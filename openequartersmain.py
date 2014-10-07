@@ -28,13 +28,16 @@ import resources_rc
 # Import the code for the dialog
 from openequartersmaindialog import OpenEQuartersMainDialog
 import os.path
+import OsmInteraction
 
 
 class OpenEQuartersMain:
 
     def __init__(self, iface):
+
         # Save reference to the QGIS interface
         self.iface = iface
+
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
@@ -50,6 +53,9 @@ class OpenEQuartersMain:
 
         # Create the dialog (after translation) and keep reference
         self.dlg = OpenEQuartersMainDialog()
+
+        self.plugin_name = 'openlayers_plugin'
+        self.open_layer_type_id = 0
 
     def initGui(self):
         # Create action that will start plugin configuration
@@ -67,14 +73,15 @@ class OpenEQuartersMain:
         self.iface.removePluginMenu(u"&OpenEQuarters", self.action)
         self.iface.removeToolBarIcon(self.action)
 
+
+    def add_osm_layer(self):
+
+        osmi = OsmInteraction
+        open_layers_plugin = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
+        if open_layers_plugin:
+            osmi.open_osm_layer(open_layers_plugin, self.open_layer_type_id)
+
     # run method that performs all the real work
     def run(self):
-        # show the dialog
-        self.dlg.show()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result == 1:
-            # do something useful (delete the line containing pass and
-            # substitute with your code)
-            pass
+
+        self.add_osm_layer()

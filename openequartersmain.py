@@ -53,9 +53,8 @@ class OpenEQuartersMain:
 
     def initGui(self):
         # Create action that will start plugin configuration
-        self.action = QAction(
-            QIcon(":/plugins/openequartersmain/icon.png"),
-            u"OpenEQuarters-Process", self.iface.mainWindow())
+        plugin_icon = QIcon("/Users/VPTtutor/Documents/QGIS/plugins/OpenEQuartersMain/icon.png")
+        self.action = QAction( plugin_icon, u"OpenEQuarters-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
 

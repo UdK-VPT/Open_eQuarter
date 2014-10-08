@@ -154,12 +154,14 @@ class OpenEQuartersMain:
         # create a new polygon shape-file, named 'Investigation Area' with system encoding and project crs
         type = 'Polygon'
         crs = '?crs=' + self.project_crs
-        shape_layer = QgsVectorLayer(type + crs, 'Investigation Area', 'memory')
+        shape_layer = QgsVectorLayer(type + crs, '000-Investigation Area', 'memory')
         shape_layer.setProviderEncoding('System')
 
         # add the layer to the layer-legend
         QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
         self.iface.mapCanvas().refresh()
+
+        #ToDo change the layer order and put the new layer first
 
         # reset appearance of crs-choice dialog to previous settings
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
@@ -168,7 +170,18 @@ class OpenEQuartersMain:
 
 
     def change_to_edit_mode(self):
-        #ToDo
+
+        # activate the shape-layer to start adding features
+        for layer in self.iface.legendInterface().layers():
+
+            if layer.name() == '000-Investigation Area':
+                self.iface.setActiveLayer(layer)
+
+        # once the layer is activated, the editing and the adding of features will be triggered
+        self.iface.actionToggleEditing().trigger()
+        self.iface.actionAddFeature().trigger()
+
+        return
 
 
 
@@ -210,3 +223,4 @@ class OpenEQuartersMain:
             self.load_osm_layer()
             self.set_project_crs(self.project_crs)
             self.create_new_shapefile()
+            self.change_to_edit_mode()

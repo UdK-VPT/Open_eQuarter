@@ -24,6 +24,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.utils import iface
+
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
@@ -42,7 +43,7 @@ class OpenEQuartersMain:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value("locale/userLocale")[0:2]
+        locale = QSettings().value('locale/userLocale')[0:2]
         localePath = os.path.join(self.plugin_dir, 'i18n', 'openequartersmain_{}.qm'.format(locale))
 
         if os.path.exists(localePath):
@@ -57,12 +58,17 @@ class OpenEQuartersMain:
 
         self.project_path = QgsProject.instance().readPath('./')
 
+        # ToDo set crs back to 4326
+        self.project_crs = 'EPSG:3068'
+
         self.plugin_name = 'openlayers_plugin'
-        self.open_layer_type_id = 0
+        # id=0 - Google Physical
+        # id=1 - Google Streets
+        self.open_layer_type_id = 1
 
     def initGui(self):
         # Create action that will start plugin configuration
-        plugin_icon = QIcon("/Users/VPTtutor/Documents/QGIS/plugins/OpenEQuartersMain/icon.png")
+        plugin_icon = QIcon('/Users/VPTtutor/Documents/QGIS/plugins/OpenEQuartersMain/icon.png')
         self.action = QAction( plugin_icon, u"OpenEQuarters-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
@@ -91,6 +97,28 @@ class OpenEQuartersMain:
                     if act.text() == 'Save &As...':
                         act.trigger()
 
+        return
+
+    def set_project_crs(self, crs):
+
+        # if the given crs is valid
+        if not crs.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs):
+
+            canvas = self.iface.mapCanvas()
+            extent = canvas.extent()
+            current_crs = canvas.mapSettings().destinationCrs() # current crs
+
+            # set new crs
+            renderer = canvas.mapRenderer()
+            new_crs = QgsCoordinateReferenceSystem(crs)
+            renderer.setDestinationCrs(new_crs)
+
+            # 'restore' extent, by transforming the formerly saved extent to new Projection
+            coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
+            canvas.setExtent(coord_transformer.transform(extent))
+            canvas.refresh()
+
+        return
 
     def load_osm_layer(self):
 
@@ -99,11 +127,32 @@ class OpenEQuartersMain:
         if open_layers_plugin:
             osmi.open_osm_layer(open_layers_plugin, self.open_layer_type_id)
 
+            canvas = self.iface.mapCanvas()
+            # if current scale is below osm-layers visibility, rescale canvas
+            if canvas.scale() < 850:
+                canvas.zoomScale(850)
+                canvas.refresh()
+
+        return
+
 
     def create_new_shapefile(self):
-        #ToDo surpress crs-choice-dlg
-        # shapeLayer = QgsVectorLayer("Polygon", "Investigation Area", "memory")
 
+        # surpress crs-choice dialog
+        old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
+        QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+
+        # create a new polygon shape-file, named 'Investigation Area' with system encoding
+        shape_layer = QgsVectorLayer('Polygon', 'Investigation Area', 'memory')
+        shape_layer.setProviderEncoding('System')
+        #shape_layer.setCrs(QgsCoordinateReferenceSystem(self.crs))
+
+        # add the layer to the layer-legend
+        QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
+        self.iface.mapCanvas().refresh()
+
+        # reset appearance of crs-choice dialog to previous settings
+        QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
         return
 
@@ -149,3 +198,5 @@ class OpenEQuartersMain:
         # start the process, if a project was created
         else:
             self.load_osm_layer()
+            self.set_project_crs(self.project_crs)
+            self.create_new_shapefile()

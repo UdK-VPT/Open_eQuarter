@@ -136,16 +136,26 @@ class OpenEQuartersMain:
         return
 
 
+    def get_project_crs(self, iface):
+
+        canvas = iface.mapCanvas()
+        crs = canvas.mapSettings().destinationCrs()
+
+        return crs
+
+
+
     def create_new_shapefile(self):
 
         # surpress crs-choice dialog
         old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
         QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-        # create a new polygon shape-file, named 'Investigation Area' with system encoding
-        shape_layer = QgsVectorLayer('Polygon', 'Investigation Area', 'memory')
+        # create a new polygon shape-file, named 'Investigation Area' with system encoding and project crs
+        type = 'Polygon'
+        crs = '?crs=' + self.project_crs
+        shape_layer = QgsVectorLayer(type + crs, 'Investigation Area', 'memory')
         shape_layer.setProviderEncoding('System')
-        #shape_layer.setCrs(QgsCoordinateReferenceSystem(self.crs))
 
         # add the layer to the layer-legend
         QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
@@ -159,7 +169,7 @@ class OpenEQuartersMain:
 
     def change_to_edit_mode(self):
         #ToDo
-        return
+
 
 
     def change_osm_layer(self, mode='hide'):

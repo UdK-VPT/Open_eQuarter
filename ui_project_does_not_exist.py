@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_openequartersmain.ui'
+# Form implementation generated from reading ui file 'ui_project_does_not_exist.ui'
 #
 # Created: Tue Oct  7 15:57:11 2014
 #      by: PyQt4 UI code generator 4.11.1

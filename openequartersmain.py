@@ -26,7 +26,7 @@ from qgis.core import *
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
-from openequartersmaindialog import OpenEQuartersMainDialog
+from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 import os.path
 import OsmInteraction
 
@@ -52,7 +52,9 @@ class OpenEQuartersMain:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = OpenEQuartersMainDialog()
+        self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
+
+        self.project_path = './'
 
         self.plugin_name = 'openlayers_plugin'
         self.open_layer_type_id = 0
@@ -74,14 +76,48 @@ class OpenEQuartersMain:
         self.iface.removeToolBarIcon(self.action)
 
 
-    def add_osm_layer(self):
+    def save_as_project_ifNotExists(self):
+        self.project_path = QgsProject.instance().readPath('./')
+
+        if self.project_path == './':
+            # show prompt and ask to save as a project
+
+
+    def load_osm_layer(self):
 
         osmi = OsmInteraction
         open_layers_plugin = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
         if open_layers_plugin:
             osmi.open_osm_layer(open_layers_plugin, self.open_layer_type_id)
 
+
+    def create_new_shapefile(self):
+        #ToDo
+
+
+    def change_to_edit_mode(self):
+        #ToDo
+
+
+    def change_osm_layer(self, mode='hide'):
+        #ToDo
+        # either hide or remove the formerly loaded osm layer
+
+
+    def load_housing_layer(self):
+        #ToDo
+
+
+    def extract_shape_views(self):
+        #ToDo
+        # store local copies of the selected areas
+
+
+    def add_housing_coordinates(self):
+        #ToDo
+
+
     # run method that performs all the real work
     def run(self):
 
-        self.add_osm_layer()
+        self.load_osm_layer()

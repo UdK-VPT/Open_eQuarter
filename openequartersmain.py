@@ -23,6 +23,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+from qgis.utils import iface
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
@@ -54,7 +55,7 @@ class OpenEQuartersMain:
         # Create the dialog (after translation) and keep reference
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
 
-        self.project_path = './'
+        self.project_path = QgsProject.instance().readPath('./')
 
         self.plugin_name = 'openlayers_plugin'
         self.open_layer_type_id = 0
@@ -76,11 +77,19 @@ class OpenEQuartersMain:
         self.iface.removeToolBarIcon(self.action)
 
 
-    def save_as_project_ifNotExists(self):
-        self.project_path = QgsProject.instance().readPath('./')
+    def create_project_ifNotExists(self):
 
+        self.project_path = QgsProject.instance().readPath('./')
         if self.project_path == './':
-            # show prompt and ask to save as a project
+            self.project_does_not_exist_dlg.show()
+            yes_to_save = self.project_does_not_exist_dlg.exec_()
+
+            if yes_to_save:
+                project_actions = self.iface.projectMenu().actions()
+
+                for act in project_actions:
+                    if act.text() == 'Save &As...':
+                        act.trigger()
 
 
     def load_osm_layer(self):
@@ -92,32 +101,51 @@ class OpenEQuartersMain:
 
 
     def create_new_shapefile(self):
-        #ToDo
+        #ToDo surpress crs-choice-dlg
+        # shapeLayer = QgsVectorLayer("Polygon", "Investigation Area", "memory")
+
+
+        return
 
 
     def change_to_edit_mode(self):
         #ToDo
+        return
 
 
     def change_osm_layer(self, mode='hide'):
         #ToDo
         # either hide or remove the formerly loaded osm layer
+        return
 
 
     def load_housing_layer(self):
         #ToDo
+        return
 
 
     def extract_shape_views(self):
         #ToDo
         # store local copies of the selected areas
+        return
 
 
     def add_housing_coordinates(self):
         #ToDo
+        return
 
 
     # run method that performs all the real work
     def run(self):
 
-        self.load_osm_layer()
+        # if no project exists, create one first
+        self.create_project_ifNotExists()
+        self.project_path = QgsProject.instance().readPath('./')
+
+        # if no project was created stop execution
+        if self.project_path == './':
+            return
+
+        # start the process, if a project was created
+        else:
+            self.load_osm_layer()

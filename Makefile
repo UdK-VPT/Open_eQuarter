@@ -37,7 +37,7 @@ PY_FILES = openequartersmain.py openequartersmaindialog.py __init__.py
 
 EXTRAS = icon.png metadata.txt
 
-UI_FILES = ui_openequartersmain.py
+UI_FILES = ui_project_does_not_exist.py
 
 RESOURCE_FILES = resources_rc.py
 

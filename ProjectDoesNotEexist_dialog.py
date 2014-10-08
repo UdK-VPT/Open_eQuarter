@@ -21,11 +21,11 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from ui_project_does_not_exist import Ui_OpenEQuartersMain
+from ui_project_does_not_exist import Ui_ProjectDoesNotExist_dialog
 # create the dialog for zoom to point
 
 
-class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_OpenEQuartersMain):
+class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
         # Set up the user interface from Designer.

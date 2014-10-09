@@ -31,7 +31,8 @@ import resources_rc
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 import os.path
 import OsmInteraction
-
+import numpy
+import time
 
 class OpenEQuartersMain:
 
@@ -59,7 +60,12 @@ class OpenEQuartersMain:
         self.project_path = QgsProject.instance().readPath('./')
 
         # ToDo set crs back to 4326
-        self.project_crs = 'EPSG:3068'
+        self.project_crs = 'EPSG:3857'
+        # extent of Germany
+        self.default_extent = QgsRectangle(numpy.float64(480310.4063808322), numpy.float64(5930330.009070959), numpy.float64(1813151.46638856), numpy.float64(7245291.493883461))
+        self.default_extent_crs = 'EPSG:3857'
+        self.default_scale = 4607478
+
 
         self.plugin_name = 'openlayers_plugin'
         # id=0 - Google Physical
@@ -99,26 +105,64 @@ class OpenEQuartersMain:
 
         return
 
+
+    def zoom_to_default_extent(self):
+
+        canvas = self.iface.mapCanvas()
+
+        # if plugin was started out of new or empty project, zoom to default extent
+        # !!!!!! A print statement has to be executed prior to calling the layerCount() function
+        print "Zoom to default extent"
+        # !!!!!! apparently the layerCount()-function does not flush properly
+        if canvas.layerCount() >= 0 and canvas.layerCount() <= 2:
+
+            canvas.zoomScale(self.default_scale)
+            canvas.setExtent(self.default_extent)
+            canvas.refresh()
+
+
     def set_project_crs(self, crs):
 
         # if the given crs is valid
         if not crs.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs):
 
             canvas = self.iface.mapCanvas()
-            extent = canvas.extent()
-            current_crs = canvas.mapSettings().destinationCrs() # current crs
 
-            # set new crs
+
+            # if some layers were existing prior to starting the plugin
+            # !!!!!! A print statement has to be executed prior to calling the layerCount() function
+            print "Zoom to default extent"
+            # !!!!!! apparently the layerCount()-function does not flush properly
+            if canvas.layerCount() > 2:
+                extent = canvas.extent()                                # save formerly viewed extent
+                current_crs = canvas.mapSettings().destinationCrs()     # set to project-crs
+                current_scale = canvas.scale()
+
+            # if the plugin was started from a new or empty project
+            else:
+                print "Else default"
+                print canvas.layerCount()
+                extent = self.default_extent                                        # set extent to default view
+                current_crs = QgsCoordinateReferenceSystem(self.default_extent_crs) # corresponding crs
+                current_scale = self.default_scale
+
             renderer = canvas.mapRenderer()
             new_crs = QgsCoordinateReferenceSystem(crs)
             renderer.setDestinationCrs(new_crs)
 
-            # 'restore' extent, by transforming the formerly saved extent to new Projection
-            coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
-            canvas.setExtent(coord_transformer.transform(extent))
+
+            canvas.zoomScale(current_scale)
+
+            if not current_crs == new_crs:
+                # set extent, by transforming the formerly saved extent to new Projection
+                coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
+                canvas.setExtent(coord_transformer.transform(extent))
+
+            canvas.setExtent(extent)
             canvas.refresh()
 
         return
+
 
     def load_osm_layer(self):
 
@@ -144,7 +188,6 @@ class OpenEQuartersMain:
         return crs
 
 
-
     def create_new_shapefile(self):
 
         # surpress crs-choice dialog
@@ -159,7 +202,6 @@ class OpenEQuartersMain:
 
         # add the layer to the layer-legend
         QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
-        self.iface.mapCanvas().refresh()
 
         #ToDo change the layer order and put the new layer first
 
@@ -221,6 +263,8 @@ class OpenEQuartersMain:
         # start the process, if a project was created
         else:
             self.load_osm_layer()
-            self.set_project_crs(self.project_crs)
             self.create_new_shapefile()
+            self.zoom_to_default_extent()
             self.change_to_edit_mode()
+            #self.set_project_crs(self.project_crs)
+

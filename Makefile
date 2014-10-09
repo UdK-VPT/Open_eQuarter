@@ -25,7 +25,7 @@ QGISDIR=.qgis2
 # Makefile for a PyQGIS plugin
 
 # translation
-SOURCES = openequartersmain.py ui_openequartersmain.py __init__.py openequartersmaindialog.py
+SOURCES = openequartersmain.py __init__.py
 #TRANSLATIONS = i18n/openequartersmain_en.ts
 TRANSLATIONS =
 
@@ -33,11 +33,11 @@ TRANSLATIONS =
 
 PLUGINNAME = openequartersmain
 
-PY_FILES = openequartersmain.py openequartersmaindialog.py __init__.py
+PY_FILES = openequartersmain.py __init__.py
 
 EXTRAS = icon.png metadata.txt
 
-UI_FILES = ui_project_does_not_exist.py
+UI_FILES = ui_project_does_not_exist.py ui_request_wms_url.py
 
 RESOURCE_FILES = resources_rc.py
 

@@ -29,10 +29,13 @@ from qgis.utils import iface
 import resources_rc
 # Import the code for the dialog
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
+from RequestWmsUrl_dialog import RequestWmsUrl_dialog
+from socket import gaierror
 import os.path
 import OsmInteraction
 import numpy
 import time
+import httplib
 
 class OpenEQuartersMain:
 
@@ -54,10 +57,12 @@ class OpenEQuartersMain:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-        # Create the dialog (after translation) and keep reference
+        # Create the dialogues (after translation) and keep references
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
-
         self.project_path = QgsProject.instance().readPath('./')
+
+        self.request_wms_url_dlg = RequestWmsUrl_dialog()
+        self.wms_url = ""
 
         # ToDo set crs back to 4326
         self.project_crs = 'EPSG:3857'
@@ -115,11 +120,11 @@ class OpenEQuartersMain:
         print "Zoom to default extent"
         # !!!!!! apparently the layerCount()-function does not flush properly
         if canvas.layerCount() >= 0 and canvas.layerCount() <= 2:
-
             canvas.zoomScale(self.default_scale)
             canvas.setExtent(self.default_extent)
             canvas.refresh()
 
+        return
 
     def set_project_crs(self, crs):
 
@@ -197,7 +202,7 @@ class OpenEQuartersMain:
         # create a new polygon shape-file, named 'Investigation Area' with system encoding and project crs
         type = 'Polygon'
         crs = '?crs=' + self.project_crs
-        shape_layer = QgsVectorLayer(type + crs, '000-Investigation Area', 'memory')
+        shape_layer = QgsVectorLayer(type + crs, 'Investigation Area', 'memory')
         shape_layer.setProviderEncoding('System')
 
         # add the layer to the layer-legend
@@ -216,7 +221,7 @@ class OpenEQuartersMain:
         # activate the shape-layer to start adding features
         for layer in self.iface.legendInterface().layers():
 
-            if layer.name() == '000-Investigation Area':
+            if layer.name() == 'Investigation Area':
                 self.iface.setActiveLayer(layer)
 
         # once the layer is activated, the editing and the adding of features will be triggered
@@ -225,6 +230,31 @@ class OpenEQuartersMain:
 
         return
 
+
+    def request_wms_layer_url(self):
+
+        self.request_wms_url_dlg.show()
+        url_confirmed = self.request_wms_url_dlg.exec_()
+
+        # if 'ok' was hit, get the url
+        if url_confirmed:
+            wms_url = self.request_wms_url_dlg.wms_url.text()
+
+            try:
+                if wms_url.startswith("http"):
+                    socket = httplib.HTTPConnection(wms_url[7:])
+                    socket.connect()
+                else:
+                    socket = httplib.HTTPConnection(wms_url)
+                    socket.connect()
+
+            except (httplib.HTTPException, gaierror) as ex:
+                print "Invalid url"
+                return
+
+            self.wms_url = wms_url
+
+        return
 
 
     def change_osm_layer(self, mode='hide'):
@@ -262,9 +292,13 @@ class OpenEQuartersMain:
 
         # start the process, if a project was created
         else:
+            """
             self.load_osm_layer()
             self.create_new_shapefile()
             self.zoom_to_default_extent()
             self.change_to_edit_mode()
+            """
+            self.request_wms_layer_url()
+
             #self.set_project_crs(self.project_crs)
 

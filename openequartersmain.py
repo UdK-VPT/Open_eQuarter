@@ -30,9 +30,11 @@ import resources_rc
 # Import the code for the dialog
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
+import OsmInteraction
+from saveselectionwithpyramid import SaveSelectionWithPyramid
+
 from socket import gaierror
 import os.path
-import OsmInteraction
 import numpy
 import time
 import httplib
@@ -71,8 +73,11 @@ class OpenEQuartersMain:
         self.default_extent_crs = 'EPSG:3857'
         self.default_scale = 4607478
 
-        # Name of the shapefile which will be created to define the investigation area
+        # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
+
+        # name of the wms-raster which will be loaded and is the basis for the clipping
+        self.clipping_raster_layer_name = "clip clap clip clap"
 
         self.plugin_name = 'openlayers_plugin'
         # id=0 - Google Physical
@@ -279,17 +284,34 @@ class OpenEQuartersMain:
 
         return
 
-    def clip_zoom_to_layer_view(self, layer_name):
 
-        if layer_name and not layer_name.isspace():
+    def open_wms_as_raster(self):
+
+        urlWithParams = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
+        rlayer = QgsRasterLayer(urlWithParams, self.clipping_raster_layer_name, 'wms')
+        #rlayer = QgsRasterLayer(self.wms_url, 'Raster layer basis', 'wms')
+        if not rlayer.isValid():
+            print "Layer failed to load!"
+        else:
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+            self.iface.setActiveLayer(rlayer)
+
+
+    def clip_zoom_to_layer_view_from_raster(self, layer_name, raster_name):
+
+        if layer_name and not layer_name.isspace() and raster_name and not raster_name.isspace():
             investigation_shape = None
+            clipping_raster = None
             # get the shapefile
             for layer in self.iface.legendInterface().layers():
 
                 if layer.name() == layer_name:
                     investigation_shape = layer
+                elif layer.name() == raster_name:
+                    clipping_raster = layer
 
-            if investigation_shape is not None:
+
+            if investigation_shape is not None and clipping_raster is not None:
                 self.iface.setActiveLayer(investigation_shape)
                 view_actions = self.iface.viewMenu().actions()
 
@@ -297,7 +319,12 @@ class OpenEQuartersMain:
                     if act.text() == 'Zoom to Layer':
                         act.trigger()
 
+                self.iface.setActiveLayer(clipping_raster)
+                pyramid_exporter = SaveSelectionWithPyramid(self.iface)
+                pyramid_exporter.export()
+
         return
+
 
     def get_extent_per_feature(self, layer_name):
 
@@ -355,9 +382,19 @@ class OpenEQuartersMain:
         return x_min, y_min, x_max, y_max
 
 
-    def change_osm_layer(self, mode='hide'):
-        #ToDo
-        # either hide or remove the formerly loaded osm layer
+    def hide_or_remove_layer(self, layer_name, mode='hide'):
+
+        if layer_name and not layer_name.isspace():
+            for layer in self.iface.mapCanvas().layers():
+                if layer.name() == layer_name:
+                    if mode == 'remove':
+                        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+
+                    if mode == 'hide':
+                        self.iface.legendInterface().setLayerVisible(layer, False)
+
+
+
         return
 
 
@@ -376,6 +413,9 @@ class OpenEQuartersMain:
         #ToDo
         return
 
+    def enable_on_the_fly_projection(self):
+        #ToDo
+        return
 
     # run method that performs all the real work
     def run(self):
@@ -395,8 +435,11 @@ class OpenEQuartersMain:
             self.create_new_shapefile(self.investigation_shape_layer_name)
             self.zoom_to_default_extent()
             self.change_to_edit_mode(self.investigation_shape_layer_name)
-            self.request_wms_layer_url()
             """
-            self.clip_zoom_to_layer_view(self.investigation_shape_layer_name)
+            #self.request_wms_layer_url()
+            #self.open_wms_as_raster()
+            self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
+            #self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
+            #self.hide_or_remove_layer("Google Streets", 'hide')
             #self.set_project_crs(self.project_crs)
 

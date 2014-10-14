@@ -71,6 +71,8 @@ class OpenEQuartersMain:
         self.default_extent_crs = 'EPSG:3857'
         self.default_scale = 4607478
 
+        # Name of the shapefile which will be created to define the investigation area
+        self.investigation_shape_layer_name = 'Investigation Area'
 
         self.plugin_name = 'openlayers_plugin'
         # id=0 - Google Physical
@@ -194,15 +196,19 @@ class OpenEQuartersMain:
 
 
     def create_new_shapefile(self):
-
+        """
+        Create and add a new Polygon-Vectorlayer, called 'Investigaion Area'
+        :return:
+        :rtype:
+        """
         # surpress crs-choice dialog
         old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
         QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-        # create a new polygon shape-file, named 'Investigation Area' with system encoding and project crs
+        # create a new polygon shape-file, named self.investigation_shape_layer_name with system encoding and project crs
         type = 'Polygon'
         crs = '?crs=' + self.project_crs
-        shape_layer = QgsVectorLayer(type + crs, 'Investigation Area', 'memory')
+        shape_layer = QgsVectorLayer(type + crs, self.investigation_shape_layer_name, 'memory')
         shape_layer.setProviderEncoding('System')
 
         # add the layer to the layer-legend
@@ -216,23 +222,40 @@ class OpenEQuartersMain:
         return
 
 
-    def change_to_edit_mode(self):
+    def change_to_edit_mode(self, layer_name):
+        """
+        Iterate over all layers and activate the Layer called with the name layer_name. Then toggle the edit mode of that layer.
+        :param layer_name: Name of the layer, that shall be switched to edit_mode
+        :type layer_name: str
+        :return:
+        :rtype:
+        """
 
-        # activate the shape-layer to start adding features
-        for layer in self.iface.legendInterface().layers():
+        if layer_name and not layer_name.isspace():
 
-            if layer.name() == 'Investigation Area':
-                self.iface.setActiveLayer(layer)
+            layer_found = False
 
-        # once the layer is activated, the editing and the adding of features will be triggered
-        self.iface.actionToggleEditing().trigger()
-        self.iface.actionAddFeature().trigger()
+            # activate the shape-layer to start adding features
+            for layer in self.iface.legendInterface().layers():
+
+                if layer.name() == layer_name:
+                    self.iface.setActiveLayer(layer)
+                    layer_found = True
+
+            # once the layer is activated, the editing and the adding of features will be triggered
+            if layer_found:
+                self.iface.actionToggleEditing().trigger()
+                self.iface.actionAddFeature().trigger()
 
         return
 
 
     def request_wms_layer_url(self):
-
+        """
+        Open the dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.
+        :return:
+        :rtype:
+        """
         self.request_wms_url_dlg.show()
         url_confirmed = self.request_wms_url_dlg.exec_()
 
@@ -255,6 +278,81 @@ class OpenEQuartersMain:
             self.wms_url = wms_url
 
         return
+
+    def clip_zoom_to_layer_view(self, layer_name):
+
+        if layer_name and not layer_name.isspace():
+            investigation_shape = None
+            # get the shapefile
+            for layer in self.iface.legendInterface().layers():
+
+                if layer.name() == layer_name:
+                    investigation_shape = layer
+
+            if investigation_shape is not None:
+                self.iface.setActiveLayer(investigation_shape)
+                view_actions = self.iface.viewMenu().actions()
+
+                for act in view_actions:
+                    if act.text() == 'Zoom to Layer':
+                        act.trigger()
+
+        return
+
+    def get_extent_per_feature(self, layer_name):
+
+        if layer_name and not layer_name.isspace():
+            shape = None
+            # get the shapefile
+            for layer in self.iface.legendInterface().layers():
+
+                 if layer.name() == layer_name:
+                    shape = layer
+
+            if shape is not None:
+
+                iterator = shape.getFeatures()
+                feature_extents = []
+
+                for feature in iterator:
+
+                    geom = feature.geometry()
+                    polygons = geom.asPolygon()
+
+                    for polygon in polygons:
+
+                        extent_coordinates = self.find_x_min_y_min_x_max_y_max(polygon)
+                        extent = QgsRectangle(extent_coordinates[0], extent_coordinates[1], extent_coordinates[2], extent_coordinates[3])
+                        feature_extents.append(extent)
+
+        return feature_extents
+
+
+    def find_x_min_y_min_x_max_y_max(self, polygon):
+        """
+        Iterate over all points of a given polygon.
+        :param polygon: A list of QgsPoint-Objects, which form a polygon
+        :type polygon: <QgsPoint>
+        :return: the extent of the polygon (lowest x, y and highest x,y)
+        :rtype: float, float, float, float
+        """
+
+        x_max = x_min = polygon[0].x()
+        y_max = y_min = polygon[0].y()
+
+        for point in polygon[1:]:
+
+            if point.x() >= x_max:
+                x_max = point.x()
+            elif point.x() <= x_min:
+                x_min = point.x()
+
+            if point.y() >= y_max:
+                y_max = point.y()
+            elif point.y() <= y_min:
+                y_min = point.y()
+
+        return x_min, y_min, x_max, y_max
 
 
     def change_osm_layer(self, mode='hide'):
@@ -294,11 +392,11 @@ class OpenEQuartersMain:
         else:
             """
             self.load_osm_layer()
-            self.create_new_shapefile()
+            self.create_new_shapefile(self.investigation_shape_layer_name)
             self.zoom_to_default_extent()
-            self.change_to_edit_mode()
-            """
+            self.change_to_edit_mode(self.investigation_shape_layer_name)
             self.request_wms_layer_url()
-
+            """
+            self.clip_zoom_to_layer_view(self.investigation_shape_layer_name)
             #self.set_project_crs(self.project_crs)
 

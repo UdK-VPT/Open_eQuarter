@@ -106,10 +106,8 @@ class SaveSelectionWithPyramid:
         self.canvas = self.iface.mapCanvas()
 
         if self.active_layer is not None and self.canvas is not None:
-            QMessageBox.information(self.iface.mainWindow(), "Info",
-                                    "Active Layer: \n {0} \n Project-path: {2}".format(
-                                        self.active_layer.name(), self.active_layer.id(),
-                                        QgsProject.instance().readPath("./")))
+            infoText = "The current extent will now be clipped. This may take some time."
+            QMessageBox.information(self.iface.mainWindow(), "Info",infoText)
             if not isinstance(self.active_layer, QgsRasterLayer):
                 #ToDo
                 QMessageBox.information(self.iface.mainWindow(), "Info", "The selected layer is not a raster layer.")

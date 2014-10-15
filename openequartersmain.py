@@ -80,7 +80,7 @@ class OpenEQuartersMain:
         self.investigation_shape_layer_name = 'Investigation Area'
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
-        self.clipping_raster_layer_name = "clip clap clip clap"
+        self.clipping_raster_layer_name = "Investigation Area - raster"
 
         self.plugin_name = 'openlayers_plugin'
         # id=0 - Google Physical
@@ -103,9 +103,12 @@ class OpenEQuartersMain:
         self.iface.removePluginMenu(u"&OpenEQuarters", self.action)
         self.iface.removeToolBarIcon(self.action)
 
-
     def create_project_ifNotExists(self):
-
+        """
+        If the current workspace has not been saved as a project, prompt the user to "Save As..." project
+        :return:
+        :rtype:
+        """
         self.project_path = QgsProject.instance().readPath('./')
         if self.project_path == './':
             self.project_does_not_exist_dlg.show()
@@ -118,69 +121,20 @@ class OpenEQuartersMain:
                     if act.text() == 'Save &As...':
                         act.trigger()
 
-        return
-
-
-    def zoom_to_default_extent(self):
-
-        canvas = self.iface.mapCanvas()
-
-        # if plugin was started out of new or empty project, zoom to default extent
-        # !!!!!! A print statement has to be executed prior to calling the layerCount() function
-        print "Zoom to default extent"
-        # !!!!!! apparently the layerCount()-function does not flush properly
-        if canvas.layerCount() >= 0 and canvas.layerCount() <= 2:
-            canvas.zoomScale(self.default_scale)
-            canvas.setExtent(self.default_extent)
-            canvas.refresh()
-
-        return
-
-    def set_project_crs(self, crs):
-
-        # if the given crs is valid
-        if not crs.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs):
-
-            canvas = self.iface.mapCanvas()
-
-
-            # if some layers were existing prior to starting the plugin
-            # !!!!!! A print statement has to be executed prior to calling the layerCount() function
-            print "Zoom to default extent"
-            # !!!!!! apparently the layerCount()-function does not flush properly
-            if canvas.layerCount() > 2:
-                extent = canvas.extent()                                # save formerly viewed extent
-                current_crs = canvas.mapSettings().destinationCrs()     # set to project-crs
-                current_scale = canvas.scale()
-
-            # if the plugin was started from a new or empty project
-            else:
-                print "Else default"
-                print canvas.layerCount()
-                extent = self.default_extent                                        # set extent to default view
-                current_crs = QgsCoordinateReferenceSystem(self.default_extent_crs) # corresponding crs
-                current_scale = self.default_scale
-
-            renderer = canvas.mapRenderer()
-            new_crs = QgsCoordinateReferenceSystem(crs)
-            renderer.setDestinationCrs(new_crs)
-
-
-            canvas.zoomScale(current_scale)
-
-            if not current_crs == new_crs:
-                # set extent, by transforming the formerly saved extent to new Projection
-                coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
-                canvas.setExtent(coord_transformer.transform(extent))
-
-            canvas.setExtent(extent)
-            canvas.refresh()
-
-        return
-
+    def enable_on_the_fly_projection(self):
+        """
+        Enable on the fly projection in the current project.
+        :return:
+        :rtype:
+        """
+        self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
 
     def load_osm_layer(self):
-
+        """
+        Call the Open Street Map plugins 'open_osm_layer'-function and open the open street map according to self.open_layer_type_id
+        :return:
+        :rtype:
+        """
         osmi = OsmInteraction
         open_layers_plugin = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
         if open_layers_plugin:
@@ -192,16 +146,22 @@ class OpenEQuartersMain:
                 canvas.zoomScale(850)
                 canvas.refresh()
 
-        return
+    def zoom_to_default_extent(self):
+        """
+        Set the canvas-extent to the extent specified in self.default_extent
+        :return:
+        :rtype:
+        """
+        canvas = self.iface.mapCanvas()
 
-
-    def get_project_crs(self, iface):
-
-        canvas = iface.mapCanvas()
-        crs = canvas.mapSettings().destinationCrs()
-
-        return crs
-
+        # if plugin was started out of new or empty project, zoom to default extent
+        # !!!!!! A print statement has to be executed prior to calling the layerCount() function
+        print ""
+        # !!!!!! apparently the layerCount()-function does not flush properly
+        if canvas.layerCount() >= 0 and canvas.layerCount() <= 2:
+            canvas.zoomScale(self.default_scale)
+            canvas.setExtent(self.default_extent)
+            canvas.refresh()
 
     def create_new_shapefile(self, layer_name):
         """
@@ -228,9 +188,6 @@ class OpenEQuartersMain:
             # reset appearance of crs-choice dialog to previous settings
             QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
-        return
-
-
     def change_to_edit_mode(self, layer_name):
         """
         Iterate over all layers and activate the Layer called with the name layer_name. Then toggle the edit mode of that layer.
@@ -256,11 +213,14 @@ class OpenEQuartersMain:
                 self.iface.actionToggleEditing().trigger()
                 self.iface.actionAddFeature().trigger()
 
-        return
-
-
     def confirm_selection_of_investigation_area(self, layer_name):
-
+        """
+        Select the layer named 'layer_name' from layers list and trigger the ToggleEditing button
+        :param layer_name: Name of the layer whose editing mode shall be triggered
+        :type layer_name: str
+        :return:
+        :rtype:
+        """
         if layer_name and not layer_name.isspace():
 
             layer_found = False
@@ -281,12 +241,9 @@ class OpenEQuartersMain:
                 if confirmation:
                     self.iface.actionToggleEditing().trigger()
 
-        return
-
-
     def request_wms_layer_url(self):
         """
-        Open the dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.
+        Open a dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.
         :return:
         :rtype:
         """
@@ -313,9 +270,12 @@ class OpenEQuartersMain:
 
         return
 
-
     def open_wms_as_raster(self):
-
+        """
+        Use the url in self.wms_url to open and add a raster layer
+        :return:
+        :rtype:
+        """
         urlWithParams = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         rlayer = QgsRasterLayer(urlWithParams, self.clipping_raster_layer_name, 'wms')
         #rlayer = QgsRasterLayer(self.wms_url, 'Raster layer basis', 'wms')
@@ -325,9 +285,68 @@ class OpenEQuartersMain:
             QgsMapLayerRegistry.instance().addMapLayer(rlayer)
             self.iface.setActiveLayer(rlayer)
 
+    def open_add_wms_dialog(self):
+        """
+        Open the common QGIS "Add WMS/WMTS Layer..."-dialog
+        :return:
+        :rtype:
+        """
+        #ToDo use this or the open_wms_as_raster function
+        self.iface.actionAddWmsLayer().trigger()
+
+    def set_project_crs(self, crs):
+        """
+        Set the project crs to the given crs and do a re-projection to keep the currently viewed extent focused
+        :param crs: The new crs to set the project to
+        :type crs: str
+        :return:
+        :rtype:
+        """
+        # if the given crs is valid
+        if not crs.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs):
+
+            canvas = self.iface.mapCanvas()
+
+            extent = canvas.extent()             # save formerly viewed extent
+            current_crs = self.get_project_crs() # get project-crs
+            current_scale = canvas.scale()
+
+            renderer = canvas.mapRenderer()
+            new_crs = QgsCoordinateReferenceSystem(crs)
+            renderer.setDestinationCrs(new_crs)
+
+            canvas.zoomScale(current_scale)
+
+            if not current_crs == new_crs:
+                # set extent, by transforming the formerly saved extent to new Projection
+                coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
+                extent = coord_transformer.transform(extent)
+
+            canvas.setExtent(extent)
+            canvas.refresh()
+
+    def get_project_crs(self):
+        """
+        Return the project crs
+        :return: The project crs
+        :rtype: QgsCoordinateReferenceSystem
+        """
+
+        canvas = iface.mapCanvas()
+        crs = canvas.mapSettings().destinationCrs()
+
+        return crs
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name, raster_name):
-
+        """
+        Zoom to a given vector-layer, containing shape files. Extract the currently viewed extent from an underlying raster-layer into a new .tif and open it.
+        :param layer_name: Name of the vector-layer
+        :type layer_name: str
+        :param raster_name: Name of the raster-layer, which will be the basis of the new clip
+        :type raster_name:
+        :return:
+        :rtype:
+        """
         if layer_name and not layer_name.isspace() and raster_name and not raster_name.isspace():
             investigation_shape = None
             clipping_raster = None
@@ -352,11 +371,15 @@ class OpenEQuartersMain:
                 pyramid_exporter = SaveSelectionWithPyramid(self.iface)
                 pyramid_exporter.export()
 
-        return
-
-
+    # Method not yet used
     def get_extent_per_feature(self, layer_name):
-
+        """
+        Iterate over all features of a given layer and return the extents (as a list of rectangles) of each feature
+        :param layer_name: Name of the layer
+        :type layer_name: str
+        :return feature_extents:
+        :rtype <QgsRectangle>:
+        """
         if layer_name and not layer_name.isspace():
             shape = None
             # get the shapefile
@@ -383,10 +406,10 @@ class OpenEQuartersMain:
 
         return feature_extents
 
-
+    # Method not yet used
     def find_x_min_y_min_x_max_y_max(self, polygon):
         """
-        Iterate over all points of a given polygon.
+        Iterate over all points of a given polygon and return the x- and y-extremes.
         :param polygon: A list of QgsPoint-Objects, which form a polygon
         :type polygon: <QgsPoint>
         :return: the extent of the polygon (lowest x, y and highest x,y)
@@ -410,9 +433,16 @@ class OpenEQuartersMain:
 
         return x_min, y_min, x_max, y_max
 
-
     def hide_or_remove_layer(self, layer_name, mode='hide'):
-
+        """
+        Hide or remove the given layer from the MapLayerRegistry, depending on the mode.
+        :param layer_name: Name of the layer to remove/hide
+        :type layer_name: str
+        :param mode: What to do with the layer; valid arguments are 'hide' or 'remove'
+        :type mode: str
+        :return:
+        :rtype:
+        """
         if layer_name and not layer_name.isspace():
             for layer in self.iface.mapCanvas().layers():
                 if layer.name() == layer_name:
@@ -422,27 +452,11 @@ class OpenEQuartersMain:
                     if mode == 'hide':
                         self.iface.legendInterface().setLayerVisible(layer, False)
 
-
-
-        return
-
-
     def load_housing_layer(self):
         #ToDo
         return
 
-
-    def extract_shape_views(self):
-        #ToDo
-        # store local copies of the selected areas
-        return
-
-
     def add_housing_coordinates(self):
-        #ToDo
-        return
-
-    def enable_on_the_fly_projection(self):
         #ToDo
         return
 
@@ -459,21 +473,20 @@ class OpenEQuartersMain:
 
         # start the process, if a project was created
         else:
+            self.enable_on_the_fly_projection()
 
-            """
             self.load_osm_layer()
-            self.create_new_shapefile(self.investigation_shape_layer_name)
             self.zoom_to_default_extent()
+            self.create_new_shapefile(self.investigation_shape_layer_name)
+
             self.change_to_edit_mode(self.investigation_shape_layer_name)
-            """
             self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
 
             #self.request_wms_layer_url()
-            #self.open_wms_as_raster()
-            """
+            self.open_wms_as_raster()
+
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
             self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
             self.hide_or_remove_layer("Google Streets", 'hide')
-            """
-            #self.set_project_crs(self.project_crs)
+            self.set_project_crs("EPSG:4326")
 

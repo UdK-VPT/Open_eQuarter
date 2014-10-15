@@ -30,6 +30,7 @@ import resources_rc
 # Import the code for the dialog
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
+from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
 import OsmInteraction
 from saveselectionwithpyramid import SaveSelectionWithPyramid
 
@@ -65,6 +66,8 @@ class OpenEQuartersMain:
 
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.wms_url = ""
+
+        self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
         # ToDo set crs back to 4326
         self.project_crs = 'EPSG:3857'
@@ -256,6 +259,31 @@ class OpenEQuartersMain:
         return
 
 
+    def confirm_selection_of_investigation_area(self, layer_name):
+
+        if layer_name and not layer_name.isspace():
+
+            layer_found = False
+
+            # activate the shape-layer to start adding features
+            for layer in self.iface.legendInterface().layers():
+
+                if layer.name() == layer_name:
+                    self.iface.setActiveLayer(layer)
+                    layer_found = True
+
+            # once the layer is activated, the editing and the adding of features will be triggered
+            if layer_found:
+
+                self.confirm_selection_of_investigation_area_dlg.show()
+                confirmation = self.confirm_selection_of_investigation_area_dlg.exec_()
+
+                if confirmation:
+                    self.iface.actionToggleEditing().trigger()
+
+        return
+
+
     def request_wms_layer_url(self):
         """
         Open the dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.
@@ -432,12 +460,15 @@ class OpenEQuartersMain:
         # start the process, if a project was created
         else:
 
+            """
             self.load_osm_layer()
             self.create_new_shapefile(self.investigation_shape_layer_name)
             self.zoom_to_default_extent()
             self.change_to_edit_mode(self.investigation_shape_layer_name)
+            """
+            self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
 
-            self.request_wms_layer_url()
+            #self.request_wms_layer_url()
             #self.open_wms_as_raster()
             """
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)

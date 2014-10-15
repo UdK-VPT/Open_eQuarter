@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/OpenEQuartersMain.iml" filepath="$PROJECT_DIR$/.idea/OpenEQuartersMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../save_selection_with_pyramid/.idea/save_selection_with_pyramid.iml" filepath="$PROJECT_DIR$/../save_selection_with_pyramid/.idea/save_selection_with_pyramid.iml" />
     </modules>
   </component>
 </project>

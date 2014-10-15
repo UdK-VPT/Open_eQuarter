@@ -21,7 +21,7 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from ui_request_wms_url import Ui_RequestWmsUrl_dialog
+from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 # create the dialog for zoom to point
 
 

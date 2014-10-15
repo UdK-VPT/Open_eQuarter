@@ -37,7 +37,7 @@ PY_FILES = openequartersmain.py __init__.py
 
 EXTRAS = icon.png metadata.txt
 
-UI_FILES = ui_project_does_not_exist.py ui_request_wms_url.py
+UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_investigation_area_selected_dialog.py
 
 RESOURCE_FILES = resources_rc.py
 

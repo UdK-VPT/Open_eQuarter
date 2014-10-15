@@ -200,29 +200,30 @@ class OpenEQuartersMain:
         return crs
 
 
-    def create_new_shapefile(self):
+    def create_new_shapefile(self, layer_name):
         """
         Create and add a new Polygon-Vectorlayer, called 'Investigaion Area'
         :return:
         :rtype:
         """
-        # surpress crs-choice dialog
-        old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
-        QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+        if layer_name and not layer_name.isspace():
+            # surpress crs-choice dialog
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-        # create a new polygon shape-file, named self.investigation_shape_layer_name with system encoding and project crs
-        type = 'Polygon'
-        crs = '?crs=' + self.project_crs
-        shape_layer = QgsVectorLayer(type + crs, self.investigation_shape_layer_name, 'memory')
-        shape_layer.setProviderEncoding('System')
+            # create a new polygon shape-file, named self.investigation_shape_layer_name with system encoding and project crs
+            type = 'Polygon'
+            crs = '?crs=' + self.project_crs
+            shape_layer = QgsVectorLayer(type + crs, self.investigation_shape_layer_name, 'memory')
+            shape_layer.setProviderEncoding('System')
 
-        # add the layer to the layer-legend
-        QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
+            # add the layer to the layer-legend
+            QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
 
-        #ToDo change the layer order and put the new layer first
+            #ToDo change the layer order and put the new layer first
 
-        # reset appearance of crs-choice dialog to previous settings
-        QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+            # reset appearance of crs-choice dialog to previous settings
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
         return
 
@@ -430,16 +431,18 @@ class OpenEQuartersMain:
 
         # start the process, if a project was created
         else:
-            """
+
             self.load_osm_layer()
             self.create_new_shapefile(self.investigation_shape_layer_name)
             self.zoom_to_default_extent()
             self.change_to_edit_mode(self.investigation_shape_layer_name)
-            """
-            #self.request_wms_layer_url()
+
+            self.request_wms_layer_url()
             #self.open_wms_as_raster()
+            """
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
-            #self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
-            #self.hide_or_remove_layer("Google Streets", 'hide')
+            self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
+            self.hide_or_remove_layer("Google Streets", 'hide')
+            """
             #self.set_project_crs(self.project_crs)
 

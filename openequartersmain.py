@@ -70,7 +70,7 @@ class OpenEQuartersMain:
         self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
         # ToDo set crs back to 4326
-        self.project_crs = 'EPSG:3857'
+        self.project_crs = 'EPSG:4326'
         # extent of Germany
         self.default_extent = QgsRectangle(numpy.float64(480310.4063808322), numpy.float64(5930330.009070959), numpy.float64(1813151.46638856), numpy.float64(7245291.493883461))
         self.default_extent_crs = 'EPSG:3857'
@@ -109,14 +109,20 @@ class OpenEQuartersMain:
         :return:
         :rtype:
         """
+        # read the current project path
         self.project_path = QgsProject.instance().readPath('./')
+
+        # if the path is './', the project has not yet been saved
         if self.project_path == './':
+
+            # prompt the user to save the project
             self.project_does_not_exist_dlg.show()
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
                 project_actions = self.iface.projectMenu().actions()
 
+                # trigger qgis "Save As"-function
                 for act in project_actions:
                     if act.text() == 'Save &As...':
                         act.trigger()
@@ -131,24 +137,28 @@ class OpenEQuartersMain:
 
     def load_osm_layer(self):
         """
-        Call the Open Street Map plugins 'open_osm_layer'-function and open the open street map according to self.open_layer_type_id
+        Use the OsmInteraction-methods to interact with the Open-Street-Map plugin and open an open street map according to self.open_layer_type_id
         :return:
         :rtype:
         """
+        # save a static reference to the methods that interact with the open-layers plugin
         osmi = OsmInteraction
-        open_layers_plugin = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
-        if open_layers_plugin:
-            osmi.open_osm_layer(open_layers_plugin, self.open_layer_type_id)
+        open_layers_plugin_installed = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
 
-            canvas = self.iface.mapCanvas()
+        if open_layers_plugin_installed:
+
+            # open an osm-layer according to its id
+            osmi.open_osm_layer(self.open_layer_type_id)
+
             # if current scale is below osm-layers visibility, rescale canvas
+            canvas = self.iface.mapCanvas()
             if canvas.scale() < 850:
                 canvas.zoomScale(850)
                 canvas.refresh()
 
     def zoom_to_default_extent(self):
         """
-        Set the canvas-extent to the extent specified in self.default_extent
+        Set the canvas-extent to the extent and scale specified in self.default_extent and self.default_scale
         :return:
         :rtype:
         """
@@ -165,7 +175,9 @@ class OpenEQuartersMain:
 
     def create_new_shapefile(self, layer_name):
         """
-        Create and add a new Polygon-Vectorlayer, called 'Investigaion Area'
+        Create and add a new Polygon-Vectorlayer, with the name as specified in layer_name
+        :param layer_name: The name of the new vectorlayer
+        :type layer_name: str
         :return:
         :rtype:
         """
@@ -174,42 +186,36 @@ class OpenEQuartersMain:
             old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
             QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-            # create a new polygon shape-file, named self.investigation_shape_layer_name with system encoding and project crs
+            # create a new polygon shape-file called layer_name, with system encoding and project crs
             type = 'Polygon'
             crs = '?crs=' + self.project_crs
-            shape_layer = QgsVectorLayer(type + crs, self.investigation_shape_layer_name, 'memory')
+            shape_layer = QgsVectorLayer(type + crs, layer_name, 'memory')
             shape_layer.setProviderEncoding('System')
 
             # add the layer to the layer-legend
             QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
 
             #ToDo change the layer order and put the new layer first
+            # (not nescessary atm, since the layer already is on top, if loaded in an empty project)
 
             # reset appearance of crs-choice dialog to previous settings
             QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
     def change_to_edit_mode(self, layer_name):
         """
-        Iterate over all layers and activate the Layer called with the name layer_name. Then toggle the edit mode of that layer.
+        Iterate over all layers and activate the Layer called layer_name. Then toggle the edit mode of that layer.
         :param layer_name: Name of the layer, that shall be switched to edit_mode
         :type layer_name: str
         :return:
         :rtype:
         """
-
         if layer_name and not layer_name.isspace():
 
-            layer_found = False
+            edit_layer = self.find_layer_by_name(layer_name)
 
-            # activate the shape-layer to start adding features
-            for layer in self.iface.legendInterface().layers():
-
-                if layer.name() == layer_name:
-                    self.iface.setActiveLayer(layer)
-                    layer_found = True
-
-            # once the layer is activated, the editing and the adding of features will be triggered
-            if layer_found:
+            # if the layer was found, it is activated and the editing and the adding of features will be triggered
+            if edit_layer:
+                self.iface.setActiveLayer(layer)
                 self.iface.actionToggleEditing().trigger()
                 self.iface.actionAddFeature().trigger()
 
@@ -223,22 +229,17 @@ class OpenEQuartersMain:
         """
         if layer_name and not layer_name.isspace():
 
-            layer_found = False
+            edit_layer = self.find_layer_by_name(layer_name)
 
-            # activate the shape-layer to start adding features
-            for layer in self.iface.legendInterface().layers():
-
-                if layer.name() == layer_name:
-                    self.iface.setActiveLayer(layer)
-                    layer_found = True
-
-            # once the layer is activated, the editing and the adding of features will be triggered
-            if layer_found:
+            # if the layer was found, prompt the user to confirm the adding-feature-process was finished
+            if edit_layer:
 
                 self.confirm_selection_of_investigation_area_dlg.show()
                 confirmation = self.confirm_selection_of_investigation_area_dlg.exec_()
 
+                # if the finalization of the process was confirmed, turn of the edit mode (by default, the user will be asked to save his changes)
                 if confirmation:
+                    self.iface.setActiveLayer(edit_layer)
                     self.iface.actionToggleEditing().trigger()
 
     def request_wms_layer_url(self):
@@ -350,7 +351,8 @@ class OpenEQuartersMain:
         if layer_name and not layer_name.isspace() and raster_name and not raster_name.isspace():
             investigation_shape = None
             clipping_raster = None
-            # get the shapefile
+
+            # get the shapefile and the raster layer
             for layer in self.iface.legendInterface().layers():
 
                 if layer.name() == layer_name:
@@ -358,15 +360,17 @@ class OpenEQuartersMain:
                 elif layer.name() == raster_name:
                     clipping_raster = layer
 
-
+            # if the shapefile was found set the layer active
             if investigation_shape is not None and clipping_raster is not None:
                 self.iface.setActiveLayer(investigation_shape)
                 view_actions = self.iface.viewMenu().actions()
 
+                # trigger the "zoom to layer"-function on the formerly activated layer
                 for act in view_actions:
                     if act.text() == 'Zoom to Layer':
                         act.trigger()
 
+                # set the rasterlayer as active and start the export
                 self.iface.setActiveLayer(clipping_raster)
                 pyramid_exporter = SaveSelectionWithPyramid(self.iface)
                 pyramid_exporter.export()
@@ -452,6 +456,20 @@ class OpenEQuartersMain:
                     if mode == 'hide':
                         self.iface.legendInterface().setLayerVisible(layer, False)
 
+    def find_layer_by_name(self, layer_name):
+        """
+        Iterate over all layers and find and return the layer with the name layer_name
+        :param layer_name: Name of the layer that shall be looked for
+        :type layer_name: str
+        :return:
+        :rtype:
+        """
+        if layer_name and not layer_name.isspace():
+
+            for layer in self.iface.mapCanvas().layers():
+                if layer.name() == layer_name:
+                    return layer
+
     def load_housing_layer(self):
         #ToDo
         return
@@ -488,5 +506,5 @@ class OpenEQuartersMain:
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
             self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
             self.hide_or_remove_layer("Google Streets", 'hide')
-            self.set_project_crs("EPSG:4326")
+            self.set_project_crs(self.project_crs)
 

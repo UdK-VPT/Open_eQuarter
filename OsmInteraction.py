@@ -30,10 +30,12 @@ def get_open_layers_plugin_ifexists(plugin_name):
         return False
 
 
-def open_osm_layer(plugin, layer_type_id):
+def open_osm_layer(layer_type_id):
+
+    plugin = get_open_layers_plugin_ifexists()
+
     if plugin == None or layer_type_id < 0:
-        return
+        return False
 
     open_layer = plugin._olLayerTypeRegistry.getById(layer_type_id)
-    plugin.addLayer(open_layer)
-    return True
+    return plugin.addLayer(open_layer)

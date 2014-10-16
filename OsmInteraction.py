@@ -32,7 +32,7 @@ def get_open_layers_plugin_ifexists(plugin_name):
 
 def open_osm_layer(layer_type_id):
 
-    plugin = get_open_layers_plugin_ifexists()
+    plugin = get_open_layers_plugin_ifexists('openlayers_plugin')
 
     if plugin == None or layer_type_id < 0:
         return False

@@ -70,7 +70,7 @@ class OpenEQuartersMain:
         self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
         # ToDo set crs back to 4326
-        self.project_crs = 'EPSG:4326'
+        self.project_crs = 'EPSG:3857'
         # extent of Germany
         self.default_extent = QgsRectangle(numpy.float64(480310.4063808322), numpy.float64(5930330.009070959), numpy.float64(1813151.46638856), numpy.float64(7245291.493883461))
         self.default_extent_crs = 'EPSG:3857'
@@ -213,9 +213,12 @@ class OpenEQuartersMain:
 
             edit_layer = self.find_layer_by_name(layer_name)
 
+            # print to avoid bug, that layer is not loaded
+            print edit_layer
             # if the layer was found, it is activated and the editing and the adding of features will be triggered
-            if edit_layer:
-                self.iface.setActiveLayer(layer)
+            if edit_layer is not None:
+                print edit_layer
+                self.iface.setActiveLayer(edit_layer)
                 self.iface.actionToggleEditing().trigger()
                 self.iface.actionAddFeature().trigger()
 
@@ -466,7 +469,8 @@ class OpenEQuartersMain:
         """
         if layer_name and not layer_name.isspace():
 
-            for layer in self.iface.mapCanvas().layers():
+            for layer in self.iface.legendInterface().layers():
+
                 if layer.name() == layer_name:
                     return layer
 
@@ -491,20 +495,21 @@ class OpenEQuartersMain:
 
         # start the process, if a project was created
         else:
+            QgsMapLayerRegistry.instance().removeAllMapLayers()
             self.enable_on_the_fly_projection()
-
+            self.set_project_crs("EPSG:3857")
             self.load_osm_layer()
             self.zoom_to_default_extent()
             self.create_new_shapefile(self.investigation_shape_layer_name)
 
             self.change_to_edit_mode(self.investigation_shape_layer_name)
-            self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
 
+            self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
             #self.request_wms_layer_url()
+
             self.open_wms_as_raster()
 
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
             self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
             self.hide_or_remove_layer("Google Streets", 'hide')
-            self.set_project_crs(self.project_crs)
 

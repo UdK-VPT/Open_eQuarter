@@ -189,8 +189,9 @@ class OpenEQuartersMain:
             # create a new polygon shape-file called layer_name, with system encoding and project crs
             type = 'Polygon'
             crs = '?crs=' + self.project_crs
-            shape_layer = QgsVectorLayer(type + crs, layer_name, 'memory')
+            shape_layer = QgsVectorLayer(type + crs, layer_name, 'memory', False)
             shape_layer.setProviderEncoding('System')
+            shape_layer.loadNamedStyle(os.path.join(self.plugin_dir, 'Layerstyle', 'oeq_ia_style.qml'))
 
             # add the layer to the layer-legend
             QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
@@ -213,11 +214,8 @@ class OpenEQuartersMain:
 
             edit_layer = self.find_layer_by_name(layer_name)
 
-            # print to avoid bug, that layer is not loaded
-            print edit_layer
             # if the layer was found, it is activated and the editing and the adding of features will be triggered
             if edit_layer is not None:
-                print edit_layer
                 self.iface.setActiveLayer(edit_layer)
                 self.iface.actionToggleEditing().trigger()
                 self.iface.actionAddFeature().trigger()
@@ -493,9 +491,10 @@ class OpenEQuartersMain:
         if self.project_path == './':
             return
 
+        self.create_new_shapefile("IA")
+        """
         # start the process, if a project was created
         else:
-            QgsMapLayerRegistry.instance().removeAllMapLayers()
             self.enable_on_the_fly_projection()
             self.set_project_crs("EPSG:3857")
             self.load_osm_layer()
@@ -512,4 +511,4 @@ class OpenEQuartersMain:
             self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
             self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
             self.hide_or_remove_layer("Google Streets", 'hide')
-
+        """

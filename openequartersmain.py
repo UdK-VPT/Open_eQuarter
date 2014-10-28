@@ -20,10 +20,10 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.utils import iface
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
 # Initialize Qt resources from file resources.py
 import resources_rc

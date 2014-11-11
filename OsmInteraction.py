@@ -27,7 +27,7 @@ def get_open_layers_plugin_ifexists(plugin_name):
         return plugin_exists
     except KeyError:
         print "No plugin under the given name '" + plugin_name + "' found. Please check the plugins settings."
-        return False
+        return None
 
 
 def open_osm_layer(layer_type_id):

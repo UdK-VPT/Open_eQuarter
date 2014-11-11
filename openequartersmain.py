@@ -40,6 +40,7 @@ import numpy
 import time
 import httplib
 
+
 class OpenEQuartersMain:
 
     def __init__(self, iface):
@@ -135,26 +136,36 @@ class OpenEQuartersMain:
         """
         self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
 
-    def load_osm_layer(self):
+    def check_if_plugin_exists(plugin_name):
         """
-        Use the OsmInteraction-methods to interact with the Open-Street-Map plugin and open an open street map according to self.open_layer_type_id
-        :return:
-        :rtype:
+        Use the OsmInteractions method get_open_layers_plugin to lookup the plugin with the given name plugin_name
+        :param plugin_name: The name of the plugin
+        :type plugin_name: str
+        :return plugin object if it exists or None otherwise:
+        :rtype object:
         """
         # save a static reference to the methods that interact with the open-layers plugin
         osmi = OsmInteraction
-        open_layers_plugin_installed = osmi.get_open_layers_plugin_ifexists(self.plugin_name)
+        plugin_installed = osmi.get_open_layers_plugin_ifexists(plugin_name)
 
-        if open_layers_plugin_installed:
+        return plugin_installed
 
-            # open an osm-layer according to its id
-            osmi.open_osm_layer(self.open_layer_type_id)
+    def load_osm_layer(open_layer_type_id):
+        """
+        Use the OsmInteraction-methods to interact with the Open-Street-Map plugin and open an open street map according to open_layer_type_id
+        :param open_layer_type_id: ID of the open-layer type
+        :type open_layer_type_id: int
+        :return:
+        :rtype:
+        """
+        # open an osm-layer according to its id
+        osmi.open_osm_layer(open_layer_type_id)
 
-            # if current scale is below osm-layers visibility, rescale canvas
-            canvas = self.iface.mapCanvas()
-            if canvas.scale() < 850:
-                canvas.zoomScale(850)
-                canvas.refresh()
+        # if current scale is below osm-layers visibility, rescale canvas
+        canvas = self.iface.mapCanvas()
+        if canvas.scale() < 850:
+            canvas.zoomScale(850)
+            canvas.refresh()
 
     def zoom_to_default_extent(self):
         """
@@ -270,7 +281,6 @@ class OpenEQuartersMain:
 
             self.wms_url = wms_url
 
-        return
 
     def open_wms_as_raster(self):
         """
@@ -483,6 +493,7 @@ class OpenEQuartersMain:
     # run method that performs all the real work
     def run(self):
 
+        """
         # if no project exists, create one first
         self.create_project_ifNotExists()
         self.project_path = QgsProject.instance().readPath('./')
@@ -492,7 +503,7 @@ class OpenEQuartersMain:
             return
 
         self.create_new_shapefile("IA")
-        """
+
         # start the process, if a project was created
         else:
             self.enable_on_the_fly_projection()
@@ -512,3 +523,4 @@ class OpenEQuartersMain:
             self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
             self.hide_or_remove_layer("Google Streets", 'hide')
         """
+

@@ -1,5 +1,7 @@
 <RCC>
-    <qresource prefix="/plugins/openequartersmain" >
-        <file>icon.png</file>
-    </qresource>
+  <qresource prefix="/plugins/openequartersmain"/>
+  <qresource prefix="Icons">
+    <file>Icons/checkmark.png</file>
+    <file>Icons/openmark.png</file>
+  </qresource>
 </RCC>

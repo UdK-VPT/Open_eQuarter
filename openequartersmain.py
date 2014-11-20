@@ -28,6 +28,7 @@ from PyQt4.QtGui import *
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
+from MainstayProcess_dialog import MainstayProcess_dialog
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
@@ -62,6 +63,7 @@ class OpenEQuartersMain:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialogues (after translation) and keep references
+        self.mainstay_process_dlg = MainstayProcess_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.project_path = QgsProject.instance().readPath('./')
 
@@ -88,9 +90,12 @@ class OpenEQuartersMain:
         # id=1 - Google Streets
         self.open_layer_type_id = 1
 
+        # list that captures the progress of the oeq-process
+        self.progress = {'project_basics': {'ol_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False}}
+
     def initGui(self):
         # Create action that will start plugin configuration
-        plugin_icon = QIcon('/Users/VPTtutor/Documents/QGIS/plugins/OpenEQuartersMain/icon.png')
+        plugin_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'icon.png'))
         self.action = QAction( plugin_icon, u"OpenEQuarters-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
@@ -136,7 +141,7 @@ class OpenEQuartersMain:
         """
         self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
 
-    def check_if_plugin_exists(plugin_name):
+    def check_if_plugin_exists(self, plugin_name):
         """
         Use the OsmInteractions method get_open_layers_plugin to lookup the plugin with the given name plugin_name
         :param plugin_name: The name of the plugin
@@ -146,11 +151,11 @@ class OpenEQuartersMain:
         """
         # save a static reference to the methods that interact with the open-layers plugin
         osmi = OsmInteraction
-        plugin_installed = osmi.get_open_layers_plugin_ifexists(plugin_name)
+        ol_plugin_installed = osmi.get_open_layers_plugin_ifexists(plugin_name)
 
-        return plugin_installed
+        return ol_plugin_installed
 
-    def load_osm_layer(open_layer_type_id):
+    def load_osm_layer(self, open_layer_type_id):
         """
         Use the OsmInteraction-methods to interact with the Open-Street-Map plugin and open an open street map according to open_layer_type_id
         :param open_layer_type_id: ID of the open-layer type
@@ -159,13 +164,29 @@ class OpenEQuartersMain:
         :rtype:
         """
         # open an osm-layer according to its id
-        osmi.open_osm_layer(open_layer_type_id)
+        osmi = OsmInteraction
+        layer_loaded = osmi.open_osm_layer(open_layer_type_id)
 
-        # if current scale is below osm-layers visibility, rescale canvas
-        canvas = self.iface.mapCanvas()
-        if canvas.scale() < 850:
-            canvas.zoomScale(850)
-            canvas.refresh()
+        if layer_loaded:
+            # if current scale is below osm-layers visibility, rescale canvas
+            canvas = self.iface.mapCanvas()
+            if canvas.scale() < 850:
+                canvas.zoomScale(850)
+                canvas.refresh()
+
+        return layer_loaded
+
+    def osm_layer_is_loaded(self):
+        """
+        Iterate over all layers and check if an osm plugin-layer exists.
+        :return True if the layer is available:
+        :rtype bool:
+        """
+        for layer in QgsMapLayerRegistry.instance().mapLayers():
+            if 'OpenLayers_plugin_layer' in layer:
+                return True
+
+        return False
 
     def zoom_to_default_extent(self):
         """
@@ -281,7 +302,6 @@ class OpenEQuartersMain:
 
             self.wms_url = wms_url
 
-
     def open_wms_as_raster(self):
         """
         Use the url in self.wms_url to open and add a raster layer
@@ -386,7 +406,7 @@ class OpenEQuartersMain:
                 pyramid_exporter = SaveSelectionWithPyramid(self.iface)
                 pyramid_exporter.export()
 
-    # Method not yet used
+    # Method not used yet
     def get_extent_per_feature(self, layer_name):
         """
         Iterate over all features of a given layer and return the extents (as a list of rectangles) of each feature
@@ -421,7 +441,7 @@ class OpenEQuartersMain:
 
         return feature_extents
 
-    # Method not yet used
+    # Method not used yet
     def find_x_min_y_min_x_max_y_max(self, polygon):
         """
         Iterate over all points of a given polygon and return the x- and y-extremes.
@@ -459,7 +479,7 @@ class OpenEQuartersMain:
         :rtype:
         """
         if layer_name and not layer_name.isspace():
-            for layer in self.iface.mapCanvas().layers():
+            for layer in QgsMapLayerRegistry.instance().mapLayers():
                 if layer.name() == layer_name:
                     if mode == 'remove':
                         QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
@@ -490,37 +510,123 @@ class OpenEQuartersMain:
         #ToDo
         return
 
-    # run method that performs all the real work
+    def update_progress(self, section, step, is_done):
+        """
+        Update the progress dictionary acoording to the section, step and the new value.
+        :param section The key related to the oeq-GUI page name:
+        :type section str:
+        :param step The key related to the oeq-GUI checkbox name:
+        :type step str:
+        :param is_done Value telling if the step was completed successfully:
+        :type is_done bool:
+        :return:
+        :rtype:
+        """
+        try:
+            self.progress[section][step] = is_done
+            self.mainstay_process_dlg.set_checkbox_on_page(step + '_chckBox', section + '_page', is_done)
+
+            if not self.is_in_progress(section):
+                self.mainstay_process_dlg.set_progress_button(section + '_btn', True)
+        except KeyError, error:
+            print str(error)
+
+    def is_in_progress(self, section, *steps):
+        """
+        Sum the number of steps completed in a given section and compare them against the total amount of steps in that section / Calculate how many of the given steps are still uncompleted.
+        :param section The key related to the oeq-GUI page name:
+        :type section str:
+        :param steps The key(s) related to the oeq-GUI checkbox name:
+        :type steps *str:
+        :return The amount of uncompleted steps in a section / list of steps. Returns 0 if all steps are completed:
+        :rtype int:
+        """
+        if not section or section.isspace():
+            return 0
+
+        if len(steps) == 0:
+            steps_in_section = 0
+            steps_done = 0
+
+            try:
+                for key in self.progress[section]:
+                    steps_in_section += 1
+                    steps_done += self.progress[section][key]
+                return steps_in_section - steps_done
+            except KeyError, error:
+                print str(error)
+                return -1
+
+        else:
+            steps_done = 0
+            try:
+                for step in steps:
+                    steps_done += self.progress[section][step]
+                return len(steps) - steps_done
+            except KeyError, error:
+                print str(error)
+                return -1
+
+    # run method that puts the process in an order
     def run(self):
 
-        """
-        # if no project exists, create one first
-        self.create_project_ifNotExists()
-        self.project_path = QgsProject.instance().readPath('./')
+        self.mainstay_process_dlg.show()
 
-        # if no project was created stop execution
-        if self.project_path == './':
-            return
+        print self.is_in_progress('project_basics')
+
+        if self.check_if_plugin_exists(self.plugin_name) is not None:
+            self.update_progress('project_basics', 'ol_plugin_installed', True)
+
+        print self.is_in_progress('project_basics')
+
+        if not self.is_in_progress('project_basics', 'ol_plugin_installed'):
+            # if no project exists, create one first
+            self.create_project_ifNotExists()
+            self.project_path = QgsProject.instance().readPath('./')
+
+            # if project was created stop execution
+            if self.project_path != './':
+                self.update_progress('project_basics', 'project_created', True)
+
+        print self.is_in_progress('project_basics')
+
+        if not self.is_in_progress('project_basics','ol_plugin_installed','project_created'):
+            self.enable_on_the_fly_projection()
+            self.set_project_crs("EPSG:3857")
+
+            if self.osm_layer_is_loaded():
+                self.update_progress('project_basics', 'osm_layer_loaded', True)
+
+            elif not self.osm_layer_is_loaded() and self.load_osm_layer(self.open_layer_type_id) is not None:
+                self.update_progress('project_basics', 'osm_layer_loaded', True)
+                self.zoom_to_default_extent()
+
+        print self.is_in_progress('project_basics')
+
+        if not self.is_in_progress('project_basics'):
+            print "Continuing with second step"
+        """
 
         self.create_new_shapefile("IA")
 
         # start the process, if a project was created
         else:
-            self.enable_on_the_fly_projection()
-            self.set_project_crs("EPSG:3857")
-            self.load_osm_layer()
-            self.zoom_to_default_extent()
-            self.create_new_shapefile(self.investigation_shape_layer_name)
 
-            self.change_to_edit_mode(self.investigation_shape_layer_name)
 
-            self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
-            #self.request_wms_layer_url()
+                self.create_new_shapefile(self.investigation_shape_layer_name)
 
-            self.open_wms_as_raster()
+                self.change_to_edit_mode(self.investigation_shape_layer_name)
 
-            self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
-            self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
-            self.hide_or_remove_layer("Google Streets", 'hide')
-        """
+                self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
+                #self.request_wms_layer_url()
+
+                self.open_wms_as_raster()
+
+                self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
+                self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
+                self.hide_or_remove_layer("Google Streets", 'hide')
+
+            else:
+                print "OSM-plugin not found"
+            """
 

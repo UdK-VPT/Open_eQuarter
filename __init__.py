@@ -23,5 +23,5 @@
 
 def classFactory(iface):
     # load OpenEQuartersMain class from file OpenEQuartersMain
-    from openequartersmain import OpenEQuartersMain
+    from OpenEQuartersMain import OpenEQuartersMain
     return OpenEQuartersMain(iface)

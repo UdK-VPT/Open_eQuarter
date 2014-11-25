@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_mainstay_process_dialog.ui'
 #
-# Created: Tue Nov 18 15:47:03 2014
+# Created: Mon Nov 24 16:25:56 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -57,15 +57,20 @@ class Ui_MainstayProcess_dialog(object):
         self.ol_plugin_installed_chckBox.setObjectName(_fromUtf8("ol_plugin_installed_chckBox"))
         self.project_created_chckBox = QtGui.QCheckBox(self.project_basics_page)
         self.project_created_chckBox.setEnabled(False)
-        self.project_created_chckBox.setGeometry(QtCore.QRect(10, 55, 261, 41))
+        self.project_created_chckBox.setGeometry(QtCore.QRect(10, 95, 261, 41))
         self.project_created_chckBox.setStyleSheet(_fromUtf8(""))
         self.project_created_chckBox.setCheckable(True)
         self.project_created_chckBox.setObjectName(_fromUtf8("project_created_chckBox"))
         self.osm_layer_loaded_chckBox = QtGui.QCheckBox(self.project_basics_page)
         self.osm_layer_loaded_chckBox.setEnabled(False)
-        self.osm_layer_loaded_chckBox.setGeometry(QtCore.QRect(10, 95, 261, 41))
+        self.osm_layer_loaded_chckBox.setGeometry(QtCore.QRect(10, 135, 261, 41))
         self.osm_layer_loaded_chckBox.setCheckable(True)
         self.osm_layer_loaded_chckBox.setObjectName(_fromUtf8("osm_layer_loaded_chckBox"))
+        self.pst_plugin_installed_chckBox = QtGui.QCheckBox(self.project_basics_page)
+        self.pst_plugin_installed_chckBox.setEnabled(False)
+        self.pst_plugin_installed_chckBox.setGeometry(QtCore.QRect(10, 55, 261, 41))
+        self.pst_plugin_installed_chckBox.setCheckable(True)
+        self.pst_plugin_installed_chckBox.setObjectName(_fromUtf8("pst_plugin_installed_chckBox"))
         self.process_page.addWidget(self.project_basics_page)
         self.investigation_area_page = QtGui.QWidget()
         self.investigation_area_page.setObjectName(_fromUtf8("investigation_area_page"))
@@ -82,11 +87,12 @@ class Ui_MainstayProcess_dialog(object):
         self.project_basics_btn = QtGui.QToolButton(MainstayProcess_dialog)
         self.project_basics_btn.setEnabled(True)
         self.project_basics_btn.setGeometry(QtCore.QRect(10, 10, 141, 31))
-        self.project_basics_btn.setStyleSheet(_fromUtf8(":active, :hover{\n"
+        self.project_basics_btn.setStyleSheet(_fromUtf8(":hover{\n"
 "    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));\n"
+"    border: 1px solid rgb(192,192,192);\n"
 "}\n"
 ":checked {\n"
-"    background-color: rgb(234,234,234);\n"
+"    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));\n"
 "    border: 1px solid rgb(192,192,192);\n"
 "}"))
         icon = QtGui.QIcon()
@@ -95,7 +101,7 @@ class Ui_MainstayProcess_dialog(object):
         self.project_basics_btn.setIcon(icon)
         self.project_basics_btn.setIconSize(QtCore.QSize(20, 20))
         self.project_basics_btn.setCheckable(True)
-        self.project_basics_btn.setChecked(True)
+        self.project_basics_btn.setChecked(False)
         self.project_basics_btn.setAutoRepeat(False)
         self.project_basics_btn.setAutoExclusive(False)
         self.project_basics_btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -105,6 +111,14 @@ class Ui_MainstayProcess_dialog(object):
         self.investigation_area_btn = QtGui.QToolButton(MainstayProcess_dialog)
         self.investigation_area_btn.setEnabled(True)
         self.investigation_area_btn.setGeometry(QtCore.QRect(10, 40, 141, 31))
+        self.investigation_area_btn.setStyleSheet(_fromUtf8(":hover{\n"
+"    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));\n"
+"    border: 1px solid rgb(192,192,192);\n"
+"}\n"
+":checked {\n"
+"    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));\n"
+"    border: 1px solid rgb(192,192,192);\n"
+"}"))
         self.investigation_area_btn.setIcon(icon)
         self.investigation_area_btn.setIconSize(QtCore.QSize(20, 20))
         self.investigation_area_btn.setCheckable(True)
@@ -118,7 +132,14 @@ class Ui_MainstayProcess_dialog(object):
         self.building_shapes_btn = QtGui.QToolButton(MainstayProcess_dialog)
         self.building_shapes_btn.setEnabled(True)
         self.building_shapes_btn.setGeometry(QtCore.QRect(10, 90, 141, 31))
-        self.building_shapes_btn.setStyleSheet(_fromUtf8(""))
+        self.building_shapes_btn.setStyleSheet(_fromUtf8(":hover{\n"
+"    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));\n"
+"    border: 1px solid rgb(192,192,192);\n"
+"}\n"
+":checked {\n"
+"    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));\n"
+"    border: 1px solid rgb(192,192,192);\n"
+"}"))
         self.building_shapes_btn.setIcon(icon)
         self.building_shapes_btn.setIconSize(QtCore.QSize(20, 20))
         self.building_shapes_btn.setCheckable(True)
@@ -317,7 +338,7 @@ class Ui_MainstayProcess_dialog(object):
         self.label_5.setObjectName(_fromUtf8("label_5"))
 
         self.retranslateUi(MainstayProcess_dialog)
-        self.process_page.setCurrentIndex(1)
+        self.process_page.setCurrentIndex(0)
         QtCore.QObject.connect(self.project_basics_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QObject.connect(self.investigation_area_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QObject.connect(self.building_shapes_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
@@ -328,6 +349,7 @@ class Ui_MainstayProcess_dialog(object):
         self.ol_plugin_installed_chckBox.setText(_translate("MainstayProcess_dialog", "Install the Open Street Map Plugin", None))
         self.project_created_chckBox.setText(_translate("MainstayProcess_dialog", "Create a new project and save it.", None))
         self.osm_layer_loaded_chckBox.setText(_translate("MainstayProcess_dialog", "Open an Open Layers Map", None))
+        self.pst_plugin_installed_chckBox.setText(_translate("MainstayProcess_dialog", "Install the PointSamplingTool Plugin", None))
         self.textBrowser.setHtml(_translate("MainstayProcess_dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

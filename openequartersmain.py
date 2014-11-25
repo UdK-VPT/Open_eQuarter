@@ -21,7 +21,7 @@
 """
 # Import the PyQt and QGIS libraries
 from qgis.core import *
-from qgis.utils import iface
+from qgis.utils import iface, plugins
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -32,13 +32,14 @@ from MainstayProcess_dialog import MainstayProcess_dialog
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
+from PstInteraction import *
 import OsmInteraction
+import LayerInteraction
 from saveselectionwithpyramid import SaveSelectionWithPyramid
 
 from socket import gaierror
 import os.path
 import numpy
-import time
 import httplib
 
 
@@ -49,6 +50,7 @@ class OpenEQuartersMain:
         # Save reference to the QGIS interface
         self.iface = iface
 
+        ### Plugin specific settings
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
@@ -62,36 +64,54 @@ class OpenEQuartersMain:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
+
+        ### UI specific settings
         # Create the dialogues (after translation) and keep references
         self.mainstay_process_dlg = MainstayProcess_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
-        self.project_path = QgsProject.instance().readPath('./')
-
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.wms_url = ""
-
         self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
-        # ToDo set crs back to 4326
-        self.project_crs = 'EPSG:3857'
-        # extent of Germany
+
+        ### Project specific settings
+        # the project path is './' as long as the project has not been saved
+        self.project_path = QgsProject.instance().readPath('./')
+        self.project_crs = 'EPSG:3857' # ToDo set crs back to 4326
+
+
+        ### Information needed to use external plugins
+        # PointSamplingTool
+        self.pst_plugin_name = 'pointsamplingtool'
+        self.pst_input_layer_name = 'testpunkte'
+        self.pst_output_layer_path = '/Users/VPTtutor/Documents/QGIS/plugin_oeq-qgs_project/Testpunkte/'
+        self.pst_output_layer_name = 'pst_out'
+
+
+        # OpenStreetMap plugin
+        self.ol_plugin_name = 'openlayers_plugin'
+        # id=0 - Google Physical
+        # id=1 - Google Streets
+        self.open_layer_type_id = 1
+
+
+        ### Default values
+        # default extent, after the OSM-layer was loaded (currently: extent of Germany)
         self.default_extent = QgsRectangle(numpy.float64(480310.4063808322), numpy.float64(5930330.009070959), numpy.float64(1813151.46638856), numpy.float64(7245291.493883461))
         self.default_extent_crs = 'EPSG:3857'
         self.default_scale = 4607478
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'Layerstyle', 'oeq_ia_style.qml')
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
-        self.clipping_raster_layer_name = "Investigation Area - raster"
+        self.clipping_raster_layer_name = 'Investigation Area - raster'
 
-        self.plugin_name = 'openlayers_plugin'
-        # id=0 - Google Physical
-        # id=1 - Google Streets
-        self.open_layer_type_id = 1
 
+        ### Information regarding the users progress
         # list that captures the progress of the oeq-process
-        self.progress = {'project_basics': {'ol_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False}}
+        self.progress = {'project_basics': {'ol_plugin_installed': False, 'pst_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False}}
 
     def initGui(self):
         # Create action that will start plugin configuration
@@ -141,19 +161,31 @@ class OpenEQuartersMain:
         """
         self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
 
-    def check_if_plugin_exists(self, plugin_name):
+    def get_plugin_ifexists(self, plugin_name):
         """
-        Use the OsmInteractions method get_open_layers_plugin to lookup the plugin with the given name plugin_name
-        :param plugin_name: The name of the plugin
-        :type plugin_name: str
-        :return plugin object if it exists or None otherwise:
-        :rtype object:
-        """
-        # save a static reference to the methods that interact with the open-layers plugin
-        osmi = OsmInteraction
-        ol_plugin_installed = osmi.get_open_layers_plugin_ifexists(plugin_name)
+        Check if a plugin with the given name exists.
 
-        return ol_plugin_installed
+        :param plugin_name: Name of the plugin to check existence of.
+        :type plugin_name: str
+
+        :return plugin: Return the plugin if it was found
+        :rtype: OpenlayersPlugin instance
+
+        :return False: Return False if the plugin was not found and the lookup resulted in an exception.
+        :rtype: bool
+        """
+
+        if not plugin_name or plugin_name.isspace():
+            return None
+
+        plugin_dict = plugins
+
+        try:
+            plugin = plugin_dict[plugin_name]
+            return plugin
+        except KeyError:
+            print "No plugin with the given name '" + plugin_name + "' found. Please check the plugin settings."
+            return None
 
     def load_osm_layer(self, open_layer_type_id):
         """
@@ -163,9 +195,12 @@ class OpenEQuartersMain:
         :return:
         :rtype:
         """
-        # open an osm-layer according to its id
-        osmi = OsmInteraction
-        layer_loaded = osmi.open_osm_layer(open_layer_type_id)
+        # if the plugin is installed under a different name
+        if self.ol_plugin_name != 'openlayers_plugin':
+            layer_loaded = OsmInteraction.open_osm_layer(open_layer_type_id, self.ol_plugin_name)
+        else:
+            layer_loaded = OsmInteraction.open_osm_layer(open_layer_type_id)
+
 
         if layer_loaded:
             # if current scale is below osm-layers visibility, rescale canvas
@@ -205,53 +240,6 @@ class OpenEQuartersMain:
             canvas.setExtent(self.default_extent)
             canvas.refresh()
 
-    def create_new_shapefile(self, layer_name):
-        """
-        Create and add a new Polygon-Vectorlayer, with the name as specified in layer_name
-        :param layer_name: The name of the new vectorlayer
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        if layer_name and not layer_name.isspace():
-            # surpress crs-choice dialog
-            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
-            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
-
-            # create a new polygon shape-file called layer_name, with system encoding and project crs
-            type = 'Polygon'
-            crs = '?crs=' + self.project_crs
-            shape_layer = QgsVectorLayer(type + crs, layer_name, 'memory', False)
-            shape_layer.setProviderEncoding('System')
-            shape_layer.loadNamedStyle(os.path.join(self.plugin_dir, 'Layerstyle', 'oeq_ia_style.qml'))
-
-            # add the layer to the layer-legend
-            QgsMapLayerRegistry.instance().addMapLayer(shape_layer)
-
-            #ToDo change the layer order and put the new layer first
-            # (not nescessary atm, since the layer already is on top, if loaded in an empty project)
-
-            # reset appearance of crs-choice dialog to previous settings
-            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-
-    def change_to_edit_mode(self, layer_name):
-        """
-        Iterate over all layers and activate the Layer called layer_name. Then toggle the edit mode of that layer.
-        :param layer_name: Name of the layer, that shall be switched to edit_mode
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        if layer_name and not layer_name.isspace():
-
-            edit_layer = self.find_layer_by_name(layer_name)
-
-            # if the layer was found, it is activated and the editing and the adding of features will be triggered
-            if edit_layer is not None:
-                self.iface.setActiveLayer(edit_layer)
-                self.iface.actionToggleEditing().trigger()
-                self.iface.actionAddFeature().trigger()
-
     def confirm_selection_of_investigation_area(self, layer_name):
         """
         Select the layer named 'layer_name' from layers list and trigger the ToggleEditing button
@@ -262,7 +250,7 @@ class OpenEQuartersMain:
         """
         if layer_name and not layer_name.isspace():
 
-            edit_layer = self.find_layer_by_name(layer_name)
+            edit_layer = LayerInteraction.find_layer_by_name(layer_name)
 
             # if the layer was found, prompt the user to confirm the adding-feature-process was finished
             if edit_layer:
@@ -468,40 +456,6 @@ class OpenEQuartersMain:
 
         return x_min, y_min, x_max, y_max
 
-    def hide_or_remove_layer(self, layer_name, mode='hide'):
-        """
-        Hide or remove the given layer from the MapLayerRegistry, depending on the mode.
-        :param layer_name: Name of the layer to remove/hide
-        :type layer_name: str
-        :param mode: What to do with the layer; valid arguments are 'hide' or 'remove'
-        :type mode: str
-        :return:
-        :rtype:
-        """
-        if layer_name and not layer_name.isspace():
-            for layer in QgsMapLayerRegistry.instance().mapLayers():
-                if layer.name() == layer_name:
-                    if mode == 'remove':
-                        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-
-                    if mode == 'hide':
-                        self.iface.legendInterface().setLayerVisible(layer, False)
-
-    def find_layer_by_name(self, layer_name):
-        """
-        Iterate over all layers and find and return the layer with the name layer_name
-        :param layer_name: Name of the layer that shall be looked for
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        if layer_name and not layer_name.isspace():
-
-            for layer in self.iface.legendInterface().layers():
-
-                if layer.name() == layer_name:
-                    return layer
-
     def load_housing_layer(self):
         #ToDo
         return
@@ -567,17 +521,20 @@ class OpenEQuartersMain:
                 print str(error)
                 return -1
 
+
+
     # run method that puts the process in an order
     def run(self):
 
         self.mainstay_process_dlg.show()
 
-        print self.is_in_progress('project_basics')
 
-        if self.check_if_plugin_exists(self.plugin_name) is not None:
+        if self.get_plugin_ifexists(self.ol_plugin_name) is not None:
             self.update_progress('project_basics', 'ol_plugin_installed', True)
 
-        print self.is_in_progress('project_basics')
+
+        if self.get_plugin_ifexists(self.pst_plugin_name) is not None:
+            self.update_progress('project_basics', 'pst_plugin_installed', True)
 
         if not self.is_in_progress('project_basics', 'ol_plugin_installed'):
             # if no project exists, create one first
@@ -588,11 +545,9 @@ class OpenEQuartersMain:
             if self.project_path != './':
                 self.update_progress('project_basics', 'project_created', True)
 
-        print self.is_in_progress('project_basics')
-
         if not self.is_in_progress('project_basics','ol_plugin_installed','project_created'):
             self.enable_on_the_fly_projection()
-            self.set_project_crs("EPSG:3857")
+            self.set_project_crs('EPSG:3857')
 
             if self.osm_layer_is_loaded():
                 self.update_progress('project_basics', 'osm_layer_loaded', True)
@@ -601,21 +556,22 @@ class OpenEQuartersMain:
                 self.update_progress('project_basics', 'osm_layer_loaded', True)
                 self.zoom_to_default_extent()
 
-        print self.is_in_progress('project_basics')
 
         if not self.is_in_progress('project_basics'):
-            print "Continuing with second step"
-        """
+            print 'Continuing with second step'
 
-        self.create_new_shapefile("IA")
+        """
+        self.create_new_shapefile('IA','Polygon')
 
         # start the process, if a project was created
         else:
 
 
-                self.create_new_shapefile(self.investigation_shape_layer_name)
+                investigation_area = LayerInteraction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon', self.project_crs)
+                LayerInteraction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
+                LayerInteraction.add_layer_to_registry(investigation_area)
 
-                self.change_to_edit_mode(self.investigation_shape_layer_name)
+                LayerInteraction.change_to_edit_mode(self.investigation_shape_layer_name)
 
                 self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
                 #self.request_wms_layer_url()
@@ -623,8 +579,20 @@ class OpenEQuartersMain:
                 self.open_wms_as_raster()
 
                 self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
-                self.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
-                self.hide_or_remove_layer("Google Streets", 'hide')
+                LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
+                LayerInteraction.hide_or_remove_layer("Google Streets", 'hide', self.iface)
+
+                ### Interaction with point sampling tool
+                pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
+                psti = PstInteraction(pst_plugin, iface)
+
+                psti.set_input_layer(self.pst_input_layer_name)
+                psti.select_files_for_sampling()
+
+                pst_output_layer = psti.start_sampling(self.pst_output_layer_path, self.pst_output_layer_name)
+                vlayer = QgsVectorLayer(pst_output_layer, unicode('pst_out'), "ogr")
+                LayerInteraction.add_layer_to_registry(vlayer)
+                ###
 
             else:
                 print "OSM-plugin not found"

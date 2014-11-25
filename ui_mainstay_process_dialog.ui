@@ -84,7 +84,7 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="project_basics_page">
     <widget class="QCheckBox" name="ol_plugin_installed_chckBox">
@@ -113,7 +113,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>55</y>
+       <y>95</y>
        <width>261</width>
        <height>41</height>
       </rect>
@@ -135,13 +135,32 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>95</y>
+       <y>135</y>
        <width>261</width>
        <height>41</height>
       </rect>
      </property>
      <property name="text">
       <string>Open an Open Layers Map</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="pst_plugin_installed_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>55</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Install the PointSamplingTool Plugin</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -183,11 +202,12 @@ p, li { white-space: pre-wrap; }
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">:active, :hover{
+    <string notr="true">:hover{
 	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));
+	border: 1px solid rgb(192,192,192);
 }
 :checked {
-	background-color: rgb(234,234,234);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));
 	border: 1px solid rgb(192,192,192);
 }</string>
    </property>
@@ -209,7 +229,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="autoRepeat">
     <bool>false</bool>
@@ -238,6 +258,16 @@ p, li { white-space: pre-wrap; }
      <width>141</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">:hover{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));
+	border: 1px solid rgb(192,192,192);
+}
+:checked {
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));
+	border: 1px solid rgb(192,192,192);
+}</string>
    </property>
    <property name="text">
     <string>Investigation Area</string>
@@ -288,7 +318,14 @@ p, li { white-space: pre-wrap; }
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true"/>
+    <string notr="true">:hover{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203));
+	border: 1px solid rgb(192,192,192);
+}
+:checked {
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.495074, y2:0.284, stop:0 rgba(204, 204, 204, 255), stop:1 rgba(239, 239, 239, 255));
+	border: 1px solid rgb(192,192,192);
+}</string>
    </property>
    <property name="text">
     <string>Building Shapes</string>

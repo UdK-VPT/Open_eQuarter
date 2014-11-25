@@ -25,15 +25,15 @@ QGISDIR=.qgis2
 # Makefile for a PyQGIS plugin
 
 # translation
-SOURCES = openequartersmain.py __init__.py
+SOURCES = OpenEQuartersMain.py __init__.py
 #TRANSLATIONS = i18n/openequartersmain_en.ts
 TRANSLATIONS =
 
 # global
 
-PLUGINNAME = openequartersmain
+PLUGINNAME = OpenEQuartersMain
 
-PY_FILES = openequartersmain.py __init__.py
+PY_FILES = OpenEQuartersMain.py __init__.py
 
 EXTRAS = Icons/icon.png Icons/checkmark.png Icons/openmark.png metadata.txt 
 

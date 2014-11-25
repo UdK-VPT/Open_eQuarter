@@ -9,13 +9,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
+    <width>614</width>
     <height>513</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>620</width>
+    <width>614</width>
     <height>513</height>
    </size>
   </property>
@@ -40,7 +40,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>310</x>
      <y>410</y>
      <width>91</width>
      <height>32</height>
@@ -84,7 +84,7 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="project_basics_page">
     <widget class="QCheckBox" name="ol_plugin_installed_chckBox">
@@ -168,26 +168,239 @@
     </widget>
    </widget>
    <widget class="QWidget" name="investigation_area_page">
-    <widget class="QTextBrowser" name="textBrowser">
+    <widget class="QCheckBox" name="temp_shapefile_created_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>100</y>
-       <width>256</width>
-       <height>192</height>
+       <x>10</x>
+       <y>15</y>
+       <width>261</width>
+       <height>41</height>
       </rect>
      </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Das ist das Haus vom Nikolaus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <property name="text">
+      <string>Create a new Polygon-Shapelayer</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="editing_temp_shapefile_started_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>55</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Activate the edit mode</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="investigation_area_selected_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>95</y>
+       <width>411</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add new features to cover your investigation area with</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="editing_temp_shapefile_stopped_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>135</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Deactivate the edit mode</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_2"/>
-   <widget class="QWidget" name="stackedWidgetPage2"/>
+   <widget class="QWidget" name="building_shapes_page">
+    <widget class="QCheckBox" name="raster_loaded_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Load a new (wms) raster-map</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="extent_clipped_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>55</y>
+       <width>321</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Export the investigation areas extent as .tif</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="pyramids_built_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>95</y>
+       <width>321</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Open the created .tif-file and build pyramids</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="sampling_points_page">
+    <widget class="QCheckBox" name="temp_pointlayer_created_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Create a new Pointlayer</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="editing_temp_pointlayer_started_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>55</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Activate the edit mode</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="points_of_interest_defined_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>95</y>
+       <width>411</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add new features to mark the buildings you want to extract information from</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="editing_temp_pointlayer_stopped_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>135</y>
+       <width>261</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Deactivate the edit mode</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="information_sampled_chckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>175</y>
+       <width>381</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use the point-samplin-tool to extract the information</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QToolButton" name="project_basics_btn">
    <property name="enabled">
@@ -363,7 +576,7 @@ p, li { white-space: pre-wrap; }
     <enum>Qt::NoArrow</enum>
    </property>
   </widget>
-  <widget class="QToolButton" name="oeqstepbutton_4">
+  <widget class="QToolButton" name="sampling_points_btn">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -1056,6 +1269,22 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sampling_points_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainstayProcess_dialog</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>306</x>
      <y>256</y>
     </hint>
    </hints>

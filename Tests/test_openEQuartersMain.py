@@ -1,5 +1,5 @@
 from unittest import TestCase
-from openequartersmain import OpenEQuartersMain
+from OpenEQuartersMain import OpenEQuartersMain
 __author__ = 'VPTtutor'
 
 

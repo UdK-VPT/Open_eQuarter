@@ -74,8 +74,9 @@ def find_layer_by_name(layer_name):
     """
     if layer_name and not layer_name.isspace():
 
-        for layer in QgsMapLayerRegistry.instance().mapLayers():
+        for layer_key in QgsMapLayerRegistry.instance().mapLayers():
 
+            layer = QgsMapLayerRegistry.instance().mapLayers()[layer_key]
             if layer.name() == layer_name:
                 return layer
         else:
@@ -133,9 +134,11 @@ def write_vector_layer_to_disk(vlayer, full_path):
             return None
 
 
-def change_to_edit_mode(layer_name, iface):
+def trigger_edit_mode(iface, layer_name, trigger='on'):
     """
     Iterate over all layers and activate the Layer called layer_name. Then toggle the edit mode of that layer.
+    :param iface: The Qgis-interface that will be accessed
+    :type iface: QgsInterface
     :param layer_name: Name of the layer, that shall be switched to edit_mode
     :type layer_name: str
     :return:
@@ -148,5 +151,10 @@ def change_to_edit_mode(layer_name, iface):
         # if the layer was found, it is activated and the editing and the adding of features will be triggered
         if edit_layer is not None:
             iface.setActiveLayer(edit_layer)
-            iface.actionToggleEditing().trigger()
-            iface.actionAddFeature().trigger()
+
+            if trigger == 'on':
+                iface.actionToggleEditing().trigger()
+                iface.actionAddFeature().trigger()
+            elif trigger == 'off':
+                iface.actionAddFeature().trigger()
+                iface.actionToggleEditing().trigger()

@@ -33,7 +33,7 @@ from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
 from PstInteraction import *
-import OsmInteraction
+from OlInteraction import *
 import LayerInteraction
 from saveselectionwithpyramid import SaveSelectionWithPyramid
 
@@ -92,7 +92,8 @@ class OpenEQuartersMain:
         self.ol_plugin_name = 'openlayers_plugin'
         # id=0 - Google Physical
         # id=1 - Google Streets
-        self.open_layer_type_id = 1
+        # id=4 - OpenStreetMap
+        self.open_layer_type_id = 4
 
 
         ### Default values
@@ -111,7 +112,10 @@ class OpenEQuartersMain:
 
         ### Information regarding the users progress
         # list that captures the progress of the oeq-process
-        self.progress = {'project_basics': {'ol_plugin_installed': False, 'pst_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False}}
+        self.progress = {'project_basics': {'ol_plugin_installed': False, 'pst_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False},
+                         'investigation_area': {'temp_shapefile_created': False, 'editing_temp_shapefile_started': False, 'investigation_area_selected': False, 'editing_temp_shapefile_stopped': False},
+                         'building_shapes': {'raster_loaded': False, 'extent_clipped': False, 'pyramids_built': False},
+                         'sampling_points': {'temp_pointlayer_created': False, 'editing_temp_pointlayer_started': False, 'points_of_interest_defined': False, 'editing_temp_pointlayer_stopped': False, 'information_sampled': False }}
 
     def initGui(self):
         # Create action that will start plugin configuration
@@ -187,30 +191,6 @@ class OpenEQuartersMain:
             print "No plugin with the given name '" + plugin_name + "' found. Please check the plugin settings."
             return None
 
-    def load_osm_layer(self, open_layer_type_id):
-        """
-        Use the OsmInteraction-methods to interact with the Open-Street-Map plugin and open an open street map according to open_layer_type_id
-        :param open_layer_type_id: ID of the open-layer type
-        :type open_layer_type_id: int
-        :return:
-        :rtype:
-        """
-        # if the plugin is installed under a different name
-        if self.ol_plugin_name != 'openlayers_plugin':
-            layer_loaded = OsmInteraction.open_osm_layer(open_layer_type_id, self.ol_plugin_name)
-        else:
-            layer_loaded = OsmInteraction.open_osm_layer(open_layer_type_id)
-
-
-        if layer_loaded:
-            # if current scale is below osm-layers visibility, rescale canvas
-            canvas = self.iface.mapCanvas()
-            if canvas.scale() < 850:
-                canvas.zoomScale(850)
-                canvas.refresh()
-
-        return layer_loaded
-
     def osm_layer_is_loaded(self):
         """
         Iterate over all layers and check if an osm plugin-layer exists.
@@ -229,13 +209,13 @@ class OpenEQuartersMain:
         :return:
         :rtype:
         """
-        canvas = self.iface.mapCanvas()
 
-        # if plugin was started out of new or empty project, zoom to default extent
-        # !!!!!! A print statement has to be executed prior to calling the layerCount() function
-        print ""
-        # !!!!!! apparently the layerCount()-function does not flush properly
-        if canvas.layerCount() >= 0 and canvas.layerCount() <= 2:
+        print "zoom"
+        canvas = self.iface.mapCanvas()
+        layers = QgsMapLayerRegistry.instance().mapLayers()
+
+        if len(layers) >= 0 and len(layers) <= 2:
+            print "zoom2"
             canvas.zoomScale(self.default_scale)
             canvas.setExtent(self.default_extent)
             canvas.refresh()
@@ -258,10 +238,12 @@ class OpenEQuartersMain:
                 self.confirm_selection_of_investigation_area_dlg.show()
                 confirmation = self.confirm_selection_of_investigation_area_dlg.exec_()
 
-                # if the finalization of the process was confirmed, turn of the edit mode (by default, the user will be asked to save his changes)
+                # if the finalization of the process was confirmed, return True
                 if confirmation:
-                    self.iface.setActiveLayer(edit_layer)
-                    self.iface.actionToggleEditing().trigger()
+                    return True
+
+                else:
+                    return False
 
     def request_wms_layer_url(self):
         """
@@ -529,14 +511,17 @@ class OpenEQuartersMain:
         self.mainstay_process_dlg.show()
 
 
+        ### Project basics
+        # check if "open layers"-plugin is installed
         if self.get_plugin_ifexists(self.ol_plugin_name) is not None:
             self.update_progress('project_basics', 'ol_plugin_installed', True)
 
-
+        # check if the pointsampling-tool is installed
         if self.get_plugin_ifexists(self.pst_plugin_name) is not None:
             self.update_progress('project_basics', 'pst_plugin_installed', True)
 
-        if not self.is_in_progress('project_basics', 'ol_plugin_installed'):
+        # check if the project has been saved
+        if not self.is_in_progress('project_basics', 'pst_plugin_installed', 'ol_plugin_installed'):
             # if no project exists, create one first
             self.create_project_ifNotExists()
             self.project_path = QgsProject.instance().readPath('./')
@@ -545,56 +530,95 @@ class OpenEQuartersMain:
             if self.project_path != './':
                 self.update_progress('project_basics', 'project_created', True)
 
-        if not self.is_in_progress('project_basics','ol_plugin_installed','project_created'):
-            self.enable_on_the_fly_projection()
-            self.set_project_crs('EPSG:3857')
+        # check if steps 1 to 3 have succeeded
+        if not self.is_in_progress('project_basics','pst_plugin_installed', 'ol_plugin_installed', 'project_created'):
 
             if self.osm_layer_is_loaded():
                 self.update_progress('project_basics', 'osm_layer_loaded', True)
 
-            elif not self.osm_layer_is_loaded() and self.load_osm_layer(self.open_layer_type_id) is not None:
-                self.update_progress('project_basics', 'osm_layer_loaded', True)
-                self.zoom_to_default_extent()
+            else:
+                ol_plugin = OlInteraction(self.ol_plugin_name)
+                # self.enable_on_the_fly_projection()
+                # self.set_project_crs(self.default_extent_crs)
 
+                if ol_plugin.open_osm_layer(self.open_layer_type_id):
+                    self.update_progress('project_basics', 'osm_layer_loaded', True)
+                    self.zoom_to_default_extent()
 
+        ### Investigation Area
+        # if the "project basics"-process is done, continue with the IA-process
         if not self.is_in_progress('project_basics'):
-            print 'Continuing with second step'
 
-        """
-        self.create_new_shapefile('IA','Polygon')
-
-        # start the process, if a project was created
-        else:
-
-
+            # create a new shape-layer
+            if self.is_in_progress('investigation_area', 'temp_shapefile_created'):
                 investigation_area = LayerInteraction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon', self.project_crs)
-                LayerInteraction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
-                LayerInteraction.add_layer_to_registry(investigation_area)
 
-                LayerInteraction.change_to_edit_mode(self.investigation_shape_layer_name)
+                if investigation_area is not None:
+                    LayerInteraction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
+                    LayerInteraction.add_layer_to_registry(investigation_area)
+                    self.update_progress('investigation_area', 'temp_shapefile_created', True)
 
-                self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
+
+            # trigger the edit-mode of the recently created layer
+            if self.is_in_progress('investigation_area', 'investigation_area_selected'):
+                if not self.is_in_progress('investigation_area', 'temp_shapefile_created'):
+                    LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
+                    self.update_progress('investigation_area', 'editing_temp_shapefile_started', True)
+
+                if not self.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started'):
+                    ia_covered = self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
+                    self.update_progress('investigation_area', 'investigation_area_selected', ia_covered)
+
+                if not self.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected'):
+                    LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
+                    self.update_progress('investigation_area', 'editing_temp_shapefile_stopped', True)
+
+        ### Raster-clipping and shape-building process
+        # if the "investigation area"-process is completed
+        if not self.is_in_progress('investigation_area'):
+
+            # open a wms-raster
+            if self.is_in_progress('building_shapes', 'raster_loaded'):
                 #self.request_wms_layer_url()
-
                 self.open_wms_as_raster()
+                self.update_progress('building_shapes', 'raster_loaded', True )
 
+            if not self.is_in_progress('building_shapes', 'raster_loaded') and self.is_in_progress('building_shapes', 'extent_clipped'):
                 self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
-                LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'remove')
-                LayerInteraction.hide_or_remove_layer("Google Streets", 'hide', self.iface)
+                self.update_progress('building_shapes', 'extent_clipped', True)
+                self.update_progress('building_shapes', 'pyramids_built', True)
+                LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)
+                LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
 
-                ### Interaction with point sampling tool
-                pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
-                psti = PstInteraction(pst_plugin, iface)
 
+        ### Point sampling
+        if not self.is_in_progress('building_shapes'):
+            pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
+            psti = PstInteraction(pst_plugin, iface)
+
+            if self.is_in_progress('sampling_points', 'temp_pointlayer_created'):
+                pst_input_layer = LayerInteraction.create_temporary_layer(self.pst_input_layer_name, 'Point', self.project_crs)
+                LayerInteraction.add_layer_to_registry(pst_input_layer)
+                self.update_progress('sampling_points', 'temp_pointlayer_created', True)
+
+            if self.is_in_progress('sampling_points', 'editing_temp_pointlayer_started') and not self.is_in_progress('sampling_points', 'temp_pointlayer_created'):
+                LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
+                self.update_progress('sampling_points', 'editing_temp_pointlayer_started', True)
+
+            if self.is_in_progress('sampling_points', 'points_of_interest_defined') and not self.is_in_progress('sampling_points', 'editing_temp_pointlayer_started'):
+                points_selected = self.confirm_selection_of_investigation_area(self.pst_input_layer_name)
+                self.update_progress('sampling_points', 'points_of_interest_defined', True)
+
+            if self.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped') and not self.is_in_progress('sampling_points', 'points_of_interest_defined'):
+                LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
+                self.update_progress('sampling_points', 'editing_temp_pointlayer_stopped', True)
+
+            if self.is_in_progress('sampling_points', 'information_sampled') and not self.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped'):
                 psti.set_input_layer(self.pst_input_layer_name)
                 psti.select_files_for_sampling()
 
-                pst_output_layer = psti.start_sampling(self.pst_output_layer_path, self.pst_output_layer_name)
+                pst_output_layer = psti.start_sampling(self.project_path, self.pst_output_layer_name)
                 vlayer = QgsVectorLayer(pst_output_layer, unicode('pst_out'), "ogr")
                 LayerInteraction.add_layer_to_registry(vlayer)
-                ###
 
-            else:
-                print "OSM-plugin not found"
-            """
-
+                self.update_progress('sampling_points', 'information_sampled', True)

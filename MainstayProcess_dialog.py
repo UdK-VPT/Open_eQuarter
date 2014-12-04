@@ -38,6 +38,7 @@ class MainstayProcess_dialog(QtGui.QDialog, Ui_MainstayProcess_dialog):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         tool_buttons = self.findChildren(QtGui.QToolButton)
+
         self.button_to_page_dictionary = {}
 
         for btn in tool_buttons:
@@ -101,3 +102,14 @@ class MainstayProcess_dialog(QtGui.QDialog, Ui_MainstayProcess_dialog):
             self.process_page.setCurrentWidget(page)
             sender.setChecked(not sender.isChecked())
             sender.setStyleSheet('QToolButton:{background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:0.5, stop:0 rgba(175, 175, 175, 255), stop:1 rgba(230, 230, 230, 203); border: 1px solid rgb(192,192,192);}')
+
+    def go_to_page(self, page_name):
+
+        if page_name is not None and not page_name.isspace():
+
+            for btn in self.button_to_page_dictionary:
+                page = self.button_to_page_dictionary[btn]
+
+                if (page_name + '_page') == page.objectName():
+                    self.process_page.setCurrentWidget(page)
+

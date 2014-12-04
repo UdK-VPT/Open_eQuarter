@@ -28,6 +28,12 @@
   <property name="windowTitle">
    <string>Open eQuarter Workflow Utility</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
@@ -40,17 +46,17 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>410</y>
-     <width>91</width>
-     <height>32</height>
+     <x>260</x>
+     <y>405</y>
+     <width>211</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Close</set>
+    <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
    </property>
   </widget>
   <widget class="QStackedWidget" name="process_page">
@@ -84,7 +90,7 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="project_basics_page">
     <widget class="QCheckBox" name="ol_plugin_installed_chckBox">
@@ -103,6 +109,9 @@
       <string>Install the Open Street Map Plugin</string>
      </property>
      <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="tristate">
       <bool>true</bool>
      </property>
     </widget>
@@ -356,7 +365,8 @@
       </rect>
      </property>
      <property name="text">
-      <string>Add new features to mark the buildings you want to extract information from</string>
+      <string>Add new features to mark the buildings you want to 
+extract information from</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -1217,6 +1227,80 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>440</y>
+     <width>601</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/Icons/Icons/Udk-OeQ_logo.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="process_button_next">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>410</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>continue with next step</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Icons/Icons/arrow_right.png</normaloff>:/Icons/Icons/arrow_right.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="process_button_prev">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>410</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>redo previous step</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Icons/Icons/arrow_left.png</normaloff>:/Icons/Icons/arrow_left.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <includes>
   <include location="local">oequtil.py</include>
@@ -1282,6 +1366,22 @@
     <hint type="sourcelabel">
      <x>80</x>
      <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>306</x>
+     <y>256</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>process_button_next</sender>
+   <signal>clicked()</signal>
+   <receiver>MainstayProcess_dialog</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>306</x>

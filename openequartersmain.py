@@ -20,6 +20,7 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
+import time
 from qgis.core import *
 from qgis.utils import iface, plugins
 from PyQt4.QtCore import *
@@ -36,12 +37,12 @@ from PstInteraction import *
 from OlInteraction import *
 import LayerInteraction
 from saveselectionwithpyramid import SaveSelectionWithPyramid
+from Processing import *
 
 from socket import gaierror
 import os.path
 import numpy
 import httplib
-
 
 class OpenEQuartersMain:
 
@@ -109,13 +110,14 @@ class OpenEQuartersMain:
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
 
+        ### Monitor the users progress
+        self.process_monitor = Processing(self.mainstay_process_dlg)
+        #ToDo have step_queue created from the process list in the Processing class
+        self.step_queue = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded',
+                           'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped',
+                           'raster_loaded', 'extent_clipped', 'pyramids_built',
+                           'temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined', 'editing_temp_pointlayer_stopped', 'information_sampled']
 
-        ### Information regarding the users progress
-        # list that captures the progress of the oeq-process
-        self.progress = {'project_basics': {'ol_plugin_installed': False, 'pst_plugin_installed': False, 'project_created': False, 'osm_layer_loaded': False},
-                         'investigation_area': {'temp_shapefile_created': False, 'editing_temp_shapefile_started': False, 'investigation_area_selected': False, 'editing_temp_shapefile_stopped': False},
-                         'building_shapes': {'raster_loaded': False, 'extent_clipped': False, 'pyramids_built': False},
-                         'sampling_points': {'temp_pointlayer_created': False, 'editing_temp_pointlayer_started': False, 'points_of_interest_defined': False, 'editing_temp_pointlayer_stopped': False, 'information_sampled': False }}
 
     def initGui(self):
         # Create action that will start plugin configuration
@@ -154,7 +156,7 @@ class OpenEQuartersMain:
 
                 # trigger qgis "Save As"-function
                 for act in project_actions:
-                    if act.text() == 'Save &As...':
+                    if act.text() == 'Save &As...' or act.text() == 'Speichern &als...':
                         act.trigger()
 
     def enable_on_the_fly_projection(self):
@@ -446,95 +448,43 @@ class OpenEQuartersMain:
         #ToDo
         return
 
-    def update_progress(self, section, step, is_done):
-        """
-        Update the progress dictionary acoording to the section, step and the new value.
-        :param section The key related to the oeq-GUI page name:
-        :type section str:
-        :param step The key related to the oeq-GUI checkbox name:
-        :type step str:
-        :param is_done Value telling if the step was completed successfully:
-        :type is_done bool:
-        :return:
-        :rtype:
-        """
-        try:
-            self.progress[section][step] = is_done
-            self.mainstay_process_dlg.set_checkbox_on_page(step + '_chckBox', section + '_page', is_done)
+    def start_or_continue_process(self):
 
-            if not self.is_in_progress(section):
-                self.mainstay_process_dlg.set_progress_button(section + '_btn', True)
-        except KeyError, error:
-            print str(error)
-
-    def is_in_progress(self, section, *steps):
-        """
-        Sum the number of steps completed in a given section and compare them against the total amount of steps in that section / Calculate how many of the given steps are still uncompleted.
-        :param section The key related to the oeq-GUI page name:
-        :type section str:
-        :param steps The key(s) related to the oeq-GUI checkbox name:
-        :type steps *str:
-        :return The amount of uncompleted steps in a section / list of steps. Returns 0 if all steps are completed:
-        :rtype int:
-        """
-        if not section or section.isspace():
-            return 0
-
-        if len(steps) == 0:
-            steps_in_section = 0
-            steps_done = 0
-
-            try:
-                for key in self.progress[section]:
-                    steps_in_section += 1
-                    steps_done += self.progress[section][key]
-                return steps_in_section - steps_done
-            except KeyError, error:
-                print str(error)
-                return -1
-
-        else:
-            steps_done = 0
-            try:
-                for step in steps:
-                    steps_done += self.progress[section][step]
-                return len(steps) - steps_done
-            except KeyError, error:
-                print str(error)
-                return -1
-
-
-
-    # run method that puts the process in an order
-    def run(self):
-
-        self.mainstay_process_dlg.show()
-
+        next_step = self.process_monitor.calculate_progress()
 
         ### Project basics
         # check if "open layers"-plugin is installed
-        if self.get_plugin_ifexists(self.ol_plugin_name) is not None:
-            self.update_progress('project_basics', 'ol_plugin_installed', True)
+        if self.step_queue[next_step] == 'ol_plugin_installed' and self.get_plugin_ifexists(self.ol_plugin_name) is not None:
+            self.process_monitor.update_progress('project_basics', 'ol_plugin_installed', True)
+
+
 
         # check if the pointsampling-tool is installed
-        if self.get_plugin_ifexists(self.pst_plugin_name) is not None:
-            self.update_progress('project_basics', 'pst_plugin_installed', True)
+        if self.step_queue[next_step] == 'pst_plugin_installed' and self.get_plugin_ifexists(self.pst_plugin_name) is not None:
+            self.process_monitor.update_progress('project_basics', 'pst_plugin_installed', True)
+
+
 
         # check if the project has been saved
-        if not self.is_in_progress('project_basics', 'pst_plugin_installed', 'ol_plugin_installed'):
+        if self.step_queue[next_step] == 'project_created' and not self.process_monitor.is_in_progress('project_basics', 'pst_plugin_installed', 'ol_plugin_installed'):
+
+            self.mainstay_process_dlg.go_to_page('project_basics')
+
             # if no project exists, create one first
             self.create_project_ifNotExists()
             self.project_path = QgsProject.instance().readPath('./')
 
             # if project was created stop execution
             if self.project_path != './':
-                self.update_progress('project_basics', 'project_created', True)
+                self.process_monitor.update_progress('project_basics', 'project_created', True)
+
+
 
         # check if steps 1 to 3 have succeeded
-        if not self.is_in_progress('project_basics','pst_plugin_installed', 'ol_plugin_installed', 'project_created'):
+        if self.step_queue[next_step] == 'osm_layer_loaded' and not self.process_monitor.is_in_progress('project_basics','pst_plugin_installed', 'ol_plugin_installed', 'project_created'):
 
             if self.osm_layer_is_loaded():
-                self.update_progress('project_basics', 'osm_layer_loaded', True)
+                self.process_monitor.update_progress('project_basics', 'osm_layer_loaded', True)
 
             else:
                 ol_plugin = OlInteraction(self.ol_plugin_name)
@@ -542,78 +492,96 @@ class OpenEQuartersMain:
                 # self.set_project_crs(self.default_extent_crs)
 
                 if ol_plugin.open_osm_layer(self.open_layer_type_id):
-                    self.update_progress('project_basics', 'osm_layer_loaded', True)
+                    self.process_monitor.update_progress('project_basics', 'osm_layer_loaded', True)
                     self.zoom_to_default_extent()
+
+
 
         ### Investigation Area
         # if the "project basics"-process is done, continue with the IA-process
-        if not self.is_in_progress('project_basics'):
+        if self.step_queue[next_step] == 'temp_shapefile_created' and not self.process_monitor.is_in_progress('project_basics'):
 
             # create a new shape-layer
-            if self.is_in_progress('investigation_area', 'temp_shapefile_created'):
+            if self.process_monitor.is_in_progress('investigation_area', 'temp_shapefile_created'):
+                self.mainstay_process_dlg.go_to_page('investigation_area')
+
                 investigation_area = LayerInteraction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon', self.project_crs)
 
                 if investigation_area is not None:
                     LayerInteraction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
                     LayerInteraction.add_layer_to_registry(investigation_area)
-                    self.update_progress('investigation_area', 'temp_shapefile_created', True)
+                    self.process_monitor.update_progress('investigation_area', 'temp_shapefile_created', True)
 
 
-            # trigger the edit-mode of the recently created layer
-            if self.is_in_progress('investigation_area', 'investigation_area_selected'):
-                if not self.is_in_progress('investigation_area', 'temp_shapefile_created'):
-                    LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
-                    self.update_progress('investigation_area', 'editing_temp_shapefile_started', True)
+        # trigger the edit-mode of the recently created layer
+        if self.step_queue[next_step] == 'editing_temp_shapefile_started' and self.process_monitor.is_in_progress('investigation_area', 'investigation_area_selected'):
+            if not self.process_monitor.is_in_progress('investigation_area', 'temp_shapefile_created'):
+                LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
+                self.process_monitor.update_progress('investigation_area', 'editing_temp_shapefile_started', True)
 
-                if not self.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started'):
-                    ia_covered = self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
-                    self.update_progress('investigation_area', 'investigation_area_selected', ia_covered)
+            if not self.process_monitor.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started'):
+                ia_covered = self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
+                self.process_monitor.update_progress('investigation_area', 'investigation_area_selected', ia_covered)
 
-                if not self.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected'):
-                    LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
-                    self.update_progress('investigation_area', 'editing_temp_shapefile_stopped', True)
+            if not self.process_monitor.is_in_progress('investigation_area', 'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected'):
+                LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
+                self.process_monitor.update_progress('investigation_area', 'editing_temp_shapefile_stopped', True)
 
         ### Raster-clipping and shape-building process
         # if the "investigation area"-process is completed
-        if not self.is_in_progress('investigation_area'):
+        if self.step_queue[next_step] == 'raster_loaded' and not self.process_monitor.is_in_progress('investigation_area'):
 
             # open a wms-raster
-            if self.is_in_progress('building_shapes', 'raster_loaded'):
+            if self.process_monitor.is_in_progress('building_shapes', 'raster_loaded'):
+                self.mainstay_process_dlg.go_to_page('building_shapes')
                 #self.request_wms_layer_url()
                 self.open_wms_as_raster()
-                self.update_progress('building_shapes', 'raster_loaded', True )
+                self.process_monitor.update_progress('building_shapes', 'raster_loaded', True )
 
-            if not self.is_in_progress('building_shapes', 'raster_loaded') and self.is_in_progress('building_shapes', 'extent_clipped'):
+        if self.step_queue[next_step] == 'extent_clipped' and not self.process_monitor.is_in_progress('investigation_area'):
+
+            if not self.process_monitor.is_in_progress('building_shapes', 'raster_loaded') and self.process_monitor.is_in_progress('building_shapes', 'extent_clipped'):
                 self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
-                self.update_progress('building_shapes', 'extent_clipped', True)
-                self.update_progress('building_shapes', 'pyramids_built', True)
+                self.process_monitor.update_progress('building_shapes', 'extent_clipped', True)
+                self.process_monitor.update_progress('building_shapes', 'pyramids_built', True)
                 LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)
                 LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
 
 
         ### Point sampling
-        if not self.is_in_progress('building_shapes'):
+        if self.step_queue[next_step] == 'temp_pointlayer_created' and not self.process_monitor.is_in_progress('building_shapes'):
             pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
             psti = PstInteraction(pst_plugin, iface)
 
-            if self.is_in_progress('sampling_points', 'temp_pointlayer_created'):
+            if self.process_monitor.is_in_progress('sampling_points', 'temp_pointlayer_created'):
+                self.mainstay_process_dlg.go_to_page('sampling_points')
                 pst_input_layer = LayerInteraction.create_temporary_layer(self.pst_input_layer_name, 'Point', self.project_crs)
                 LayerInteraction.add_layer_to_registry(pst_input_layer)
-                self.update_progress('sampling_points', 'temp_pointlayer_created', True)
+                self.process_monitor.update_progress('sampling_points', 'temp_pointlayer_created', True)
 
-            if self.is_in_progress('sampling_points', 'editing_temp_pointlayer_started') and not self.is_in_progress('sampling_points', 'temp_pointlayer_created'):
+        if self.step_queue[next_step] == 'editing_temp_pointlayer_started' and not self.process_monitor.is_in_progress('building_shapes'):
+            pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
+            psti = PstInteraction(pst_plugin, iface)
+
+            if self.process_monitor.is_in_progress('sampling_points', 'editing_temp_pointlayer_started') and not self.process_monitor.is_in_progress('sampling_points', 'temp_pointlayer_created'):
                 LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
-                self.update_progress('sampling_points', 'editing_temp_pointlayer_started', True)
+                self.process_monitor.update_progress('sampling_points', 'editing_temp_pointlayer_started', True)
 
-            if self.is_in_progress('sampling_points', 'points_of_interest_defined') and not self.is_in_progress('sampling_points', 'editing_temp_pointlayer_started'):
+            if self.process_monitor.is_in_progress('sampling_points', 'points_of_interest_defined') and not self.process_monitor.is_in_progress('sampling_points', 'editing_temp_pointlayer_started'):
+                self.confirm_selection_of_investigation_area_dlg.set_dialog_text("Click \'OK\' once the sampling points are selected.", "Choose sample points")
                 points_selected = self.confirm_selection_of_investigation_area(self.pst_input_layer_name)
-                self.update_progress('sampling_points', 'points_of_interest_defined', True)
+                if points_selected:
+                    self.process_monitor.update_progress('sampling_points', 'points_of_interest_defined', True)
 
-            if self.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped') and not self.is_in_progress('sampling_points', 'points_of_interest_defined'):
+            if self.process_monitor.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped') and not self.process_monitor.is_in_progress('sampling_points', 'points_of_interest_defined'):
                 LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
-                self.update_progress('sampling_points', 'editing_temp_pointlayer_stopped', True)
+                self.process_monitor.update_progress('sampling_points', 'editing_temp_pointlayer_stopped', True)
 
-            if self.is_in_progress('sampling_points', 'information_sampled') and not self.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped'):
+        if self.step_queue[next_step] == 'information_sampled' and not self.process_monitor.is_in_progress('building_shapes'):
+            pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
+            psti = PstInteraction(pst_plugin, iface)
+
+            if self.process_monitor.is_in_progress('sampling_points', 'information_sampled') and not self.process_monitor.is_in_progress('sampling_points', 'editing_temp_pointlayer_stopped'):
                 psti.set_input_layer(self.pst_input_layer_name)
                 psti.select_files_for_sampling()
 
@@ -621,4 +589,12 @@ class OpenEQuartersMain:
                 vlayer = QgsVectorLayer(pst_output_layer, unicode('pst_out'), "ogr")
                 LayerInteraction.add_layer_to_registry(vlayer)
 
-                self.update_progress('sampling_points', 'information_sampled', True)
+                self.process_monitor.update_progress('sampling_points', 'information_sampled', True)
+
+
+    # run method that puts the process in an order
+    def run(self):
+
+        self.mainstay_process_dlg.show()
+
+        self.mainstay_process_dlg.process_button_next.clicked.connect(self.start_or_continue_process)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_mainstay_process_dialog.ui'
 #
-# Created: Tue Nov 25 15:54:53 2014
+# Created: Thu Dec  4 13:12:40 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,13 +30,15 @@ class Ui_MainstayProcess_dialog(object):
         MainstayProcess_dialog.resize(614, 513)
         MainstayProcess_dialog.setMinimumSize(QtCore.QSize(614, 513))
         MainstayProcess_dialog.setMaximumSize(QtCore.QSize(812, 513))
+        MainstayProcess_dialog.setAutoFillBackground(False)
+        MainstayProcess_dialog.setStyleSheet(_fromUtf8(""))
         MainstayProcess_dialog.setSizeGripEnabled(False)
         MainstayProcess_dialog.setModal(False)
         self.buttonBox = QtGui.QDialogButtonBox(MainstayProcess_dialog)
         self.buttonBox.setEnabled(True)
-        self.buttonBox.setGeometry(QtCore.QRect(310, 410, 91, 32))
+        self.buttonBox.setGeometry(QtCore.QRect(260, 405, 211, 31))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Reset)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.process_page = QtGui.QStackedWidget(MainstayProcess_dialog)
         self.process_page.setEnabled(False)
@@ -54,6 +56,7 @@ class Ui_MainstayProcess_dialog(object):
         self.ol_plugin_installed_chckBox.setEnabled(False)
         self.ol_plugin_installed_chckBox.setGeometry(QtCore.QRect(10, 15, 261, 41))
         self.ol_plugin_installed_chckBox.setCheckable(True)
+        self.ol_plugin_installed_chckBox.setTristate(True)
         self.ol_plugin_installed_chckBox.setObjectName(_fromUtf8("ol_plugin_installed_chckBox"))
         self.project_created_chckBox = QtGui.QCheckBox(self.project_basics_page)
         self.project_created_chckBox.setEnabled(False)
@@ -393,13 +396,37 @@ class Ui_MainstayProcess_dialog(object):
         self.label_5.setScaledContents(False)
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.label_6 = QtGui.QLabel(MainstayProcess_dialog)
+        self.label_6.setGeometry(QtCore.QRect(10, 440, 601, 71))
+        self.label_6.setText(_fromUtf8(""))
+        self.label_6.setPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/Udk-OeQ_logo.png")))
+        self.label_6.setObjectName(_fromUtf8("label_6"))
+        self.process_button_next = QtGui.QPushButton(MainstayProcess_dialog)
+        self.process_button_next.setGeometry(QtCore.QRect(570, 410, 20, 20))
+        self.process_button_next.setText(_fromUtf8(""))
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/arrow_right.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_next.setIcon(icon1)
+        self.process_button_next.setIconSize(QtCore.QSize(20, 20))
+        self.process_button_next.setFlat(True)
+        self.process_button_next.setObjectName(_fromUtf8("process_button_next"))
+        self.process_button_prev = QtGui.QPushButton(MainstayProcess_dialog)
+        self.process_button_prev.setGeometry(QtCore.QRect(550, 410, 20, 20))
+        self.process_button_prev.setText(_fromUtf8(""))
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/arrow_left.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_prev.setIcon(icon2)
+        self.process_button_prev.setIconSize(QtCore.QSize(20, 20))
+        self.process_button_prev.setFlat(True)
+        self.process_button_prev.setObjectName(_fromUtf8("process_button_prev"))
 
         self.retranslateUi(MainstayProcess_dialog)
-        self.process_page.setCurrentIndex(3)
+        self.process_page.setCurrentIndex(0)
         QtCore.QObject.connect(self.project_basics_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QObject.connect(self.investigation_area_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QObject.connect(self.building_shapes_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QObject.connect(self.sampling_points_btn, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
+        QtCore.QObject.connect(self.process_button_next, QtCore.SIGNAL(_fromUtf8("clicked()")), MainstayProcess_dialog.update)
         QtCore.QMetaObject.connectSlotsByName(MainstayProcess_dialog)
 
     def retranslateUi(self, MainstayProcess_dialog):
@@ -417,7 +444,8 @@ class Ui_MainstayProcess_dialog(object):
         self.pyramids_built_chckBox.setText(_translate("MainstayProcess_dialog", "Open the created .tif-file and build pyramids", None))
         self.temp_pointlayer_created_chckBox.setText(_translate("MainstayProcess_dialog", "Create a new Pointlayer", None))
         self.editing_temp_pointlayer_started_chckBox.setText(_translate("MainstayProcess_dialog", "Activate the edit mode", None))
-        self.points_of_interest_defined_chckBox.setText(_translate("MainstayProcess_dialog", "Add new features to mark the buildings you want to extract information from", None))
+        self.points_of_interest_defined_chckBox.setText(_translate("MainstayProcess_dialog", "Add new features to mark the buildings you want to \n"
+"extract information from", None))
         self.editing_temp_pointlayer_stopped_chckBox.setText(_translate("MainstayProcess_dialog", "Deactivate the edit mode", None))
         self.information_sampled_chckBox.setText(_translate("MainstayProcess_dialog", "Use the point-samplin-tool to extract the information", None))
         self.project_basics_btn.setText(_translate("MainstayProcess_dialog", "Project Basics", None))
@@ -435,5 +463,7 @@ class Ui_MainstayProcess_dialog(object):
         self.label_3.setText(_translate("MainstayProcess_dialog", "⬇︎", None))
         self.label_4.setText(_translate("MainstayProcess_dialog", "⬇︎", None))
         self.label_5.setText(_translate("MainstayProcess_dialog", "⬇︎", None))
+        self.process_button_next.setToolTip(_translate("MainstayProcess_dialog", "continue with next step", None))
+        self.process_button_prev.setToolTip(_translate("MainstayProcess_dialog", "redo previous step", None))
 
 import resources_rc

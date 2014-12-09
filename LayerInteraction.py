@@ -17,15 +17,16 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
     if layer_name and not layer_name.isspace() and layer_type and not layer_type.isspace():
 
+        crs = ''
+
         if crs_name and not crs_name.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs_name):
             # surpress crs-choice dialog
             old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
             QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
-            crs = '?crs=' + crs_name
+            crs += '?crs=' + crs_name
         else:
             old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
             QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
-
 
         # create a new shape-file called layer_name, of the type layer_type, with system encoding and crs according to crs_name
         shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory', False)
@@ -35,6 +36,9 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
         return shape_layer
+
+    else:
+        return None
 
 
 def add_style_to_layer(path_to_style, layer):

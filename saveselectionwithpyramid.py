@@ -95,7 +95,7 @@ class SaveSelectionWithPyramid:
 
         return
 
-
+    #ToDo Deal with bug resulting from different crs
     def export(self, clipped_raster_name = 'Investigation Area'):
         """
         Put the steps necessary for the export together in one procedure

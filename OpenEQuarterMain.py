@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- OpenEQuartersMain
+ OpenEQuarterMain
                                  A QGIS plugin
  The plugin automates the setup for investigating an area.
                               -------------------
@@ -44,7 +44,7 @@ import os.path
 import numpy
 import httplib
 
-class OpenEQuartersMain:
+class OpenEQuarterMain:
 
     def __init__(self, iface):
 
@@ -56,7 +56,7 @@ class OpenEQuartersMain:
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
-        localePath = os.path.join(self.plugin_dir, 'i18n', 'openequartersmain_{}.qm'.format(locale))
+        localePath = os.path.join(self.plugin_dir, 'i18n', 'OpenEQuartermain_{}.qm'.format(locale))
 
         if os.path.exists(localePath):
             self.translator = QTranslator()
@@ -120,20 +120,29 @@ class OpenEQuartersMain:
 
 
     def initGui(self):
+
         # Create action that will start plugin configuration
         plugin_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'icon.png'))
-        self.action = QAction( plugin_icon, u"OpenEQuarters-Process", self.iface.mainWindow())
+        self.main_action = QAction( plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
-        self.action.triggered.connect(self.run)
+        self.main_action.triggered.connect(self.run)
 
         # Add toolbar button and menu item
-        self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu(u"&OpenEQuarters", self.action)
+        self.iface.addToolBarIcon(self.main_action)
+        self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
+
+        clipping_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'scissor.png'))
+        self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
+        self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
+        self.iface.addToolBarIcon(self.clipping_action)
+        self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
+
 
     def unload(self):
         # Remove the plugin menu item and icon
-        self.iface.removePluginMenu(u"&OpenEQuarters", self.action)
-        self.iface.removeToolBarIcon(self.action)
+        self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
+        self.iface.removeToolBarIcon(self.main_action)
+        self.iface.removeToolBarIcon(self.clipping_action)
 
     def create_project_ifNotExists(self):
         """
@@ -341,6 +350,13 @@ class OpenEQuartersMain:
 
         return crs
 
+    def clip_from_raster(self, raster_layer):
+
+        # set the rasterlayer as active and start the export
+        self.iface.setActiveLayer(raster_layer)
+        pyramid_exporter = SaveSelectionWithPyramid(self.iface)
+        pyramid_exporter.export()
+
     def clip_zoom_to_layer_view_from_raster(self, layer_name, raster_name):
         """
         Zoom to a given vector-layer, containing shape files. Extract the currently viewed extent from an underlying raster-layer into a new .tif and open it.
@@ -356,12 +372,8 @@ class OpenEQuartersMain:
             clipping_raster = None
 
             # get the shapefile and the raster layer
-            for layer in self.iface.legendInterface().layers():
-
-                if layer.name() == layer_name:
-                    investigation_shape = layer
-                elif layer.name() == raster_name:
-                    clipping_raster = layer
+            investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
+            clipping_raster = LayerInteraction.find_layer_by_name(raster_name)
 
             # if the shapefile was found set the layer active
             if investigation_shape is not None and clipping_raster is not None:
@@ -373,10 +385,9 @@ class OpenEQuartersMain:
                     if act.text() == 'Zoom to Layer':
                         act.trigger()
 
-                # set the rasterlayer as active and start the export
-                self.iface.setActiveLayer(clipping_raster)
-                pyramid_exporter = SaveSelectionWithPyramid(self.iface)
-                pyramid_exporter.export()
+                self.clip_from_raster(clipping_raster)
+
+
 
     # Method not used yet
     def get_extent_per_feature(self, layer_name):

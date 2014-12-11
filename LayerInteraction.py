@@ -78,11 +78,9 @@ def find_layer_by_name(layer_name):
     """
     if layer_name and not layer_name.isspace():
 
-        for layer_key in QgsMapLayerRegistry.instance().mapLayers():
-
-            layer = QgsMapLayerRegistry.instance().mapLayers()[layer_key]
-            if layer.name() == layer_name:
-                return layer
+        found_layers = QgsMapLayerRegistry.instance().mapLayersByName(layer_name)
+        if found_layers != [] and found_layers[0].name() == layer_name:
+            return found_layers[0]
         else:
             return None
 
@@ -137,6 +135,8 @@ def write_vector_layer_to_disk(vlayer, full_path):
         else:
             return None
 
+    else:
+        return None
 
 def trigger_edit_mode(iface, layer_name, trigger='on'):
     """

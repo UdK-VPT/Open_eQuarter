@@ -1,6 +1,9 @@
 from unittest import TestCase
+from qgis.utils import iface
 from qgis.gui import *
+from QgisTestInterface import QgisTestInterface
 from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry
+from os import path, remove, walk
 from PyQt4 import QtCore
 import LayerInteraction
 
@@ -18,6 +21,7 @@ class LayerInteraction_test(TestCase):
         QtCore.QCoreApplication.setApplicationName('QGIS2')
 
     def tearDown(self):
+        QgsMapLayerRegistry.instance().removeAllMapLayers()
         QgsApplication.exitQgis
 
     def test_create_temporary_layer(self):
@@ -74,6 +78,7 @@ class LayerInteraction_test(TestCase):
     def test_find_layer_by_name(self):
 
         reg = QgsMapLayerRegistry.instance()
+
         v1_name = 'layer1'
         v2_name = 'layer2'
         v3_name = 'layer3'
@@ -108,5 +113,66 @@ class LayerInteraction_test(TestCase):
         self.assertTrue(layer1_exists, 'An error occured when trying to find the previously added layer ' + layer1.name() + '.')
         self.assertTrue(layer2_exists, 'An error occured when trying to find the previously added layer ' + layer2.name() + '.')
         self.assertTrue(layer3_exists, 'An error occured when trying to find the previously added layer ' + layer3.name() + '.')
+
+    def test_hide_or_remove_layer(self):
+
+        iface = QgisTestInterface()
+
+        reg = QgsMapLayerRegistry.instance()
+        v1_name = 'layer1'
+
+        reg.addMapLayer(QgsVectorLayer('Polygon?crs=EPSG:3857', v1_name, 'memory', False))
+        self.assertEqual(reg.mapLayersByName(v1_name)[0].name(), v1_name, 'Layer was not added.')
+
+        LayerInteraction.hide_or_remove_layer(v1_name, 'hide', iface)
+        self.assertFalse(iface.legendInterface().isLayerVisible(LayerInteraction.find_layer_by_name(v1_name)))
+
+        LayerInteraction.hide_or_remove_layer(v1_name, 'remove')
+        self.assertEqual(reg.mapLayersByName(v1_name), [], 'Layer was not removed.')
+
+    def test_write_vector_layer_to_disk(self):
+
+        v_layer_name = 'MyWriteTestLayer'
+        v_layer = QgsVectorLayer('Polygon?crs=EPSG:3857', v_layer_name, 'memory', False)
+
+        test_path = path.join('/', 'Users', 'VPTtutor', 'Desktop', v_layer_name)
+
+
+        if path.exists(test_path + '.shp'):
+            appendix = 0
+            temp_path = test_path
+            while path.exists(temp_path + '.shp'):
+                appendix += 1
+                temp_path = test_path + str(appendix)
+
+            test_path = temp_path
+            v_layer_name += str(appendix)
+
+        invalid_path = path.join(test_path, 'InvalidPath')
+
+        return_layer = LayerInteraction.write_vector_layer_to_disk(v_layer, invalid_path)
+        self.assertIsNone(return_layer)
+
+        return_layer = LayerInteraction.write_vector_layer_to_disk(None, invalid_path)
+        self.assertIsNone(return_layer)
+
+        return_layer = LayerInteraction.write_vector_layer_to_disk(v_layer, test_path)
+        self.assertIsNotNone(return_layer)
+        self.assertEqual(return_layer.name(), v_layer_name)
+        self.assertTrue(path.exists(test_path + '.shp'))
+
+        return_layer = LayerInteraction.write_vector_layer_to_disk(v_layer, test_path + '.shp')
+        self.assertIsNotNone(return_layer)
+        self.assertEqual(return_layer.name(), v_layer_name + '1')
+        self.assertTrue(path.exists(test_path + '1.shp'))
+
+
+        test_dir = path.dirname(test_path)
+        for subdir, dirs, files in walk(test_dir):
+            for file in files:
+                if file.startswith(v_layer_name) or file.startswith(v_layer_name + '1'):
+                    remove(path.join(test_dir, file))
+
+
 
 

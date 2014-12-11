@@ -96,12 +96,16 @@ class SaveSelectionWithPyramid:
         return
 
 
-    def export(self):
+    def export(self, clipped_raster_name = 'Investigation Area'):
         """
         Put the steps necessary for the export together in one procedure
         :return:
         :rtype: None
         """
+
+        if clipped_raster_name and not clipped_raster_name.isspace() and clipped_raster_name != self.export_name:
+            self.export_name = clipped_raster_name
+
         self.active_layer = self.iface.activeLayer()
         self.canvas = self.iface.mapCanvas()
 
@@ -145,8 +149,11 @@ class SaveSelectionWithPyramid:
         """
         Return the data needed to geo-reference the snapshot of the current view after saving.
 
-        :return crs: The coordinate reference system, which is currently in use
-        :rtype crs: str
+        :return url: The url to the wms-server
+        :rtype url: str
+
+        :return wms_crs: The coordinate reference system, which is currently in use
+        :rtype wms_crs: str
 
         :return upper_left_x: The x value of the current extents upper left corner
         :rtype upper_left_x: int
@@ -165,15 +172,15 @@ class SaveSelectionWithPyramid:
         src = self.active_layer.source()
 
         # extract the current crs from layer-source
-        crs = ""
+        wms_crs = ""
         start = src.find("crs=")
         if start > -1:
             start += 4
             end = src.find("&", start)
             if end > -1:
-                crs = src[start:end]
+                wms_crs = src[start:end]
             else:
-                crs = src[start:]
+                wms_crs = src[start:]
 
         # extract the wms source-url from layer-source
         url = ""
@@ -189,7 +196,7 @@ class SaveSelectionWithPyramid:
         # get the currently viewed coordinate range and crs
         view_extent = self.canvas.extent()
         current_crs = self.canvas.mapSettings().destinationCrs()
-        target_crs = QgsCoordinateReferenceSystem(crs)
+        target_crs = QgsCoordinateReferenceSystem(wms_crs)
 
         # check if the extent coresponds to the same crs as the map on the server
         if not current_crs == target_crs:
@@ -199,12 +206,12 @@ class SaveSelectionWithPyramid:
 
         self.transformed_extent = view_extent
 
-        upper_left_x = view_extent.xMinimum()
-        upper_left_y = view_extent.yMaximum()
-        lower_right_x = view_extent.xMaximum()
-        lower_right_y = view_extent.yMinimum()
+        upper_left_x = self.view_extent.xMinimum()
+        upper_left_y = self.view_extent.yMaximum()
+        lower_right_x = self.view_extent.xMaximum()
+        lower_right_y = self.view_extent.yMinimum()
 
-        return url, crs, upper_left_x, upper_left_y, lower_right_x, lower_right_y
+        return url, wms_crs, upper_left_x, upper_left_y, lower_right_x, lower_right_y
 
     def create_multiple_rasters(self, amount, geo_ref = False, pyramids = 0):
         """
@@ -264,7 +271,7 @@ class SaveSelectionWithPyramid:
             if pyramids > 0:
                 # wait until the geo-referenced file was created before building pyramids
                 while not os.path.exists(dest_filename):
-                    time.sleep(0.3)
+                    time.sleep(0.1)
                 building_pyramids = self.build_pyramids(dest_filename, self.res_algorithm, self.number_of_pyramids, environment)
 
                 if building_pyramids != 0:

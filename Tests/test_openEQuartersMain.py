@@ -1,5 +1,10 @@
 from unittest import TestCase
-from OpenEQuartersMain import OpenEQuartersMain
+import atexit
+
+from qgis.core import *
+from qgis.gui import *
+from PyQt4 import QtCore
+
 __author__ = 'VPTtutor'
 
 
@@ -16,6 +21,7 @@ class TestOpenEQuartersMain(TestCase):
 
         atexit.register(QgsApplication.exitQgis)
         self.fail()
+
 
     """
     def test_create_project_ifNotExists(self):

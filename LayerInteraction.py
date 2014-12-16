@@ -138,6 +138,7 @@ def write_vector_layer_to_disk(vlayer, full_path):
     else:
         return None
 
+
 def trigger_edit_mode(iface, layer_name, trigger='on'):
     """
     Iterate over all layers and activate the Layer called layer_name. Then toggle the edit mode of that layer.

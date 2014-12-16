@@ -38,16 +38,17 @@ from OlInteraction import *
 import LayerInteraction
 from saveselectionwithpyramid import SaveSelectionWithPyramid
 from Processing import *
+from Tests.LayerInteraction_test import LayerInteraction_test
 
 from socket import gaierror
 import os.path
 import numpy
 import httplib
+import unittest
 
 class OpenEQuarterMain:
 
     def __init__(self, iface):
-
         # Save reference to the QGIS interface
         self.iface = iface
 
@@ -118,7 +119,6 @@ class OpenEQuarterMain:
                            'raster_loaded', 'extent_clipped', 'pyramids_built',
                            'temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined', 'editing_temp_pointlayer_stopped', 'information_sampled']
 
-
     def initGui(self):
 
         # Create action that will start plugin configuration
@@ -137,12 +137,19 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.clipping_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
 
+        testing_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'lightbulb.png'))
+        self.testing_action = QAction(testing_icon, u"Run all unit-tests", self.iface.mainWindow())
+        self.testing_action.triggered.connect(lambda: self.run_tests())
+        self.iface.addToolBarIcon(self.testing_action)
+        self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
+
 
     def unload(self):
         # Remove the plugin menu item and icon
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
+        self.iface.removeToolBarIcon(self.testing_action)
 
     def create_project_ifNotExists(self):
         """
@@ -609,3 +616,15 @@ class OpenEQuarterMain:
         self.mainstay_process_dlg.show()
 
         self.mainstay_process_dlg.process_button_next.clicked.connect(self.start_or_continue_process)
+
+    def run_tests(self):
+
+        test_class = LayerInteraction_test
+        test_loader = unittest.TestLoader()
+        test_names = test_loader.getTestCaseNames(test_class)
+
+        suite = unittest.TestSuite()
+        for test_method in test_names:
+            suite.addTest(test_class(test_method, self.iface))
+
+        unittest.TextTestRunner(sys.stdout).run(suite)

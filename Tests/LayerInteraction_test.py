@@ -1,14 +1,18 @@
 from unittest import TestCase
-from qgis.utils import iface
-from qgis.gui import *
-from QgisTestInterface import QgisTestInterface
 from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry
 from os import path, remove, walk
 from PyQt4 import QtCore
-import LayerInteraction
+from .. import LayerInteraction
+from QgisTestInterface import QgisTestInterface
+from copy import deepcopy
 
 
 class LayerInteraction_test(TestCase):
+
+    def __init__(self, testName, iface = QgisTestInterface()):
+        super(LayerInteraction_test, self).__init__(testName)
+        self.iface = iface
+        self.layer_list = []
 
     def setUp(self):
         QgsApplication.setPrefixPath('/Applications/QGIS.app/Contents/MacOS', True)
@@ -17,11 +21,16 @@ class LayerInteraction_test(TestCase):
         if len(QgsProviderRegistry.instance().providerList()) == 0:
             raise RuntimeError('No data providers available.')
 
+        self.layer_list = []
+
         QtCore.QCoreApplication.setOrganizationName('QGIS')
         QtCore.QCoreApplication.setApplicationName('QGIS2')
 
     def tearDown(self):
-        QgsMapLayerRegistry.instance().removeAllMapLayers()
+        for layer_name in self.layer_list:
+            layer = QgsMapLayerRegistry.instance().mapLayersByName(layer_name)
+            if( len(layer) == 1):
+                QgsMapLayerRegistry.instance().removeMapLayer(layer[0].id())
         QgsApplication.exitQgis
 
     def test_create_temporary_layer(self):
@@ -56,6 +65,7 @@ class LayerInteraction_test(TestCase):
         number_of_layers = len(QgsMapLayerRegistry.instance().mapLayers())
 
         LayerInteraction.add_layer_to_registry(layer)
+        self.layer_list.append(layer.name())
 
         map_layers = QgsMapLayerRegistry.instance().mapLayers()
         self.assertEqual(len(map_layers), number_of_layers + 1, 'An error occured when adding a layer to the MapLayerRegistry.')
@@ -83,8 +93,11 @@ class LayerInteraction_test(TestCase):
         v2_name = 'layer2'
         v3_name = 'layer3'
         reg.addMapLayer(QgsVectorLayer('Polygon?crs=EPSG:3857', v1_name, 'memory', False))
+        self.layer_list.append(v1_name)
         reg.addMapLayer(QgsVectorLayer('Point?crs=EPSG:3857', v2_name, 'memory', False))
+        self.layer_list.append(v2_name)
         reg.addMapLayer(QgsVectorLayer('Point?crs=EPSG:3857', v3_name, 'memory', False))
+        self.layer_list.append(v3_name)
 
         layer = LayerInteraction.find_layer_by_name(None)
         self.assertIsNone(layer, 'An error occured when trying to find a layer passing a none-type name.')
@@ -116,12 +129,13 @@ class LayerInteraction_test(TestCase):
 
     def test_hide_or_remove_layer(self):
 
-        iface = QgisTestInterface()
+        iface = self.iface
 
         reg = QgsMapLayerRegistry.instance()
         v1_name = 'layer1'
 
         reg.addMapLayer(QgsVectorLayer('Polygon?crs=EPSG:3857', v1_name, 'memory', False))
+        self.layer_list.append(v1_name)
         self.assertEqual(reg.mapLayersByName(v1_name)[0].name(), v1_name, 'Layer was not added.')
 
         LayerInteraction.hide_or_remove_layer(v1_name, 'hide', iface)
@@ -172,6 +186,30 @@ class LayerInteraction_test(TestCase):
             for file in files:
                 if file.startswith(v_layer_name) or file.startswith(v_layer_name + '1'):
                     remove(path.join(test_dir, file))
+
+    def test_add_style_to_layer(self):
+        pass
+
+    def test_trigger_edit_mode(self):
+        iface = self.iface
+
+        reg = QgsMapLayerRegistry.instance()
+        edit_layer = 'MylayerForEditing'
+        reg.addMapLayer(QgsVectorLayer('Polygon?crs=EPSG:3857', edit_layer, 'memory', False))
+        self.layer_list.append(edit_layer)
+
+        editing_triggered = [False]
+        iface.actionToggleEditing().triggered.connect(lambda who: self.checkSender(who, editing_triggered))
+        LayerInteraction.trigger_edit_mode(self.iface, edit_layer)
+
+        self.assertTrue(editing_triggered[1])
+
+        LayerInteraction.trigger_edit_mode(self.iface, edit_layer, 'off')
+        self.assertFalse(editing_triggered[2])
+
+
+    def checkSender(self, sender, edit_list):
+        edit_list.append(sender)
 
 
 

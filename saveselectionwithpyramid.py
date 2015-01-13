@@ -191,10 +191,10 @@ class SaveSelectionWithPyramid:
 
         self.transformed_extent = view_extent
 
-        upper_left_x = self.view_extent.xMinimum()
-        upper_left_y = self.view_extent.yMaximum()
-        lower_right_x = self.view_extent.xMaximum()
-        lower_right_y = self.view_extent.yMinimum()
+        upper_left_x = self.transformed_extent.xMinimum()
+        upper_left_y = self.transformed_extent.yMaximum()
+        lower_right_x = self.transformed_extent.xMaximum()
+        lower_right_y = self.transformed_extent.yMinimum()
 
         return url, wms_crs, upper_left_x, upper_left_y, lower_right_x, lower_right_y
 
@@ -297,7 +297,6 @@ class SaveSelectionWithPyramid:
 
         return recent_file_desc_name
 
-
     def save_image(self, width, height, filename='export'):
         """
         Select and save the currently visible extent to a .tif file
@@ -324,15 +323,15 @@ class SaveSelectionWithPyramid:
         img = self.active_layer.previewAsImage(QSize(width, height), img_color, img_format)
 
         # create painter
-        p = QPainter()
-        p.begin(img)
-        p.setRenderHint(QPainter.Antialiasing)
+        painter = QPainter()
+        painter.begin(img)
+        painter.setRenderHint(QPainter.Antialiasing)
 
         # set layer set
         renderer = QgsMapRenderer()
-        lst = []
-        lst.append(self.active_layer.id())
-        renderer.setLayerSet(lst)
+        layer_set = []
+        layer_set.append(self.active_layer.id())
+        renderer.setLayerSet(layer_set)
 
         # set extent to currently visible extent
         renderer.setExtent(self.transformed_extent)
@@ -341,9 +340,9 @@ class SaveSelectionWithPyramid:
         renderer.setOutputSize(img.size(), img.logicalDpiX())
 
         # do the rendering
-        renderer.render(p)
+        renderer.render(painter)
 
-        p.end()
+        painter.end()
         # save image
         save_as = filename + '.' + image_type
         if img.save(save_as, image_type):
@@ -385,8 +384,6 @@ class SaveSelectionWithPyramid:
 
         #ToDo Add timeout function
         return gdal_process.wait()
-
-
 
     def build_pyramids(self, file, sampling_algorithm, amount, environment):
 

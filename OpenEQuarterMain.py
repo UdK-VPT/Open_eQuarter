@@ -143,7 +143,6 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.testing_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
 
-
     def unload(self):
         # Remove the plugin menu item and icon
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
@@ -298,7 +297,7 @@ class OpenEQuarterMain:
         """
         urlWithParams = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         rlayer = QgsRasterLayer(urlWithParams, self.clipping_raster_layer_name, 'wms')
-        #rlayer = QgsRasterLayer(self.wms_url, 'Raster layer basis', 'wms')
+        #rlayer = QgsRasterLaayer(self.wms_url, 'Raster layer basis', 'wms')
         if not rlayer.isValid():
             print "Layer failed to load!"
         else:
@@ -375,8 +374,6 @@ class OpenEQuarterMain:
         :rtype:
         """
         if layer_name and not layer_name.isspace() and raster_name and not raster_name.isspace():
-            investigation_shape = None
-            clipping_raster = None
 
             # get the shapefile and the raster layer
             investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
@@ -393,8 +390,6 @@ class OpenEQuarterMain:
                         act.trigger()
 
                 self.clip_from_raster(clipping_raster)
-
-
 
     # Method not used yet
     def get_extent_per_feature(self, layer_name):
@@ -608,7 +603,6 @@ class OpenEQuarterMain:
                 LayerInteraction.add_layer_to_registry(vlayer)
 
                 self.process_monitor.update_progress('sampling_points', 'information_sampled', True)
-
 
     # run method that puts the process in an order
     def run(self):

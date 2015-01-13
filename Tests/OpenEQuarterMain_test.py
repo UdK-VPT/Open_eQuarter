@@ -8,7 +8,7 @@ from PyQt4 import QtCore
 __author__ = 'VPTtutor'
 
 
-class TestOpenEQuartersMain(TestCase):
+class OpenEQuarterMain_test(TestCase):
     def test_initGui(self):
         QgsApplication.setPrefixPath('/Applications/QGIS.app/Contents/MacOS', True)
         QgsApplication.initQgis()

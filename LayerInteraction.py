@@ -163,3 +163,13 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
             elif trigger == 'off':
                 iface.actionAddFeature().trigger()
                 iface.actionToggleEditing().trigger()
+
+def get_wms_layer_list(iface):
+    """
+    Iterate over all layers and return a list of the currently visible WMS-files.
+    :param iface:
+    :type iface:
+    :return:
+    :rtype:
+    """
+    return

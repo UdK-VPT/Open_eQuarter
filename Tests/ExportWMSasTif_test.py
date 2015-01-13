@@ -4,10 +4,10 @@ from PyQt4 import QtCore
 from QgisTestInterface import QgisTestInterface
 
 
-class SaveSelectionWithPyramid_test(TestCase):
+class ExportWMSasTif_test(TestCase):
 
     def __init__(self, testName, iface = QgisTestInterface()):
-        super(SaveSelectionWithPyramid_test, self).__init__(testName)
+        super(ExportWMSasTif_test, self).__init__(testName)
         self.iface = iface
         self.layer_list = []
 

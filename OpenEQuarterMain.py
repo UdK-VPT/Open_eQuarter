@@ -36,7 +36,7 @@ from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
 from PstInteraction import *
 from OlInteraction import *
 import LayerInteraction
-from saveselectionwithpyramid import SaveSelectionWithPyramid
+from ExportWMSasTif import SaveSelectionWithPyramid
 from Processing import *
 from Tests.LayerInteraction_test import LayerInteraction_test
 

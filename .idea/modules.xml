@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/OpenEQuartersMain.iml" filepath="$PROJECT_DIR$/.idea/OpenEQuartersMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Open_eQuartersMain.iml" filepath="$PROJECT_DIR$/.idea/Open_eQuartersMain.iml" />
     </modules>
   </component>
 </project>
-

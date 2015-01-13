@@ -9,12 +9,12 @@
 
 
 [general]
-name=OpenEQuarters
+name=Open eQuarter
 qgisMinimumVersion=2.0
 description=The plugin automates the setup for investigating an area.
-version=0.1
+version=0.2
 author=Kim Gülle / UdK-Berlin
-email=kimonline@example.com
+email=firstdayofjune@users.noreply.github.com
 
 # end of mandatory metadata
 
@@ -28,10 +28,10 @@ tags=
 
 homepage=
 tracker=
-repository=
+repository=https://github.com/firstdayofjune/Open_eQuarter
 icon=icon.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version
 deprecated=False

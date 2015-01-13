@@ -3,8 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file:///Applications/QGIS.app/Contents/Resources/python" />
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 2.7.8 (/Library/Frameworks/Python.framework/Versions/2.7/bin/python)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="PyQgis 2.7.8" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
-

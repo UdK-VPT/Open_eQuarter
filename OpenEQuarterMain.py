@@ -106,7 +106,7 @@ class OpenEQuarterMain:
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'Layerstyle', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'Styles', 'oeq_ia_style.qml')
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
@@ -122,7 +122,7 @@ class OpenEQuarterMain:
     def initGui(self):
 
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'icon.png'))
+        plugin_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'main.png'))
         self.main_action = QAction( plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)

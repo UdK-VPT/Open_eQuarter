@@ -36,10 +36,23 @@ class InvestigationAreaSelected_dialog(QtGui.QDialog, Ui_InvestigationAreaSelect
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setContentsMargins(500,500,0,0)
+        self.setContentsMargins(500, 500, 0, 0)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.help_dialog = InvestigationAreaSelectedHelp_dialog()
         self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
 
+    def set_dialog_text(self, text, title=""):
 
+        if not title.isspace():
+            self.setWindowTitle(title)
 
+        if text is not None and not text.isspace():
+
+            html_prefix = (
+            '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n'
+            '<html><head><meta name="qrichtext" content="1" /><style type="text/css">\n'
+            'p, li { white-space: pre-wrap; }\n'
+            '</style></head><body style=" font-family:\\')
+
+            html_postfix = "</p></body></html>"
+            self.textBrowser.setHtml(html_prefix + text + html_postfix)

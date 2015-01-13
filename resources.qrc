@@ -1,5 +1,9 @@
 <RCC>
-    <qresource prefix="/plugins/openequartersmain" >
-        <file>icon.png</file>
-    </qresource>
+  <qresource prefix="Icons">
+    <file>Icons/Udk-OeQ_logo.png</file>
+    <file>Icons/arrow_left.png</file>
+    <file>Icons/arrow_right.png</file>
+    <file>Icons/checkmark.png</file>
+    <file>Icons/openmark.png</file>
+  </qresource>
 </RCC>

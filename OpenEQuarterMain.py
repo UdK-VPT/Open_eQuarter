@@ -359,29 +359,27 @@ class OpenEQuarterMain:
 
     def clip_from_raster(self, raster_layer):
 
-        # set the rasterlayer as active and start the export
-        self.iface.setActiveLayer(raster_layer)
-        pyramid_exporter = SaveSelectionWithPyramid(self.iface)
-        pyramid_exporter.export()
+        if raster_layer is not None and raster_layer.isValid():
+            # set the rasterlayer as active, since only the active layer will be clipped and start the export
+            self.iface.setActiveLayer(raster_layer)
+            pyramid_exporter = SaveSelectionWithPyramid(self.iface)
+            pyramid_exporter.export(raster_layer.name())
 
-    def clip_zoom_to_layer_view_from_raster(self, layer_name, raster_name):
+    def clip_zoom_to_layer_view_from_raster(self, layer_name):
         """
         Zoom to a given vector-layer, containing shape files. Extract the currently viewed extent from an underlying raster-layer into a new .tif and open it.
         :param layer_name: Name of the vector-layer
         :type layer_name: str
-        :param raster_name: Name of the raster-layer, which will be the basis of the new clip
-        :type raster_name:
         :return:
         :rtype:
         """
-        if layer_name and not layer_name.isspace() and raster_name and not raster_name.isspace():
+        if layer_name and not layer_name.isspace():
 
             # get the shapefile and the raster layer
             investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
-            clipping_raster = LayerInteraction.find_layer_by_name(raster_name)
 
             # if the shapefile was found set the layer active
-            if investigation_shape is not None and clipping_raster is not None:
+            if investigation_shape is not None:
                 self.iface.setActiveLayer(investigation_shape)
                 view_actions = self.iface.viewMenu().actions()
 
@@ -390,7 +388,10 @@ class OpenEQuarterMain:
                     if act.text() == 'Zoom to Layer':
                         act.trigger()
 
-                self.clip_from_raster(clipping_raster)
+                # clip extent from visible raster layers
+                raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
+                for clipping_raster in raster_layers:
+                    self.clip_from_raster(clipping_raster)
 
     # Method not used yet
     def get_extent_per_feature(self, layer_name):
@@ -513,7 +514,7 @@ class OpenEQuarterMain:
 
         ### Investigation Area
         # if the "project basics"-process is done, continue with the IA-process
-        if self.step_queue[next_step] == 'temp_shapefile_created' and not self.process_monitor.is_in_progress('project_basics'):
+        if self.step_queue[next_step] == 'temp_shapefile_created' and not self.process_monitor.is_in_progress('project_basics') and self.process_monitor.is_in_progress('investigation_area'):
 
             # create a new shape-layer
             if self.process_monitor.is_in_progress('investigation_area', 'temp_shapefile_created'):
@@ -555,7 +556,7 @@ class OpenEQuarterMain:
         if self.step_queue[next_step] == 'extent_clipped' and not self.process_monitor.is_in_progress('investigation_area'):
 
             if not self.process_monitor.is_in_progress('building_shapes', 'raster_loaded') and self.process_monitor.is_in_progress('building_shapes', 'extent_clipped'):
-                self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name, self.clipping_raster_layer_name)
+                self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
                 self.process_monitor.update_progress('building_shapes', 'extent_clipped', True)
                 self.process_monitor.update_progress('building_shapes', 'pyramids_built', True)
                 LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)

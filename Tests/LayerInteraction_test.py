@@ -1,10 +1,9 @@
 from unittest import TestCase
-from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer
 from os import path, remove, walk
 from PyQt4 import QtCore
 from .. import LayerInteraction
 from QgisTestInterface import QgisTestInterface
-from copy import deepcopy
 
 
 class LayerInteraction_test(TestCase):
@@ -210,6 +209,61 @@ class LayerInteraction_test(TestCase):
 
     def checkSender(self, sender, edit_list):
         edit_list.append(sender)
+
+    def test_get_wms_layer_list(self):
+        urlWithParams = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
+        visibility = [True, False, True, True, True, False]
+
+        for i in range(0, len(visibility)):
+            layer_name = 'r{0}_visible:{1}'.format(i, visibility[i])
+            rlayer = QgsRasterLayer(urlWithParams, layer_name, 'wms')
+            self.assertTrue(rlayer.isValid(), layer_name + ' is not a valid raster layer')
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+            self.iface.legendInterface().setLayerVisible(rlayer, visibility[i])
+            self.layer_list.append(layer_name)
+
+        expected_layers = {}
+        actual_layers = {}
+        visible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
+        for i in range(0, len(visibility)):
+            if visibility[i]:
+                expected_layers[self.layer_list[i]] = True
+
+        for i in range(0, len(visible_raster_layers)):
+            layer = visible_raster_layers[i]
+            if '_visible:' in layer.name():
+                actual_layers[str(layer.name())] = True
+
+        self.assertDictEqual(expected_layers, actual_layers, 'The returned layers do not match the expected layers.\n\t Expected: {0}\n\t received: {1}.'.format(expected_layers, actual_layers))
+
+
+        expected_layers = {}
+        actual_layers = {}
+        invisible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'invisible')
+        for i in range(0, len(visibility)):
+            if not visibility[i]:
+                expected_layers[self.layer_list[i]] = False
+
+        for i in range(0, len(invisible_raster_layers)):
+            layer = invisible_raster_layers[i]
+            if '_visible:' in layer.name():
+                actual_layers[str(layer.name())] = True if str(layer.name()[-4:]) == 'True' else False
+
+        self.assertDictEqual(expected_layers, actual_layers, 'The returned layers do not match the expected layers.\n\t Expected: {0}\n\t received: {1}.'.format(expected_layers, actual_layers))
+
+        expected_layers = {}
+        actual_layers = {}
+        invisible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'all')
+        for i in range(0, len(visibility)):
+            expected_layers[self.layer_list[i]] = visibility[i]
+
+        for i in range(0, len(invisible_raster_layers)):
+            layer = invisible_raster_layers[i]
+            if '_visible:' in layer.name():
+                actual_layers[str(layer.name())] = True if str(layer.name()[-4:]) == 'True' else False
+
+        self.assertDictEqual(expected_layers, actual_layers, 'The returned layers do not match the expected layers.\n\t Expected: {0}\n\t received: {1}.'.format(expected_layers, actual_layers))
+
 
 
 

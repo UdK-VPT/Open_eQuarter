@@ -1,4 +1,4 @@
-from qgis.core import QgsVectorLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer
 from PyQt4.QtCore import QSettings
 from os import path
 
@@ -163,3 +163,39 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
             elif trigger == 'off':
                 iface.actionAddFeature().trigger()
                 iface.actionToggleEditing().trigger()
+
+def get_wms_layer_list(iface, visibility='all'):
+    """
+    Iterate over all layers and return a list of the currently visible WMS-files.
+    :param iface:
+    :type iface:
+    :return:
+    :rtype:
+    """
+    active_wms_layers = []
+    layer_list = QgsMapLayerRegistry.instance().mapLayers()
+    interface = iface.legendInterface()
+
+    if visibility == 'visible':
+        for layer_key in layer_list:
+            layer = layer_list[layer_key]
+            if layer.type() == QgsMapLayer.RasterLayer and interface.isLayerVisible(layer):
+                active_wms_layers.append(layer)
+
+        return active_wms_layers
+
+    elif visibility == 'invisible':
+        for layer_key in layer_list:
+            layer = layer_list[layer_key]
+            if layer.type() == QgsMapLayer.RasterLayer and not interface.isLayerVisible(layer):
+                active_wms_layers.append(layer)
+
+        return active_wms_layers
+
+    else:
+        for layer_key in layer_list:
+            layer = layer_list[layer_key]
+            if layer.type() == QgsMapLayer.RasterLayer:
+                active_wms_layers.append(layer)
+
+        return active_wms_layers

@@ -263,6 +263,7 @@ class OpenEQuarterMain:
                 else:
                     return False
 
+    # method currently not in use
     def request_wms_layer_url(self):
         """
         Open a dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.

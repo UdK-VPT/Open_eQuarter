@@ -170,6 +170,7 @@ class OpenEQuarterMain:
                 project_actions = self.iface.projectMenu().actions()
 
                 # trigger qgis "Save As"-function
+                #ToDO change to iface.actionSaveProjectAs().trigger()
                 for act in project_actions:
                     if act.text() == 'Save &As...' or act.text() == 'Speichern &als...':
                         act.trigger()

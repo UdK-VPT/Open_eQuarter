@@ -104,13 +104,21 @@ def hide_or_remove_layer(layer_name, mode='hide', iface = None):
 
 
 def write_vector_layer_to_disk(vlayer, full_path):
-
+    """
+    Write the given vector layer to disk.
+    :param vlayer: The vector layer that shall be written to disk
+    :type vlayer: QgsVectorLayer
+    :param full_path: The path and filename the layer shall be written to
+    :type full_path: str
+    :return:
+    :rtype:
+    """
     out_path, out_name = path.split(full_path)
 
     if out_name.upper().endswith('.SHP'):
         out_name = out_name[:-4]
 
-    if vlayer is not None and path.exists(out_path):
+    if vlayer is not None and vlayer.isValid() and path.exists(out_path):
 
         if path.exists(path.join(out_path, out_name + '.shp')):
             new_name = out_name
@@ -155,14 +163,13 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
 
         # if the layer was found, it is activated and the editing and the adding of features will be triggered
         if edit_layer is not None:
-            iface.setActiveLayer(edit_layer)
 
             if trigger == 'on':
-                iface.actionToggleEditing().trigger()
+                edit_layer.startEditing()
                 iface.actionAddFeature().trigger()
             elif trigger == 'off':
                 iface.actionAddFeature().trigger()
-                iface.actionToggleEditing().trigger()
+                edit_layer.commitChanges()
 
 def get_wms_layer_list(iface, visibility='all'):
     """
@@ -199,3 +206,54 @@ def get_wms_layer_list(iface, visibility='all'):
                 active_wms_layers.append(layer)
 
         return active_wms_layers
+
+def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
+    """
+    Connect to a given wms-server and create a new wms-layer from the url.
+    :param iface:
+    :type iface:
+    :param wms_url_with_parameters: The url to the raster-layer in the form '{parameter=value&}*{url=http://url_to.wms/}'
+    :type wms_url_with_parameters: str
+    :param layer_name: Name of the new wms raster-layer
+    :type layer_name: str
+    :return:
+    :rtype:
+    """
+    if iface is not None and wms_url_with_parameters and layer_name and not wms_url_with_parameters.isspace() and not layer_name.isspace():
+
+        rlayer = QgsRasterLayer(wms_url_with_parameters, layer_name, 'wms')
+
+        if not rlayer.isValid():
+            return None
+        else:
+            return rlayer
+
+def zoom_to_layer(iface, layer_name):
+
+    if layer_name and not layer_name.isspace():
+
+        zoom_layer = find_layer_by_name(layer_name)
+
+        # if the shapefile was found set the layer active
+        if zoom_layer is not None:
+            iface.setActiveLayer(zoom_layer)
+            iface.actionZoomToLayer().trigger()
+
+def biuniquify_layer_name(layer_name):
+
+    biunique_name = ''
+    if layer_name and not layer_name.isspace():
+
+        biunique_name = layer_name
+        suffix = 0
+
+        while(find_layer_by_name(biunique_name) is not None):
+            biunique_name = layer_name + str(suffix)
+            suffix += 1
+
+    return biunique_name
+
+
+
+
+

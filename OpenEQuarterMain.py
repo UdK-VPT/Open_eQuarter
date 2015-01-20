@@ -72,7 +72,7 @@ class OpenEQuarterMain:
         self.mainstay_process_dlg = MainstayProcess_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
-        self.wms_url = ""
+        self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
 
@@ -172,13 +172,6 @@ class OpenEQuarterMain:
                 # trigger qgis "Save As"-function
                 iface.actionSaveProjectAs().trigger()
 
-    def enable_on_the_fly_projection(self):
-        """
-        Enable on the fly projection in the current project.
-        :return:
-        :rtype:
-        """
-        self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
 
     def get_plugin_ifexists(self, plugin_name):
         """
@@ -287,30 +280,6 @@ class OpenEQuarterMain:
                 return
 
             self.wms_url = wms_url
-
-    def open_wms_as_raster(self):
-        """
-        Use the url in self.wms_url to open and add a raster layer
-        :return:
-        :rtype:
-        """
-        urlWithParams = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
-        rlayer = QgsRasterLayer(urlWithParams, self.clipping_raster_layer_name, 'wms')
-        #rlayer = QgsRasterLaayer(self.wms_url, 'Raster layer basis', 'wms')
-        if not rlayer.isValid():
-            print "Layer failed to load!"
-        else:
-            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-            self.iface.setActiveLayer(rlayer)
-
-    def open_add_wms_dialog(self):
-        """
-        Open the common QGIS "Add WMS/WMTS Layer..."-dialog
-        :return:
-        :rtype:
-        """
-        #ToDo use this or the open_wms_as_raster function
-        self.iface.actionAddWmsLayer().trigger()
 
     def set_project_crs(self, crs):
         """
@@ -548,8 +517,15 @@ class OpenEQuarterMain:
             if self.process_monitor.is_in_progress('building_shapes', 'raster_loaded'):
                 self.mainstay_process_dlg.go_to_page('building_shapes')
                 #self.request_wms_layer_url()
-                self.open_wms_as_raster()
-                self.process_monitor.update_progress('building_shapes', 'raster_loaded', True )
+                investigation_raster_layer = LayerInteraction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name)
+
+                if investigation_raster_layer is not None and investigation_raster_layer.isValid():
+                    LayerInteraction.add_layer_to_registry(investigation_raster_layer)
+                    self.iface.setActiveLayer(investigation_raster_layer)
+                    self.process_monitor.update_progress('building_shapes', 'raster_loaded', True )
+
+                else:
+                    self.iface.actionAddWmsLayer().trigger()
 
         if self.step_queue[next_step] == 'extent_clipped' and not self.process_monitor.is_in_progress('investigation_area'):
 

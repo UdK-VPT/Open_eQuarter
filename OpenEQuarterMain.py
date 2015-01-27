@@ -7,7 +7,7 @@
                               -------------------
         begin                : 2014-10-07
         copyright            : (C) 2014 by Kim Gülle / UdK-Berlin
-        email                : kimonline@example.com
+        email                : kimonline@posteo.de
  ***************************************************************************/
 
 /***************************************************************************
@@ -36,7 +36,7 @@ from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
 from PstInteraction import *
 from OlInteraction import *
 import LayerInteraction
-from ExportWMSasTif import SaveSelectionWithPyramid
+from ExportWMSasTif import ExportWMSasTif
 from Processing import *
 from Tests.LayerInteraction_test import LayerInteraction_test
 
@@ -321,7 +321,7 @@ class OpenEQuarterMain:
         if raster_layer is not None and raster_layer.isValid():
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
-            pyramid_exporter = SaveSelectionWithPyramid(self.iface)
+            pyramid_exporter = ExportWMSasTif(self.iface)
             pyramid_exporter.export(raster_layer.name())
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):

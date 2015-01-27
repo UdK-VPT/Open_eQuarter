@@ -46,7 +46,7 @@ class Ui_RequestWmsUrl_dialog(object):
         self.wms_url.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.wms_url.setInputMethodHints(QtCore.Qt.ImhUrlCharactersOnly)
         self.wms_url.setText(_fromUtf8(""))
-        self.wms_url.setObjectName(_fromUtf8("wms_url"))
+        self.wms_url.setObjectName(_fromUtf8("valid_wms_url"))
 
         self.retranslateUi(RequestWmsUrl_dialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), RequestWmsUrl_dialog.accept)

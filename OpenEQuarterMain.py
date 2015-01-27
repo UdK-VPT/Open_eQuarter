@@ -29,7 +29,6 @@ from PyQt4.QtGui import *
 # Initialize Qt resources from file resources.py
 import resources_rc
 # Import the code for the dialog
-from MainstayProcess_dialog import MainstayProcess_dialog
 from MainProcess_dock import MainProcess_dock
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog

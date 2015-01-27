@@ -40,17 +40,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
             page = self.findChild(QtGui.QWidget, page_name)
             checkbox = page.findChild(QtGui.QPushButton, checkbox_name)
 
-            if checkbox and check_yes_no:
-                icon = QtGui.QIcon()
-                icon.addPixmap(self.check_mark, QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                icon.addPixmap(self.open_mark, QtGui.QIcon.Normal, QtGui.QIcon.On)
-                checkbox.setIcon(icon)
-
-            elif checkbox and not check_yes_no:
-                icon = QtGui.QIcon()
-                icon.addPixmap(self.check_mark, QtGui.QIcon.Normal, QtGui.QIcon.On)
-                icon.addPixmap(self.open_mark, QtGui.QIcon.Normal, QtGui.QIcon.Off)
-                checkbox.setIcon(icon)
+            if checkbox:
+                checkbox.setChecked(check_yes_no)
 
     def is_checkbox_on_page_checked(self, checkbox_name, page_name):
 
@@ -61,9 +52,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
             print "A page with the given name " + page_name + " was not found."
 
         else:
-            if self.mainstay_process_widget is not None:
-                page = self.mainstay_process_widget.findChild(QtGui.QWidget, page_name)
-                return page.findChild(QtGui.QCheckBox, checkbox_name).isChecked()
+            page = self.process_page.findChild(QtGui.QWidget, page_name)
+            return page.findChild(QtGui.QPushButton, checkbox_name).isChecked()
 
     def set_page_done(self, value):
 

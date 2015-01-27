@@ -134,6 +134,12 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.testing_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
 
+        self.main_process_dock.process_button_next.clicked.connect(self.start_or_continue_process)
+
+        ## connect each pushbutton to its corresponding method-calls
+        self.main_process_dock.ol_plugin_installed_chckBox.clicked.connect()
+
+
     def unload(self):
         # Remove the plugin menu item and icon
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
@@ -598,9 +604,7 @@ class OpenEQuarterMain:
     # run method that puts the process in an order
     def run(self):
 
-        #self.progress_widget.show()
         self.iface.addDockWidget( Qt.RightDockWidgetArea, self.main_process_dock)
-        self.main_process_dock.process_button_next.clicked.connect(self.start_or_continue_process)
 
     def run_tests(self):
 

@@ -84,7 +84,7 @@ class SaveSelectionWithPyramid:
         """
         Put the steps necessary for the export together in one procedure
         :return:
-        :rtype: None
+        :rtype:
         """
 
         if not clipped_raster_name.isspace() and clipped_raster_name != self.export_name:

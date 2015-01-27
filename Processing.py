@@ -10,7 +10,7 @@ class Processing(object):
                          'building_shapes': {'raster_loaded': False, 'extent_clipped': False, 'pyramids_built': False},
                          'sampling_points': {'temp_pointlayer_created': False, 'editing_temp_pointlayer_started': False, 'points_of_interest_defined': False, 'editing_temp_pointlayer_stopped': False, 'information_sampled': False }}
 
-        self.mainstay_process_dlg = main_dialog
+        self.progress_widget = main_dialog
 
     def update_progress(self, section, step, is_done):
         """
@@ -26,10 +26,11 @@ class Processing(object):
         """
         try:
             self.progress[section][step] = is_done
-            self.mainstay_process_dlg.set_checkbox_on_page(step + '_chckBox', section + '_page', is_done)
+            self.progress_widget.set_checkbox_on_page(step + '_chckBox', section + '_page', is_done)
 
             if not self.is_in_progress(section):
-                self.mainstay_process_dlg.set_progress_button(section + '_btn', True)
+                self.progress_widget.set_page_done(True)
+
         except KeyError, error:
             print str(error)
 

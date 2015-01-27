@@ -30,6 +30,7 @@ from PyQt4.QtGui import *
 import resources_rc
 # Import the code for the dialog
 from MainstayProcess_dialog import MainstayProcess_dialog
+from MainProcess_dock import MainProcess_dock
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
@@ -55,20 +56,10 @@ class OpenEQuarterMain:
         ### Plugin specific settings
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        localePath = os.path.join(self.plugin_dir, 'i18n', 'OpenEQuartermain_{}.qm'.format(locale))
-
-        if os.path.exists(localePath):
-            self.translator = QTranslator()
-            self.translator.load(localePath)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
-
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
+        self.main_process_dock = MainProcess_dock()
         self.mainstay_process_dlg = MainstayProcess_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
@@ -112,7 +103,7 @@ class OpenEQuarterMain:
         self.clipping_raster_layer_name = 'Investigation Area - raster'
 
         ### Monitor the users progress
-        self.process_monitor = Processing(self.mainstay_process_dlg)
+        self.process_monitor = Processing(self.main_process_dock)
         #ToDo have step_queue created from the process list in the Processing class
         self.step_queue = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded',
                            'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped',
@@ -142,6 +133,12 @@ class OpenEQuarterMain:
         self.testing_action.triggered.connect(lambda: self.run_tests())
         self.iface.addToolBarIcon(self.testing_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
+
+        self.main_process_dock.process_button_next.clicked.connect(self.start_or_continue_process)
+
+        ## connect each pushbutton to its corresponding method-calls
+        self.main_process_dock.ol_plugin_installed_chckBox.clicked.connect()
+
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -607,9 +604,7 @@ class OpenEQuarterMain:
     # run method that puts the process in an order
     def run(self):
 
-        self.mainstay_process_dlg.show()
-
-        self.mainstay_process_dlg.process_button_next.clicked.connect(self.start_or_continue_process)
+        self.iface.addDockWidget( Qt.RightDockWidgetArea, self.main_process_dock)
 
     def run_tests(self):
 

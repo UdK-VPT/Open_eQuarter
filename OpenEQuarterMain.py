@@ -30,6 +30,7 @@ from PyQt4.QtGui import *
 import resources_rc
 # Import the code for the dialog
 from MainProcess_dock import MainProcess_dock
+from ProgressModel import ProgressModel
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
@@ -59,7 +60,6 @@ class OpenEQuarterMain:
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
         self.main_process_dock = MainProcess_dock()
-        self.mainstay_process_dlg = MainstayProcess_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
@@ -103,6 +103,7 @@ class OpenEQuarterMain:
 
         ### Monitor the users progress
         self.process_monitor = Processing(self.main_process_dock)
+        self.progress_model = ProgressModel()
         #ToDo have step_queue created from the process list in the Processing class
         self.step_queue = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded',
                            'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped',
@@ -425,6 +426,7 @@ class OpenEQuarterMain:
     def start_or_continue_process(self):
 
         next_step = self.process_monitor.calculate_progress()
+        self.progress_model.update_progress('project_basics', 'ol_plugin_installed', True)
 
         ### Project basics
         # check if "open layers"-plugin is installed

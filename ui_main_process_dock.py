@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_main_process_dock.ui'
 #
-# Created: Tue Jan 27 14:39:44 2015
+# Created: Wed Feb  4 15:36:10 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,9 +26,32 @@ except AttributeError:
 class Ui_MainProcess_dock(object):
     def setupUi(self, MainProcess_dock):
         MainProcess_dock.setObjectName(_fromUtf8("MainProcess_dock"))
-        MainProcess_dock.resize(370, 460)
+        MainProcess_dock.resize(370, 440)
         MainProcess_dock.setMinimumSize(QtCore.QSize(370, 440))
-        MainProcess_dock.setStyleSheet(_fromUtf8(""))
+        MainProcess_dock.setStyleSheet(_fromUtf8("QStackedWidget QWidget { \n"
+"    text-align: left; \n"
+"}\n"
+"\n"
+"QStackedWidget QAbstractButton {\n"
+"    border: none;\n"
+"    margin-left: 2px;\n"
+"    min-width: 261px;\n"
+"    max-width: 320px;\n"
+"    min-height: 32px;\n"
+"    max-height: 40px;\n"
+"    qproperty-icon: url(\":/Icons/Icons/openmark.png\") off,\n"
+"                            url(\":/Icons/Icons/checkmark.png\") on ;\n"
+"    qproperty-iconSize: 17px; \n"
+"    qproperty-flat: true;\n"
+"    qproperty-checkable: true;\n"
+"}\n"
+"\n"
+"QStackedWidget QAbstractButton:active {\n"
+"    border: none;\n"
+"}\n"
+"\n"
+"\n"
+""))
         self.dockWidgetContents = QtGui.QWidget()
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -38,9 +61,10 @@ class Ui_MainProcess_dock(object):
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.process_page = QtGui.QStackedWidget(self.dockWidgetContents)
         self.process_page.setEnabled(True)
-        self.process_page.setGeometry(QtCore.QRect(10, 50, 350, 281))
+        self.process_page.setGeometry(QtCore.QRect(10, 50, 350, 280))
+        self.process_page.setMinimumSize(QtCore.QSize(350, 280))
         self.process_page.setAutoFillBackground(False)
-        self.process_page.setStyleSheet(_fromUtf8("text-align: left;"))
+        self.process_page.setStyleSheet(_fromUtf8(""))
         self.process_page.setFrameShape(QtGui.QFrame.StyledPanel)
         self.process_page.setFrameShadow(QtGui.QFrame.Plain)
         self.process_page.setLineWidth(2)
@@ -48,231 +72,85 @@ class Ui_MainProcess_dock(object):
         self.process_page.setObjectName(_fromUtf8("process_page"))
         self.project_basics_page = QtGui.QWidget()
         self.project_basics_page.setAccessibleDescription(_fromUtf8(""))
+        self.project_basics_page.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.project_basics_page.setStyleSheet(_fromUtf8(""))
         self.project_basics_page.setObjectName(_fromUtf8("project_basics_page"))
-        self.ol_plugin_installed_chckBox = QtGui.QPushButton(self.project_basics_page)
-        self.ol_plugin_installed_chckBox.setEnabled(True)
-        self.ol_plugin_installed_chckBox.setGeometry(QtCore.QRect(10, 0, 261, 41))
-        self.ol_plugin_installed_chckBox.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.ol_plugin_installed_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/openmark.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/checkmark.png")), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.ol_plugin_installed_chckBox.setIcon(icon)
-        self.ol_plugin_installed_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.ol_plugin_installed_chckBox.setShortcut(_fromUtf8(""))
-        self.ol_plugin_installed_chckBox.setCheckable(True)
-        self.ol_plugin_installed_chckBox.setFlat(True)
-        self.ol_plugin_installed_chckBox.setProperty("tristate", True)
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.project_basics_page)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.ol_plugin_installed_chckBox = QProcessButton(self.project_basics_page)
         self.ol_plugin_installed_chckBox.setObjectName(_fromUtf8("ol_plugin_installed_chckBox"))
-        self.project_created_chckBox = QtGui.QPushButton(self.project_basics_page)
-        self.project_created_chckBox.setEnabled(True)
-        self.project_created_chckBox.setGeometry(QtCore.QRect(10, 80, 261, 41))
-        self.project_created_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.project_created_chckBox.setIcon(icon)
-        self.project_created_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.project_created_chckBox.setShortcut(_fromUtf8(""))
-        self.project_created_chckBox.setCheckable(True)
-        self.project_created_chckBox.setFlat(True)
-        self.project_created_chckBox.setObjectName(_fromUtf8("project_created_chckBox"))
-        self.osm_layer_loaded_chckBox = QtGui.QPushButton(self.project_basics_page)
-        self.osm_layer_loaded_chckBox.setEnabled(True)
-        self.osm_layer_loaded_chckBox.setGeometry(QtCore.QRect(10, 120, 261, 41))
-        self.osm_layer_loaded_chckBox.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.osm_layer_loaded_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.osm_layer_loaded_chckBox.setIcon(icon)
-        self.osm_layer_loaded_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.osm_layer_loaded_chckBox.setShortcut(_fromUtf8(""))
-        self.osm_layer_loaded_chckBox.setCheckable(True)
-        self.osm_layer_loaded_chckBox.setFlat(True)
-        self.osm_layer_loaded_chckBox.setObjectName(_fromUtf8("osm_layer_loaded_chckBox"))
-        self.pst_plugin_installed_chckBox = QtGui.QPushButton(self.project_basics_page)
-        self.pst_plugin_installed_chckBox.setEnabled(True)
-        self.pst_plugin_installed_chckBox.setGeometry(QtCore.QRect(10, 40, 261, 41))
-        self.pst_plugin_installed_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.pst_plugin_installed_chckBox.setIcon(icon)
-        self.pst_plugin_installed_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.pst_plugin_installed_chckBox.setShortcut(_fromUtf8(""))
-        self.pst_plugin_installed_chckBox.setCheckable(True)
-        self.pst_plugin_installed_chckBox.setFlat(True)
+        self.verticalLayout_2.addWidget(self.ol_plugin_installed_chckBox)
+        self.pst_plugin_installed_chckBox = QProcessButton(self.project_basics_page)
         self.pst_plugin_installed_chckBox.setObjectName(_fromUtf8("pst_plugin_installed_chckBox"))
+        self.verticalLayout_2.addWidget(self.pst_plugin_installed_chckBox)
+        self.project_created_chckBox = QProcessButton(self.project_basics_page)
+        self.project_created_chckBox.setObjectName(_fromUtf8("project_created_chckBox"))
+        self.verticalLayout_2.addWidget(self.project_created_chckBox)
+        self.osm_layer_loaded_chckBox = QProcessButton(self.project_basics_page)
+        self.osm_layer_loaded_chckBox.setObjectName(_fromUtf8("osm_layer_loaded_chckBox"))
+        self.verticalLayout_2.addWidget(self.osm_layer_loaded_chckBox)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem)
         self.process_page.addWidget(self.project_basics_page)
         self.investigation_area_page = QtGui.QWidget()
         self.investigation_area_page.setAccessibleDescription(_fromUtf8(""))
         self.investigation_area_page.setObjectName(_fromUtf8("investigation_area_page"))
-        self.temp_shapefile_created_chckBox = QtGui.QPushButton(self.investigation_area_page)
-        self.temp_shapefile_created_chckBox.setEnabled(True)
-        self.temp_shapefile_created_chckBox.setGeometry(QtCore.QRect(10, 0, 261, 41))
-        self.temp_shapefile_created_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.temp_shapefile_created_chckBox.setIcon(icon)
-        self.temp_shapefile_created_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.temp_shapefile_created_chckBox.setShortcut(_fromUtf8(""))
-        self.temp_shapefile_created_chckBox.setCheckable(True)
-        self.temp_shapefile_created_chckBox.setFlat(True)
+        self.verticalLayout = QtGui.QVBoxLayout(self.investigation_area_page)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.temp_shapefile_created_chckBox = QProcessButton(self.investigation_area_page)
         self.temp_shapefile_created_chckBox.setObjectName(_fromUtf8("temp_shapefile_created_chckBox"))
-        self.editing_temp_shapefile_started_chckBox = QtGui.QPushButton(self.investigation_area_page)
-        self.editing_temp_shapefile_started_chckBox.setEnabled(True)
-        self.editing_temp_shapefile_started_chckBox.setGeometry(QtCore.QRect(10, 40, 261, 41))
-        self.editing_temp_shapefile_started_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.editing_temp_shapefile_started_chckBox.setIcon(icon)
-        self.editing_temp_shapefile_started_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.editing_temp_shapefile_started_chckBox.setShortcut(_fromUtf8(""))
-        self.editing_temp_shapefile_started_chckBox.setCheckable(True)
-        self.editing_temp_shapefile_started_chckBox.setFlat(True)
+        self.verticalLayout.addWidget(self.temp_shapefile_created_chckBox)
+        self.editing_temp_shapefile_started_chckBox = QProcessButton(self.investigation_area_page)
         self.editing_temp_shapefile_started_chckBox.setObjectName(_fromUtf8("editing_temp_shapefile_started_chckBox"))
-        self.investigation_area_selected_chckBox = QtGui.QPushButton(self.investigation_area_page)
-        self.investigation_area_selected_chckBox.setEnabled(True)
-        self.investigation_area_selected_chckBox.setGeometry(QtCore.QRect(10, 80, 411, 41))
-        self.investigation_area_selected_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.investigation_area_selected_chckBox.setIcon(icon)
-        self.investigation_area_selected_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.investigation_area_selected_chckBox.setShortcut(_fromUtf8(""))
-        self.investigation_area_selected_chckBox.setCheckable(True)
-        self.investigation_area_selected_chckBox.setFlat(True)
+        self.verticalLayout.addWidget(self.editing_temp_shapefile_started_chckBox)
+        self.investigation_area_selected_chckBox = QProcessButton(self.investigation_area_page)
         self.investigation_area_selected_chckBox.setObjectName(_fromUtf8("investigation_area_selected_chckBox"))
-        self.editing_temp_shapefile_stopped_chckBox = QtGui.QPushButton(self.investigation_area_page)
-        self.editing_temp_shapefile_stopped_chckBox.setEnabled(True)
-        self.editing_temp_shapefile_stopped_chckBox.setGeometry(QtCore.QRect(10, 120, 261, 41))
-        self.editing_temp_shapefile_stopped_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.editing_temp_shapefile_stopped_chckBox.setIcon(icon)
-        self.editing_temp_shapefile_stopped_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.editing_temp_shapefile_stopped_chckBox.setShortcut(_fromUtf8(""))
-        self.editing_temp_shapefile_stopped_chckBox.setCheckable(True)
-        self.editing_temp_shapefile_stopped_chckBox.setFlat(True)
+        self.verticalLayout.addWidget(self.investigation_area_selected_chckBox)
+        self.editing_temp_shapefile_stopped_chckBox = QProcessButton(self.investigation_area_page)
         self.editing_temp_shapefile_stopped_chckBox.setObjectName(_fromUtf8("editing_temp_shapefile_stopped_chckBox"))
+        self.verticalLayout.addWidget(self.editing_temp_shapefile_stopped_chckBox)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem1)
         self.process_page.addWidget(self.investigation_area_page)
         self.building_shapes_page = QtGui.QWidget()
         self.building_shapes_page.setAccessibleDescription(_fromUtf8(""))
         self.building_shapes_page.setObjectName(_fromUtf8("building_shapes_page"))
-        self.raster_loaded_chckBox = QtGui.QPushButton(self.building_shapes_page)
-        self.raster_loaded_chckBox.setEnabled(True)
-        self.raster_loaded_chckBox.setGeometry(QtCore.QRect(10, 0, 261, 41))
-        self.raster_loaded_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px;}\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.raster_loaded_chckBox.setIcon(icon)
-        self.raster_loaded_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.raster_loaded_chckBox.setCheckable(True)
-        self.raster_loaded_chckBox.setFlat(True)
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.building_shapes_page)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.raster_loaded_chckBox = QProcessButton(self.building_shapes_page)
         self.raster_loaded_chckBox.setObjectName(_fromUtf8("raster_loaded_chckBox"))
-        self.extent_clipped_chckBox = QtGui.QPushButton(self.building_shapes_page)
-        self.extent_clipped_chckBox.setEnabled(True)
-        self.extent_clipped_chckBox.setGeometry(QtCore.QRect(10, 40, 321, 41))
-        self.extent_clipped_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px;}\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.extent_clipped_chckBox.setIcon(icon)
-        self.extent_clipped_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.extent_clipped_chckBox.setCheckable(True)
-        self.extent_clipped_chckBox.setFlat(True)
+        self.verticalLayout_3.addWidget(self.raster_loaded_chckBox)
+        self.extent_clipped_chckBox = QProcessButton(self.building_shapes_page)
         self.extent_clipped_chckBox.setObjectName(_fromUtf8("extent_clipped_chckBox"))
-        self.pyramids_built_chckBox = QtGui.QPushButton(self.building_shapes_page)
-        self.pyramids_built_chckBox.setEnabled(True)
-        self.pyramids_built_chckBox.setGeometry(QtCore.QRect(10, 80, 321, 41))
-        self.pyramids_built_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px;}\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.pyramids_built_chckBox.setIcon(icon)
-        self.pyramids_built_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.pyramids_built_chckBox.setShortcut(_fromUtf8(""))
-        self.pyramids_built_chckBox.setCheckable(True)
-        self.pyramids_built_chckBox.setFlat(True)
+        self.verticalLayout_3.addWidget(self.extent_clipped_chckBox)
+        self.pyramids_built_chckBox = QProcessButton(self.building_shapes_page)
         self.pyramids_built_chckBox.setObjectName(_fromUtf8("pyramids_built_chckBox"))
+        self.verticalLayout_3.addWidget(self.pyramids_built_chckBox)
+        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem2)
         self.process_page.addWidget(self.building_shapes_page)
         self.sampling_points_page = QtGui.QWidget()
         self.sampling_points_page.setAccessibleDescription(_fromUtf8(""))
         self.sampling_points_page.setObjectName(_fromUtf8("sampling_points_page"))
-        self.temp_pointlayer_created_chckBox = QtGui.QPushButton(self.sampling_points_page)
-        self.temp_pointlayer_created_chckBox.setEnabled(True)
-        self.temp_pointlayer_created_chckBox.setGeometry(QtCore.QRect(10, 0, 176, 41))
-        self.temp_pointlayer_created_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.temp_pointlayer_created_chckBox.setIcon(icon)
-        self.temp_pointlayer_created_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.temp_pointlayer_created_chckBox.setShortcut(_fromUtf8(""))
-        self.temp_pointlayer_created_chckBox.setCheckable(True)
-        self.temp_pointlayer_created_chckBox.setFlat(True)
+        self.verticalLayout_4 = QtGui.QVBoxLayout(self.sampling_points_page)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.temp_pointlayer_created_chckBox = QProcessButton(self.sampling_points_page)
         self.temp_pointlayer_created_chckBox.setObjectName(_fromUtf8("temp_pointlayer_created_chckBox"))
-        self.editing_temp_pointlayer_started_chckBox = QtGui.QPushButton(self.sampling_points_page)
-        self.editing_temp_pointlayer_started_chckBox.setEnabled(True)
-        self.editing_temp_pointlayer_started_chckBox.setGeometry(QtCore.QRect(10, 40, 171, 41))
-        self.editing_temp_pointlayer_started_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.editing_temp_pointlayer_started_chckBox.setIcon(icon)
-        self.editing_temp_pointlayer_started_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.editing_temp_pointlayer_started_chckBox.setShortcut(_fromUtf8(""))
-        self.editing_temp_pointlayer_started_chckBox.setCheckable(True)
-        self.editing_temp_pointlayer_started_chckBox.setFlat(True)
+        self.verticalLayout_4.addWidget(self.temp_pointlayer_created_chckBox)
+        self.editing_temp_pointlayer_started_chckBox = QProcessButton(self.sampling_points_page)
         self.editing_temp_pointlayer_started_chckBox.setObjectName(_fromUtf8("editing_temp_pointlayer_started_chckBox"))
-        self.points_of_interest_defined_chckBox = QtGui.QPushButton(self.sampling_points_page)
-        self.points_of_interest_defined_chckBox.setEnabled(True)
-        self.points_of_interest_defined_chckBox.setGeometry(QtCore.QRect(10, 80, 276, 41))
-        self.points_of_interest_defined_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.points_of_interest_defined_chckBox.setIcon(icon)
-        self.points_of_interest_defined_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.points_of_interest_defined_chckBox.setShortcut(_fromUtf8(""))
-        self.points_of_interest_defined_chckBox.setCheckable(True)
-        self.points_of_interest_defined_chckBox.setFlat(True)
+        self.verticalLayout_4.addWidget(self.editing_temp_pointlayer_started_chckBox)
+        self.points_of_interest_defined_chckBox = QProcessButton(self.sampling_points_page)
         self.points_of_interest_defined_chckBox.setObjectName(_fromUtf8("points_of_interest_defined_chckBox"))
-        self.editing_temp_pointlayer_stopped_chckBox = QtGui.QPushButton(self.sampling_points_page)
-        self.editing_temp_pointlayer_stopped_chckBox.setEnabled(True)
-        self.editing_temp_pointlayer_stopped_chckBox.setGeometry(QtCore.QRect(10, 120, 246, 41))
-        self.editing_temp_pointlayer_stopped_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.editing_temp_pointlayer_stopped_chckBox.setIcon(icon)
-        self.editing_temp_pointlayer_stopped_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.editing_temp_pointlayer_stopped_chckBox.setShortcut(_fromUtf8(""))
-        self.editing_temp_pointlayer_stopped_chckBox.setCheckable(True)
-        self.editing_temp_pointlayer_stopped_chckBox.setFlat(True)
+        self.verticalLayout_4.addWidget(self.points_of_interest_defined_chckBox)
+        self.editing_temp_pointlayer_stopped_chckBox = QProcessButton(self.sampling_points_page)
         self.editing_temp_pointlayer_stopped_chckBox.setObjectName(_fromUtf8("editing_temp_pointlayer_stopped_chckBox"))
-        self.information_sampled_chckBox = QtGui.QPushButton(self.sampling_points_page)
-        self.information_sampled_chckBox.setEnabled(True)
-        self.information_sampled_chckBox.setGeometry(QtCore.QRect(10, 160, 381, 41))
-        self.information_sampled_chckBox.setStyleSheet(_fromUtf8(":active{ text-align: left; border: none; margin-left: 3px; }\n"
-":checked { border: none; }\n"
-":pressed { border: none; }\n"
-""))
-        self.information_sampled_chckBox.setIcon(icon)
-        self.information_sampled_chckBox.setIconSize(QtCore.QSize(17, 17))
-        self.information_sampled_chckBox.setShortcut(_fromUtf8(""))
-        self.information_sampled_chckBox.setCheckable(True)
-        self.information_sampled_chckBox.setFlat(True)
+        self.verticalLayout_4.addWidget(self.editing_temp_pointlayer_stopped_chckBox)
+        self.information_sampled_chckBox = QProcessButton(self.sampling_points_page)
         self.information_sampled_chckBox.setObjectName(_fromUtf8("information_sampled_chckBox"))
+        self.verticalLayout_4.addWidget(self.information_sampled_chckBox)
+        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem3)
         self.process_page.addWidget(self.sampling_points_page)
         self.label = QtGui.QLabel(self.dockWidgetContents)
         self.label.setGeometry(QtCore.QRect(11, 17, 121, 26))
@@ -280,15 +158,24 @@ class Ui_MainProcess_dock(object):
         self.active_page_dropdown = QtGui.QComboBox(self.dockWidgetContents)
         self.active_page_dropdown.setGeometry(QtCore.QRect(143, 20, 221, 26))
         self.active_page_dropdown.setObjectName(_fromUtf8("active_page_dropdown"))
-        self.pushButton = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButton.setGeometry(QtCore.QRect(5, 340, 114, 32))
+        self.horizontalLayoutWidget = QtGui.QWidget(self.dockWidgetContents)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 335, 351, 56))
+        self.horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setSpacing(5)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.pushButton = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.process_button_prev = QtGui.QPushButton(self.dockWidgetContents)
-        self.process_button_prev.setGeometry(QtCore.QRect(160, 340, 100, 32))
+        self.horizontalLayout.addWidget(self.pushButton)
+        spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem4)
+        self.process_button_prev = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.process_button_prev.setObjectName(_fromUtf8("process_button_prev"))
-        self.process_button_next = QtGui.QPushButton(self.dockWidgetContents)
-        self.process_button_next.setGeometry(QtCore.QRect(266, 340, 100, 32))
+        self.horizontalLayout.addWidget(self.process_button_prev)
+        self.process_button_next = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.process_button_next.setObjectName(_fromUtf8("process_button_next"))
+        self.horizontalLayout.addWidget(self.process_button_next)
         MainProcess_dock.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(MainProcess_dock)
@@ -299,9 +186,9 @@ class Ui_MainProcess_dock(object):
         MainProcess_dock.setWindowTitle(_translate("MainProcess_dock", "Open eQuarter - Analysis", None))
         self.project_basics_page.setAccessibleName(_translate("MainProcess_dock", "Project Basics", None))
         self.ol_plugin_installed_chckBox.setText(_translate("MainProcess_dock", "Install the Open Street Map Plugin", None))
+        self.pst_plugin_installed_chckBox.setText(_translate("MainProcess_dock", "Install the PointSamplingTool Plugin", None))
         self.project_created_chckBox.setText(_translate("MainProcess_dock", "Create a new project and save it.", None))
         self.osm_layer_loaded_chckBox.setText(_translate("MainProcess_dock", "Open an Open Layers Map", None))
-        self.pst_plugin_installed_chckBox.setText(_translate("MainProcess_dock", "Install the PointSamplingTool Plugin", None))
         self.investigation_area_page.setAccessibleName(_translate("MainProcess_dock", "Investigation Area", None))
         self.temp_shapefile_created_chckBox.setText(_translate("MainProcess_dock", "Create a new Polygon-Shapelayer", None))
         self.editing_temp_shapefile_started_chckBox.setText(_translate("MainProcess_dock", "Activate the edit mode", None))
@@ -325,4 +212,5 @@ class Ui_MainProcess_dock(object):
         self.process_button_prev.setText(_translate("MainProcess_dock", "< Previous", None))
         self.process_button_next.setText(_translate("MainProcess_dock", "Next >", None))
 
+from ui_process_button import QProcessButton
 import resources_rc

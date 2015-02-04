@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>370</width>
-    <height>460</height>
+    <height>440</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -17,7 +17,30 @@
    </size>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QStackedWidget QWidget { 
+	text-align: left; 
+}
+
+QStackedWidget QAbstractButton {
+	border: none;
+	margin-left: 2px;
+	min-width: 261px;
+	max-width: 320px;
+	min-height: 32px;
+	max-height: 40px;
+	qproperty-icon: url(&quot;:/Icons/Icons/openmark.png&quot;) off,
+							url(&quot;:/Icons/Icons/checkmark.png&quot;) on ;
+	qproperty-iconSize: 17px; 
+	qproperty-flat: true;
+	qproperty-checkable: true;
+}
+
+QStackedWidget QAbstractButton:active {
+	border: none;
+}
+
+
+</string>
   </property>
   <property name="windowTitle">
    <string>Open eQuarter - Analysis</string>
@@ -38,14 +61,20 @@
       <x>10</x>
       <y>50</y>
       <width>350</width>
-      <height>281</height>
+      <height>280</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>350</width>
+      <height>280</height>
+     </size>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">text-align: left;</string>
+     <string notr="true"/>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -69,183 +98,55 @@
      <property name="accessibleDescription">
       <string/>
      </property>
-     <widget class="QPushButton" name="ol_plugin_installed_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Install the Open Street Map Plugin</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-      <property name="tristate" stdset="0">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="project_created_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Create a new project and save it.</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="osm_layer_loaded_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Open an Open Layers Map</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pst_plugin_installed_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Install the PointSamplingTool Plugin</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QProcessButton" name="ol_plugin_installed_chckBox">
+        <property name="text">
+         <string>Install the Open Street Map Plugin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="pst_plugin_installed_chckBox">
+        <property name="text">
+         <string>Install the PointSamplingTool Plugin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="project_created_chckBox">
+        <property name="text">
+         <string>Create a new project and save it.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="osm_layer_loaded_chckBox">
+        <property name="text">
+         <string>Open an Open Layers Map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
     <widget class="QWidget" name="investigation_area_page">
      <property name="accessibleName">
@@ -254,175 +155,50 @@
      <property name="accessibleDescription">
       <string/>
      </property>
-     <widget class="QPushButton" name="temp_shapefile_created_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Create a new Polygon-Shapelayer</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="editing_temp_shapefile_started_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Activate the edit mode</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="investigation_area_selected_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>411</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Add new features to cover your
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QProcessButton" name="temp_shapefile_created_chckBox">
+        <property name="text">
+         <string>Create a new Polygon-Shapelayer</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="editing_temp_shapefile_started_chckBox">
+        <property name="text">
+         <string>Activate the edit mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="investigation_area_selected_chckBox">
+        <property name="text">
+         <string>Add new features to cover your
 investigation area with</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="editing_temp_shapefile_stopped_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Deactivate the edit mode</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="editing_temp_shapefile_stopped_chckBox">
+        <property name="text">
+         <string>Deactivate the edit mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
     <widget class="QWidget" name="building_shapes_page">
      <property name="accessibleName">
@@ -431,126 +207,45 @@ investigation area with</string>
      <property name="accessibleDescription">
       <string/>
      </property>
-     <widget class="QPushButton" name="raster_loaded_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>261</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px;}
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Load a new (wms) raster-map</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="extent_clipped_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>321</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px;}
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Export the investigation areas extent as .tif</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pyramids_built_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>321</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px;}
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Open the created .tif-file and build pyramids</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QProcessButton" name="raster_loaded_chckBox">
+        <property name="text">
+         <string>Load a new (wms) raster-map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="extent_clipped_chckBox">
+        <property name="text">
+         <string>Export the investigation areas extent as .tif</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="pyramids_built_chckBox">
+        <property name="text">
+         <string>Open the created .tif-file and build pyramids</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
     <widget class="QWidget" name="sampling_points_page">
      <property name="accessibleName">
@@ -559,218 +254,58 @@ investigation area with</string>
      <property name="accessibleDescription">
       <string/>
      </property>
-     <widget class="QPushButton" name="temp_pointlayer_created_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>176</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Create a new Pointlayer</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="editing_temp_pointlayer_started_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>171</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Activate the edit mode</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="points_of_interest_defined_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>276</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Add new features to mark the buildings 
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QProcessButton" name="temp_pointlayer_created_chckBox">
+        <property name="text">
+         <string>Create a new Pointlayer</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="editing_temp_pointlayer_started_chckBox">
+        <property name="text">
+         <string>Activate the edit mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="points_of_interest_defined_chckBox">
+        <property name="text">
+         <string>Add new features to mark the buildings 
 you want to extract information from</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="editing_temp_pointlayer_stopped_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>246</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Deactivate the edit mode</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="information_sampled_chckBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>160</y>
-        <width>381</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">:active{ text-align: left; border: none; margin-left: 3px; }
-:checked { border: none; }
-:pressed { border: none; }
-</string>
-      </property>
-      <property name="text">
-       <string>Use the point-sampling-tool to extract
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="editing_temp_pointlayer_stopped_chckBox">
+        <property name="text">
+         <string>Deactivate the edit mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProcessButton" name="information_sampled_chckBox">
+        <property name="text">
+         <string>Use the point-sampling-tool to extract
 the information</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../OpenEQuartersMain/resources.qrc">
-        <normaloff>:/Icons/Icons/openmark.png</normaloff>
-        <normalon>:/Icons/Icons/checkmark.png</normalon>:/Icons/Icons/openmark.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>17</width>
-        <height>17</height>
-       </size>
-      </property>
-      <property name="shortcut">
-       <string notr="true"/>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QLabel" name="label">
@@ -796,47 +331,64 @@ the information</string>
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>5</x>
-      <y>340</y>
-      <width>114</width>
-      <height>32</height>
+      <x>10</x>
+      <y>335</y>
+      <width>351</width>
+      <height>56</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Cancel</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="process_button_prev">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>340</y>
-      <width>100</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt; Previous</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="process_button_next">
-    <property name="geometry">
-     <rect>
-      <x>266</x>
-      <y>340</y>
-      <width>100</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Next &gt;</string>
-    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="process_button_prev">
+       <property name="text">
+        <string>&lt; Previous</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="process_button_next">
+       <property name="text">
+        <string>Next &gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QProcessButton</class>
+   <extends>QPushButton</extends>
+   <header>ui_process_button</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../OpenEQuartersMain/resources.qrc"/>
   <include location="../OpenEQuartersMain/resources.qrc"/>

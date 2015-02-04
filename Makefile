@@ -37,7 +37,7 @@ PY_FILES = OpenEQuarterMain.py __init__.py
 
 EXTRAS = Icons/icon.png Icons/checkmark.png Icons/openmark.png metadata.txt 
 
-UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_investigation_area_selected_dialog.py ui_investigation_area_selected_help_dialog.py ui_mainstay_process_dialog.py ui_main_process_wizard.py ui_main_process_dock.py
+UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_investigation_area_selected_dialog.py ui_investigation_area_selected_help_dialog.py ui_main_process_dock.py
 
 RESOURCE_FILES = resources_rc.py
 

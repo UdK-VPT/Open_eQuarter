@@ -9,28 +9,26 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         QtGui.QDockWidget.__init__(self)
 
         self.setupUi(self)
-        self.selection_to_page = {}
-        self.check_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/checkmark.png"))
-        self.open_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/openmark.png"))
+        self._selection_to_page = {}
+        self._check_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/checkmark.png"))
+        self._open_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/openmark.png"))
 
         page_list = []
         for page_name in self.process_page.children():
-            if type(page_name) is QtGui.QWidget:
-                self.selection_to_page[page_name.accessibleName()] = page_name
+            if isinstance(page_name, QtGui.QWidget):
+                self._selection_to_page[page_name.accessibleName()] = page_name
                 page_list.append(page_name.accessibleName())
 
-        page_list.reverse()
 
         # add page-names to according position in dropdown-menu, so the user can navigate through the process
-        # connect each QProcessButton, so progress-steps can be triggered seperately
-        for page_number in range(0, len(page_list)):
-            page_name = page_list[page_number]
+        # connect each QProcessButton, so _progress-steps can be triggered seperately
+        for page_number, page_name in enumerate(reversed(page_list)):
             self.active_page_dropdown.addItem(page_name)
-            self.active_page_dropdown.setItemData(page_number, self.open_mark, QtCore.Qt.DecorationRole)
+            self.active_page_dropdown.setItemData(page_number, self._open_mark, QtCore.Qt.DecorationRole)
 
-            page = self.selection_to_page[page_name]
+            page = self._selection_to_page[page_name]
             for button in page.children():
-                if type(button) is QProcessButton:
+                if isinstance(button, QProcessButton):
                     self.connect(button, SIGNAL('step_clicked'), self.print_received)
 
 
@@ -41,8 +39,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
         if selection_name is not None and not selection_name.isspace():
 
-            for selection in self.selection_to_page:
-                page = self.selection_to_page[selection]
+            for selection in self._selection_to_page:
+                page = self._selection_to_page[selection]
 
                 if (selection_name) == page.accessibleName():
                     self.process_page.setCurrentWidget(page)
@@ -60,8 +58,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         elif not page_name or page_name.isspace():
             print "A page with the given name " + page_name + " was not found."
 
-        elif type(check_yes_no) is not bool:
-            print "A boolean check_yes_no has to be passed as a third parameter."
+        elif isinstance(check_yes_no, bool):
+            print "Received: {}, expected: bool".format(type(check_yes_no))
 
         else:
             page = self.findChild(QtGui.QWidget, page_name)
@@ -84,16 +82,16 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def set_page_done(self, value):
 
-        if type(value) is not bool:
+        if isinstance(value, bool):
             print "A boolean value has to be passed as a third parameter."
 
         else:
             page_name = self.active_page_dropdown.currentText()
-            page = self.selection_to_page[page_name]
+            page = self._selection_to_page[page_name]
 
             if (page_name) == page.accessibleName():
                 index = self.active_page_dropdown.currentIndex()
-                self.active_page_dropdown.setItemData(index, self.check_mark, QtCore.Qt.DecorationRole)
-                self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
+                self.active_page_dropdown.setItemData(index, self._check_mark, QtCore.Qt.DecorationRole)
+                self.active_page_dropdown.setCurrentIndex((index+1) % len(self._selection_to_page))
 
 

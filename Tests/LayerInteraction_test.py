@@ -113,9 +113,8 @@ class LayerInteraction_test(TestCase):
         layer3 = LayerInteraction.find_layer_by_name(v3_name)
 
         layer1_exists = layer2_exists = layer3_exists = False
-        for layer_key in reg.mapLayers():
-            layer_value = reg.mapLayers()[layer_key]
 
+        for key, layer_value in reg.mapLayers().iteritems():
             if layer_value == layer1:
                 layer1_exists = True
             elif layer_value == layer2:
@@ -210,24 +209,23 @@ class LayerInteraction_test(TestCase):
         wms_url_with_parameters = self.valid_wms_url
         visibility = [True, False, True, True, True, False]
 
-        for i in range(0, len(visibility)):
-            layer_name = LayerInteraction.biuniquify_layer_name('r{0}_visible:{1}'.format(i, visibility[i]))
+        for i, visible in enumerate(visibility):
+            layer_name = LayerInteraction.biuniquify_layer_name('r{0}_visible:{1}'.format(i, visible))
             rlayer = QgsRasterLayer(wms_url_with_parameters, layer_name, 'wms')
-            self.assertTrue(rlayer.isValid(), layer_name + ' is not a valid raster layer')
+            self.assertTrue(rlayer.isValid(), layer_name.join(' is not a valid raster layer'))
             QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-            self.iface.legendInterface().setLayerVisible(rlayer, visibility[i])
+            self.iface.legendInterface().setLayerVisible(rlayer, visible)
             self.layer_list.append(layer_name)
 
         # get a list of all visible wms layers
         expected_layers = {}
         actual_layers = {}
         visible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
-        for i in range(0, len(visibility)):
-            if visibility[i]:
+        for i, visible in enumerate(visibility):
+            if visible:
                 expected_layers[self.layer_list[i]] = True
 
-        for i in range(0, len(visible_raster_layers)):
-            layer = visible_raster_layers[i]
+        for layer in visible_raster_layers:
             if '_visible:' in layer.name():
                 actual_layers[str(layer.name())] = True
 
@@ -237,14 +235,13 @@ class LayerInteraction_test(TestCase):
         expected_layers = {}
         actual_layers = {}
         invisible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'invisible')
-        for i in range(0, len(visibility)):
-            if not visibility[i]:
+        for i, visible in enumerate(visibility):
+            if not visible:
                 expected_layers[self.layer_list[i]] = False
 
-        for i in range(0, len(invisible_raster_layers)):
-            layer = invisible_raster_layers[i]
+        for layer in invisible_raster_layers:
             if '_visible:' in layer.name():
-                actual_layers[str(layer.name())] = True if str(layer.name()[-4:]) == 'True' else False
+                actual_layers[str(layer.name())] = True if layer.name().endswith('True') else False
 
         self.assertDictEqual(expected_layers, actual_layers, 'The returned layers do not match the expected layers.\n\t Expected: {0}\n\t received: {1}.'.format(expected_layers, actual_layers))
 
@@ -252,13 +249,12 @@ class LayerInteraction_test(TestCase):
         expected_layers = {}
         actual_layers = {}
         invisible_raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'all')
-        for i in range(0, len(visibility)):
-            expected_layers[self.layer_list[i]] = visibility[i]
+        for i, visible in enumerate(visibility):
+            expected_layers[self.layer_list[i]] = visible
 
-        for i in range(0, len(invisible_raster_layers)):
-            layer = invisible_raster_layers[i]
+        for layer in invisible_raster_layers:
             if '_visible:' in layer.name():
-                actual_layers[str(layer.name())] = True if str(layer.name()[-4:]) == 'True' else False
+                actual_layers[str(layer.name())] = True if layer.name().endswith('True') else False
 
         self.assertDictEqual(expected_layers, actual_layers, 'The returned layers do not match the expected layers.\n\t Expected: {0}\n\t received: {1}.'.format(expected_layers, actual_layers))
 

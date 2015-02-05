@@ -184,24 +184,21 @@ def get_wms_layer_list(iface, visibility='all'):
     interface = iface.legendInterface()
 
     if visibility == 'visible':
-        for layer_key in layer_list:
-            layer = layer_list[layer_key]
+        for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and interface.isLayerVisible(layer):
                 active_wms_layers.append(layer)
 
         return active_wms_layers
 
     elif visibility == 'invisible':
-        for layer_key in layer_list:
-            layer = layer_list[layer_key]
+        for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and not interface.isLayerVisible(layer):
                 active_wms_layers.append(layer)
 
         return active_wms_layers
 
     else:
-        for layer_key in layer_list:
-            layer = layer_list[layer_key]
+        for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer:
                 active_wms_layers.append(layer)
 

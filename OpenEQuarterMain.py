@@ -26,9 +26,7 @@ from qgis.utils import iface, plugins
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-# Initialize Qt resources from file resources.py
 import resources_rc
-# Import the code for the dialog
 from MainProcess_dock import MainProcess_dock
 from ProgressModel import ProgressModel
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
@@ -40,6 +38,7 @@ import LayerInteraction
 from ExportWMSasTif import ExportWMSasTif
 from Processing import *
 from Tests.LayerInteraction_test import LayerInteraction_test
+from ui_process_button import QProcessButton
 
 from socket import gaierror
 import os.path
@@ -60,6 +59,7 @@ class OpenEQuarterMain:
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
         self.main_process_dock = MainProcess_dock()
+
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
@@ -135,6 +135,11 @@ class OpenEQuarterMain:
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
 
         self.main_process_dock.process_button_next.clicked.connect(self.start_or_continue_process)
+
+        for page in self.main_process_dock.selection_to_page.values():
+            for button in page.children():
+                if isinstance(button, QProcessButton):
+                    self.main_process_dock.connect(button, SIGNAL('step_clicked'), self.print_received)
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -423,6 +428,13 @@ class OpenEQuarterMain:
         #ToDo
         return
 
+    def print_received(self, *args):
+        print 'Got signal from sender: ' + args[0]
+        print '({})'.format(args[1])
+
+    def continue_process(self):
+
+
     def start_or_continue_process(self):
 
         next_step = self.process_monitor.calculate_progress()
@@ -576,7 +588,6 @@ class OpenEQuarterMain:
 
     # run method that puts the process in an order
     def run(self):
-
         self.iface.addDockWidget( Qt.RightDockWidgetArea, self.main_process_dock)
 
     def run_tests(self):

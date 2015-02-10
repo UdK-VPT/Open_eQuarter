@@ -8,38 +8,39 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def __init__(self):
         QtGui.QDockWidget.__init__(self)
-
         self.setupUi(self)
         self.selection_to_page = OrderedDict([])
         self._check_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/checkmark.png"))
         self._open_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/openmark.png"))
 
-        for page_name in self.process_page.children():
-            if isinstance(page_name, QtGui.QWidget):
-                self.selection_to_page[page_name.accessibleName()] = page_name
+        page_triples = []
+
+        # put each page-widget in a list of triples, as they are not sorted properly
+        for page in self.process_page.children():
+            if isinstance(page, QtGui.QWidget):
+                index = self.process_page.indexOf(page)
+                page_triples.append((index, page.accessibleName(), page))
+
+        page_triples_sorted = sorted(page_triples, key=lambda tup: tup[0])
+        self.selection_to_page = OrderedDict(map(lambda trip: trip[1:], page_triples_sorted))
 
 
         # add page-names to according position in dropdown-menu, so the user can navigate through the process
-        for page_number, page_name in enumerate(reversed(self.selection_to_page.keys())):
-            self.active_page_dropdown.addItem(page_name)
+        for page_number, page in enumerate(self.selection_to_page.keys()):
+            self.active_page_dropdown.addItem(page)
             self.active_page_dropdown.setItemData(page_number, self._open_mark, QtCore.Qt.DecorationRole)
 
         self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
 
-    def go_to_page(self, selection_name):
+        # set the currently displayed widget to the first process-page, otherwise the correct display is not guaranteed
+        self.process_page.setCurrentWidget(self.selection_to_page.values()[0])
 
+    def go_to_page(self, selection_name):
         [self.process_page.setCurrentWidget(page)
          for page in self.selection_to_page.values() if selection_name == page.accessibleName()]
 
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
-
-        if not checkbox_name or checkbox_name.isspace():
-            print "A checkbox with the given name " + checkbox_name + " was not found."
-
-        elif not page_name or page_name.isspace():
-            print "A page with the given name " + page_name + " was not found."
-
-        elif isinstance(check_yes_no, bool):
+        if isinstance(check_yes_no, bool):
             page = self.findChild(QtGui.QWidget, page_name)
             checkbox = page.findChild(QtGui.QPushButton, checkbox_name)
 
@@ -47,23 +48,11 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
                 checkbox.setChecked(check_yes_no)
 
     def is_checkbox_on_page_checked(self, checkbox_name, page_name):
+        page = self.process_page.findChild(QtGui.QWidget, page_name)
+        return page.findChild(QtGui.QPushButton, checkbox_name).isChecked()
 
-        if not checkbox_name or checkbox_name.isspace():
-            print "A checkbox with the given name " + checkbox_name + " was not found."
-
-        elif not page_name or page_name.isspace():
-            print "A page with the given name " + page_name + " was not found."
-
-        else:
-            page = self.process_page.findChild(QtGui.QWidget, page_name)
-            return page.findChild(QtGui.QPushButton, checkbox_name).isChecked()
-
-    def set_page_done(self, value):
-
-        if not isinstance(value, bool):
-            print "A boolean value has to be passed as a third parameter."
-
-        else:
+    def set_current_page_done(self, value):
+        if isinstance(value, bool):
             page_name = self.active_page_dropdown.currentText()
             page = self.selection_to_page[page_name]
 

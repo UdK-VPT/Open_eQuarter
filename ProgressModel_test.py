@@ -87,6 +87,12 @@ class ProgressModel_test(unittest.TestCase):
         section = self._pages[0]
         self.assertFalse(self._prog_model.is_section_done(section))
 
+        section = self._pages[1]
+        self.assertFalse(self._prog_model.is_section_done(section))
+
+        section = self._pages[2]
+        self.assertFalse(self._prog_model.is_section_done(section))
+
     def test_if_first_section_is_marked_as_done(self):
         section = self._pages[0]
 
@@ -113,6 +119,13 @@ class ProgressModel_test(unittest.TestCase):
 
         self.assertTrue(self._prog_model.is_section_done(section))
 
+    def test_if_section_is_done_if_three_of_four_steps_are_completed(self):
+        section = self._pages[0]
+        for step in self._steps0[:-1]:
+            self._prog_model.update_progress(section, step, True)
+
+        self.assertFalse(self._prog_model.is_section_done(section))
+
     def test_if_first_step_is_done(self):
         section = self._pages[0]
         step = self._steps0[0]
@@ -128,6 +141,14 @@ class ProgressModel_test(unittest.TestCase):
     def test_if_step_is_not_done(self):
         step = self._steps1[2]
         self.assertFalse(self._prog_model.is_step_done(step))
+
+    def test_if_step_list_contains_every_step(self):
+        step_list = set(self._prog_model.get_step_list())
+
+        self.assertEqual(step_list.intersection(set(self._steps0)), set(self._steps0))
+        self.assertEqual(step_list.intersection(set(self._steps1)), set(self._steps1))
+        self.assertEqual(step_list.intersection(set(self._steps2)), set(self._steps2))
+        self.assertEqual(step_list.intersection(set(self._steps3)), set(self._steps3))
 
 if __name__ == '__main__':
     unittest.main()

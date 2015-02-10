@@ -4,7 +4,8 @@ from collections import OrderedDict
 class ProgressModel(object):
     def __init__(self, save_file='default'):
 
-        self.last_step_executed = 0
+        # has to be -1, so the first step (counting from 0) is executed first
+        self.last_step_executed = -1
 
         if save_file == 'default':
             self._project_basics = OrderedDict([('ol_plugin_installed', False), ('pst_plugin_installed', False), ('project_created', False), ('osm_layer_loaded', False)])
@@ -30,8 +31,9 @@ class ProgressModel(object):
         try:
             self._progress[section][step] = is_done
             self.last_step_executed = self.get_position_of_step(step)
+
         except KeyError, error:
-            print error.message
+            print error
 
     def prerequisites_are_given(self, step):
         """
@@ -76,25 +78,40 @@ class ProgressModel(object):
 
     def get_progress_list(self):
         """
-        Return the complete list of all steps and resolve the separation into sections.
-        :return: A list containing every step
+        Resolve the separation into sections and return a list of the booleans corresponding to each step.
+        :return: A list containing the booleans related to every step
         :rtype: list
         """
         progress = []
 
-        pages = self._progress.values()
+        sections = self._progress.values()
 
-        for steps in pages:
+        for steps in sections:
             progress += steps.values()
 
         return progress
+
+    def get_step_list(self):
+        """
+        Resolve the separation into sections and return a list containing each step.
+        :return: A list containing every step
+        :rtype: list
+        """
+
+        steps = []
+        sections = self._progress.values()
+
+        for step_list in sections:
+            steps += step_list
+        
+        return steps
 
     def is_section_done(self, section_name):
         """
         Check if all steps within a section are set to True.
         :param section_name: The name of the section
         :type section_name: str
-        :return: If all steps in the given sectino are done.
+        :return: If all steps in the given section are done.
         :rtype: bool
         """
         section = self._progress[section_name]
@@ -106,7 +123,7 @@ class ProgressModel(object):
         is_done = True
 
         # initially compare with True, if one step is set to False, is_done will be set to false as well and won't be set back to True again
-        for i in range(section_start, section_end):
+        for i in range(section_start, section_end+1):
             is_done = step_done[i] and is_done
 
         return is_done

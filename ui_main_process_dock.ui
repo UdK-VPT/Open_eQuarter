@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>370</width>
-    <height>440</height>
+    <width>374</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>370</width>
-    <height>440</height>
+    <width>374</width>
+    <height>500</height>
    </size>
   </property>
   <property name="styleSheet">
@@ -52,334 +52,389 @@ QStackedWidget QAbstractButton:active {
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <widget class="QStackedWidget" name="process_page">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>50</y>
-      <width>350</width>
-      <height>280</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>350</width>
-      <height>280</height>
-     </size>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Plain</enum>
-    </property>
-    <property name="lineWidth">
-     <number>2</number>
-    </property>
-    <property name="midLineWidth">
-     <number>1</number>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="project_basics_page">
-     <property name="accessibleName">
-      <string>Project Basics</string>
-     </property>
-     <property name="accessibleDescription">
-      <string/>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QProcessButton" name="ol_plugin_installed_chckBox">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Install the Open Street Map Plugin</string>
+         <string>Currently viewing:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QProcessButton" name="pst_plugin_installed_chckBox">
-        <property name="text">
-         <string>Install the PointSamplingTool Plugin</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="project_created_chckBox">
-        <property name="text">
-         <string>Create a new project and save it.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="osm_layer_loaded_chckBox">
-        <property name="text">
-         <string>Open an Open Layers Map</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QComboBox" name="active_page_dropdown"/>
+      </item>
      </layout>
-    </widget>
-    <widget class="QWidget" name="investigation_area_page">
-     <property name="accessibleName">
-      <string>Investigation Area</string>
-     </property>
-     <property name="accessibleDescription">
-      <string/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QProcessButton" name="temp_shapefile_created_chckBox">
-        <property name="text">
-         <string>Create a new Polygon-Shapelayer</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="editing_temp_shapefile_started_chckBox">
-        <property name="text">
-         <string>Activate the edit mode</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="investigation_area_selected_chckBox">
-        <property name="text">
-         <string>Add new features to cover your
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="process_page">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>350</width>
+        <height>280</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>280</height>
+       </size>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="midLineWidth">
+       <number>1</number>
+      </property>
+      <property name="currentIndex">
+       <number>2</number>
+      </property>
+      <widget class="QWidget" name="project_basics_page">
+       <property name="accessibleName">
+        <string>Project Basics</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QProcessButton" name="ol_plugin_installed_chckBox">
+          <property name="text">
+           <string>Install the Open Street Map Plugin</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="pst_plugin_installed_chckBox">
+          <property name="text">
+           <string>Install the PointSamplingTool Plugin</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="project_created_chckBox">
+          <property name="text">
+           <string>Create a new project and save it.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="osm_layer_loaded_chckBox">
+          <property name="text">
+           <string>Open an Open Layers Map</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="investigation_area_page">
+       <property name="accessibleName">
+        <string>Investigation Area</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QProcessButton" name="temp_shapefile_created_chckBox">
+          <property name="text">
+           <string>Create a new Polygon-Shapelayer</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="editing_temp_shapefile_started_chckBox">
+          <property name="text">
+           <string>Activate the edit mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="investigation_area_selected_chckBox">
+          <property name="text">
+           <string>Add new features to cover your
 investigation area with</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="editing_temp_shapefile_stopped_chckBox">
-        <property name="text">
-         <string>Deactivate the edit mode</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="building_shapes_page">
-     <property name="accessibleName">
-      <string>Building Shapes</string>
-     </property>
-     <property name="accessibleDescription">
-      <string/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QProcessButton" name="raster_loaded_chckBox">
-        <property name="text">
-         <string>Load a new (wms) raster-map</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="extent_clipped_chckBox">
-        <property name="text">
-         <string>Export the investigation areas extent as .tif</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="pyramids_built_chckBox">
-        <property name="text">
-         <string>Open the created .tif-file and build pyramids</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="sampling_points_page">
-     <property name="accessibleName">
-      <string>Point Sampling</string>
-     </property>
-     <property name="accessibleDescription">
-      <string/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
-      <item>
-       <widget class="QProcessButton" name="temp_pointlayer_created_chckBox">
-        <property name="text">
-         <string>Create a new Pointlayer</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="editing_temp_pointlayer_started_chckBox">
-        <property name="text">
-         <string>Activate the edit mode</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="points_of_interest_defined_chckBox">
-        <property name="text">
-         <string>Add new features to mark the buildings 
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="editing_temp_shapefile_stopped_chckBox">
+          <property name="text">
+           <string>Deactivate the edit mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="building_shapes_page">
+       <property name="accessibleName">
+        <string>Building Shapes</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QProcessButton" name="raster_loaded_chckBox">
+          <property name="text">
+           <string>Load a new (wms) raster-map</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="extent_clipped_chckBox">
+          <property name="text">
+           <string>Export the investigation areas extent as .tif</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="pyramids_built_chckBox">
+          <property name="text">
+           <string>Open the created .tif-file and build pyramids</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="sampling_points_page">
+       <property name="accessibleName">
+        <string>Point Sampling</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QProcessButton" name="temp_pointlayer_created_chckBox">
+          <property name="text">
+           <string>Create a new Pointlayer</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="editing_temp_pointlayer_started_chckBox">
+          <property name="text">
+           <string>Activate the edit mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="points_of_interest_defined_chckBox">
+          <property name="text">
+           <string>Add new features to mark the buildings 
 you want to extract information from</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="editing_temp_pointlayer_stopped_chckBox">
-        <property name="text">
-         <string>Deactivate the edit mode</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProcessButton" name="information_sampled_chckBox">
-        <property name="text">
-         <string>Use the point-sampling-tool to extract
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="editing_temp_pointlayer_stopped_chckBox">
+          <property name="text">
+           <string>Deactivate the edit mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="information_sampled_chckBox">
+          <property name="text">
+           <string>Use the point-sampling-tool to extract
 the information</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="button_layout">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Cancel</string>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer_4">
+       <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="process_button_prev">
+        <property name="text">
+         <string>Previous</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Icons/Icons/arrow_left.png</normaloff>:/Icons/Icons/arrow_left.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="process_button_next">
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Next </string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Icons/Icons/arrow_right.png</normaloff>:/Icons/Icons/arrow_right.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="vertical_logo_spacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>32</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="logo_layout">
+      <item>
+       <widget class="QClickableLabel" name="oeq_clickable_logo">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="resources.qrc">:/Icons/Icons/programmlogo.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
      </layout>
-    </widget>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>11</x>
-      <y>17</y>
-      <width>121</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Currently viewing:</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="active_page_dropdown">
-    <property name="geometry">
-     <rect>
-      <x>143</x>
-      <y>20</y>
-      <width>221</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>335</y>
-      <width>351</width>
-      <height>56</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>5</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="process_button_prev">
-       <property name="text">
-        <string>&lt; Previous</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="process_button_next">
-       <property name="text">
-        <string>Next &gt;</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <customwidgets>
@@ -388,10 +443,14 @@ the information</string>
    <extends>QPushButton</extends>
    <header>ui_process_button</header>
   </customwidget>
+  <customwidget>
+   <class>QClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>ui_clickable_label</header>
+  </customwidget>
  </customwidgets>
  <resources>
-  <include location="../OpenEQuartersMain/resources.qrc"/>
-  <include location="../OpenEQuartersMain/resources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

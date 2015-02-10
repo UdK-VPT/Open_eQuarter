@@ -36,7 +36,7 @@ import time
 import LayerInteraction
 
 
-class SaveSelectionWithPyramid:
+class ExportWMSasTif:
 
 
     def __init__(self, iface):

@@ -17,16 +17,24 @@ class ProgressModel_test(unittest.TestCase):
         for step in self._steps0:
             self._prog_model.update_progress(self._pages[0], step, True)
 
+        self.assertEqual(self._prog_model.last_step_executed, 3)
+
         for step in self._steps1:
             self._prog_model.update_progress(self._pages[1], step, True)
+
+        self.assertEqual(self._prog_model.last_step_executed, 7)
 
         for step in self._steps2:
             self._prog_model.update_progress(self._pages[2], step, True)
 
+        self.assertEqual(self._prog_model.last_step_executed, 10)
+
         for step in self._steps3:
             self._prog_model.update_progress(self._pages[3], step, True)
 
+        self.assertEqual(self._prog_model.last_step_executed, 15)
         self.assertRaises(KeyError, self._prog_model.update_progress(self._steps0[1], self._pages[1], False))
+        self.assertEqual(self._prog_model.last_step_executed, 15)
 
     def test_prerequisites_when_nothing_is_true(self):
         self.assertFalse(self._prog_model.prerequisites_are_given('information_sampled'))
@@ -86,7 +94,6 @@ class ProgressModel_test(unittest.TestCase):
             self._prog_model.update_progress(section, step, True)
 
         self.assertTrue(self._prog_model.is_section_done(section))
-
 
     def test_open_section_if_previous_section_is_done(self):
         prev_section = self._pages[0]

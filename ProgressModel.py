@@ -4,6 +4,8 @@ from collections import OrderedDict
 class ProgressModel(object):
     def __init__(self, save_file='default'):
 
+        self.last_step_executed = 0
+
         if save_file == 'default':
             self._project_basics = OrderedDict([('ol_plugin_installed', False), ('pst_plugin_installed', False), ('project_created', False), ('osm_layer_loaded', False)])
             self._investigation_area = OrderedDict([('temp_shapefile_created', False), ('editing_temp_shapefile_started', False), ('investigation_area_selected', False), ('editing_temp_shapefile_stopped', False)])
@@ -27,12 +29,21 @@ class ProgressModel(object):
         """
         try:
             self._progress[section][step] = is_done
+            self.last_step_executed = self.get_position_of_step(step)
         except KeyError, error:
             print error.message
 
     def prerequisites_are_given(self, step):
+        """
+        Check if each predecessor within the section of the given step was set to 'True'
+        :param step: The name of the step whose prerequisites/predecessors shall be checked
+        :type step: str
+        :return: If all steps prior to the given step are set to True
+        :rtype: bool
+        """
         position = self.get_position_of_step(step)
 
+        # since the first step (at position 0) has no prerequisites, True can be returned
         if position == 0:
             return True
 
@@ -46,6 +57,13 @@ class ProgressModel(object):
         return prerequisites_given
 
     def get_position_of_step(self, step):
+        """
+        Returns the position of the step within the progress. The position refers to the order in which the steps shall be executed.
+        :param step: Name of the step
+        :type step: str
+        :return: The order number of the step
+        :rtype: int
+        """
         position = 0
         pages = self._progress.values()
 
@@ -57,17 +75,28 @@ class ProgressModel(object):
                     position += 1
 
     def get_progress_list(self):
+        """
+        Return the complete list of all steps and resolve the separation into sections.
+        :return: A list containing every step
+        :rtype: list
+        """
         progress = []
 
         pages = self._progress.values()
 
         for steps in pages:
-            for current_step in steps.values():
-                progress.append(current_step)
+            progress += steps.values()
 
         return progress
 
     def is_section_done(self, section_name):
+        """
+        Check if all steps within a section are set to True.
+        :param section_name: The name of the section
+        :type section_name: str
+        :return: If all steps in the given sectino are done.
+        :rtype: bool
+        """
         section = self._progress[section_name]
         section_last_ele = section.keys()[-1]
         section_end = self.get_position_of_step(section_last_ele)
@@ -76,10 +105,18 @@ class ProgressModel(object):
         step_done = self.get_progress_list()
         is_done = True
 
+        # initially compare with True, if one step is set to False, is_done will be set to false as well and won't be set back to True again
         for i in range(section_start, section_end):
             is_done = step_done[i] and is_done
 
         return is_done
 
     def is_step_done(self, step):
+        """
+        Check if the given step is set to true.
+        :param step:
+        :type step:
+        :return:
+        :rtype:
+        """
         return self.get_progress_list()[self.get_position_of_step(step)]

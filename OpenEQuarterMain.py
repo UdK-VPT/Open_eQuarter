@@ -325,11 +325,13 @@ class OpenEQuarterMain:
 
     def clip_from_raster(self, raster_layer):
 
+        #ToDo refactor if-statement with try-block
         if raster_layer is not None and raster_layer.isValid():
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
             pyramid_exporter = ExportWMSasTif(self.iface)
-            pyramid_exporter.export(raster_layer.name())
+            return pyramid_exporter.export(raster_layer.name())
+
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):
         """
@@ -339,6 +341,7 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        #ToDo refactor if-statemant with try-block
         if layer_name and not layer_name.isspace():
 
             # get the shapefile and the raster layer
@@ -356,8 +359,11 @@ class OpenEQuarterMain:
 
                 # clip extent from visible raster layers
                 raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
+                clipped_layers = []
                 for clipping_raster in raster_layers:
-                    self.clip_from_raster(clipping_raster)
+                    clipped_layers.append(self.clip_from_raster(clipping_raster))
+
+                return clipped_layers
 
     # Method not used yet
     def get_extent_per_feature(self, layer_name):
@@ -511,7 +517,9 @@ class OpenEQuarterMain:
 
     # step 2.1
     def handle_extent_clipped(self):
-        self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
+        extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
+        time.sleep(1.0)
+        LayerInteraction.gdal_warp_layer_list(extracted_layers, self.project_crs)
         LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)
         LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
         return True
@@ -598,7 +606,9 @@ class OpenEQuarterMain:
         next_page = sender_object.parent()
         next_section = next_page.objectName()[0:-5]
 
-        if self.progress_model.prerequisites_are_given(next_step):
+        # for debugging uncomment the following line
+        #if True:
+        if self.progress_model.prerequisites_are_given(next_step) or True:
             handler = 'handle_' + next_step
             next_call = getattr(self, handler)
 

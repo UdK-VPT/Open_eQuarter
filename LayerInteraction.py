@@ -1,6 +1,10 @@
+import subprocess
 from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer
 from PyQt4.QtCore import QSettings
 from os import path
+import time
+import GdalUtils
+import platform
 
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
@@ -249,6 +253,44 @@ def biuniquify_layer_name(layer_name):
             suffix += 1
 
     return biunique_name
+
+def change_crs_of_layers(layer_list, dest_crs):
+
+    for layer_name in layer_list:
+        layer = find_layer_by_name(layer_name)
+
+        if layer and layer.isValid():
+            layer.setCrs(dest_crs)
+
+def gdal_warp_layer_list(layer_list, target_crs):
+
+    for layer_name in layer_list:
+        layer = find_layer_by_name(layer_name)
+
+        if layer and layer.isValid():
+            input_path = layer.publicSource()
+            out_path = path.dirname(input_path)
+            out_path = path.join(out_path, layer.name() + '_transformed.tif')
+
+            # setup the MacOSX path to both GDAL executables and python modules
+            if platform.system() == 'Darwin':
+                GdalUtils.setMacOSXDefaultEnvironment()
+
+            environment = GdalUtils.setProcessEnvironment()
+
+            # wait until the file exists to add geo-references
+            while not path.exists(input_path):
+                time.sleep(0.1)
+
+
+
+            cmd = ['gdalwarp', '-t_srs', str(target_crs), input_path, out_path]
+
+            gdalwarp = subprocess.Popen(cmd, env=environment)
+
+            #ToDo Add timeout function
+            return gdalwarp.wait()
+
 
 
 

@@ -245,7 +245,7 @@ class ExportWMSasTif:
 
             # wait until the file exists to add geo-references
             while not os.path.exists(filename):
-                time.sleep(0.3)
+                time.sleep(0.1)
 
 
             referencing = self.add_geo_reference(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry, environment)
@@ -273,7 +273,7 @@ class ExportWMSasTif:
         while not os.path.exists(recent_file_name):
             time.sleep(0.2)
 
-        if not self.crs or self.crs.isspace() or not QgsCoordinateReferenceSystem().createFromUserInput(self.crs):
+        if not self.crs or self.crs.isspace() or not QgsCoordinateReferenceSystem(self.crs):
             # crs is not valid
             # save current settings and set Qgis to prompt for CRS
             old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))

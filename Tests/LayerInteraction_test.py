@@ -1,5 +1,5 @@
 from unittest import TestCase
-from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer
+from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
 from os import path, remove, walk
 from PyQt4 import QtCore
 from .. import LayerInteraction
@@ -207,7 +207,11 @@ class LayerInteraction_test(TestCase):
 
     def test_get_wms_layer_list(self):
         wms_url_with_parameters = self.valid_wms_url
+        # use this list for proper testing...
         visibility = [True, False, True, True, True, False]
+        # when debuggng, use the list below instead
+        # visibility = [True]
+
 
         for i, visible in enumerate(visibility):
             layer_name = LayerInteraction.biuniquify_layer_name('r{0}_visible:{1}'.format(i, visible))
@@ -325,3 +329,28 @@ class LayerInteraction_test(TestCase):
         self.assertEqual(layer1_name +'1', LayerInteraction.biuniquify_layer_name(layer1_name))
         self.assertEqual(layer1_name +'2', LayerInteraction.biuniquify_layer_name(layer1_name + str(2)))
         self.assertEqual(layer2_name +'0', LayerInteraction.biuniquify_layer_name(layer2_name))
+
+    def test_change_group_crs(self):
+        layer1_name = 'asdhhkhlu18927309hgdkaghdzuz7817982_unique'
+        layer2_name = 'asdhhkhlu18927309hgdkaghdzuz781712ziadgwz_unique'
+        layer1 = QgsVectorLayer('Polygon?crs=EPSG:3068', layer1_name, 'memory', False)
+        layer2 = QgsVectorLayer('Polygon?crs=EPSG:4326', layer2_name, 'memory', False)
+        self.layer_list.extend([layer1_name, layer2_name])
+
+        reg = QgsMapLayerRegistry.instance()
+        reg.addMapLayer(layer1)
+        reg.addMapLayer(layer2)
+
+        layer_group = [layer1.name(), layer2.name()]
+        target_crs = QgsCoordinateReferenceSystem('EPSG:3857')
+        LayerInteraction.change_crs_of_layers(layer_group,target_crs)
+
+        self.assertEqual(layer1.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer1.name()))
+        self.assertEqual(layer2.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer2.name()))
+
+    # ToDo
+    def test_gdal_warp_layer_list(self):
+        pass
+
+
+

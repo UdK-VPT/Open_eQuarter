@@ -23,13 +23,13 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+from platform import system
 
 # Import additional packages
 import numpy
 import GdalUtils
 import os
 import subprocess
-import platform
 import time
 
 # Import self-written packages
@@ -237,17 +237,35 @@ class ExportWMSasTif:
         # the image was created and shall get geo-referenced
         elif geo_ref:
             # setup the MacOSX path to both GDAL executables and python modules
-            if platform.system() == 'Darwin':
+            if system() == 'Darwin':
                 GdalUtils.setMacOSXDefaultEnvironment()
 
             environment = GdalUtils.setProcessEnvironment()
+
+            if system() == 'Windows':
+                # The gdal-processing executables are located at <QGIS Installation folder>\bin
+                # The gcs.csv-file (required as a GDAL_DATA env-var) is stored in <QGIS Installation folder>\share\gdal
+                # The projection files (required as a PROJ_LIB env-var) are stored in <QGIS Installation folder>\share\proj
+                # prefixPath() returns <QGIS Installation folder>\apps\qgis
+                gdal_location = os.path.join(QgsApplication.prefixPath(), '..', '..', 'bin')
+                gdal_data = os.path.join(QgsApplication.prefixPath(), '..', '..', 'share', 'gdal')
+                gdal_python_tools = os.path.join(QgsApplication.prefixPath(), 'python', 'plugins', 'GdalTools')
+                gdal_projection = os.path.join(QgsApplication.prefixPath(), '..', '..', 'share', 'proj')
+                environment['PATH'] = str(os.path.abspath(gdal_location))
+                environment['PYTHONPATH'] = str(os.path.abspath(gdal_python_tools))
+                environment['GDAL_DATA'] = str(os.path.abspath(gdal_data))
+                environment['PROJ_LIB'] = str(os.path.abspath(gdal_projection))
+
+
             dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
 
             # wait until the file exists to add geo-references
-            while not os.path.exists(filename):
+            no_timeout = 50
+            while not os.path.exists(filename) and no_timeout:
                 time.sleep(0.1)
+                no_timeout -= 1
 
-
+            print environment
             referencing = self.add_geo_reference(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry, environment)
 
             if referencing != 0:
@@ -255,8 +273,10 @@ class ExportWMSasTif:
 
             if pyramids > 0:
                 # wait until the geo-referenced file was created before building pyramids
-                while not os.path.exists(dest_filename):
+                no_timeout = 30
+                while not os.path.exists(dest_filename) and no_timeout:
                     time.sleep(0.1)
+                    no_timeout -= 1
                 building_pyramids = self.build_pyramids(dest_filename, self.res_algorithm, self.number_of_pyramids, environment)
 
                 if building_pyramids != 0:
@@ -379,6 +399,7 @@ class ExportWMSasTif:
         cmd = ['gdal_translate', '-a_srs', crs, '-a_ullr', repr(ulx), repr(uly), repr(lrx), repr(lry), str(file.encode('utf-8')),
                str(dst_filename.encode('utf-8'))]
 
+        print " ".join(cmd)
         # Error code 127 corresponds to 'command not found'
         gdal_process = subprocess.Popen(cmd, env=environment)
 

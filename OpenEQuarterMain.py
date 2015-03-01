@@ -88,9 +88,9 @@ class OpenEQuarterMain:
 
 
         ### Default values
-        # default extent, after the OSM-layer was loaded (currently: extent of Germany)
-        self.default_extent = QgsRectangle(numpy.float64(480310.4063808322), numpy.float64(5930330.009070959),
-                                           numpy.float64(1813151.46638856), numpy.float64(7245291.493883461))
+        # default extent, after the OSM-layer was loaded (currently: extent of Berlin - Germany)
+        self.default_extent = QgsRectangle(numpy.float64(1541791.863584674), numpy.float64(6929650.281509268),
+                                           numpy.float64(1434669.8536058515), numpy.float64(6847465.188708487))
         self.default_extent_crs = 'EPSG:3857'
         self.default_scale = 4607478
 
@@ -145,6 +145,8 @@ class OpenEQuarterMain:
     def unload(self):
         # Remove the plugin menu item and icon
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
+        self.iface.removePluginMenu(u"&OpenEQuarter", self.clipping_action)
+        self.iface.removePluginMenu(u"&OpenEQuarter", self.testing_action)
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
         self.iface.removeToolBarIcon(self.testing_action)
@@ -348,7 +350,7 @@ class OpenEQuarterMain:
             investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
 
             # if the shapefile was found set the layer active
-            if investigation_shape is not None:
+            if investigation_shape is not None and investigation_shape.featureCount() > 0:
                 self.iface.setActiveLayer(investigation_shape)
                 view_actions = self.iface.viewMenu().actions()
 
@@ -522,6 +524,22 @@ class OpenEQuarterMain:
         LayerInteraction.gdal_warp_layer_list(extracted_layers, self.project_crs)
         LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)
         LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
+
+        for layer_name in extracted_layers:
+            layer = LayerInteraction.find_layer_by_name(layer_name)
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+            path = layer.publicSource()
+            LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
+            #os.remove(path)
+            path = path.replace('_geo.tif', '_transformed.tif')
+            rlayer = QgsRasterLayer(path, layer_name)
+            rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+            self.iface.mapCanvas().refresh()
+            # restore former settings
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+
         return True
 
     # step 2.2
@@ -607,8 +625,8 @@ class OpenEQuarterMain:
         next_section = next_page.objectName()[0:-5]
 
         # for debugging uncomment the following line
-        #if True:
-        if self.progress_model.prerequisites_are_given(next_step) or True:
+        if True:
+        #if self.progress_model.prerequisites_are_given(next_step) or True:
             handler = 'handle_' + next_step
             next_call = getattr(self, handler)
 

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="Icons">
+    <file>Icons/autorun.png</file>
     <file>Icons/arrow_left.png</file>
     <file>Icons/arrow_right.png</file>
     <file>Icons/programmlogo.png</file>

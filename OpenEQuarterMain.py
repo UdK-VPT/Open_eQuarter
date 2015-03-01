@@ -136,6 +136,7 @@ class OpenEQuarterMain:
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
 
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
+        self.main_process_dock.process_button_auto.clicked.connect(self.auto_run)
 
         for page in self.main_process_dock.selection_to_page.values():
             for button in page.children():
@@ -649,3 +650,23 @@ class OpenEQuarterMain:
             suite.addTest(test_class(test_method, self.iface))
 
         unittest.TextTestRunner(sys.stdout).run(suite)
+
+    def auto_run(self):
+        steps = self.progress_model.get_step_list()
+
+        for i in range(0,17):
+
+            if self.iface.mapCanvas().isDrawing():
+                i -= 1
+            else:
+                try:
+                    next = self.progress_model.last_step_executed + 1
+                    print steps[next]
+                    time.sleep(1.5)
+                    self.continue_process()
+                except IndexError, error:
+                    print error
+
+
+
+

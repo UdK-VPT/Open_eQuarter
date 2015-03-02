@@ -155,7 +155,7 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
     """
     Iterate over all layers and activate the Layer called layer_name. Then toggle the edit mode of that layer.
     :param iface: The Qgis-interface that will be accessed
-    :type iface: QgsInterface
+    :type iface: QgisInterface
     :param layer_name: Name of the layer, that shall be switched to edit_mode
     :type layer_name: str
     :return:
@@ -178,10 +178,10 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
 def get_wms_layer_list(iface, visibility='all'):
     """
     Iterate over all layers and return a list of the currently visible WMS-files.
-    :param iface:
-    :type iface:
-    :return:
-    :rtype:
+    :param iface: The Qgis-interface that will be accessed
+    :type iface: QgisInterface
+    :return: A list containing raster layers with the given visibility-value
+    :rtype: list
     """
     active_wms_layers = []
     layer_list = QgsMapLayerRegistry.instance().mapLayers()
@@ -299,13 +299,9 @@ def gdal_warp_layer_list(layer_list, target_crs):
             while not path.exists(input_path):
                 time.sleep(0.1)
 
-
-
             cmd = ['gdalwarp', '-s_srs', str(source_crs),'-t_srs', str(target_crs), input_path, out_path]
 
-            print " ".join(cmd)
             gdalwarp = subprocess.Popen(cmd, env=environment)
-            print out_path
 
             #ToDo Add timeout function
             return gdalwarp.wait()

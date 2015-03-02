@@ -399,7 +399,6 @@ class ExportWMSasTif:
         cmd = ['gdal_translate', '-a_srs', crs, '-a_ullr', repr(ulx), repr(uly), repr(lrx), repr(lry), str(file.encode('utf-8')),
                str(dst_filename.encode('utf-8'))]
 
-        print " ".join(cmd)
         # Error code 127 corresponds to 'command not found'
         gdal_process = subprocess.Popen(cmd, env=environment)
 

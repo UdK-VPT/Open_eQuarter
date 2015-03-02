@@ -173,8 +173,6 @@ class OpenEQuarterMain:
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
-                project_actions = self.iface.projectMenu().actions()
-
                 # trigger qgis "Save As"-function
                 iface.actionSaveProjectAs().trigger()
 
@@ -332,13 +330,15 @@ class OpenEQuarterMain:
 
     def clip_from_raster(self, raster_layer):
 
-        #ToDo refactor if-statement with try-block
-        if raster_layer is not None and raster_layer.isValid():
+        try:
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
             pyramid_exporter = ExportWMSasTif(self.iface)
             return pyramid_exporter.export(raster_layer.name())
 
+        except None as exception:
+            print exception
+            return None
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):
         """
@@ -348,29 +348,30 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        #ToDo refactor if-statemant with try-block
-        if layer_name and not layer_name.isspace():
-
-            # get the shapefile and the raster layer
+        try:
             investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
 
-            # if the shapefile was found set the layer active
+            # an investigation shape is needed, to trigger the zoom to layer function
             if investigation_shape is not None and investigation_shape.featureCount() > 0:
-                self.iface.setActiveLayer(investigation_shape)
-                view_actions = self.iface.viewMenu().actions()
 
-                # trigger the "zoom to layer"-function on the formerly activated layer
-                for act in view_actions:
-                    if act.text() == 'Zoom to Layer':
-                        act.trigger()
+                # zoom
+                self.iface.setActiveLayer(investigation_shape)
+                self.iface.actionZoomToLayer().trigger()
 
                 # clip extent from visible raster layers
+                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
                 raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
+                for layer in raster_layers:
+                    self.iface.legendInterface().setLayerVisible(layer, False)
+
                 clipped_layers = []
                 for clipping_raster in raster_layers:
                     clipped_layers.append(self.clip_from_raster(clipping_raster))
 
                 return clipped_layers
+        except None as exception:
+            print exception
+            return None
 
     # Method not used yet
     def get_extent_per_feature(self, layer_name):
@@ -531,19 +532,24 @@ class OpenEQuarterMain:
         LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
 
         for layer_name in extracted_layers:
-            layer = LayerInteraction.find_layer_by_name(layer_name)
-            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
-            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
-            path = layer.publicSource()
-            LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
-            #os.remove(path)
-            path = path.replace('_geo.tif', '_transformed.tif')
-            rlayer = QgsRasterLayer(path, layer_name)
-            rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
-            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-            self.iface.mapCanvas().refresh()
-            # restore former settings
-            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+
+            try:
+                layer = LayerInteraction.find_layer_by_name(layer_name)
+                old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+                QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+                path_geo = layer.publicSource()
+                LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
+                path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
+                rlayer = QgsRasterLayer(path_transformed, layer_name)
+                rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
+                QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+                os.remove(path_geo)
+                self.iface.mapCanvas().refresh()
+                # restore former settings
+                QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+            except OSError as e:
+                print(e)
+                pass
 
         return True
 

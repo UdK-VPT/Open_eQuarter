@@ -114,7 +114,7 @@ class OpenEQuarterMain:
     def initGui(self):
 
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'main.png'))
+        plugin_icon = QIcon(os.path.join(':/Icons/Icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)
@@ -653,17 +653,19 @@ class OpenEQuarterMain:
 
     def auto_run(self):
         steps = self.progress_model.get_step_list()
+        next = self.progress_model.last_step_executed
 
-        for i in range(0,17):
-
+        for i in range(len(steps)):
+            print i
             if self.iface.mapCanvas().isDrawing():
-                i -= 1
+                i - 1
             else:
                 try:
                     next = self.progress_model.last_step_executed + 1
                     print steps[next]
                     time.sleep(1.5)
                     self.continue_process()
+                    i = next
                 except IndexError, error:
                     print error
 

@@ -425,11 +425,17 @@ the information</string>
      <layout class="QHBoxLayout" name="logo_layout">
       <item>
        <widget class="QClickableLabel" name="oeq_clickable_logo">
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>57</height>
+         </size>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>:/Icons/Icons/programmlogo.png</pixmap>
+         <pixmap resource="resources.qrc">:/Icons/Icons/OeQ_logo_footer.png</pixmap>
         </property>
        </widget>
       </item>

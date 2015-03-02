@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_main_process_dock.ui'
 #
-# Created: Sun Mar 01 22:27:12 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Mon Mar  2 10:42:51 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -201,8 +201,9 @@ class Ui_MainProcess_dock(object):
         self.logo_layout = QtGui.QHBoxLayout()
         self.logo_layout.setObjectName(_fromUtf8("logo_layout"))
         self.oeq_clickable_logo = QClickableLabel(self.dockWidgetContents)
+        self.oeq_clickable_logo.setMinimumSize(QtCore.QSize(350, 57))
         self.oeq_clickable_logo.setText(_fromUtf8(""))
-        self.oeq_clickable_logo.setPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/programmlogo.png")))
+        self.oeq_clickable_logo.setPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/OeQ_logo_footer.png")))
         self.oeq_clickable_logo.setObjectName(_fromUtf8("oeq_clickable_logo"))
         self.logo_layout.addWidget(self.oeq_clickable_logo)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

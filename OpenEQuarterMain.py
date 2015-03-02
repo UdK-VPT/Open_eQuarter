@@ -25,6 +25,7 @@ from qgis.core import *
 from qgis.utils import iface, plugins
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from ProjectSettings_form import ProjectSettings_form
 
 import resources_rc
 from MainProcess_dock import MainProcess_dock
@@ -32,6 +33,7 @@ from ProgressModel import ProgressModel
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
+from ProjectSettings_form import ProjectSettings_form
 from PstInteraction import *
 from OlInteraction import *
 import LayerInteraction
@@ -58,6 +60,7 @@ class OpenEQuarterMain:
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
         self.main_process_dock = MainProcess_dock()
+        self.oeq_project_settings_form = ProjectSettings_form()
 
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
@@ -67,8 +70,9 @@ class OpenEQuarterMain:
 
         ### Project specific settings
         # the project path is './' as long as the project has not been saved
-        self.project_path = QgsProject.instance().readPath('./')
+        self.project_path = QgsProject.instance().readPath('')
         self.project_crs = 'EPSG:3857'  # ToDo set crs back to 4326
+        self.oeq_project = ''
 
 
         ### Information needed to use external plugins
@@ -638,6 +642,10 @@ class OpenEQuarterMain:
 
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
+
+        if self.oeq_project == '':
+            self.oeq_project_settings_form.show()
+
 
 
     def run_tests(self):

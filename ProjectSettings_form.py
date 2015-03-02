@@ -21,10 +21,11 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
+from ui_project_settings_form import Ui_project_settings_form
+from functools import partial
 
 
-class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
+class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
     def __init__(self):
         QtGui.QDialog.__init__(self)
@@ -34,4 +35,14 @@ class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.defaults = {}
+
+        for field in self.form.findChildren(QtGui.QLineEdit)[:]:
+            self.defaults[field.objectName()] = field.text()
+            field.textChanged.connect(partial(self.text_changed, field))
+
+
+    def text_changed(self, input_field):
+        if input_field.text() != self.defaults[input_field.objectName()]:
+            input_field.setStyleSheet('color: rgb(0,0,0)')
+

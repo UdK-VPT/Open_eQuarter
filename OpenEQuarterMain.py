@@ -535,6 +535,7 @@ class OpenEQuarterMain:
 
             try:
                 layer = LayerInteraction.find_layer_by_name(layer_name)
+                # change validation to surpress missing-crs prompt
                 old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                 QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
                 path_geo = layer.publicSource()

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/qt/ui_main_process_dock.ui'
 #
-# Created: Tue Mar  3 11:14:16 2015
+# Created: Tue Mar  3 15:20:20 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainProcess_dock(object):
     def setupUi(self, MainProcess_dock):
         MainProcess_dock.setObjectName(_fromUtf8("MainProcess_dock"))
-        MainProcess_dock.resize(374, 500)
+        MainProcess_dock.resize(374, 516)
         MainProcess_dock.setMinimumSize(QtCore.QSize(374, 500))
         MainProcess_dock.setStyleSheet(_fromUtf8("QStackedWidget QWidget { \n"
 "    text-align: left; \n"
@@ -39,8 +39,8 @@ class Ui_MainProcess_dock(object):
 "    max-width: 320px;\n"
 "    min-height: 32px;\n"
 "    max-height: 40px;\n"
-"    qproperty-icon: url(\":/Icons/Icons/openmark.png\") off,\n"
-"                            url(\":/Icons/Icons/checkmark.png\") on ;\n"
+"    qproperty-icon: url(\":/Controls/Icons/openmark.png\") off,\n"
+"                            url(\":/Controls/Icons/checkmark.png\") on ;\n"
 "    qproperty-iconSize: 17px; \n"
 "    qproperty-flat: true;\n"
 "    qproperty-checkable: true;\n"
@@ -63,6 +63,14 @@ class Ui_MainProcess_dock(object):
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.settings_dropdown_btn = QtGui.QToolButton(self.dockWidgetContents)
+        self.settings_dropdown_btn.setText(_fromUtf8(""))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/Icons/gearwheel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.settings_dropdown_btn.setIcon(icon)
+        self.settings_dropdown_btn.setIconSize(QtCore.QSize(17, 17))
+        self.settings_dropdown_btn.setObjectName(_fromUtf8("settings_dropdown_btn"))
+        self.horizontalLayout_3.addWidget(self.settings_dropdown_btn)
         self.label = QtGui.QLabel(self.dockWidgetContents)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
@@ -176,22 +184,22 @@ class Ui_MainProcess_dock(object):
         self.button_layout.addItem(spacerItem5)
         self.process_button_auto = QtGui.QPushButton(self.dockWidgetContents)
         self.process_button_auto.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/autorun.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_auto.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/Icons/autorun.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_auto.setIcon(icon1)
         self.process_button_auto.setObjectName(_fromUtf8("process_button_auto"))
         self.button_layout.addWidget(self.process_button_auto)
         self.process_button_prev = QtGui.QPushButton(self.dockWidgetContents)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/arrow_left.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_prev.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/Icons/arrow_left.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_prev.setIcon(icon2)
         self.process_button_prev.setObjectName(_fromUtf8("process_button_prev"))
         self.button_layout.addWidget(self.process_button_prev)
         self.process_button_next = QtGui.QPushButton(self.dockWidgetContents)
         self.process_button_next.setLayoutDirection(QtCore.Qt.RightToLeft)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/arrow_right.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_next.setIcon(icon2)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/Icons/arrow_right.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_next.setIcon(icon3)
         self.process_button_next.setIconSize(QtCore.QSize(16, 16))
         self.process_button_next.setObjectName(_fromUtf8("process_button_next"))
         self.button_layout.addWidget(self.process_button_next)
@@ -203,7 +211,7 @@ class Ui_MainProcess_dock(object):
         self.oeq_clickable_logo = QClickableLabel(self.dockWidgetContents)
         self.oeq_clickable_logo.setMinimumSize(QtCore.QSize(350, 57))
         self.oeq_clickable_logo.setText(_fromUtf8(""))
-        self.oeq_clickable_logo.setPixmap(QtGui.QPixmap(_fromUtf8(":/Icons/Icons/OeQ_logo_footer.png")))
+        self.oeq_clickable_logo.setPixmap(QtGui.QPixmap(_fromUtf8(":/Brands/Icons/OeQ_logo_footer.png")))
         self.oeq_clickable_logo.setObjectName(_fromUtf8("oeq_clickable_logo"))
         self.logo_layout.addWidget(self.oeq_clickable_logo)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -212,7 +220,7 @@ class Ui_MainProcess_dock(object):
         MainProcess_dock.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(MainProcess_dock)
-        self.process_page.setCurrentIndex(2)
+        self.process_page.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(MainProcess_dock)
 
     def retranslateUi(self, MainProcess_dock):

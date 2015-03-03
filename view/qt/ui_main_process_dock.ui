@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>374</width>
-    <height>500</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,8 +28,8 @@ QStackedWidget QAbstractButton {
 	max-width: 320px;
 	min-height: 32px;
 	max-height: 40px;
-	qproperty-icon: url(&quot;:/Icons/Icons/openmark.png&quot;) off,
-							url(&quot;:/Icons/Icons/checkmark.png&quot;) on ;
+	qproperty-icon: url(&quot;:/Controls/Icons/openmark.png&quot;) off,
+							url(&quot;:/Controls/Icons/checkmark.png&quot;) on ;
 	qproperty-iconSize: 17px; 
 	qproperty-flat: true;
 	qproperty-checkable: true;
@@ -55,6 +55,23 @@ QStackedWidget QAbstractButton:active {
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QToolButton" name="settings_dropdown_btn">
+        <property name="text">
+         <string notr="true"/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/Icons/gearwheel.png</normaloff>:/Controls/Icons/gearwheel.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>17</width>
+          <height>17</height>
+         </size>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
@@ -116,7 +133,7 @@ QStackedWidget QAbstractButton:active {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="project_basics_page">
        <property name="accessibleName">
@@ -371,7 +388,7 @@ the information</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/Icons/Icons/autorun.png</normaloff>:/Icons/Icons/autorun.png</iconset>
+          <normaloff>:/Controls/Icons/autorun.png</normaloff>:/Controls/Icons/autorun.png</iconset>
         </property>
        </widget>
       </item>
@@ -382,7 +399,7 @@ the information</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/Icons/Icons/arrow_left.png</normaloff>:/Icons/Icons/arrow_left.png</iconset>
+          <normaloff>:/Controls/Icons/arrow_left.png</normaloff>:/Controls/Icons/arrow_left.png</iconset>
         </property>
        </widget>
       </item>
@@ -396,7 +413,7 @@ the information</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/Icons/Icons/arrow_right.png</normaloff>:/Icons/Icons/arrow_right.png</iconset>
+          <normaloff>:/Controls/Icons/arrow_right.png</normaloff>:/Controls/Icons/arrow_right.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -435,7 +452,7 @@ the information</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="resources.qrc">:/Icons/Icons/OeQ_logo_footer.png</pixmap>
+         <pixmap resource="resources.qrc">:/Brands/Icons/OeQ_logo_footer.png</pixmap>
         </property>
        </widget>
       </item>

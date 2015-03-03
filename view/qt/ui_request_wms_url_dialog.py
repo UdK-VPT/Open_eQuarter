@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/qt/ui_request_wms_url_dialog.ui'
 #
-# Created: Tue Mar  3 11:14:16 2015
+# Created: Tue Mar  3 15:20:20 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!

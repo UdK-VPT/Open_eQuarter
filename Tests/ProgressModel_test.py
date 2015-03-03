@@ -1,6 +1,6 @@
 import unittest
 
-from ProgressModel import *
+from model.ProgressModel import *
 
 
 class ProgressModel_test(unittest.TestCase):

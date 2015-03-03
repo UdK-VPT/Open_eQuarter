@@ -42,7 +42,7 @@ from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *
 from qgisinteraction import LayerInteraction
 from ExportWMSasTif import ExportWMSasTif
-from Tests.LayerInteraction_test import LayerInteraction_test
+from tests.LayerInteraction_test import LayerInteraction_test
 
 
 class OpenEQuarterMain:
@@ -115,7 +115,7 @@ class OpenEQuarterMain:
     def initGui(self):
 
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(os.path.join(':/Icons/Icons/OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(os.path.join(':/Plugin/Icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)
@@ -143,6 +143,27 @@ class OpenEQuarterMain:
             for button in page.children():
                 if isinstance(button, QProcessButton):
                     self.main_process_dock.connect(button, SIGNAL('process_button_click'), self.process_button_clicked)
+
+        self.main_process_dock.dropdown_menu = QMenu()
+        self.main_process_dock.dropdown_menu.addAction('Open project setup..', self.open_settings)
+        self.main_process_dock.dropdown_menu.addAction('Save current progress', self.save_progress)
+        self.main_process_dock.dropdown_menu.addAction('Save current progress as..', self.save_progress_as)
+        self.main_process_dock.dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
+
+        self.main_process_dock.settings_dropdown_btn.setMenu(self.main_process_dock.dropdown_menu)
+        self.main_process_dock.settings_dropdown_btn.setPopupMode(QToolButton.InstantPopup)
+
+    def open_settings(self):
+        self.oeq_project_settings_form.show()
+
+    def open_progress(self):
+        print 'Open Project'
+
+    def save_progress(self):
+        print 'Save progress'
+
+    def save_progress_as(self):
+        print 'Save as'
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -523,32 +544,34 @@ class OpenEQuarterMain:
     # step 2.1
     def handle_extent_clipped(self):
         extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
-        time.sleep(1.0)
-        LayerInteraction.gdal_warp_layer_list(extracted_layers, self.project_crs)
-        LayerInteraction.hide_or_remove_layer(self.clipping_raster_layer_name, 'hide', self.iface)
         LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
 
         for layer_name in extracted_layers:
-
             try:
                 layer = LayerInteraction.find_layer_by_name(layer_name)
-                # change validation to surpress missing-crs prompt
-                old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
-                QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+                LayerInteraction.gdal_warp_layer_list(layer, self.project_crs)
                 path_geo = layer.publicSource()
-                LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
-                rlayer = QgsRasterLayer(path_transformed, layer_name)
-                rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
-                QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-                os.remove(path_geo)
-                self.iface.mapCanvas().refresh()
-                # restore former settings
-                QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-            except OSError as e:
-                print(e)
+
+                if os.path.exists(path_transformed):
+                    # change validation to surpress missing-crs prompt
+                    old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+                    QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+
+                    LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
+
+                    rlayer = QgsRasterLayer(path_transformed, layer_name)
+                    rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
+                    QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+                    os.remove(path_geo)
+                    self.iface.mapCanvas().refresh()
+                    # restore former settings
+                    QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+            except OSError as OS_Error:
+                print(OS_Error)
                 pass
 
+        time.sleep(1.0)
         return True
 
     # step 2.2
@@ -668,13 +691,11 @@ class OpenEQuarterMain:
         next = self.progress_model.last_step_executed
 
         for i in range(len(steps)):
-            print i
             if self.iface.mapCanvas().isDrawing():
                 i - 1
             else:
                 try:
                     next = self.progress_model.last_step_executed + 1
-                    print steps[next]
                     time.sleep(1.5)
                     self.continue_process()
                     i = next

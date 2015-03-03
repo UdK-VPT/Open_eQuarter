@@ -34,7 +34,9 @@ PLUGINNAME = Open eQuarter
 
 PY_FILES = OpenEQuarterMain.py __init__.py
 
-EXTRAS = Icons/OeQ_plugin_icon.png Icons/OeQ_logo_footer.png Icons/checkmark.png Icons/openmark.png Icons/arrow_left.png Icons/arrow_right.png Icons/autorun.png Icons/lightbulb.png Icons/scissor.png metadata.txt
+EXTRAS = Icons/gearwheel.png Icons/OeQ_plugin_icon.png Icons/OeQ_logo_footer.png Icons/checkmark.png Icons/openmark.png Icons/arrow_left.png Icons/arrow_right.png Icons/autorun.png Icons/lightbulb.png Icons/scissor.png metadata.txt
+
+PACKAGE_PREFIX = view/qt/
 
 UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_investigation_area_selected_dialog.py ui_investigation_area_selected_help_dialog.py ui_main_process_dock.py ui_project_settings_form.py
 
@@ -42,11 +44,10 @@ RESOURCE_FILES = resources_rc.py
 
 HELP = help/build/html
 
-PACKAGE_PREFIX = view/qt/
-
 default: compile
 
-compile: $(PACKAGE_PREFIX)$(UI_FILES) $(PACKAGE_PREFIX)$(RESOURCE_FILES)
+# Compile depends on all ui- and resource-files
+compile: $(UI_FILES) $(RESOURCE_FILES)
 
 %_rc.py : $(PACKAGE_PREFIX)%.qrc
 	pyrcc4 -o $(PACKAGE_PREFIX)$*_rc.py  $<

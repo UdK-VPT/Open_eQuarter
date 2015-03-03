@@ -29,13 +29,12 @@ from qgis.core import *
 
 # Import additional packages
 import numpy
-import qgisinteraction.GdalUtils
 import os
 import subprocess
 import time
 
 # Import self-written packages
-
+from qgisinteraction import GdalUtils
 
 class ExportWMSasTif:
 
@@ -81,7 +80,7 @@ class ExportWMSasTif:
         return
 
     #ToDo Deal with bug resulting from different crs
-    def export(self, clipped_raster_name = 'Investigation Area'):
+    def     export(self, clipped_raster_name = 'Investigation Area'):
         """
         Put the steps necessary for the export together in one procedure
         :return:
@@ -266,7 +265,6 @@ class ExportWMSasTif:
                 time.sleep(0.1)
                 no_timeout -= 1
 
-            print environment
             referencing = self.add_geo_reference(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry, environment)
 
             if referencing != 0:

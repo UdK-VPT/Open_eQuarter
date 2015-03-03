@@ -21,31 +21,28 @@
 """
 # Import the PyQt and QGIS libraries
 import time
-from qgis.core import *
-from qgis.utils import iface, plugins
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from ProjectSettings_form import ProjectSettings_form
+from socket import gaierror
+import httplib
+import unittest
 
-import resources_rc
-from MainProcess_dock import MainProcess_dock
+from qgis.core import *
+from qgis.utils import iface
+
+from PyQt4.QtGui import *
+import numpy
+
 from ProgressModel import ProgressModel
-from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
-from RequestWmsUrl_dialog import RequestWmsUrl_dialog
-from InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
-from ProjectSettings_form import ProjectSettings_form
+from view.InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
+from view.ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
+from view.ProjectSettings_form import ProjectSettings_form
+from view.MainProcess_dock import MainProcess_dock
+from view.RequestWmsUrl_dialog import RequestWmsUrl_dialog
 from PstInteraction import *
 from OlInteraction import *
 import LayerInteraction
 from ExportWMSasTif import ExportWMSasTif
 from Tests.LayerInteraction_test import LayerInteraction_test
-from ui_process_button import QProcessButton
-
-from socket import gaierror
-import os.path
-import numpy
-import httplib
-import unittest
+from view.qt.ui_process_button import QProcessButton
 
 
 class OpenEQuarterMain:

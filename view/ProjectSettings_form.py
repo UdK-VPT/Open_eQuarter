@@ -20,37 +20,31 @@
  ***************************************************************************/
 """
 
-from PyQt4 import QtCore, QtGui
-from ui_investigation_area_selected_dialog import Ui_InvestigationAreaSelected_dialog
-from InvestigationAreaSelectedHelp_dialog import InvestigationAreaSelectedHelp_dialog
-# create the dialog for zoom to point
+from functools import partial
+
+from PyQt4 import QtGui
+
+from Open_eQuarter.view.qt.ui_project_settings_form import Ui_project_settings_form
 
 
-class InvestigationAreaSelected_dialog(QtGui.QDialog, Ui_InvestigationAreaSelected_dialog):
+class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
+
     def __init__(self):
         QtGui.QDialog.__init__(self)
-
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setContentsMargins(500, 500, 0, 0)
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.help_dialog = InvestigationAreaSelectedHelp_dialog()
-        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
+        self.defaults = {}
 
-    def set_dialog_text(self, text, title=""):
+        for field in self.form.findChildren(QtGui.QLineEdit)[:]:
+            self.defaults[field.objectName()] = field.text()
+            field.textChanged.connect(partial(self.text_changed, field))
 
-        if not title.isspace():
-            self.setWindowTitle(title)
 
-        if text is not None and not text.isspace():
+    def text_changed(self, input_field):
+        if input_field.text() != self.defaults[input_field.objectName()]:
+            input_field.setStyleSheet('color: rgb(0,0,0)')
 
-            html_prefix = ('<p align="center" style=" margin-top:0px; margin-bottom:0px; '
-                           'margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">')
-
-            html_postfix = "</p>"
-            browser_text = html_prefix + text + html_postfix
-            self.textBrowser.setHtml(QtGui.QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))

@@ -21,28 +21,20 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from ui_project_settings_form import Ui_project_settings_form
-from functools import partial
+
+from Open_eQuarter.view.qt.ui_investigation_area_selected_help_dialog import Ui_InvestigationAreaSelectedHelp_dialog
+
+# create the dialog for zoom to point
 
 
-class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
-
+class InvestigationAreaSelectedHelp_dialog(QtGui.QDialog, Ui_InvestigationAreaSelectedHelp_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
+
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.defaults = {}
-
-        for field in self.form.findChildren(QtGui.QLineEdit)[:]:
-            self.defaults[field.objectName()] = field.text()
-            field.textChanged.connect(partial(self.text_changed, field))
-
-
-    def text_changed(self, input_field):
-        if input_field.text() != self.defaults[input_field.objectName()]:
-            input_field.setStyleSheet('color: rgb(0,0,0)')
-
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)

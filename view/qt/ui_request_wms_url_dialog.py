@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_request_wms_url_dialog.ui'
+# Form implementation generated from reading ui file 'view/qt/ui_request_wms_url_dialog.ui'
 #
-# Created: Tue Nov 11 11:57:10 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Tue Mar  3 11:14:16 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -46,7 +46,7 @@ class Ui_RequestWmsUrl_dialog(object):
         self.wms_url.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.wms_url.setInputMethodHints(QtCore.Qt.ImhUrlCharactersOnly)
         self.wms_url.setText(_fromUtf8(""))
-        self.wms_url.setObjectName(_fromUtf8("valid_wms_url"))
+        self.wms_url.setObjectName(_fromUtf8("wms_url"))
 
         self.retranslateUi(RequestWmsUrl_dialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), RequestWmsUrl_dialog.accept)

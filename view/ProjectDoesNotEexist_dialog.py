@@ -21,7 +21,8 @@
 """
 
 from PyQt4 import QtCore, QtGui
-from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
+
+from Open_eQuarter.view.qt.ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 
 
 class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):

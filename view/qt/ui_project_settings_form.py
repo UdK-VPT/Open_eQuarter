@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_project_settings_form.ui'
+# Form implementation generated from reading ui file 'view/qt/ui_project_settings_form.ui'
 #
-# Created: Mon Mar  2 13:26:39 2015
+# Created: Tue Mar  3 11:14:16 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!

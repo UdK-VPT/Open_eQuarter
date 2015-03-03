@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_investigation_area_selected_dialog.ui'
+# Form implementation generated from reading ui file 'view/qt/ui_investigation_area_selected_dialog.ui'
 #
-# Created: Tue Nov 11 11:57:10 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Tue Mar  3 11:14:16 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 

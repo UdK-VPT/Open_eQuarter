@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_main_process_dock.ui'
+# Form implementation generated from reading ui file 'view/qt/ui_main_process_dock.ui'
 #
-# Created: Mon Mar  2 10:42:51 2015
+# Created: Tue Mar  3 11:14:16 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!

@@ -1,8 +1,9 @@
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import SIGNAL
-from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
-from ui_process_button import QProcessButton
 from collections import OrderedDict
+
+from PyQt4 import QtCore, QtGui
+
+from Open_eQuarter.view.qt.ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
+
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 

@@ -29,7 +29,7 @@ tags=
 homepage=
 tracker=
 repository=https://github.com/firstdayofjune/Open_eQuarter
-icon=icon.png
+icon=Icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=True
 

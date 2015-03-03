@@ -20,7 +20,8 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
-
+import view
+import view.qt
 def classFactory(iface):
     # load OpenEQuartersMain class from file OpenEQuartersMain
     from OpenEQuarterMain import OpenEQuarterMain

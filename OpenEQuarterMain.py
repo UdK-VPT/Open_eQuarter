@@ -567,8 +567,8 @@ class OpenEQuarterMain:
                     self.iface.mapCanvas().refresh()
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-            except OSError as OS_Error:
-                print(OS_Error)
+            except (OSError, AttributeError) as Clipping_Error:
+                print(Clipping_Error)
                 pass
 
         time.sleep(1.0)
@@ -673,7 +673,7 @@ class OpenEQuarterMain:
         if self.oeq_project == '':
             self.oeq_project_settings_form.show()
 
-
+        self.check_status()
 
     def run_tests(self):
         test_class = LayerInteraction_test
@@ -686,21 +686,61 @@ class OpenEQuarterMain:
 
         unittest.TextTestRunner(sys.stdout).run(suite)
 
+    def check_status(self):
+
+        self.continue_process() #OL-Plugin
+        self.continue_process() #PST-Plugin
+        self.continue_process() #Proje. saved
+
+        investigation_layer = LayerInteraction.find_layer_by_name(self.investigation_shape_layer_name)
+
+        if self.osm_layer_is_loaded() or investigation_layer:
+            self.set_next_step_done() # open OL-map
+
+            if investigation_layer:
+                self.set_next_step_done() # create shapefile
+
+                if investigation_layer.featureCount() > 0:
+                    self.set_next_step_done() # activate edit mode
+                    self.set_next_step_done() # confirm selection
+                    self.set_next_step_done() # deactivate edit mode
+
+    def set_next_step_done(self):
+        try:
+            next_open_step_no = self.progress_model.last_step_executed + 1
+            next_open_step = self.progress_model.get_step_list()[next_open_step_no]
+
+            step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
+            step_section = step_page.objectName()[0:-5]
+
+            self.progress_model.update_progress(step_section, next_open_step, True)
+            self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', True)
+
+            if self.progress_model.is_section_done(step_section):
+                self.main_process_dock.set_current_page_done(True)
+
+        except IndexError, error:
+                print error
+
+
+
+
     def auto_run(self):
         steps = self.progress_model.get_step_list()
         next = self.progress_model.last_step_executed
 
-        for i in range(len(steps)):
-            if self.iface.mapCanvas().isDrawing():
-                i - 1
-            else:
-                try:
+        try:
+            for i in range(len(steps)):
+                if self.iface.mapCanvas().isDrawing():
+                    i - 1
+                else:
                     next = self.progress_model.last_step_executed + 1
                     time.sleep(1.5)
                     self.continue_process()
                     i = next
-                except IndexError, error:
-                    print error
+
+        except IndexError, error:
+            print error
 
 
 

@@ -11,8 +11,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         QtGui.QDockWidget.__init__(self)
         self.setupUi(self)
         self.selection_to_page = OrderedDict([])
-        self._check_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/checkmark.png"))
-        self._open_mark = QtGui.QPixmap(_fromUtf8(":/Icons/Icons/openmark.png"))
+        self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/Icons/checkmark.png"))
+        self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/Icons/openmark.png"))
 
         page_triples = []
 

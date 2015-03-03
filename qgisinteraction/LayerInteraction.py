@@ -1,11 +1,11 @@
 import subprocess
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QgsApplication
-from PyQt4.QtCore import QSettings
 from os import path
 from platform import system
 import time
-import GdalUtils
 
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QgsApplication
+from PyQt4.QtCore import QSettings
+import GdalUtils
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """

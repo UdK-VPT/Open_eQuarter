@@ -20,20 +20,21 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
+from platform import system
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
-from platform import system
+
 
 # Import additional packages
 import numpy
-import GdalUtils
+import qgisinteraction.GdalUtils
 import os
 import subprocess
 import time
 
 # Import self-written packages
-import LayerInteraction
 
 
 class ExportWMSasTif:

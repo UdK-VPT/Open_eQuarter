@@ -1,8 +1,10 @@
 from unittest import TestCase
-from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
 from os import path, remove, walk
+
+from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
 from PyQt4 import QtCore
-from .. import LayerInteraction
+
+from Open_eQuarter.qgisinteraction import LayerInteraction
 from QgisTestInterface import QgisTestInterface
 
 

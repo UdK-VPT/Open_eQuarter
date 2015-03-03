@@ -22,6 +22,8 @@
 """
 import view
 import view.qt
+import model
+import qgisinteraction
 def classFactory(iface):
     # load OpenEQuartersMain class from file OpenEQuartersMain
     from OpenEQuarterMain import OpenEQuarterMain

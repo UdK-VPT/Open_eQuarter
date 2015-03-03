@@ -31,18 +31,18 @@ from qgis.utils import iface
 from PyQt4.QtGui import *
 import numpy
 
-from ProgressModel import ProgressModel
+from model.ProgressModel import ProgressModel
 from view.InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
 from view.ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from view.ProjectSettings_form import ProjectSettings_form
 from view.MainProcess_dock import MainProcess_dock
 from view.RequestWmsUrl_dialog import RequestWmsUrl_dialog
-from PstInteraction import *
-from OlInteraction import *
-import LayerInteraction
+from view.qt.ui_process_button import QProcessButton
+from qgisinteraction.PstInteraction import *
+from qgisinteraction.OlInteraction import *
+from qgisinteraction import LayerInteraction
 from ExportWMSasTif import ExportWMSasTif
 from Tests.LayerInteraction_test import LayerInteraction_test
-from view.qt.ui_process_button import QProcessButton
 
 
 class OpenEQuarterMain:

@@ -104,6 +104,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.value_field_one = value_one
         self.value_field_two = value_two
 
+    #ToDo A different way of removing the entries has to be found.
     def remove_entry(self, button):
         """
         Remove a row consisting of number, color, value1, value2 and remove-button from the
@@ -115,7 +116,6 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         try:
-            self.color_table.chi
             row_number = str(button.objectName())
             underscore = button.objectName().rfind('_')
             row_number = row_number[underscore+1:]

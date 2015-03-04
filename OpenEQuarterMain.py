@@ -27,16 +27,19 @@ import unittest
 
 from qgis.core import *
 from qgis.utils import iface
+from qgis.gui import QgsMapToolEmitPoint
 
 from PyQt4.QtGui import *
 import numpy
 
 from model.ProgressModel import ProgressModel
-from view import InvestigationAreaSelected_dialog, ProjectDoesNotExist_dialog, ProjectSettings_form, MainProcess_dock, RequestWmsUrl_dialog
+from view import InvestigationAreaSelected_dialog, ProjectDoesNotExist_dialog, RequestWmsUrl_dialog, ColorPicker_dialog
+from view import ProjectSettings_form, MainProcess_dock
 from view.qt.ui_process_button import QProcessButton
 from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *
 from qgisinteraction import LayerInteraction
+from qgisinteraction import RasterLayerInteraction
 from ExportWMSasTif import ExportWMSasTif
 from tests import LayerInteraction_test
 
@@ -53,9 +56,10 @@ class OpenEQuarterMain:
         # Create the dialogues (after translation) and keep references
         self.main_process_dock = MainProcess_dock()
         self.oeq_project_settings_form = ProjectSettings_form()
-
+        self.color_picker_dlg = ColorPicker_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
+        self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
 
@@ -144,7 +148,7 @@ class OpenEQuarterMain:
         self.main_process_dock.dropdown_menu.addAction('Save current progress', self.save_progress)
         self.main_process_dock.dropdown_menu.addAction('Save current progress as..', self.save_progress_as)
         self.main_process_dock.dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
-
+        self.main_process_dock.dropdown_menu.addAction('Color Picker', self.chose_color)
         self.main_process_dock.settings_dropdown_btn.setMenu(self.main_process_dock.dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setPopupMode(QToolButton.InstantPopup)
 
@@ -159,6 +163,19 @@ class OpenEQuarterMain:
 
     def save_progress_as(self):
         print 'Save as'
+
+    def chose_color(self):
+        self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
+        self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
+        self.color_picker_dlg.show()
+        save_or_abort = self.color_picker_dlg.exec_()
+
+        print save_or_abort
+        self.iface.actionPan().trigger()
+
+    def handle_canvas_click(self, point, button):
+        color = RasterLayerInteraction.extract_color_at_point(self.iface.activeLayer(), point)
+        self.color_picker_dlg.add_color(color)
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -544,7 +561,7 @@ class OpenEQuarterMain:
         for layer_name in extracted_layers:
             try:
                 layer = LayerInteraction.find_layer_by_name(layer_name)
-                LayerInteraction.gdal_warp_layer_list(layer, self.project_crs)
+                RasterLayerInteraction.gdal_warp_layer(layer, self.project_crs)
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 

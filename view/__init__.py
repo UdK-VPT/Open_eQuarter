@@ -3,3 +3,4 @@ from MainProcess_dock import MainProcess_dock
 from ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
 from ProjectSettings_form import ProjectSettings_form
 from RequestWmsUrl_dialog import RequestWmsUrl_dialog
+from ColorPicker_dialog import ColorPicker_dialog

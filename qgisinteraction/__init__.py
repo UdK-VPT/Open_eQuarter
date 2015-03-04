@@ -1,4 +1,5 @@
 from OlInteraction import OlInteraction
 from PstInteraction import PstInteraction
 import LayerInteraction
+import RasterLayerInteraction
 import GdalUtils

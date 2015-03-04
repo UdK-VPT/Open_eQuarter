@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/qt/ui_investigation_area_selected_help_dialog.ui'
 #
-# Created: Tue Mar  3 15:20:20 2015
+# Created: Wed Mar  4 17:25:47 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!

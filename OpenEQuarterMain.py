@@ -32,11 +32,7 @@ from PyQt4.QtGui import *
 import numpy
 
 from model.ProgressModel import ProgressModel
-from view.InvestigationAreaSelected_dialog import InvestigationAreaSelected_dialog
-from view.ProjectDoesNotEexist_dialog import ProjectDoesNotExist_dialog
-from view.ProjectSettings_form import ProjectSettings_form
-from view.MainProcess_dock import MainProcess_dock
-from view.RequestWmsUrl_dialog import RequestWmsUrl_dialog
+from view import InvestigationAreaSelected_dialog, ProjectDoesNotExist_dialog, ProjectSettings_form, MainProcess_dock, RequestWmsUrl_dialog
 from view.qt.ui_process_button import QProcessButton
 from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *

@@ -650,11 +650,7 @@ class OpenEQuarterMain:
         :rtype:
         """
         sender_name = args[0]
-        sender_object = args[1]
         next_step = sender_name[:-8]
-
-        next_page = sender_object.parent()
-        next_section = next_page.objectName()[0:-5]
 
         # for debugging uncomment the following line
         if True:
@@ -663,9 +659,7 @@ class OpenEQuarterMain:
             next_call = getattr(self, handler)
 
             is_done = next_call()
-            self.progress_model.update_progress(next_section, next_step, is_done)
-            self.main_process_dock.go_to_page(next_page.accessibleName())
-            self.main_process_dock.set_checkbox_on_page(next_step + '_chckBox', next_section + '_page', is_done)
+            self.set_next_step_done(is_done)
 
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
@@ -695,17 +689,17 @@ class OpenEQuarterMain:
         investigation_layer = LayerInteraction.find_layer_by_name(self.investigation_shape_layer_name)
 
         if self.osm_layer_is_loaded() or investigation_layer:
-            self.set_next_step_done() # open OL-map
+            self.set_next_step_done(True) # open OL-map
 
             if investigation_layer:
-                self.set_next_step_done() # create shapefile
+                self.set_next_step_done(True) # create shapefile
 
                 if investigation_layer.featureCount() > 0:
-                    self.set_next_step_done() # activate edit mode
-                    self.set_next_step_done() # confirm selection
-                    self.set_next_step_done() # deactivate edit mode
+                    self.set_next_step_done(True) # activate edit mode
+                    self.set_next_step_done(True) # confirm selection
+                    self.set_next_step_done(True) # deactivate edit mode
 
-    def set_next_step_done(self):
+    def set_next_step_done(self, is_done):
         try:
             next_open_step_no = self.progress_model.last_step_executed + 1
             next_open_step = self.progress_model.get_step_list()[next_open_step_no]
@@ -713,11 +707,11 @@ class OpenEQuarterMain:
             step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
             step_section = step_page.objectName()[0:-5]
 
-            self.progress_model.update_progress(step_section, next_open_step, True)
-            self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', True)
+            self.progress_model.update_progress(step_section, next_open_step, is_done)
+            self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', is_done)
 
             if self.progress_model.is_section_done(step_section):
-                self.main_process_dock.set_current_page_done(True)
+                self.main_process_dock.set_current_page_done(is_done)
 
         except IndexError, error:
                 print error

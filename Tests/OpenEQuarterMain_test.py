@@ -3,13 +3,15 @@ import atexit
 
 from qgis.core import *
 from qgis.gui import *
+from qgis.utils import initInterface, iface
 from PyQt4 import QtCore
-
-__author__ = 'VPTtutor'
+from Open_eQuarter.OpenEQuarterMain import OpenEQuarterMain
 
 
 class OpenEQuarterMain_test(TestCase):
-    def test_initGui(self):
+
+    def setUp(self):
+
         QgsApplication.setPrefixPath('/Applications/QGIS.app/Contents/MacOS', True)
         QgsApplication.initQgis()
 
@@ -18,9 +20,12 @@ class OpenEQuarterMain_test(TestCase):
 
         QtCore.QCoreApplication.setOrganizationName('QGIS')
         QtCore.QCoreApplication.setApplicationName('QGIS2')
+        QgsApplication
+        initInterface()
+        self.iface = iface
 
-        atexit.register(QgsApplication.exitQgis)
-        self.fail()
+    def test_init(self):
+        OpenEQuarterMain(self.iface)
 
 
     """

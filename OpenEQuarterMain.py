@@ -42,8 +42,7 @@ from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *
 from qgisinteraction import LayerInteraction
 from ExportWMSasTif import ExportWMSasTif
-from tests.LayerInteraction_test import LayerInteraction_test
-
+from tests import LayerInteraction_test
 
 class OpenEQuarterMain:
     def __init__(self, iface):
@@ -666,8 +665,11 @@ class OpenEQuarterMain:
 
         if self.oeq_project == '':
             self.oeq_project_settings_form.show()
+            save_or_abort = self.oeq_project_settings_form.exec_()
 
-        self.check_status()
+        print save_or_abort
+        if save_or_abort:
+            self.check_status()
 
     def run_tests(self):
         test_class = LayerInteraction_test

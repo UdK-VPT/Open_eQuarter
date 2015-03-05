@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from PyQt4 import QtCore, QtGui
 
-from Open_eQuarter.view.qt.ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
+from qt.ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):

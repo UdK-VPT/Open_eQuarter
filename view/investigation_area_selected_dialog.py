@@ -20,19 +20,39 @@
  ***************************************************************************/
 """
 
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 
-from Open_eQuarter.view.qt.ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
+from qt.ui_investigation_area_selected_dialog import Ui_InvestigationAreaSelected_dialog
+from investigation_area_selected_help_dialog import InvestigationAreaSelectedHelp_dialog
 
 # create the dialog for zoom to point
 
 
-class RequestWmsUrl_dialog(QtGui.QDialog, Ui_RequestWmsUrl_dialog):
+class InvestigationAreaSelected_dialog(QtGui.QDialog, Ui_InvestigationAreaSelected_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
+
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.setContentsMargins(500, 500, 0, 0)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.help_dialog = InvestigationAreaSelectedHelp_dialog()
+        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
+
+    def set_dialog_text(self, text, title=""):
+
+        if not title.isspace():
+            self.setWindowTitle(title)
+
+        if text is not None and not text.isspace():
+
+            html_prefix = ('<p align="center" style=" margin-top:0px; margin-bottom:0px; '
+                           'margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">')
+
+            html_postfix = "</p>"
+            browser_text = html_prefix + text + html_postfix
+            self.textBrowser.setHtml(QtGui.QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))

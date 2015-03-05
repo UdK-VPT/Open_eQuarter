@@ -1,4 +1,4 @@
-from qgis.core import QgsRasterLayer, QgsApplication, QgsRaster
+from qgis.core import QgsRasterLayer, QgsApplication, QgsRaster, QgsCoordinateTransform
 from PyQt4.QtGui import QColor
 from platform import system
 from os import path
@@ -51,9 +51,17 @@ def gdal_warp_layer(layer, target_crs):
         print(Att_Error.message)
 
 
-def extract_color_at_point(raster, point):
+def extract_color_at_point(raster, point, point_crs):
+
+    if not raster.crs() == point_crs:
+        xform = QgsCoordinateTransform(point_crs, raster.crs())
+        point = xform.transform(point)
 
     color_rgba = raster.dataProvider().identify(point,QgsRaster.IdentifyFormatValue).results()
-    r, g, b, a = color_rgba.values()
-    color = QColor.fromRgb(r, g, b, a)
-    return color
+    try:
+        r, g, b, a = color_rgba.values()
+        color = QColor.fromRgb(r, g, b, a)
+    except ValueError:
+        return None
+    else:
+        return color

@@ -25,14 +25,14 @@ QGISDIR=.qgis2
 # Makefile for a PyQGIS plugin
 
 # translation
-SOURCES = OpenEQuarterMain.py __init__.py
+SOURCES = open_equarter_main.py __init__.py
 #TRANSLATIONS = i18n/OpenEQuarterMain_en.ts
 
 # global
 
 PLUGINNAME = Open eQuarter
 
-PY_FILES = OpenEQuarterMain.py __init__.py
+PY_FILES = open_equarter_main.py __init__.py
 
 EXTRAS = Icons/gearwheel.png Icons/OeQ_plugin_icon.png Icons/OeQ_logo_footer.png Icons/checkmark.png Icons/openmark.png Icons/arrow_left.png Icons/arrow_right.png Icons/autorun.png Icons/lightbulb.png Icons/scissor.png metadata.txt
 

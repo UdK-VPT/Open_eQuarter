@@ -27,5 +27,5 @@ import qgisinteraction
 import tests
 def classFactory(iface):
     # load OpenEQuartersMain class from file OpenEQuartersMain
-    from OpenEQuarterMain import OpenEQuarterMain
+    from open_equarter_main import OpenEQuarterMain
     return OpenEQuarterMain(iface)

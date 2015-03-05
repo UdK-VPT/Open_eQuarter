@@ -43,6 +43,7 @@ from qgisinteraction import RasterLayerInteraction
 from ExportWMSasTif import ExportWMSasTif
 from tests import LayerInteraction_test
 
+
 class OpenEQuarterMain:
     def __init__(self, iface):
         # Save reference to the QGIS interface
@@ -67,7 +68,7 @@ class OpenEQuarterMain:
         ### Project specific settings
         # the project path is './' as long as the project has not been saved
         self.project_path = QgsProject.instance().readPath('')
-        self.project_crs = 'EPSG:3857'  # ToDo set crs back to 4326
+        self.project_crs = 'EPSG:3857'
         self.oeq_project = ''
 
 
@@ -167,15 +168,43 @@ class OpenEQuarterMain:
     def chose_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
+        dropdown = self.color_picker_dlg.layers_dropdown
+
+        wms_list = LayerInteraction.get_wms_layer_list(self.iface, visibility='visible')
+        for layer in wms_list:
+            source = layer.publicSource()
+            if os.path.basename(source).endswith('.tif'):
+                dropdown.addItem(layer.name())
+
+        set_layer = 'setActiveLayer('
+        find_lyer = 'LayerInteraction.find_layer_by_name("'
+        #dropdown.currentIndexChanged.connect(lambda: getattr(self.iface, set_layer + find_lyer + dropdown.currentText() +'"))'))
+        dropdown.currentIndexChanged.connect(lambda: self.move_layer_top(dropdown.currentText()))
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
 
         print save_or_abort
         self.iface.actionPan().trigger()
 
+    def move_layer_top(self, layer_name):
+        root = QgsProject.instance().layerTreeRoot()
+        layers = root.children()
+        for layer_node in layers:
+            if layer_node.layerName() == layer_name:
+                clone = layer_node.clone()
+                root.insertChildNode(0,clone)
+                root.removeChildNode(layer_node)
+                self.iface.setActiveLayer(clone.layer())
+                break
+
     def handle_canvas_click(self, point, button):
-        color = RasterLayerInteraction.extract_color_at_point(self.iface.activeLayer(), point)
-        self.color_picker_dlg.add_color(color)
+        canvas = self.iface.mapCanvas()
+        crs = canvas.mapRenderer().destinationCrs()
+        raster = self.iface.activeLayer()
+        if raster is not None:
+            color = RasterLayerInteraction.extract_color_at_point(raster, point, crs)
+            if isinstance(color, QColor):
+                self.color_picker_dlg.add_color(color)
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -205,7 +234,6 @@ class OpenEQuarterMain:
             if yes_to_save:
                 # trigger qgis "Save As"-function
                 iface.actionSaveProjectAs().trigger()
-
 
     def get_plugin_ifexists(self, plugin_name):
         """
@@ -324,7 +352,7 @@ class OpenEQuarterMain:
         :rtype:
         """
         # if the given crs is valid
-        if not crs.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs):
+        if not crs.isspace() and QgsCoordinateReferenceSystem(crs):
 
             canvas = self.iface.mapCanvas()
 
@@ -662,7 +690,11 @@ class OpenEQuarterMain:
         :rtype:
         """
         sender_name = args[0]
+        sender_object = args[1]
         next_step = sender_name[:-8]
+
+        next_page = sender_object.parent()
+        next_section = next_page.objectName()[0:-5]
 
         # for debugging uncomment the following line
         if True:
@@ -671,7 +703,9 @@ class OpenEQuarterMain:
             next_call = getattr(self, handler)
 
             is_done = next_call()
-            self.set_next_step_done(is_done)
+            self.progress_model.update_progress(next_section, next_step, is_done)
+            self.main_process_dock.go_to_page(next_page.accessibleName())
+            self.main_process_dock.set_checkbox_on_page(next_step + '_chckBox', next_section + '_page', is_done)
 
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
@@ -730,9 +764,6 @@ class OpenEQuarterMain:
 
         except IndexError, error:
                 print error
-
-
-
 
     def auto_run(self):
         steps = self.progress_model.get_step_list()

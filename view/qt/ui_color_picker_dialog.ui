@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>416</width>
-    <height>286</height>
+    <width>497</width>
+    <height>285</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,19 +18,41 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="raster_dlg" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Chose clipped raster layers (*tif files only):</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="layers_dropdown"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <layout class="QGridLayout" name="color_table">
      <property name="sizeConstraint">
       <enum>QLayout::SetFixedSize</enum>
      </property>
-     <item row="0" column="1" alignment="Qt::AlignLeft">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Color-value</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="2">
       <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Value 1</string>
        </property>
@@ -38,6 +60,12 @@
      </item>
      <item row="0" column="3">
       <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Value 2</string>
        </property>
@@ -48,13 +76,49 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>140</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QLineEdit" name="value_one_0"/>
+      <widget class="QLineEdit" name="value_one_0">
+       <property name="minimumSize">
+        <size>
+         <width>140</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" alignment="Qt::AlignLeft">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Color-value</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="3">
-      <widget class="QLineEdit" name="value_two_0"/>
+      <widget class="QLineEdit" name="value_two_0">
+       <property name="minimumSize">
+        <size>
+         <width>140</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="1" column="4">
       <widget class="QRemoveEntryButton" name="remove_entries_0">
@@ -100,6 +164,12 @@
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="row_number_0">
+       <property name="minimumSize">
+        <size>
+         <width>15</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>1</string>
        </property>

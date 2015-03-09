@@ -20,11 +20,7 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
-import view
-import view.qt
-import model
-import qgisinteraction
-import tests
+
 def classFactory(iface):
     # load OpenEQuartersMain class from file OpenEQuartersMain
     from open_equarter_main import OpenEQuarterMain

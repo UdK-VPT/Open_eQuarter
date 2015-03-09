@@ -34,7 +34,7 @@ import numpy
 
 from model.ProgressModel import ProgressModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
-from view.qt.ui_process_button import QProcessButton
+from view.oeq_ui_classes import QProcessButton
 from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *
 from qgisinteraction import LayerInteraction

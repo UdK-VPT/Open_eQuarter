@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'view/qt/ui_investigation_area_selected_help_dialog.ui'
+# Form implementation generated from reading ui file 'view/qt/ui_modular_info_dialog.ui'
 #
-# Created: Thu Mar 05 21:07:28 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Mon Mar  9 10:16:13 2015
+#      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,19 +23,19 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_InvestigationAreaSelectedHelp_dialog(object):
-    def setupUi(self, InvestigationAreaSelectedHelp_dialog):
-        InvestigationAreaSelectedHelp_dialog.setObjectName(_fromUtf8("InvestigationAreaSelectedHelp_dialog"))
-        InvestigationAreaSelectedHelp_dialog.resize(502, 190)
-        InvestigationAreaSelectedHelp_dialog.setFocusPolicy(QtCore.Qt.ClickFocus)
-        InvestigationAreaSelectedHelp_dialog.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
-        self.buttonBox = QtGui.QDialogButtonBox(InvestigationAreaSelectedHelp_dialog)
+class Ui_ModularInfo_dialog(object):
+    def setupUi(self, ModularInfo_dialog):
+        ModularInfo_dialog.setObjectName(_fromUtf8("ModularInfo_dialog"))
+        ModularInfo_dialog.resize(502, 190)
+        ModularInfo_dialog.setFocusPolicy(QtCore.Qt.ClickFocus)
+        ModularInfo_dialog.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.buttonBox = QtGui.QDialogButtonBox(ModularInfo_dialog)
         self.buttonBox.setGeometry(QtCore.QRect(191, 140, 120, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
         self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.textBrowser = QtGui.QTextBrowser(InvestigationAreaSelectedHelp_dialog)
+        self.textBrowser = QtGui.QTextBrowser(ModularInfo_dialog)
         self.textBrowser.setGeometry(QtCore.QRect(25, 10, 450, 111))
         self.textBrowser.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.textBrowser.setAutoFillBackground(False)
@@ -45,14 +45,14 @@ class Ui_InvestigationAreaSelectedHelp_dialog(object):
         self.textBrowser.setLineWidth(0)
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
 
-        self.retranslateUi(InvestigationAreaSelectedHelp_dialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), InvestigationAreaSelectedHelp_dialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), InvestigationAreaSelectedHelp_dialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(InvestigationAreaSelectedHelp_dialog)
+        self.retranslateUi(ModularInfo_dialog)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ModularInfo_dialog.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ModularInfo_dialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(ModularInfo_dialog)
 
-    def retranslateUi(self, InvestigationAreaSelectedHelp_dialog):
-        InvestigationAreaSelectedHelp_dialog.setWindowTitle(_translate("InvestigationAreaSelectedHelp_dialog", "How to select the Investigation Area", None))
-        self.textBrowser.setHtml(_translate("InvestigationAreaSelectedHelp_dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+    def retranslateUi(self, ModularInfo_dialog):
+        ModularInfo_dialog.setWindowTitle(_translate("ModularInfo_dialog", "How to select the Investigation Area", None))
+        self.textBrowser.setHtml(_translate("ModularInfo_dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Lucida Grande\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"

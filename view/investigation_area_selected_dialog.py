@@ -22,13 +22,13 @@
 
 from PyQt4 import QtCore, QtGui
 
-from qt.ui_investigation_area_selected_dialog import Ui_InvestigationAreaSelected_dialog
-from investigation_area_selected_help_dialog import InvestigationAreaSelectedHelp_dialog
+from qt.ui_modular_dialog import Ui_Modular_dialog
+from investigation_area_selected_help_dialog import ModularInfo_dialog
 
 # create the dialog for zoom to point
 
 
-class InvestigationAreaSelected_dialog(QtGui.QDialog, Ui_InvestigationAreaSelected_dialog):
+class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
 
@@ -40,7 +40,7 @@ class InvestigationAreaSelected_dialog(QtGui.QDialog, Ui_InvestigationAreaSelect
         self.setupUi(self)
         self.setContentsMargins(500, 500, 0, 0)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.help_dialog = InvestigationAreaSelectedHelp_dialog()
+        self.help_dialog = ModularInfo_dialog()
         self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
 
     def set_dialog_text(self, text, title=""):

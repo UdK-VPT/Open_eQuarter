@@ -22,12 +22,12 @@
 
 from PyQt4 import QtCore, QtGui
 
-from qt.ui_investigation_area_selected_help_dialog import Ui_InvestigationAreaSelectedHelp_dialog
+from qt.ui_modular_info_dialog import Ui_ModularInfo_dialog
 
 # create the dialog for zoom to point
 
 
-class InvestigationAreaSelectedHelp_dialog(QtGui.QDialog, Ui_InvestigationAreaSelectedHelp_dialog):
+class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
 

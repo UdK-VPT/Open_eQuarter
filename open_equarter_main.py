@@ -33,8 +33,7 @@ from PyQt4.QtGui import *
 import numpy
 
 from model.ProgressModel import ProgressModel
-from view import InvestigationAreaSelected_dialog, ProjectDoesNotExist_dialog, RequestWmsUrl_dialog, ColorPicker_dialog
-from view import ProjectSettings_form, MainProcess_dock
+from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
 from view.qt.ui_process_button import QProcessButton
 from qgisinteraction.PstInteraction import *
 from qgisinteraction.OlInteraction import *
@@ -62,7 +61,7 @@ class OpenEQuarterMain:
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
-        self.confirm_selection_of_investigation_area_dlg = InvestigationAreaSelected_dialog()
+        self.confirm_selection_of_investigation_area_dlg = Modular_dialog()
 
 
         ### Project specific settings

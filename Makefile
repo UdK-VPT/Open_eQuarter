@@ -38,7 +38,7 @@ EXTRAS = Icons/gearwheel.png Icons/OeQ_plugin_icon.png Icons/OeQ_logo_footer.png
 
 PACKAGE_PREFIX = view/qt/
 
-UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_investigation_area_selected_dialog.py ui_investigation_area_selected_help_dialog.py ui_main_process_dock.py ui_project_settings_form.py ui_color_picker_dialog.py
+UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_modular_dialog.py ui_modular_info_dialog.py ui_main_process_dock.py ui_project_settings_form.py ui_color_picker_dialog.py
 
 RESOURCE_FILES = resources_rc.py
 

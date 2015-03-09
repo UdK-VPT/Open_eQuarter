@@ -1,7 +1,1 @@
-from investigation_area_selected_dialog import Modular_dialog
-from investigation_area_selected_help_dialog import ModularInfo_dialog
-from project_does_not_exist_dialog import ProjectDoesNotExist_dialog
-from request_wms_url_dialog import RequestWmsUrl_dialog
-from color_picker_dialog import ColorPicker_dialog
-from main_process_dock import MainProcess_dock
-from project_settings_form import ProjectSettings_form
+from oeq_dialogs import ColorPicker_dialog, Modular_dialog, ModularInfo_dialog, MainProcess_dock, ProjectDoesNotExist_dialog, ProjectSettings_form, RequestWmsUrl_dialog

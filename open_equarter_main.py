@@ -96,7 +96,7 @@ class OpenEQuarterMain:
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'Styles', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
@@ -114,7 +114,7 @@ class OpenEQuarterMain:
     def initGui(self):
 
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(os.path.join(':/Plugin/Icons/OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)
@@ -123,13 +123,13 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.main_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
 
-        clipping_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'scissor.png'))
+        clipping_icon = QIcon(os.path.join(self.plugin_dir, 'icons', 'scissor.png'))
         self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
         self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
         self.iface.addToolBarIcon(self.clipping_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
 
-        testing_icon = QIcon(os.path.join(self.plugin_dir, 'Icons', 'lightbulb.png'))
+        testing_icon = QIcon(os.path.join(self.plugin_dir, 'icons', 'lightbulb.png'))
         self.testing_action = QAction(testing_icon, u"Run all unit-tests", self.iface.mainWindow())
         self.testing_action.triggered.connect(lambda: self.run_tests())
         self.iface.addToolBarIcon(self.testing_action)

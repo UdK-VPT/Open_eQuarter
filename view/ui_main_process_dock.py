@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'view/qt/ui_main_process_dock.ui'
+# Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Mon Mar  9 10:16:13 2015
+# Created: Mon Mar  9 11:12:38 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -254,6 +254,5 @@ class Ui_MainProcess_dock(object):
         self.process_button_prev.setText(_translate("MainProcess_dock", "Previous", None))
         self.process_button_next.setText(_translate("MainProcess_dock", "Next ", None))
 
-from ui_clickable_label import QClickableLabel
-from ui_process_button import QProcessButton
+from oeq_ui_classes import QClickableLabel, QProcessButton
 import resources_rc

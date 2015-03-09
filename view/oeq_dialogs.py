@@ -24,14 +24,14 @@ from PyQt4.QtCore import *
 from collections import OrderedDict
 from functools import partial
 
-from qt.ui_color_picker_dialog import Ui_color_picker_dialog
-from qt.ui_remove_entry_button import QRemoveEntryButton
-from qt.ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
-from qt.ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
-from qt.ui_project_settings_form import Ui_project_settings_form
-from qt.ui_modular_info_dialog import Ui_ModularInfo_dialog
-from qt.ui_modular_dialog import Ui_Modular_dialog
-from qt.ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
+from ui_color_picker_dialog import Ui_color_picker_dialog
+from oeq_ui_classes import QRemoveEntryButton
+from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
+from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
+from ui_project_settings_form import Ui_project_settings_form
+from ui_modular_info_dialog import Ui_ModularInfo_dialog
+from ui_modular_dialog import Ui_Modular_dialog
+from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
@@ -155,8 +155,8 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
         QDockWidget.__init__(self)
         self.setupUi(self)
         self.selection_to_page = OrderedDict([])
-        self._check_mark = QPixmap(_fromUtf8(":/Controls/Icons/checkmark.png"))
-        self._open_mark = QPixmap(_fromUtf8(":/Controls/Icons/openmark.png"))
+        self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
+        self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
 
         page_triples = []
 

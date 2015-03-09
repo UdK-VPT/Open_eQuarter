@@ -34,9 +34,9 @@ PLUGINNAME = Open eQuarter
 
 PY_FILES = open_equarter_main.py __init__.py
 
-EXTRAS = Icons/gearwheel.png Icons/OeQ_plugin_icon.png Icons/OeQ_logo_footer.png Icons/checkmark.png Icons/openmark.png Icons/arrow_left.png Icons/arrow_right.png Icons/autorun.png Icons/lightbulb.png Icons/scissor.png metadata.txt
+EXTRAS = icons/gearwheel.png icons/OeQ_plugin_icon.png icons/OeQ_logo_footer.png icons/checkmark.png icons/openmark.png icons/arrow_left.png icons/arrow_right.png icons/autorun.png icons/lightbulb.png icons/scissor.png metadata.txt
 
-PACKAGE_PREFIX = view/qt/
+PACKAGE_PREFIX = view/
 
 UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_modular_dialog.py ui_modular_info_dialog.py ui_main_process_dock.py ui_project_settings_form.py ui_color_picker_dialog.py
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Tue Mar 10 13:26:42 2015
+# Created: Tue Mar 10 16:43:18 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -45,19 +45,19 @@ class Ui_project_settings_form(object):
         self.gridLayout.setHorizontalSpacing(15)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(self.form)
-        self.label.setObjectName(_fromUtf8("color_value_label"))
+        self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.project_name = QtGui.QLineEdit(self.form)
         self.project_name.setObjectName(_fromUtf8("project_name"))
         self.gridLayout.addWidget(self.project_name, 1, 0, 1, 1)
         self.label_2 = QtGui.QLabel(self.form)
-        self.label_2.setObjectName(_fromUtf8("value_one_label"))
+        self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
         self.description = QtGui.QLineEdit(self.form)
         self.description.setObjectName(_fromUtf8("description"))
         self.gridLayout.addWidget(self.description, 3, 0, 1, 1)
         self.label_3 = QtGui.QLabel(self.form)
-        self.label_3.setObjectName(_fromUtf8("value_two_label"))
+        self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 4, 0, 1, 1)
         self.climate_zone = QtGui.QLineEdit(self.form)
         self.climate_zone.setObjectName(_fromUtf8("climate_zone"))

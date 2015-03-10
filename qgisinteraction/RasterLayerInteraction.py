@@ -61,7 +61,7 @@ def extract_color_at_point(raster, point, point_crs):
     try:
         r, g, b, a = color_rgba.values()
         color = QColor.fromRgb(r, g, b, a)
-    except ValueError:
+    except (ValueError, TypeError):
         return None
     else:
         return color

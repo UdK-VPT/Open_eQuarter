@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Tue Mar 10 13:26:42 2015
+# Created: Tue Mar 10 16:43:18 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,7 +72,7 @@ class Ui_MainProcess_dock(object):
         self.settings_dropdown_btn.setObjectName(_fromUtf8("settings_dropdown_btn"))
         self.horizontalLayout_3.addWidget(self.settings_dropdown_btn)
         self.label = QtGui.QLabel(self.dockWidgetContents)
-        self.label.setObjectName(_fromUtf8("color_value_label"))
+        self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)

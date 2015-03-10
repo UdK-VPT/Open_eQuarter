@@ -183,10 +183,49 @@ class GridMatrixModelTest(unittest.TestCase):
         row6.add_widget(wid6)
         row_list.add_node(row6)
 
+        row7 = WidgetLinkedListNode()
+        wid7 = QWidget()
+        row7.add_widget(wid7)
+
         self.assertEqual(row_list.get_index(row1), 0)
         self.assertEqual(row_list.get_index(row3), 2)
         self.assertEqual(row_list.get_index(row4), 3)
         self.assertEqual(row_list.get_index(row6), 5)
+        self.assertEqual(row_list.get_index(row7), -1)
 
+    def test_if_iterator_returns_elements_in_order(self):
+        row_list = WidgetLinkedList()
+
+        row1 = WidgetLinkedListNode()
+        wid1 = QWidget()
+        row1.add_widget(wid1)
+        row_list.add_node(row1)
+
+        row2 = WidgetLinkedListNode()
+        wid2 = QWidget()
+        row2.add_widget(wid2)
+        row_list.add_node(row2)
+
+        row3 = WidgetLinkedListNode()
+        wid3 = QWidget()
+        row3.add_widget(wid3)
+        row_list.add_node(row3)
+
+        row4 = WidgetLinkedListNode()
+        wid4 = QWidget()
+        row4.add_widget(wid4)
+        row_list.add_node(row4)
+
+        row5 = WidgetLinkedListNode()
+        wid5 = QWidget()
+        row5.add_widget(wid5)
+        row_list.add_node(row5)
+
+        row6 = WidgetLinkedListNode()
+        wid6 = QWidget()
+        row6.add_widget(wid6)
+        row_list.add_node(row6)
+
+        self.assertSequenceEqual(list(row_list), [row1, row2, row3, row4, row5, row6])
 if __name__ == '__main__':
     unittest.main()

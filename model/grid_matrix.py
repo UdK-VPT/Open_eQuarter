@@ -3,6 +3,19 @@ class WidgetLinkedList:
     def __init__(self):
         self._head = None
         self._size = 0
+        self.__current = self._head
+
+    def __iter__(self):
+        self.__current = self._head
+        return self
+
+    def next(self):
+        if self.__current is None:
+            raise StopIteration
+        else:
+            current = self.__current
+            self.__current = self.__current.next
+            return current
 
     def add_node(self, widget_node):
         if self._head is None:
@@ -32,33 +45,19 @@ class WidgetLinkedList:
 
     def get_node_at_position(self, position):
 
-        if position < self._size:
-            node = self._head
-
-            for i in range(position):
-                node = node.next
-
-            return node
-
+        for node_position, node in enumerate(self):
+            if node_position == position:
+                return node
         else:
             return None
 
     def get_index(self, node):
 
-        position = 0
-        if node == self._head:
-            return position
-
+        for position, list_node in enumerate(self):
+            if list_node == node:
+                return position
         else:
-            current = self._head
-            for i in range(1,self._size):
-                if current.next == node:
-                    position = i
-                    break
-                else:
-                    current = current.next
-
-            return position
+            return -1
 
 class WidgetLinkedListNode:
 

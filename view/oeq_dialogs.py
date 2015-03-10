@@ -25,32 +25,93 @@ from collections import OrderedDict
 from functools import partial
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
-from oeq_ui_classes import QRemoveEntryButton
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 from ui_project_settings_form import Ui_project_settings_form
 from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
+from oeq_ui_classes import QRemoveEntryButton, QResponsiveGridLayout
+from Open_eQuarter.model.grid_matrix import WidgetLinkedListNode, WidgetLinkedList
 
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
         QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-        self.rows = 1
-        self.id = 0
-        self.color_field = self.chosen_color_0
-        self.value_field_one = self.value_one_0
-        self.value_field_two = self.value_two_0
 
+        self.color_table = QResponsiveGridLayout(self, 1)
+        self.color_table.setSizeConstraint(QLayout.SetFixedSize)
+        self.color_table.setObjectName(_fromUtf8('color_table'))
+
+        # Table headings
+        headings_font = QFont()
+        headings_font.setBold(True)
+        headings_font.setWeight(75)
+
+        self.row_number_label = QLabel()
+        self.row_number_label.setMinimumSize(QSize(15,0))
+
+        self.color_value_label = QLabel()
+        self.color_value_label.setText('Color-value')
+        self.color_value_label.setFont(headings_font)
+        self.color_value_label.setMinimumSize(QSize(200, 0))
+        self.color_value_label.setObjectName(_fromUtf8('color_value_label'))
+
+        self.value_one_label = QLabel()
+        self.value_one_label.setText('Value 1')
+        self.value_one_label.setFont(headings_font)
+        self.value_one_label.setMinimumSize(QSize(200, 0))
+        self.value_one_label.setObjectName(_fromUtf8('value_one_label'))
+
+        self.value_two_label = QLabel()
+        self.value_two_label.setFont(headings_font)
+        self.value_two_label.setObjectName(_fromUtf8('value_two_label'))
+        self.value_two_label.setMinimumSize(QSize(200, 0))
+        self.value_two_label.setText('Value 2')
+
+        self.remove_button_label = QLabel()
+        self.remove_button_label.setMinimumSize(QSize(18,0))
+
+        self.color_table.addWidget(self.row_number_label, 0, 0)
+        self.color_table.addWidget(self.color_value_label, 0, 1, Qt.AlignLeft)
+        self.color_table.addWidget(self.value_one_label, 0, 2)
+        self.color_table.addWidget(self.value_two_label, 0, 3)
+        self.color_table.addWidget(self.remove_button_label, 0, 4)
+
+        # Initialise first row
+        self.row_number_0 = QLabel()
+        self.row_number_0.setMinimumSize(QSize(15, 0))
+        self.row_number_0.setObjectName(_fromUtf8('row_number_0'))
+        self.row_number_0.setText('1')
+
+        self.chosen_color_0 = QLineEdit()
+        self.chosen_color_0.setEnabled(False)
+        self.chosen_color_0.setObjectName(_fromUtf8('chosen_color_0'))
+
+        self.value_one_0 = QLineEdit()
+        self.value_one_0.setObjectName(_fromUtf8('value_one_0'))
+
+        self.value_two_0 = QLineEdit()
+        self.value_two_0.setObjectName(_fromUtf8('value_two_0'))
+
+        self.remove_entries_0 = QRemoveEntryButton()
+        self.remove_entries_0.setMinimumSize(QSize(18, 0))
+        self.remove_entries_0.setMaximumSize(QSize(20, 20))
+        self.remove_entries_0.setFlat(True)
+        self.remove_entries_0.setObjectName(_fromUtf8('remove_entries_0'))
+        self.remove_entries_0.setToolTip('<html><head/><body><p style="color: #000000; font-size: 12px; font-weight: normal; margin-left: 5px;">Remove entry 1</p></body></html>')
+        self.remove_entries_0.setText('-')
         self.connect(self.remove_entries_0, SIGNAL('remove_entry'), self.remove_entry)
+
+        # Add first row
+        self.color_table.addWidget(self.row_number_0, 1, 0)
+        self.color_table.addWidget(self.chosen_color_0, 1, 1)
+        self.color_table.addWidget(self.value_one_0, 1, 2)
+        self.color_table.addWidget(self.value_two_0, 1, 3)
+        self.color_table.addWidget(self.remove_entries_0, 1, 4)
+        self.color_table_widget.setLayout(self.color_table)
 
     def add_color(self, color, value1=0, value2=0):
         """
@@ -64,11 +125,17 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        self.color_field.setText('RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha()))
-        if self.value_field_one.text().isspace():
-            self.value_field_one.setText(str(value1))
-        if self.value_field_two.text().isspace():
-            self.value_field_two.setText(str(value2))
+        # substract 1 from size, since indexing starts at 0, add first_responsive_row (the offset to the first input-field)
+        last_row = self.color_table.grid_matrix._size - 1 + self.color_table.first_responsive_row
+        color_field = self.color_table.itemAtPosition(last_row, 1).widget()
+        value_field_one = self.color_table.itemAtPosition(last_row, 2).widget()
+        value_field_two = self.color_table.itemAtPosition(last_row, 3).widget()
+
+        color_field.setText('RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha()))
+        if value_field_one.text().isspace():
+            value_field_one.setText(str(value1))
+        if value_field_two.text().isspace():
+            value_field_two.setText(str(value2))
 
         self.add_row()
         # pixmap = QPixmap(QSize(20,20))
@@ -81,33 +148,28 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        self.rows += 1
-        self.id +=1
-
-        row_number = QLabel(self)
-        row_number.setObjectName('row_number_{}'.format(self.id))
-        row_number.setText(str(self.rows))
-        self.color_table.addWidget(row_number, self.rows,0, 1, 1)
+        row_number = self.color_table.grid_matrix._size
+        # the labels object-name has to be 'row_number' to be recognised by the QResponsiveGridLayout's repopulate method
+        row_number_label = QLabel(self)
+        row_number_label.setObjectName(self.color_table.row_label_name)
+        row_number_label.setText('{}'.format(row_number + 1))
 
         chosen_color = QLineEdit(self)
         chosen_color.setEnabled(False)
-        chosen_color.setObjectName('chosen_color_{}'.format(self.id))
-        self.color_table.addWidget(chosen_color, self.rows, 1, 1, 1)
+        chosen_color.setObjectName('chosen_color_{}'.format(row_number))
 
         value_one = QLineEdit(self)
-        value_one.setObjectName('value_one_{}'.format(self.id))
-        self.color_table.addWidget(value_one, self.rows, 2, 1, 1)
+        value_one.setObjectName('value_one_{}'.format(row_number))
 
         value_two = QLineEdit(self)
-        value_two.setObjectName('value_two_{}'.format(self.id))
-        self.color_table.addWidget(value_two, self.rows, 3, 1, 1)
+        value_two.setObjectName('value_two_{}'.format(row_number))
 
         remove_entries = QRemoveEntryButton(self)
-        remove_entries.setObjectName('remove_entries_{}'.format(self.id))
+        remove_entries.setObjectName('remove_entries_{}'.format(row_number))
         remove_entries.stylize()
         self.connect(remove_entries, SIGNAL('remove_entry'), self.remove_entry)
-        self.color_table.addWidget(remove_entries, self.rows, 4, 1, 1)
 
+        self.color_table.add_row(row_number_label, chosen_color, value_one, value_two, remove_entries)
         self.color_field = chosen_color
         self.value_field_one = value_one
         self.value_field_two = value_two
@@ -123,31 +185,45 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        try:
-            row_number = str(button.objectName())
-            underscore = button.objectName().rfind('_')
-            row_number = row_number[underscore+1:]
-            color_field = 'chosen_color_{}'.format(row_number)
-            color_field = getattr(self, color_field)
+        print('remove')
+        row_number = str(button.objectName())
+        number_start = row_number.rfind('_') + 1
+        row_number = int(row_number[number_start:])
+
+        print(row_number)
+        print(self.color_table.itemAtPosition(row_number+1, 1).widget())
+        print(self.color_field)
+        print(self.color_field.objectName())
+        if self.color_field:
+            bottom_field_number = str(self.color_field.objectName())
+            number_start = bottom_field_number.rfind('_') + 1
+            bottom_field_number = int(bottom_field_number[number_start:])
+
+            print (row_number, bottom_field_number)
 
             # clear textfields only, if the first row shall be deleted and no further entries exist
             # if this row would be deleted, errors would occur when appending further values
-            if self.rows == 1:
-                exec('self.chosen_color_{}.clear()'.format(row_number))
-                exec('self.value_one_{}.clear()'.format(row_number))
-                exec('self.value_two_{}.clear()'.format(row_number))
+            if row_number == 0 and row_number == bottom_field_number:
+                self.chosen_color_0.clear()
+                self.value_one_0.clear()
+                self.value_two_0.clear()
 
-            elif not color_field.text().isspace():
-                exec('self.color_table.removeWidget(self.row_number_{})'.format(row_number))
-                exec('self.color_table.removeWidget(self.chosen_color_{})'.format(row_number))
-                exec('self.color_table.removeWidget(self.value_one_{})'.format(row_number))
-                exec('self.color_table.removeWidget(self.value_two_{})'.format(row_number))
-                exec('self.color_table.removeWidget(self.remove_entries_{})'.format(row_number))
-                self.rows -= 1
+            elif row_number == bottom_field_number:
+                self.color_field.clear()
+                self.value_field_one.clear()
+                self.value_field_two.clear()
+            else:
+                self.color_table.remove_row(row_number)
+                self.color_table.repopulate()
 
-        except AttributeError as Att_Error:
-            print(Att_Error)
+                # subtract one since the indexing starts with 0
+                last_row = self.color_table.grid_matrix._size - 1
 
+                self.color_field = self.color_table_widget.findChild(QLineEdit, 'chosen_color_{}'.format(last_row))
+                self.value_field_one = self.color_table_widget.findChild(QLineEdit, 'value_one_{}'.format(last_row))
+                self.value_field_two = self.color_table_widget.findChild(QLineEdit, 'value_two_{}'.format(last_row))
+
+                print(last_row, self.color_field, self.value_field_one, self.value_field_two)
 
 class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
 
@@ -155,8 +231,8 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
         QDockWidget.__init__(self)
         self.setupUi(self)
         self.selection_to_page = OrderedDict([])
-        self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
-        self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
+        self._check_mark = QPixmap(_fromUtf8(':/Controls/icons/checkmark.png'))
+        self._open_mark = QPixmap(_fromUtf8(':/Controls/icons/openmark.png'))
 
         page_triples = []
 

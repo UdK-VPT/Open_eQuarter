@@ -43,6 +43,23 @@ class WidgetLinkedList:
         else:
             return None
 
+    def get_index(self, node):
+
+        position = 0
+        if node == self._head:
+            return position
+
+        else:
+            current = self._head
+            for i in range(1,self._size):
+                if current.next == node:
+                    position = i
+                    break
+                else:
+                    current = current.next
+
+            return position
+
 class WidgetLinkedListNode:
 
     def __init__(self):

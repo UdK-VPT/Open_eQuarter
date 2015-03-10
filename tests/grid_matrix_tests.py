@@ -40,8 +40,6 @@ class GridMatrixModelTest(unittest.TestCase):
     def test_if_nodes_can_be_added_and_removed(self):
         row_list = WidgetLinkedList()
 
-        row_list = WidgetLinkedList()
-
         row1 = WidgetLinkedListNode()
         wid1 = QWidget()
         row1.add_widget(wid1)
@@ -151,6 +149,44 @@ class GridMatrixModelTest(unittest.TestCase):
         self.assertEqual(node, row2)
         node = row_list.get_node_at_position(2)
         self.assertIsNone(node)
+
+    def test_grid_matrix_returns_correct_index_by_node(self):
+        row_list = WidgetLinkedList()
+
+        row1 = WidgetLinkedListNode()
+        wid1 = QWidget()
+        row1.add_widget(wid1)
+        row_list.add_node(row1)
+
+        row2 = WidgetLinkedListNode()
+        wid2 = QWidget()
+        row2.add_widget(wid2)
+        row_list.add_node(row2)
+
+        row3 = WidgetLinkedListNode()
+        wid3 = QWidget()
+        row3.add_widget(wid3)
+        row_list.add_node(row3)
+
+        row4 = WidgetLinkedListNode()
+        wid4 = QWidget()
+        row4.add_widget(wid4)
+        row_list.add_node(row4)
+
+        row5 = WidgetLinkedListNode()
+        wid5 = QWidget()
+        row5.add_widget(wid5)
+        row_list.add_node(row5)
+
+        row6 = WidgetLinkedListNode()
+        wid6 = QWidget()
+        row6.add_widget(wid6)
+        row_list.add_node(row6)
+
+        self.assertEqual(row_list.get_index(row1), 0)
+        self.assertEqual(row_list.get_index(row3), 2)
+        self.assertEqual(row_list.get_index(row4), 3)
+        self.assertEqual(row_list.get_index(row6), 5)
 
 if __name__ == '__main__':
     unittest.main()

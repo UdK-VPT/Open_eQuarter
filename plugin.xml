@@ -1,7 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <?xml-stylesheet type='text/xsl' href='http://plugins.qgis.org/plugins/static/style/plugins.xsl' ?>
 <plugins>
-  <pyqgis_plugin name='Open eQuarter Mole' version='0.2'>
+  <pyqgis_plugin name='Open_eQuarter' version='0.2'>
     <description>This plugin is part of the Open eQuarter Suite.</description>
     <version>0.2</version>
     <qgis_minimum_version>2.4</qgis_minimum_version>

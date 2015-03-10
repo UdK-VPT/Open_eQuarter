@@ -1,5 +1,5 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
-<?xml-stylesheet type='text/xsl' href='/plugins.xsl' ?>
+<?xml-stylesheet type='text/xsl' href='http://plugins.qgis.org/plugins/static/style/plugins.xsl' ?>
 <plugins>
   <pyqgis_plugin name='Open eQuarter Mole' version='0.2'>
     <description>This plugin is part of the Open eQuarter Suite.</description>
@@ -8,9 +8,10 @@
     <homepage>http://www.arch.udk-berlin.de/nytsch/index.php?pageid=4</homepage>
     <file_name>master.zip</file_name>
     <author_name>Werner Kaul & Kim Gülle</author_name>
-    <download_url>https://github.com/UdK-VPT/Open_eQuarter/archive/master.zip</download_url>
+    <download_url>http://github.com/UdK-VPT/Open_eQuarter/archive/master.zip</download_url>
     <uploaded_by>vpt</uploaded_by>
     <create_date>2015-03-10</create_date>
     <update_date>2015-03-10</update_date>
+    <experimental>True</experimental>
   </pyqgis_plugin>
 </plugins

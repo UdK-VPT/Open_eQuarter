@@ -7,8 +7,8 @@
     <qgis_minimum_version>2.4</qgis_minimum_version>
     <homepage>http://www.arch.udk-berlin.de/nytsch/index.php?pageid=4</homepage>
     <file_name>oeq_mole.zip</file_name>
-    <author_name>Kim Gülle / UdK-Berlin</author_name>
-    <download_url>https://github.com/firstdayofjune/Open_eQuarter/mole/oeq_mole.zip</download_url>
+    <author_name>Kim Gülle / Open eQuarter Team UdK-Berlin</author_name>
+    <download_url>http://udk-vpt.github.io/Open_eQuarter/qgis_repo/oeq_mole.zip</download_url>
     <uploaded_by>OeQ Team</uploaded_by>
     <create_date>2015-03-10</create_date>
     <update_date>2015-03-11</update_date>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Wed Mar 11 11:06:08 2015
+# Created: Wed Mar 11 17:42:29 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,10 +41,10 @@ class Ui_color_picker_dialog(object):
         self.horizontalLayout = QtGui.QHBoxLayout(self.raster_dlg)
         self.horizontalLayout.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.label_4 = QtGui.QLabel(self.raster_dlg)
-        self.label_4.setStyleSheet(_fromUtf8(""))
-        self.label_4.setObjectName(_fromUtf8("label_4"))
-        self.horizontalLayout.addWidget(self.label_4)
+        self.chose_raster_info = QtGui.QLabel(self.raster_dlg)
+        self.chose_raster_info.setStyleSheet(_fromUtf8(""))
+        self.chose_raster_info.setObjectName(_fromUtf8("chose_raster_info"))
+        self.horizontalLayout.addWidget(self.chose_raster_info)
         self.layers_dropdown = QtGui.QComboBox(self.raster_dlg)
         self.layers_dropdown.setObjectName(_fromUtf8("layers_dropdown"))
         self.horizontalLayout.addWidget(self.layers_dropdown)
@@ -142,6 +142,11 @@ class Ui_color_picker_dialog(object):
         self.verticalLayout.addWidget(self.widget)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
+        self.warning_label = QtGui.QLabel(color_picker_dialog)
+        self.warning_label.setStyleSheet(_fromUtf8("color: red;"))
+        self.warning_label.setText(_fromUtf8(""))
+        self.warning_label.setObjectName(_fromUtf8("warning_label"))
+        self.verticalLayout.addWidget(self.warning_label)
         self.buttonBox = QtGui.QDialogButtonBox(color_picker_dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Save)
@@ -155,7 +160,7 @@ class Ui_color_picker_dialog(object):
 
     def retranslateUi(self, color_picker_dialog):
         color_picker_dialog.setWindowTitle(_translate("color_picker_dialog", "Create Color Palette", None))
-        self.label_4.setText(_translate("color_picker_dialog", "Chose clipped raster layers (*tif files only):", None))
+        self.chose_raster_info.setText(_translate("color_picker_dialog", "Chose clipped raster layers (*tif files only):", None))
         self.value_one_label.setText(_translate("color_picker_dialog", "Value 1", None))
         self.value_two_label.setText(_translate("color_picker_dialog", "Value 2", None))
         self.chosen_color_label.setText(_translate("color_picker_dialog", "Color-value", None))

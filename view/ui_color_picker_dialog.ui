@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>687</width>
     <height>285</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Create Color Palette</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -26,9 +26,21 @@
    </item>
    <item>
     <widget class="QWidget" name="raster_dlg" native="true">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QLabel" name="label_4">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
         <property name="text">
          <string>Chose clipped raster layers (*tif files only):</string>
         </property>
@@ -36,6 +48,50 @@
       </item>
       <item>
        <widget class="QComboBox" name="layers_dropdown"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="refresh_layers_dropdown">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>27</width>
+          <height>27</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">:pressed {
+	background-color: rgb(237, 237, 237);
+}
+</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/icons/refresh.png</normaloff>:/Controls/icons/refresh.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>15</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -45,8 +101,11 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetFixedSize</enum>
      </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
      <item row="0" column="2">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="value_one_label">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -59,7 +118,7 @@
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="value_two_label">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -78,7 +137,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>140</width>
+         <width>190</width>
          <height>0</height>
         </size>
        </property>
@@ -91,14 +150,14 @@
       <widget class="QLineEdit" name="value_one_0">
        <property name="minimumSize">
         <size>
-         <width>140</width>
+         <width>190</width>
          <height>0</height>
         </size>
        </property>
       </widget>
      </item>
      <item row="0" column="1" alignment="Qt::AlignLeft">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="chosen_color_label">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -114,7 +173,7 @@
       <widget class="QLineEdit" name="value_two_0">
        <property name="minimumSize">
         <size>
-         <width>140</width>
+         <width>190</width>
          <height>0</height>
         </size>
        </property>
@@ -218,7 +277,9 @@
    <header>oeq_ui_classes</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

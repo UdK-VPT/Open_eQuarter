@@ -5,8 +5,7 @@ from qgis.core import *
 from qgis.gui import *
 from qgis.utils import initInterface, iface
 from PyQt4 import QtCore
-from Open_eQuarter.OpenEQuarterMain import OpenEQuarterMain
-
+from mole.open_equarter_main import OpenEQuarterMain
 
 class OpenEQuarterMain_test(TestCase):
 

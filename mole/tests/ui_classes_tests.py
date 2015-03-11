@@ -3,9 +3,6 @@ import sys
 
 from PyQt4.QtGui import QGridLayout, QWidget, QApplication, QLabel, QLineEdit
 
-from Open_eQuarter.view.oeq_ui_classes import QResponsiveGridLayout
-
-
 class MyTestCase(unittest.TestCase):
 
     @classmethod

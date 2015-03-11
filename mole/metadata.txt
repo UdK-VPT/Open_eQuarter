@@ -28,7 +28,7 @@ tags=
 
 homepage=
 tracker=
-repository=https://github.com/firstdayofjune/Open_eQuarter
+repository=https://github.com/firstdayofjune/Open_eQuarter/mole
 icon=Icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=True

@@ -33,14 +33,19 @@ class QColorizedLineEdit(QLineEdit):
         QLineEdit.__init__(self, parent)
 
     def colorize(self, r, g, b, a):
-
-        background_color = 'background-color: qlineargradient(spread:pad,' \
-                           ' x1:0, y1:0, x2:0.324739, y2:0, ' \
+        background_color = 'background-color: qlineargradient(spread:pad, ' \
+                           'x1:0.08, y1:0.1, x2:1, y2:0.1, ' \
                            'stop:0 rgba({0}, {1}, {2}, {3}), ' \
-                           'stop:0.3 rgba({0}, {1}, {2}, {3}), ' \
-                           'stop:1 rgba(255, 255, 255, 255));'
+                           'stop:0.02 rgba({0}, {1}, {2}, {3}), ' \
+                           'stop:0.02 rgba(0, 0, 0, 0));'
+
+        # background_color = 'background-color: qlineargradient(spread:pad,' \
+        #                    ' x1:0, y1:0, x2:0.324739, y2:0, ' \
+        #                    'stop:0 rgba({0}, {1}, {2}, {3}), ' \
+        #                    'stop:0.3 rgba({0}, {1}, {2}, {3}), ' \
+        #                    'stop:1 rgba(255, 255, 255, 255));'
         background_color = background_color.format(r, g, b, a)
-        self.setStyleSheet(background_color)
+        self.setStyleSheet(background_color + ' padding-left: 20px;')
 
 class QRemoveEntryButton(QPushButton):
 

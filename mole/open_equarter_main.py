@@ -112,9 +112,6 @@ class OpenEQuarterMain:
                            'temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined',
                            'editing_temp_pointlayer_stopped', 'information_sampled']
 
-        ### Keep track of the colors chosen with the color picker
-        self.color_entry_manager = ColorEntryManager()
-
     def initGui(self):
         # Create action that will start plugin configuration
         plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
@@ -170,15 +167,11 @@ class OpenEQuarterMain:
     def chose_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
-        dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.clear()
-        wms_list = LayerInteraction.get_wms_layer_list(self.iface, visibility='visible')
-        for layer in wms_list:
-            source = layer.publicSource()
-            if os.path.basename(source).endswith('.tif'):
-                dropdown.addItem(layer.name())
-                self.color_entry_manager.add_layer(layer.name())
+        self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
+        self.refresh_layer_list()
 
+        dropdown = self.color_picker_dlg.layers_dropdown
+        dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
         dropdown.currentIndexChanged.connect(lambda: self.move_layer_top(dropdown.currentText()))
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
@@ -187,8 +180,25 @@ class OpenEQuarterMain:
             layer = self.iface.activeLayer()
             path = os.path.dirname(layer.publicSource())
             path = os.path.join(path, layer.name() + '.txt')
-            self.color_entry_manager.write_map_to_disk(layer.name(), path)
+            self.color_picker_dlg.update_color_values()
+            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), path)
+        else:
+            self.color_picker_dlg.__init__()
+
         self.iface.actionPan().trigger()
+
+    # ToDo Check if this has to be put in a separate method
+    def refresh_layer_list(self):
+        dropdown = self.color_picker_dlg.layers_dropdown
+        dropdown.clear()
+        wms_list = LayerInteraction.get_wms_layer_list(self.iface, visibility='visible')
+        for layer in wms_list:
+            source = layer.publicSource()
+            if os.path.basename(source).endswith('.tif'):
+                dropdown.addItem(layer.name())
+                self.color_picker_dlg.color_entry_manager.add_layer(layer.name())
+
+        self.move_layer_top(layer)
 
     def move_layer_top(self, layer_name):
         root = QgsProject.instance().layerTreeRoot()
@@ -210,16 +220,7 @@ class OpenEQuarterMain:
             color = RasterLayerInteraction.extract_color_at_point(raster, point, crs)
 
             if isinstance(color, QColor):
-                color_key = 'RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha())
-                color_map = self.color_entry_manager.layer_values_map[raster.name()]
-
-                if not color_map.has_key(color_key):
-                    self.color_picker_dlg.warning_label.clear()
-                    self.color_picker_dlg.add_color(color)
-                    self.color_entry_manager.add_color_value_triple_to_layer((color_key, 0, 0), raster.name())
-
-                else:
-                    self.color_picker_dlg.warning_label.setText('Attention: Color {} is defined already.'.format(color_key))
+                self.color_picker_dlg.add_color(color)
 
     def unload(self):
         # Remove the plugin menu item and icon

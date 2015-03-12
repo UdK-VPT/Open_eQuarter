@@ -32,6 +32,8 @@ from ui_project_settings_form import Ui_project_settings_form
 from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
+from mole.model.file_manager import ColorEntryManager
+
 
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
@@ -47,6 +49,8 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.row_offset = 1
         self.row_count = 2
         self.connect(self.remove_entries_0, SIGNAL('remove_entry'), self.remove_entry)
+        self.color_entry_manager = ColorEntryManager()
+        self.recent_layer = ''
 
     def add_color(self, color, value1=0, value2=0):
         """
@@ -60,20 +64,68 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        last_row = self.row_count - self.row_offset
-        color_field = self.color_table.itemAtPosition(last_row, 1).widget()
-        value_field_one = self.color_table.itemAtPosition(last_row, 2).widget()
-        value_field_two = self.color_table.itemAtPosition(last_row, 3).widget()
+        layer = self.layers_dropdown.currentText()
+        self.recent_layer = layer
+        color_map = self.color_entry_manager.layer_values_map[layer]
+        color_key = 'RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha())
+        if color_map.has_key(color_key):
+            self.warning_label.setText('Attention: Color {} is defined already.'.format(color_key))
 
-        color_field.setText('RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha()))
-        if value_field_one.text().isspace():
-            value_field_one.setText(str(value1))
-        if value_field_two.text().isspace():
-            value_field_two.setText(str(value2))
+        else:
+            self.warning_label.clear()
+            self.color_entry_manager.add_color_value_triple_to_layer((color_key, 0, 0), layer)
 
-        self.add_row()
+            last_row = self.row_count - self.row_offset
+            color_field = self.color_table.itemAtPosition(last_row, 1).widget()
+            value_field_one = self.color_table.itemAtPosition(last_row, 2).widget()
+            value_field_two = self.color_table.itemAtPosition(last_row, 3).widget()
+
+            color_field.setText(color_key)
+            if value_field_one.text().isspace():
+                value_field_one.setText(str(value1))
+            if value_field_two.text().isspace():
+                value_field_two.setText(str(value2))
+
+            self.add_row()
+
         # pixmap = QPixmap(QSize(20,20))
         # painter = QPainter(pixmap)
+
+    def restore_color_value_pairs(self, layer):
+        try:
+            color_map = self.color_entry_manager.layer_values_map[layer]
+            print color_map
+            row = self.row_offset
+            for color, values in color_map.iteritems():
+                color_field = self.color_table.itemAtPosition(row, 1).widget()
+                value_field_one = self.color_table.itemAtPosition(row, 2).widget()
+                value_field_two = self.color_table.itemAtPosition(row, 3).widget()
+                row += 1
+                color_field.setText(color)
+                value_field_one.setText(values[0])
+                value_field_two.setText(values[1])
+                self.add_row()
+
+        except KeyError, Error:
+            print(Error)
+
+    def update_color_values(self):
+        grid = self.color_table
+        removal = []
+        for i in range(0, self.row_count-2):
+            row = i + self.row_offset
+            color = grid.itemAtPosition(row, 1).widget().text()
+            value1 = grid.itemAtPosition(row, 2).widget().text()
+            value2 = grid.itemAtPosition(row, 3).widget().text()
+            removal.append(grid.itemAtPosition(row, 3).widget())
+            self.color_entry_manager.add_color_value_triple_to_layer((color, value1, value2), self.recent_layer)
+
+        for remove_button in removal:
+            self.remove_entry(remove_button)
+
+        layer = self.layers_dropdown.currentText()
+        self.restore_color_value_pairs(layer)
+        self.recent_layer = layer
 
     def add_row(self):
         """
@@ -109,7 +161,6 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.color_table.addWidget(remove_entries, current_row, 4, 1, 1)
         self.row_count += 1
 
-    #ToDo A different way of removing the entries has to be found.
     def remove_entry(self, button):
         """
         Remove a row consisting of number, color, value1, value2 and remove-button from the

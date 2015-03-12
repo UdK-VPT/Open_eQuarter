@@ -28,7 +28,7 @@ tags=
 
 homepage=
 tracker=
-repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo/plugin.xml
+repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo
 icon=icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=True

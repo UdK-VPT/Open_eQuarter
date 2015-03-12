@@ -1,5 +1,5 @@
 from os import path
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QgsApplication
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QgsApplication, QgsProject
 from PyQt4.QtCore import QSettings
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
@@ -170,6 +170,7 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
                 iface.actionAddFeature().trigger()
                 edit_layer.commitChanges()
 
+
 def get_wms_layer_list(iface, visibility='all'):
     """
     Iterate over all layers and return a list of the currently visible WMS-files.
@@ -203,6 +204,7 @@ def get_wms_layer_list(iface, visibility='all'):
 
         return active_wms_layers
 
+
 def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
     """
     Connect to a given wms-server and create a new wms-layer from the url.
@@ -224,8 +226,8 @@ def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
         else:
             return rlayer
 
-def zoom_to_layer(iface, layer_name):
 
+def zoom_to_layer(iface, layer_name):
     if layer_name and not layer_name.isspace():
 
         zoom_layer = find_layer_by_name(layer_name)
@@ -235,8 +237,8 @@ def zoom_to_layer(iface, layer_name):
             iface.setActiveLayer(zoom_layer)
             iface.actionZoomToLayer().trigger()
 
-def biuniquify_layer_name(layer_name):
 
+def biuniquify_layer_name(layer_name):
     biunique_name = ''
     if layer_name and not layer_name.isspace():
 
@@ -249,10 +251,33 @@ def biuniquify_layer_name(layer_name):
 
     return biunique_name
 
-def change_crs_of_layers(layer_list, dest_crs):
 
+def change_crs_of_layers(layer_list, dest_crs):
     for layer_name in layer_list:
         layer = find_layer_by_name(layer_name)
 
         if layer and layer.isValid():
             layer.setCrs(dest_crs)
+
+
+def move_layer_to_position(iface, layer_name, position):
+    """
+    Move the layer with the name 'layer_name' to the given position in the iface's Table of Layers
+    :param iface: Qgis Interface
+    :type iface: QgisInterface
+    :param layer_name: Name of the layer
+    :type layer_name: str
+    :param position: Postion from 0 to max
+    :type position: int
+    :return:
+    :rtype:
+    """
+    root = QgsProject.instance().layerTreeRoot()
+    layers = root.children()
+    for layer_node in layers:
+        if layer_node.layerName() == layer_name:
+            clone = layer_node.clone()
+            root.insertChildNode(position,clone)
+            root.removeChildNode(layer_node)
+            iface.setActiveLayer(clone.layer())
+            break

@@ -26,7 +26,6 @@ from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import *
 from qgis.utils import iface
 from socket import gaierror
-from os import path
 
 import sys
 import httplib
@@ -53,7 +52,7 @@ class OpenEQuarterMain:
 
         ### Plugin specific settings
         # initialize plugin directory
-        self.plugin_dir = path.dirname(__file__)
+        self.plugin_dir = os.path.dirname(__file__)
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
@@ -99,7 +98,7 @@ class OpenEQuarterMain:
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
-        self.investigation_shape_layer_style = path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
@@ -109,7 +108,7 @@ class OpenEQuarterMain:
 
     def initGui(self):
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)
@@ -118,13 +117,13 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.main_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
 
-        clipping_icon = QIcon(path.join(':','Plugin', 'icons', 'scissor.png'))
+        clipping_icon = QIcon(os.path.join(':','Plugin', 'icons', 'scissor.png'))
         self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
         self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
         self.iface.addToolBarIcon(self.clipping_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
 
-        testing_icon = QIcon(path.join(':','Plugin', 'icons', 'lightbulb.png'))
+        testing_icon = QIcon(os.path.join(':','Plugin', 'icons', 'lightbulb.png'))
         self.testing_action = QAction(testing_icon, u"Run all unit-tests", self.iface.mainWindow())
         self.testing_action.triggered.connect(lambda: self.run_tests())
         self.iface.addToolBarIcon(self.testing_action)
@@ -167,16 +166,16 @@ class OpenEQuarterMain:
 
         dropdown = self.color_picker_dlg.layers_dropdown
         dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
-        dropdown.currentIndexChanged.connect(lambda: self.move_layer_top(dropdown.currentText()))
+        dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
 
         if save_or_abort:
             layer = self.iface.activeLayer()
-            path = path.dirname(layer.publicSource())
-            path = path.join(path, layer.name() + '.txt')
+            out_path = os.path.dirname(layer.publicSource())
+            out_path = os.path.join(out_path, layer.name() + '.txt')
             self.color_picker_dlg.update_color_values()
-            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), path)
+            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
         else:
             self.color_picker_dlg.__init__()
 
@@ -191,22 +190,11 @@ class OpenEQuarterMain:
         layer = None
         for layer in wms_list:
             source = layer.publicSource()
-            if path.basename(source).endswith('.tif'):
+            if os.path.basename(source).endswith('.tif'):
                 dropdown.addItem(layer.name())
                 self.color_picker_dlg.color_entry_manager.add_layer(layer.name())
 
-        self.move_layer_top(layer)
-
-    def move_layer_top(self, layer_name):
-        root = QgsProject.instance().layerTreeRoot()
-        layers = root.children()
-        for layer_node in layers:
-            if layer_node.layerName() == layer_name:
-                clone = layer_node.clone()
-                root.insertChildNode(0,clone)
-                root.removeChildNode(layer_node)
-                self.iface.setActiveLayer(clone.layer())
-                break
+        layer_interaction.move_layer_to_position(self.iface, layer, 0)
 
     def handle_canvas_click(self, point, button):
         canvas = self.iface.mapCanvas()
@@ -518,7 +506,7 @@ class OpenEQuarterMain:
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 
-                if path.exists(path_transformed):
+                if os.path.exists(path_transformed):
                     # change validation to surpress missing-crs prompt
                     old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                     QSettings().setValue('/Projections/defaultBehaviour', 'useProject')

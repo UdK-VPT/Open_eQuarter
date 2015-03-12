@@ -418,68 +418,6 @@ class OpenEQuarterMain:
             print exception
             return None
 
-    # Method not used yet
-    def get_extent_per_feature(self, layer_name):
-        """
-        Iterate over all features of a given layer and return the extents (as a list of rectangles) of each feature
-        :param layer_name: Name of the layer
-        :type layer_name: str
-        :return feature_extents:
-        :rtype <QgsRectangle>:
-        """
-        if layer_name and not layer_name.isspace():
-            shape = None
-            # get the shapefile
-            for layer in self.iface.legendInterface().layers():
-
-                if layer.name() == layer_name:
-                    shape = layer
-
-            if shape is not None:
-
-                iterator = shape.getFeatures()
-                feature_extents = []
-
-                for feature in iterator:
-
-                    geom = feature.geometry()
-                    polygons = geom.asPolygon()
-
-                    for polygon in polygons:
-                        extent_coordinates = self.find_x_min_y_min_x_max_y_max(polygon)
-                        extent = QgsRectangle(extent_coordinates[0], extent_coordinates[1], extent_coordinates[2],
-                                              extent_coordinates[3])
-                        feature_extents.append(extent)
-
-        return feature_extents
-
-    # Method not used yet
-    def find_x_min_y_min_x_max_y_max(self, polygon):
-        """
-        Iterate over all points of a given polygon and return the x- and y-extremes.
-        :param polygon: A list of QgsPoint-Objects, which form a polygon
-        :type polygon: <QgsPoint>
-        :return: the extent of the polygon (lowest x, y and highest x,y)
-        :rtype: float, float, float, float
-        """
-
-        x_max = x_min = polygon[0].x()
-        y_max = y_min = polygon[0].y()
-
-        for point in polygon[1:]:
-
-            if point.x() >= x_max:
-                x_max = point.x()
-            elif point.x() <= x_min:
-                x_min = point.x()
-
-            if point.y() >= y_max:
-                y_max = point.y()
-            elif point.y() <= y_min:
-                y_min = point.y()
-
-        return x_min, y_min, x_max, y_max
-
     def load_housing_layer(self):
         # ToDo
         return

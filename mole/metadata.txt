@@ -13,7 +13,7 @@ name=Open eQuarter
 qgisMinimumVersion=2.0
 description=The plugin automates the setup for investigating an area.
 version=0.2
-author=Kim Gülle / UdK-Berlin
+author=Kim Gülle / Open eQuarter Team UdK-Berlin
 email=firstdayofjune@users.noreply.github.com
 
 # end of mandatory metadata
@@ -28,8 +28,8 @@ tags=
 
 homepage=
 tracker=
-repository=https://github.com/firstdayofjune/Open_eQuarter/mole
-icon=Icons/OeQ_plugin_icon.png
+repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo
+icon=icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=True
 

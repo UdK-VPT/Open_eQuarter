@@ -28,8 +28,8 @@ tags=
 
 homepage=
 tracker=
-repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo
-icon=Icons/OeQ_plugin_icon.png
+repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo/plugin.xml
+icon=icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=True
 

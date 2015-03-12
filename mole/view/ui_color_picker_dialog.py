@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Wed Mar 11 17:42:29 2015
+# Created: Thu Mar 12 12:55:39 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,9 +87,10 @@ class Ui_color_picker_dialog(object):
         self.value_two_label.setFont(font)
         self.value_two_label.setObjectName(_fromUtf8("value_two_label"))
         self.color_table.addWidget(self.value_two_label, 0, 3, 1, 1)
-        self.chosen_color_0 = QtGui.QLineEdit(color_picker_dialog)
+        self.chosen_color_0 = QColorizedLineEdit(color_picker_dialog)
         self.chosen_color_0.setEnabled(False)
         self.chosen_color_0.setMinimumSize(QtCore.QSize(190, 0))
+        self.chosen_color_0.setStyleSheet(_fromUtf8(""))
         self.chosen_color_0.setText(_fromUtf8(""))
         self.chosen_color_0.setObjectName(_fromUtf8("chosen_color_0"))
         self.color_table.addWidget(self.chosen_color_0, 1, 1, 1, 1)
@@ -168,5 +169,5 @@ class Ui_color_picker_dialog(object):
         self.remove_entries_0.setText(_translate("color_picker_dialog", "-", None))
         self.row_number_0.setText(_translate("color_picker_dialog", "1", None))
 
-from oeq_ui_classes import QRemoveEntryButton
+from oeq_ui_classes import QColorizedLineEdit, QRemoveEntryButton
 import resources_rc

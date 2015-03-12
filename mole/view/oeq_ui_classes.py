@@ -1,4 +1,4 @@
-from PyQt4.QtGui import QLabel, QPushButton
+from PyQt4.QtGui import QLabel, QPushButton, QLineEdit
 from PyQt4.QtCore import SIGNAL
 from PyQt4 import QtCore
 
@@ -26,6 +26,21 @@ class QProcessButton(QPushButton):
     def mouseReleaseEvent(self, event):
         self.emit(SIGNAL('process_button_click'), self.objectName(), self)
 
+
+class QColorizedLineEdit(QLineEdit):
+
+    def __init__(self, parent):
+        QLineEdit.__init__(self, parent)
+
+    def colorize(self, r, g, b, a):
+
+        background_color = 'background-color: qlineargradient(spread:pad,' \
+                           ' x1:0, y1:0, x2:0.324739, y2:0, ' \
+                           'stop:0 rgba({0}, {1}, {2}, {3}), ' \
+                           'stop:0.3 rgba({0}, {1}, {2}, {3}), ' \
+                           'stop:1 rgba(255, 255, 255, 255));'
+        background_color = background_color.format(r, g, b, a)
+        self.setStyleSheet(background_color)
 
 class QRemoveEntryButton(QPushButton):
 

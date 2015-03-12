@@ -25,7 +25,7 @@ from collections import OrderedDict
 from functools import partial
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
-from oeq_ui_classes import QRemoveEntryButton
+from oeq_ui_classes import QRemoveEntryButton, QColorizedLineEdit
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 from ui_project_settings_form import Ui_project_settings_form
@@ -81,6 +81,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
             value_field_two = self.color_table.itemAtPosition(last_row, 3).widget()
 
             color_field.setText(color_key)
+            color_field.colorize(color.red(), color.green(), color.blue(), color.alpha())
             if value_field_one.text().isspace():
                 value_field_one.setText(str(value1))
             if value_field_two.text().isspace():
@@ -88,13 +89,9 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
             self.add_row()
 
-        # pixmap = QPixmap(QSize(20,20))
-        # painter = QPainter(pixmap)
-
     def restore_color_value_pairs(self, layer):
         try:
             color_map = self.color_entry_manager.layer_values_map[layer]
-            print color_map
             row = self.row_offset
             for color, values in color_map.iteritems():
                 color_field = self.color_table.itemAtPosition(row, 1).widget()
@@ -102,6 +99,9 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
                 value_field_two = self.color_table.itemAtPosition(row, 3).widget()
                 row += 1
                 color_field.setText(color)
+                color = color[5:-1]
+                colors = color.split(',')
+                color_field.colorize(colors[0], colors[1], colors[2], colors[3])
                 value_field_one.setText(values[0])
                 value_field_two.setText(values[1])
                 self.add_row()
@@ -141,7 +141,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         row_number.setText(str(entry_number))
         self.color_table.addWidget(row_number, current_row, 0, 1, 1)
 
-        chosen_color = QLineEdit(self)
+        chosen_color = QColorizedLineEdit(self)
         chosen_color.setEnabled(False)
         chosen_color.setObjectName('chosen_color_{}'.format(current_row - 1))
         self.color_table.addWidget(chosen_color, current_row, 1, 1, 1)

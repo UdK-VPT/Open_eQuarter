@@ -186,7 +186,8 @@ class OpenEQuarterMain:
         if save_or_abort:
             layer = self.iface.activeLayer()
             path = os.path.dirname(layer.publicSource())
-            self.color_entry_manager.write_map_to_disk(layer.name(), path + layer.name() + '.txt')
+            path = os.path.join(path, layer.name() + '.txt')
+            self.color_entry_manager.write_map_to_disk(layer.name(), path)
         self.iface.actionPan().trigger()
 
     def move_layer_top(self, layer_name):

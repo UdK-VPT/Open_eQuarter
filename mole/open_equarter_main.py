@@ -20,28 +20,30 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-import time
-from socket import gaierror
-import httplib
-import unittest
-
+from PyQt4.QtGui import *
+from PyQt4.QtCore import SIGNAL, Qt, QSettings
+from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import *
 from qgis.utils import iface
-from qgis.gui import QgsMapToolEmitPoint
+from socket import gaierror
+from os import path
 
-from PyQt4.QtGui import *
+import sys
+import httplib
+import unittest
+import time
 import numpy
+import os
 
-from model.ProgressModel import ProgressModel
-from model.file_manager import ColorEntryManager
+from model.progress_model import ProgressModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
 from view.oeq_ui_classes import QProcessButton
-from qgisinteraction.PstInteraction import *
-from qgisinteraction.OlInteraction import *
-from qgisinteraction import LayerInteraction
-from qgisinteraction import RasterLayerInteraction
+from qgisinteraction import plugin_interaction
+from qgisinteraction.plugin_interaction import PstInteraction, OlInteraction
+from qgisinteraction import layer_interaction
+from qgisinteraction import raster_layer_interaction
 from ExportWMSasTif import ExportWMSasTif
-from tests import LayerInteraction_test
+from tests import layer_interaction_test
 
 
 class OpenEQuarterMain:
@@ -51,7 +53,7 @@ class OpenEQuarterMain:
 
         ### Plugin specific settings
         # initialize plugin directory
-        self.plugin_dir = os.path.dirname(__file__)
+        self.plugin_dir = path.dirname(__file__)
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
@@ -97,24 +99,17 @@ class OpenEQuarterMain:
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
 
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
 
         ### Monitor the users progress
         self.progress_model = ProgressModel()
-        # ToDo have step_queue created from the process list in the Processing class
-        self.step_queue = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded',
-                           'temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected',
-                           'editing_temp_shapefile_stopped',
-                           'raster_loaded', 'extent_clipped', 'pyramids_built',
-                           'temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined',
-                           'editing_temp_pointlayer_stopped', 'information_sampled']
 
     def initGui(self):
         # Create action that will start plugin configuration
-        plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         # connect the action to the run method
         self.main_action.triggered.connect(self.run)
@@ -123,13 +118,13 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.main_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
 
-        clipping_icon = QIcon(os.path.join(self.plugin_dir, 'icons', 'scissor.png'))
+        clipping_icon = QIcon(path.join(':','Plugin', 'icons', 'scissor.png'))
         self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
         self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
         self.iface.addToolBarIcon(self.clipping_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
 
-        testing_icon = QIcon(os.path.join(self.plugin_dir, 'icons', 'lightbulb.png'))
+        testing_icon = QIcon(path.join(':','Plugin', 'icons', 'lightbulb.png'))
         self.testing_action = QAction(testing_icon, u"Run all unit-tests", self.iface.mainWindow())
         self.testing_action.triggered.connect(lambda: self.run_tests())
         self.iface.addToolBarIcon(self.testing_action)
@@ -178,8 +173,8 @@ class OpenEQuarterMain:
 
         if save_or_abort:
             layer = self.iface.activeLayer()
-            path = os.path.dirname(layer.publicSource())
-            path = os.path.join(path, layer.name() + '.txt')
+            path = path.dirname(layer.publicSource())
+            path = path.join(path, layer.name() + '.txt')
             self.color_picker_dlg.update_color_values()
             self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), path)
         else:
@@ -191,10 +186,12 @@ class OpenEQuarterMain:
     def refresh_layer_list(self):
         dropdown = self.color_picker_dlg.layers_dropdown
         dropdown.clear()
-        wms_list = LayerInteraction.get_wms_layer_list(self.iface, visibility='visible')
+        wms_list = layer_interaction.get_wms_layer_list(self.iface, visibility='visible')
+
+        layer = None
         for layer in wms_list:
             source = layer.publicSource()
-            if os.path.basename(source).endswith('.tif'):
+            if path.basename(source).endswith('.tif'):
                 dropdown.addItem(layer.name())
                 self.color_picker_dlg.color_entry_manager.add_layer(layer.name())
 
@@ -217,7 +214,7 @@ class OpenEQuarterMain:
         raster = self.iface.activeLayer()
 
         if raster is not None:
-            color = RasterLayerInteraction.extract_color_at_point(raster, point, crs)
+            color = raster_layer_interaction.extract_color_at_point(raster, point, crs)
 
             if isinstance(color, QColor):
                 self.color_picker_dlg.add_color(color)
@@ -250,32 +247,6 @@ class OpenEQuarterMain:
             if yes_to_save:
                 # trigger qgis "Save As"-function
                 iface.actionSaveProjectAs().trigger()
-
-    def get_plugin_ifexists(self, plugin_name):
-        """
-        Check if a plugin with the given name exists.
-
-        :param plugin_name: Name of the plugin to check existence of.
-        :type plugin_name: str
-
-        :return plugin: Return the plugin if it was found
-        :rtype: OpenlayersPlugin instance
-
-        :return False: Return False if the plugin was not found and the lookup resulted in an exception.
-        :rtype: bool
-        """
-
-        if not plugin_name or plugin_name.isspace():
-            return None
-
-        plugin_dict = plugins
-
-        try:
-            plugin = plugin_dict[plugin_name]
-            return plugin
-        except KeyError:
-            print "No plugin with the given name '" + plugin_name + "' found. Please check the plugin settings."
-            return None
 
     def osm_layer_is_loaded(self):
         """
@@ -316,7 +287,7 @@ class OpenEQuarterMain:
         """
         if layer_name and not layer_name.isspace():
 
-            edit_layer = LayerInteraction.find_layer_by_name(layer_name)
+            edit_layer = layer_interaction.find_layer_by_name(layer_name)
 
             # if the layer was found, prompt the user to confirm the adding-feature-process was finished
             if edit_layer:
@@ -423,7 +394,7 @@ class OpenEQuarterMain:
         :rtype:
         """
         try:
-            investigation_shape = LayerInteraction.find_layer_by_name(layer_name)
+            investigation_shape = layer_interaction.find_layer_by_name(layer_name)
 
             # an investigation shape is needed, to trigger the zoom to layer function
             if investigation_shape is not None and investigation_shape.featureCount() > 0:
@@ -434,7 +405,7 @@ class OpenEQuarterMain:
 
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
-                raster_layers = LayerInteraction.get_wms_layer_list(self.iface, 'visible')
+                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
                 for layer in raster_layers:
                     self.iface.legendInterface().setLayerVisible(layer, False)
 
@@ -519,11 +490,11 @@ class OpenEQuarterMain:
 
     # step 0.0
     def handle_ol_plugin_installed(self):
-        return self.get_plugin_ifexists(self.ol_plugin_name) is not None
+        return plugin_interaction.get_plugin_ifexists(self.ol_plugin_name) is not None
 
     # step 0.1
     def handle_pst_plugin_installed(self):
-        return self.get_plugin_ifexists(self.pst_plugin_name) is not None
+        return plugin_interaction.get_plugin_ifexists(self.pst_plugin_name) is not None
 
     # step 0.2
     def handle_project_created(self):
@@ -556,19 +527,19 @@ class OpenEQuarterMain:
 
     # step 1.0
     def handle_temp_shapefile_created(self):
-        investigation_area = LayerInteraction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon',
+        investigation_area = layer_interaction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon',
                                                                      self.project_crs)
 
         if investigation_area is not None:
-            LayerInteraction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
-            LayerInteraction.add_layer_to_registry(investigation_area)
+            layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
+            layer_interaction.add_layer_to_registry(investigation_area)
             return True
         else:
             return False
 
     # step 1.1
     def handle_editing_temp_shapefile_started(self):
-        LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
+        layer_interaction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
         return True
 
     # step 1.2
@@ -580,17 +551,17 @@ class OpenEQuarterMain:
 
     # step 1.3
     def handle_editing_temp_shapefile_stopped(self):
-        LayerInteraction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
+        layer_interaction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
         return True
 
     # step 2.0
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
-        investigation_raster_layer = LayerInteraction.open_wms_as_raster(self.iface, self.wms_url,
+        investigation_raster_layer = layer_interaction.open_wms_as_raster(self.iface, self.wms_url,
                                                                          self.clipping_raster_layer_name)
 
         if investigation_raster_layer is not None and investigation_raster_layer.isValid():
-            LayerInteraction.add_layer_to_registry(investigation_raster_layer)
+            layer_interaction.add_layer_to_registry(investigation_raster_layer)
             self.iface.setActiveLayer(investigation_raster_layer)
             return True
         else:
@@ -600,21 +571,21 @@ class OpenEQuarterMain:
     # step 2.1
     def handle_extent_clipped(self):
         extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
-        LayerInteraction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
+        layer_interaction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
 
         for layer_name in extracted_layers:
             try:
-                layer = LayerInteraction.find_layer_by_name(layer_name)
-                RasterLayerInteraction.gdal_warp_layer(layer, self.project_crs)
+                layer = layer_interaction.find_layer_by_name(layer_name)
+                raster_layer_interaction.gdal_warp_layer(layer, self.project_crs)
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 
-                if os.path.exists(path_transformed):
+                if path.exists(path_transformed):
                     # change validation to surpress missing-crs prompt
                     old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                     QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-                    LayerInteraction.hide_or_remove_layer(layer_name,'remove',self.iface)
+                    layer_interaction.hide_or_remove_layer(layer_name,'remove',self.iface)
 
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
@@ -636,14 +607,14 @@ class OpenEQuarterMain:
 
     # step 3.0
     def handle_temp_pointlayer_created(self):
-        pst_input_layer = LayerInteraction.create_temporary_layer(self.pst_input_layer_name, 'Point',
+        pst_input_layer = layer_interaction.create_temporary_layer(self.pst_input_layer_name, 'Point',
                                                                   self.project_crs)
-        LayerInteraction.add_layer_to_registry(pst_input_layer)
+        layer_interaction.add_layer_to_registry(pst_input_layer)
         return True
 
     # step 3.1
     def handle_editing_temp_pointlayer_started(self):
-        LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
+        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
         return True
 
     # step 3.2
@@ -655,20 +626,20 @@ class OpenEQuarterMain:
 
     # step 3.3
     def handle_editing_temp_pointlayer_stopped(self):
-        LayerInteraction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
+        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
         return True
 
     # step 3.4
     def handle_information_sampled(self):
-        pst_plugin = self.get_plugin_ifexists(self.pst_plugin_name)
+        pst_plugin = plugin_interaction.get_plugin_ifexists(self.pst_plugin_name)
         psti = PstInteraction(pst_plugin, iface)
 
         psti.set_input_layer(self.pst_input_layer_name)
         psti.select_files_for_sampling()
 
         pst_output_layer = psti.start_sampling(self.project_path, self.pst_output_layer_name)
-        vlayer = QgsVectorLayer(pst_output_layer, LayerInteraction.biuniquify_layer_name('pst_out'), "ogr")
-        LayerInteraction.add_layer_to_registry(vlayer)
+        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")
+        layer_interaction.add_layer_to_registry(vlayer)
         return True
 
     def continue_process(self):
@@ -735,7 +706,7 @@ class OpenEQuarterMain:
             self.check_status()
 
     def run_tests(self):
-        test_class = LayerInteraction_test
+        test_class = layer_interaction_test.LayerInteraction_test
         test_loader = unittest.TestLoader()
         test_names = test_loader.getTestCaseNames(test_class)
 
@@ -751,7 +722,7 @@ class OpenEQuarterMain:
         self.continue_process() #PST-Plugin
         self.continue_process() #Proje. saved
 
-        investigation_layer = LayerInteraction.find_layer_by_name(self.investigation_shape_layer_name)
+        investigation_layer = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
 
         if self.osm_layer_is_loaded() or investigation_layer:
             self.set_next_step_done(True) # open OL-map

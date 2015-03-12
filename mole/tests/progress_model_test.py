@@ -1,6 +1,6 @@
 import unittest
 
-from model.ProgressModel import *
+from mole.model.progress_model import *
 
 
 class ProgressModel_test(unittest.TestCase):

@@ -1,1 +1,1 @@
-from ProgressModel import ProgressModel
+from progress_model import ProgressModel

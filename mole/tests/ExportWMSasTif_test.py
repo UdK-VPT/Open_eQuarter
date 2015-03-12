@@ -1,7 +1,7 @@
 from unittest import TestCase
 from qgis.core import *
 from PyQt4 import QtCore
-from QgisTestInterface import QgisTestInterface
+from qgis_test_interface import QgisTestInterface
 
 
 class ExportWMSasTif_test(TestCase):

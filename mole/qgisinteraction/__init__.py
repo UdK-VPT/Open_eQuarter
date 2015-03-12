@@ -1,5 +1,4 @@
-from OlInteraction import OlInteraction
-from PstInteraction import PstInteraction
-import LayerInteraction
-import RasterLayerInteraction
+from plugin_interaction import OlInteraction, PstInteraction
+import layer_interaction
+import raster_layer_interaction
 import GdalUtils

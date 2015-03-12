@@ -267,7 +267,7 @@ def move_layer_to_position(iface, layer_name, position):
     :type iface: QgisInterface
     :param layer_name: Name of the layer
     :type layer_name: str
-    :param position: Postion from 0 to max
+    :param position: Postion from 0 to max (if position is larger than the number of layers, the layer is always added to the bottom)
     :type position: int
     :return:
     :rtype:

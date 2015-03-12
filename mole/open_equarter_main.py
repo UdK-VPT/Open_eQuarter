@@ -99,7 +99,8 @@ class OpenEQuarterMain:
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
         self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
-
+        self.housing_layer_name = ''
+        self.housing_coordinate_layer_name = ''
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
 
@@ -145,6 +146,13 @@ class OpenEQuarterMain:
         self.main_process_dock.dropdown_menu.addAction('Color Picker', self.chose_color)
         self.main_process_dock.settings_dropdown_btn.setMenu(self.main_process_dock.dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setPopupMode(QToolButton.InstantPopup)
+
+        self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
+
+    def update_layer_positions(self):
+        layer_interaction.move_layer_to_position(self.iface, self.investigation_shape_layer_name, 0)
+        layer_interaction.move_layer_to_position(self.iface, self.housing_coordinate_layer_name, 1)
+        layer_interaction.move_layer_to_position(self.iface, self.housing_layer_name, 2)
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -483,8 +491,7 @@ class OpenEQuarterMain:
     # step 2.0
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
-        investigation_raster_layer = layer_interaction.open_wms_as_raster(self.iface, self.wms_url,
-                                                                         self.clipping_raster_layer_name)
+        investigation_raster_layer = layer_interaction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name)
 
         if investigation_raster_layer is not None and investigation_raster_layer.isValid():
             layer_interaction.add_layer_to_registry(investigation_raster_layer)

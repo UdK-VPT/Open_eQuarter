@@ -230,6 +230,7 @@ class OpenEQuarterMain:
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
         self.iface.removeToolBarIcon(self.testing_action)
+        self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
 
     def create_project_ifNotExists(self):
         """
@@ -493,6 +494,22 @@ class OpenEQuarterMain:
     # step 1.3
     def handle_editing_temp_shapefile_stopped(self):
         layer_interaction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
+        try:
+            investigation_area = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
+            disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(self.project_path, investigation_area.name()))
+
+            if disk_layer.isValid():
+                layer_interaction.hide_or_remove_layer(self.investigation_shape_layer_name, 'remove')
+                layer_interaction.add_layer_to_registry(disk_layer)
+                layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, disk_layer)
+                # trigger the edit-mode, to have the style displayed.
+                layer_interaction.trigger_edit_mode(self.iface, disk_layer.name())
+                layer_interaction.trigger_edit_mode(self.iface, disk_layer.name(), 'off')
+                disk_layer.setLayerName(self.investigation_shape_layer_name)
+
+        except IOError, Error:
+            print('The "Investigation Area"-layer could not be saved to disk:')
+            print(Error)
         return True
 
     # step 2.0

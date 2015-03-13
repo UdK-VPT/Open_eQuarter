@@ -1,6 +1,6 @@
-from os import path
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QgsApplication, QgsProject
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QGis, QgsProject, QgsFeature
 from PyQt4.QtCore import QSettings
+import os, time
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -50,7 +50,7 @@ def add_style_to_layer(path_to_style, layer):
     :return:
     :rtype:
     """
-    if layer and path_to_style and path.exists(path_to_style):
+    if layer and path_to_style and os.path.exists(path_to_style):
         layer.loadNamedStyle(path_to_style)
 
 
@@ -101,7 +101,7 @@ def hide_or_remove_layer(layer_name, mode='hide', iface = None):
     if layer and mode == 'hide' and iface:
         iface.legendInterface().setLayerVisible(layer, False)
 
-
+#ToDo Try to use the currently recommended way to save the layer
 def write_vector_layer_to_disk(vlayer, full_path):
     """
     Write the given vector layer to disk.
@@ -112,35 +112,62 @@ def write_vector_layer_to_disk(vlayer, full_path):
     :return:
     :rtype:
     """
-    out_path, out_name = path.split(full_path)
+    out_path, out_name = os.path.split(full_path)
 
     if out_name.upper().endswith('.SHP'):
         out_name = out_name[:-4]
 
-    if vlayer is not None and vlayer.isValid() and path.exists(out_path):
+    if vlayer is not None and vlayer.isValid() and os.path.exists(out_path):
 
-        if path.exists(path.join(out_path, out_name + '.shp')):
+        if os.path.exists(os.path.join(out_path, out_name + '.shp')):
             new_name = out_name
             suffix = 0
 
-            while path.exists(path.join(out_path, new_name + '.shp')):
+            while os.path.exists(os.path.join(out_path, new_name + '.shp')):
                 suffix += 1
                 new_name = out_name + str(suffix)
 
             out_name = new_name
 
-        full_path = path.join(out_path, out_name + '.shp')
+        full_path = os.path.join(out_path, out_name + '.shp')
 
         provider = vlayer.dataProvider()
-        return_code = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, provider.encoding(), provider.crs(), 'ESRI Shapefile')
+        encoding = provider.encoding()
+        fields = provider.fields()
+        crs = provider.crs()
+        writer = QgsVectorFileWriter(full_path, encoding, fields, QGis.WKBPolygon, crs, 'ESRI Shapefile')
 
-        if return_code == QgsVectorFileWriter.NoError:
-            vlayer = QgsVectorLayer(full_path, unicode(out_name), "ogr")
-
-            return vlayer
-
-        else:
+        if writer.hasError() != QgsVectorFileWriter.NoError:
+            raise IOError('Can\'t create the file: {0}'.format(layer_path))
+            del writer
             return None
+        else:
+            # features = provider.getFeatures()
+            # for feature in features:
+            #     writer.addFeature(feature)
+            #
+            # del writer
+
+            out_feat = QgsFeature()
+            in_feat = QgsFeature()
+            for feat in provider.getFeatures():
+                geometry = feat.geometry() # grab it's geometry
+                buffer = geometry.buffer(100,10) # buffer the geometry
+                out_feat.setAttributes(in_feat.attributes()) # set the attributes for the output feature
+                out_feat.setGeometry(buffer) # set the bufer as the output geometry
+                writer.addFeature(out_feat) # write the feature to file
+            
+            timeout = 30
+            while not os.path.exists(full_path) and timeout:
+                time.sleep(0.1)
+                timeout -= 1
+
+            disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
+            
+            if disk_layer.isValid():
+                return disk_layer
+            else:
+                return None
 
     else:
         return None

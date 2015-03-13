@@ -138,14 +138,18 @@ class OpenEQuarterMain:
                 if isinstance(button, QProcessButton):
                     self.main_process_dock.connect(button, SIGNAL('process_button_click'), self.process_button_clicked)
 
-        self.main_process_dock.dropdown_menu = QMenu()
-        self.main_process_dock.dropdown_menu.addAction('Open project setup..', self.open_settings)
-        self.main_process_dock.dropdown_menu.addAction('Save current progress', self.save_progress)
-        self.main_process_dock.dropdown_menu.addAction('Save current progress as..', self.save_progress_as)
-        self.main_process_dock.dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
-        self.main_process_dock.dropdown_menu.addAction('Color Picker', self.chose_color)
-        self.main_process_dock.settings_dropdown_btn.setMenu(self.main_process_dock.dropdown_menu)
-        self.main_process_dock.settings_dropdown_btn.setPopupMode(QToolButton.InstantPopup)
+        settings_dropdown_menu = QMenu()
+        settings_dropdown_menu.addAction('Open project setup..', self.open_settings)
+        settings_dropdown_menu.addAction('Save current progress', self.save_progress)
+        settings_dropdown_menu.addAction('Save current progress as..', self.save_progress_as)
+        settings_dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
+
+        tools_dropdown_menu = QMenu()
+        tools_dropdown_menu.addAction('Color Picker', self.chose_color)
+        tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
+
+        self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
+        self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
         self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
 
@@ -165,6 +169,9 @@ class OpenEQuarterMain:
 
     def save_progress_as(self):
         print 'Save as'
+
+    def load_wms(self):
+        print('Load wms')
 
     def chose_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="Controls">
+    <file>../icons/tools.png</file>
     <file>../icons/checkmark.png</file>
     <file>../icons/refresh.png</file>
     <file>../icons/openmark.png</file>

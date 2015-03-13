@@ -34,7 +34,6 @@ from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from mole.model.file_manager import ColorEntryManager
 
-
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
     def __init__(self):

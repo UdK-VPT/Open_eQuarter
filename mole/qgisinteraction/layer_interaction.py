@@ -133,30 +133,15 @@ def write_vector_layer_to_disk(vlayer, full_path):
 
         provider = vlayer.dataProvider()
         encoding = provider.encoding()
-        fields = provider.fields()
         crs = provider.crs()
-        writer = QgsVectorFileWriter(full_path, encoding, fields, QGis.WKBPolygon, crs, 'ESRI Shapefile')
+        write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
 
-        if writer.hasError() != QgsVectorFileWriter.NoError:
+        if write_error == QgsVectorFileWriter.WriterError:
             raise IOError('Can\'t create the file: {0}'.format(layer_path))
-            del writer
             return None
         else:
-            # features = provider.getFeatures()
-            # for feature in features:
-            #     writer.addFeature(feature)
-            #
-            # del writer
 
-            out_feat = QgsFeature()
-            in_feat = QgsFeature()
-            for feat in provider.getFeatures():
-                geometry = feat.geometry() # grab it's geometry
-                buffer = geometry.buffer(100,10) # buffer the geometry
-                out_feat.setAttributes(in_feat.attributes()) # set the attributes for the output feature
-                out_feat.setGeometry(buffer) # set the bufer as the output geometry
-                writer.addFeature(out_feat) # write the feature to file
-            
+            # wait until the layer was created
             timeout = 30
             while not os.path.exists(full_path) and timeout:
                 time.sleep(0.1)
@@ -165,6 +150,13 @@ def write_vector_layer_to_disk(vlayer, full_path):
             disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
             
             if disk_layer.isValid():
+                old_features = provider.getFeatures()
+                new_provider = disk_layer.dataProvider()
+                feature_list = []
+                for feature in old_features:
+                    feature_list.append(feature)
+
+                new_provider.addFeatures(feature_list)
                 return disk_layer
             else:
                 return None

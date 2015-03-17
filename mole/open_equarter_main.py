@@ -76,8 +76,7 @@ class OpenEQuarterMain:
         ### Information needed to use external plugins
         # PointSamplingTool
         self.pst_plugin_name = 'pointsamplingtool'
-        self.pst_input_layer_name = 'testpunkte'
-        self.pst_output_layer_path = '/Users/VPTtutor/Documents/QGIS/plugin_oeq-qgs_project/Testpunkte/'
+        self.pst_input_layer_name = 'pst_points_of_interest'
         self.pst_output_layer_name = 'pst_out'
 
 
@@ -398,8 +397,9 @@ class OpenEQuarterMain:
         :rtype:
         """
         try:
+            print('Find: ' + layer_name)
             investigation_shape = layer_interaction.find_layer_by_name(layer_name)
-
+            print('Found ' +  investigation_shape.name() if investigation_shape is not None else 'nothing')
             # an investigation shape is needed, to trigger the zoom to layer function
             if investigation_shape is not None and investigation_shape.featureCount() > 0:
 
@@ -572,6 +572,8 @@ class OpenEQuarterMain:
     # step 3.1
     def handle_editing_temp_pointlayer_started(self):
         layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
+        pst_input_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
+        self.iface.setActiveLayer(pst_input_layer)
         return True
 
     # step 3.2
@@ -661,6 +663,7 @@ class OpenEQuarterMain:
         print save_or_abort
         if save_or_abort:
             self.check_status()
+            self.auto_run()
 
     def run_tests(self):
         test_class = layer_interaction_test.LayerInteraction_test

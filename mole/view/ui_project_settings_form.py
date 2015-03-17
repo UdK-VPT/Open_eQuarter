@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Tue Mar 17 15:31:50 2015
+# Created: Tue Mar 17 16:39:50 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,9 +68,9 @@ class Ui_project_settings_form(object):
         self.average_build_year = QtGui.QLineEdit(self.form)
         self.average_build_year.setObjectName(_fromUtf8("average_build_year"))
         self.gridLayout.addWidget(self.average_build_year, 11, 0, 1, 1)
-        self.population_density_2 = QtGui.QLabel(self.form)
-        self.population_density_2.setObjectName(_fromUtf8("population_density_2"))
-        self.gridLayout.addWidget(self.population_density_2, 12, 0, 1, 1)
+        self.population_density_label = QtGui.QLabel(self.form)
+        self.population_density_label.setObjectName(_fromUtf8("population_density_label"))
+        self.gridLayout.addWidget(self.population_density_label, 12, 0, 1, 1)
         self.population_density = QtGui.QLineEdit(self.form)
         self.population_density.setObjectName(_fromUtf8("population_density"))
         self.gridLayout.addWidget(self.population_density, 13, 0, 1, 1)
@@ -131,8 +131,8 @@ class Ui_project_settings_form(object):
         self.average_build_year_label.setToolTip(_translate("project_settings_form", "Average year of construction on the building stock", None))
         self.average_build_year_label.setText(_translate("project_settings_form", "Average Build Year", None))
         self.average_build_year.setText(_translate("project_settings_form", "1917", None))
-        self.population_density_2.setToolTip(_translate("project_settings_form", "Population density of the investigation area (inhabitants per square kilometre)", None))
-        self.population_density_2.setText(_translate("project_settings_form", "Population Density:", None))
+        self.population_density_label.setToolTip(_translate("project_settings_form", "Population density of the investigation area (inhabitants per square kilometre)", None))
+        self.population_density_label.setText(_translate("project_settings_form", "Population Density:", None))
         self.population_density.setText(_translate("project_settings_form", "3.859", None))
         self.location_city.setText(_translate("project_settings_form", "City", None))
         self.location_postal.setText(_translate("project_settings_form", "Postal", None))

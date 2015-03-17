@@ -399,9 +399,7 @@ class OpenEQuarterMain:
         :rtype:
         """
         try:
-            print('Find: ' + layer_name)
             investigation_shape = layer_interaction.find_layer_by_name(layer_name)
-            print('Found ' +  investigation_shape.name() if investigation_shape is not None else 'nothing')
             # an investigation shape is needed, to trigger the zoom to layer function
             if investigation_shape is not None and investigation_shape.featureCount() > 0:
 

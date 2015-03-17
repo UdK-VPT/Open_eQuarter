@@ -32,7 +32,7 @@ from ui_project_settings_form import Ui_project_settings_form
 from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
-from mole.model.file_manager import ColorEntryManager
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser
 
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
@@ -313,16 +313,37 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.defaults = {}
+        self.location_postal.editingFinished.connect(self.autofill_municipal_information)
 
         for field in self.form.findChildren(QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
 
-
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
 
+    def autofill_municipal_information(self):
+        postcode = self.location_postal.text()
+
+        if postcode:
+            json_parser = MunicipalInformationParser()
+
+            try:
+                postcode = int(postcode)
+
+            except ValueError:
+                self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
+                return
+
+            json_parser.parse_municipal(postcode)
+            if json_parser.municipal:
+                city_name = '{}'.format(json_parser.municipal['NAME'])
+                pop_dens = '{}'.format(json_parser.municipal['POP_DENS'])
+                avg_yoc = '{}'.format(json_parser.municipal['AVG_YOC'])
+                self.location_city.setText(city_name)
+                self.average_build_year.setText(avg_yoc)
+                self.population_density.setText(pop_dens)
 
 class ModularInfo_dialog(QDialog, Ui_ModularInfo_dialog):
     def __init__(self):

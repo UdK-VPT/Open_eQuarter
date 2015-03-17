@@ -56,13 +56,16 @@ class MunicipalInformationParser():
                 for line in file:
                     entry = json.loads(line, encoding='utf-8')
 
-                    if entry['POSTCODE'] == postcode:
-                        self.municipal = {}
-                        for key, value in entry.iteritems():
-                            self.municipal[key.encode('utf-8')] = value
+                    try:
+                        if entry['POSTCODE'] == postcode:
+                            self.municipal = {}
+                            for key, value in entry.iteritems():
+                                self.municipal[key.encode('utf-8')] = value
 
-                        self.municipal['NAME'] = self.municipal['NAME'].encode('utf-8')
-                        break
+                            self.municipal['NAME'] = self.municipal['NAME'].encode('utf-8')
+                            break
+                    except KeyError, Error:
+                        print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 
         except IOError, Error:
             print(Error)

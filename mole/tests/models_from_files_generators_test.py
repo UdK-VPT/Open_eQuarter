@@ -113,10 +113,20 @@ class MyTestCase(unittest.TestCase):
     def test_municipal_json_file_can_be_found(self):
         self.assertTrue(os.path.exists(self.mip.municipal_json_file))
 
-    def test_municipal_bergewoehrden_is_found_by_code_25779(self):
-        json_content =  {"NAME":"Bergewöhrden","POP_DENS":14,"POSTCODE":25779,"GEO_L":9.20943,"GEO_W":54.31847}
-        self.mip.parse_municipal(25779)
+    def test_municipal_is_found_if_in_first_rows(self):
+        json_content = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_L.1":9.43751,"AVG_YOC":1954,"_row":"010010000000"}
+        self.mip.parse_municipal(24937)
         self.assertDictEqual(json_content, self.mip.municipal)
+
+        json_content = {"NAME":"Lübeck, Hansestadt","POP_DENS":983,"POSTCODE":23539,"GEO_L":10.68393,"GEO_L.1":10.68393,"AVG_YOC":1944,"_row":"010030000000"}
+        self.mip.parse_municipal(23539)
+        self.assertDictEqual(json_content, self.mip.municipal)
+
+    def test_municipal_is_found_if_in_row_10001(self):
+        json_content = {"NAME":"Weißenberg, Stadt","POP_DENS":66,"POSTCODE":2627,"GEO_L":14.65936,"GEO_L.1":14.65936,"AVG_YOC":1929}
+        self.mip.parse_municipal(23539)
+        self.assertDictEqual(json_content, self.mip.municipal)
+
 
 
 if __name__ == '__main__':

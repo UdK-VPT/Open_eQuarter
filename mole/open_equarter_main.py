@@ -86,6 +86,7 @@ class OpenEQuarterMain:
         # id=1 - Google Streets
         # id=4 - OpenStreetMap
         self.open_layer_type_id = 4
+        self.open_layer = None
 
 
         ### Default values
@@ -265,20 +266,17 @@ class OpenEQuarterMain:
 
     def zoom_to_default_extent(self):
         """
-        Set the canvas-extent to the extent and scale specified in self.default_extent and self.default_scale
+        Set the extent of the open layer to the default extent and scale specified as in self.default_extent and self.default_scale
         :return:
         :rtype:
         """
+        try:
+            self.open_layer.setExtent(self.default_extent)
+            self.iface.setActiveLayer(self.open_layer)
+            self.iface.actionZoomToLayer().trigger()
 
-        print "zoom"
-        canvas = self.iface.mapCanvas()
-        layers = QgsMapLayerRegistry.instance().mapLayers()
-
-        if len(layers) >= 0 and len(layers) <= 2:
-            print "zoom2"
-            canvas.zoomScale(self.default_scale)
-            canvas.setExtent(self.default_extent)
-            canvas.refresh()
+        except None, Error:
+            print('Could nor zoom to default extent: {}'.format(Error))
 
     def confirm_selection_of_investigation_area(self, layer_name):
         """
@@ -457,10 +455,14 @@ class OpenEQuarterMain:
 
         else:
             ol_plugin = OlInteraction(self.ol_plugin_name)
-        # self.enable_on_the_fly_projection()
-        # self.set_project_crs(self.default_extent_crs)
 
             if ol_plugin.open_osm_layer(self.open_layer_type_id):
+                layer_dict = QgsMapLayerRegistry.instance().mapLayers()
+                for layer_name, layer in layer_dict.iteritems():
+                    if 'OpenLayers_plugin_layer' in layer_name:
+                        self.open_layer = layer
+                        break
+
                 self.zoom_to_default_extent()
                 return True
 
@@ -528,7 +530,11 @@ class OpenEQuarterMain:
     # step 2.1
     def handle_extent_clipped(self):
         extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
-        layer_interaction.hide_or_remove_layer('OpenStreetMap', 'hide', self.iface)
+
+        try:
+            layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
+        except None, Error:
+            print(Error)
 
         for layer_name in extracted_layers:
             try:

@@ -41,8 +41,15 @@
       <property name="verticalSpacing">
        <number>-1</number>
       </property>
+      <item row="4" column="0">
+       <widget class="QLabel" name="location_label">
+        <property name="text">
+         <string>Location:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="project_name_label">
         <property name="toolTip">
          <string>Name of the project</string>
         </property>
@@ -62,7 +69,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="description_label">
         <property name="toolTip">
          <string>Short description of the project</string>
         </property>
@@ -78,8 +85,8 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_3">
+      <item row="6" column="0">
+       <widget class="QLabel" name="climate_zone_label">
         <property name="toolTip">
          <string>Köppen–Geiger climate classification of the investigation area (for more informatoin visit: http://en.wikipedia.org/wiki/Köppen_climate_classification)</string>
         </property>
@@ -88,15 +95,15 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="7" column="0">
        <widget class="QLineEdit" name="climate_zone">
         <property name="text">
          <string>e.g. Dfb, Cfb, Dfc</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_4">
+      <item row="8" column="0">
+       <widget class="QLabel" name="average_build_year_label">
         <property name="toolTip">
          <string>Average year of construction on the building stock</string>
         </property>
@@ -105,15 +112,15 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="9" column="0">
        <widget class="QLineEdit" name="average_build_year">
         <property name="text">
          <string>1917</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="10" column="0">
+       <widget class="QLabel" name="population_density_2">
         <property name="toolTip">
          <string>Population density of the investigation area (inhabitants per square kilometre)</string>
         </property>
@@ -122,20 +129,27 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="0">
+      <item row="11" column="0">
        <widget class="QLineEdit" name="population_density">
         <property name="text">
          <string>3.859</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="0">
+      <item row="12" column="0">
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="standardButtons">
          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLineEdit" name="location">
+        <property name="text">
+         <string>Zip code or in the form &lt;City&gt;/&lt;Country&gt;</string>
         </property>
        </widget>
       </item>

@@ -98,7 +98,7 @@ class OpenEQuarterMain:
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'styles', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project_data', 'oeq_ia_style.qml')
         self.housing_layer_name = ''
         self.housing_coordinate_layer_name = ''
         # name of the wms-raster which will be loaded and is the basis for the clipping
@@ -250,6 +250,7 @@ class OpenEQuarterMain:
 
             if yes_to_save:
                 # trigger qgis "Save As"-function
+                self.get_default_extent_by_zip_code()
                 iface.actionSaveProjectAs().trigger()
 
     def osm_layer_is_loaded(self):
@@ -263,6 +264,9 @@ class OpenEQuarterMain:
                 return True
 
         return False
+
+    def get_default_extent_by_zip_code(self):
+        pass
 
     def zoom_to_default_extent(self):
         """

@@ -1,13 +1,16 @@
+# coding=utf-8
+
 import unittest
 import sys, io, json, os
 
-from mole.model.file_manager import ColorEntryManager
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser
 
 
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
         self.cem = ColorEntryManager()
+        self.mip = MunicipalInformationParser()
 
     def test_dict_can_be_added_to_layer_in_color_entry_manager(self):
 
@@ -106,6 +109,15 @@ class MyTestCase(unittest.TestCase):
                 os.remove(out_path)
             except IOError, Error:
                 print(Error)
+
+    def test_municipal_json_file_can_be_found(self):
+        self.assertTrue(os.path.exists(self.mip.municipal_json_file))
+
+    def test_municipal_bergewoehrden_is_found_by_code_25779(self):
+        json_content =  {"NAME":"Bergewöhrden","POP_DENS":14,"POSTCODE":25779,"GEO_L":9.20943,"GEO_W":54.31847}
+        self.mip.parse_municipal(25779)
+        self.assertDictEqual(json_content, self.mip.municipal)
+
 
 if __name__ == '__main__':
     unittest.main()

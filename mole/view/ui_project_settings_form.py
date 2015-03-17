@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Tue Mar 17 13:36:41 2015
+# Created: Tue Mar 17 15:31:50 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_project_settings_form(object):
     def setupUi(self, project_settings_form):
         project_settings_form.setObjectName(_fromUtf8("project_settings_form"))
-        project_settings_form.resize(374, 409)
+        project_settings_form.resize(374, 516)
         project_settings_form.setStyleSheet(_fromUtf8("#form QLineEdit {\n"
 "    color: rgb(151, 151, 151,95);\n"
 "}\n"
@@ -59,32 +59,57 @@ class Ui_project_settings_form(object):
         self.description = QtGui.QLineEdit(self.form)
         self.description.setObjectName(_fromUtf8("description"))
         self.gridLayout.addWidget(self.description, 3, 0, 1, 1)
-        self.climate_zone_label = QtGui.QLabel(self.form)
-        self.climate_zone_label.setObjectName(_fromUtf8("climate_zone_label"))
-        self.gridLayout.addWidget(self.climate_zone_label, 6, 0, 1, 1)
         self.climate_zone = QtGui.QLineEdit(self.form)
         self.climate_zone.setObjectName(_fromUtf8("climate_zone"))
-        self.gridLayout.addWidget(self.climate_zone, 7, 0, 1, 1)
+        self.gridLayout.addWidget(self.climate_zone, 9, 0, 1, 1)
         self.average_build_year_label = QtGui.QLabel(self.form)
         self.average_build_year_label.setObjectName(_fromUtf8("average_build_year_label"))
-        self.gridLayout.addWidget(self.average_build_year_label, 8, 0, 1, 1)
+        self.gridLayout.addWidget(self.average_build_year_label, 10, 0, 1, 1)
         self.average_build_year = QtGui.QLineEdit(self.form)
         self.average_build_year.setObjectName(_fromUtf8("average_build_year"))
-        self.gridLayout.addWidget(self.average_build_year, 9, 0, 1, 1)
+        self.gridLayout.addWidget(self.average_build_year, 11, 0, 1, 1)
         self.population_density_2 = QtGui.QLabel(self.form)
         self.population_density_2.setObjectName(_fromUtf8("population_density_2"))
-        self.gridLayout.addWidget(self.population_density_2, 10, 0, 1, 1)
+        self.gridLayout.addWidget(self.population_density_2, 12, 0, 1, 1)
         self.population_density = QtGui.QLineEdit(self.form)
         self.population_density.setObjectName(_fromUtf8("population_density"))
-        self.gridLayout.addWidget(self.population_density, 11, 0, 1, 1)
+        self.gridLayout.addWidget(self.population_density, 13, 0, 1, 1)
         self.buttonBox = QtGui.QDialogButtonBox(self.form)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Save)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.gridLayout.addWidget(self.buttonBox, 12, 0, 1, 1)
-        self.location = QtGui.QLineEdit(self.form)
-        self.location.setObjectName(_fromUtf8("location"))
-        self.gridLayout.addWidget(self.location, 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.buttonBox, 14, 0, 1, 1)
+        self.location_layout = QtGui.QHBoxLayout()
+        self.location_layout.setObjectName(_fromUtf8("location_layout"))
+        self.location_city = QtGui.QLineEdit(self.form)
+        self.location_city.setMinimumSize(QtCore.QSize(0, 0))
+        self.location_city.setObjectName(_fromUtf8("location_city"))
+        self.location_layout.addWidget(self.location_city)
+        self.location_postal = QtGui.QLineEdit(self.form)
+        self.location_postal.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.location_postal.setObjectName(_fromUtf8("location_postal"))
+        self.location_layout.addWidget(self.location_postal)
+        self.gridLayout.addLayout(self.location_layout, 5, 0, 1, 1)
+        self.climate_zone_layout = QtGui.QHBoxLayout()
+        self.climate_zone_layout.setSpacing(0)
+        self.climate_zone_layout.setObjectName(_fromUtf8("climate_zone_layout"))
+        self.climate_zone_label = QtGui.QLabel(self.form)
+        self.climate_zone_label.setToolTip(_fromUtf8(""))
+        self.climate_zone_label.setObjectName(_fromUtf8("climate_zone_label"))
+        self.climate_zone_layout.addWidget(self.climate_zone_label)
+        self.pushButton = QtGui.QPushButton(self.form)
+        self.pushButton.setMaximumSize(QtCore.QSize(18, 16777215))
+        self.pushButton.setStyleSheet(_fromUtf8(""))
+        self.pushButton.setText(_fromUtf8(""))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/info.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButton.setIcon(icon)
+        self.pushButton.setFlat(True)
+        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.climate_zone_layout.addWidget(self.pushButton)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.climate_zone_layout.addItem(spacerItem)
+        self.gridLayout.addLayout(self.climate_zone_layout, 8, 0, 1, 1)
         self.verticalLayout.addWidget(self.form)
 
         self.retranslateUi(project_settings_form)
@@ -102,8 +127,6 @@ class Ui_project_settings_form(object):
         self.description_label.setToolTip(_translate("project_settings_form", "Short description of the project", None))
         self.description_label.setText(_translate("project_settings_form", "Description:", None))
         self.description.setText(_translate("project_settings_form", "The aim of this project, is to analyse a quarter.", None))
-        self.climate_zone_label.setToolTip(_translate("project_settings_form", "Köppen–Geiger climate classification of the investigation area (for more informatoin visit: http://en.wikipedia.org/wiki/Köppen_climate_classification)", None))
-        self.climate_zone_label.setText(_translate("project_settings_form", "Climate Zone:", None))
         self.climate_zone.setText(_translate("project_settings_form", "e.g. Dfb, Cfb, Dfc", None))
         self.average_build_year_label.setToolTip(_translate("project_settings_form", "Average year of construction on the building stock", None))
         self.average_build_year_label.setText(_translate("project_settings_form", "Average Build Year", None))
@@ -111,5 +134,9 @@ class Ui_project_settings_form(object):
         self.population_density_2.setToolTip(_translate("project_settings_form", "Population density of the investigation area (inhabitants per square kilometre)", None))
         self.population_density_2.setText(_translate("project_settings_form", "Population Density:", None))
         self.population_density.setText(_translate("project_settings_form", "3.859", None))
-        self.location.setText(_translate("project_settings_form", "Zip code or in the form <City>/<Country>", None))
+        self.location_city.setText(_translate("project_settings_form", "City", None))
+        self.location_postal.setText(_translate("project_settings_form", "Postal", None))
+        self.climate_zone_label.setText(_translate("project_settings_form", "Climate Zone:", None))
+        self.pushButton.setToolTip(_translate("project_settings_form", "Köppen–Geiger climate classification of the investigation area (for more informatoin visit: http://en.wikipedia.org/wiki/Köppen_climate_classification)", None))
 
+import resources_rc

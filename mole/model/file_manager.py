@@ -43,7 +43,7 @@ class ColorEntryManager():
 class MunicipalInformationParser():
 
     def __init__(self):
-        self.municipal = {}
+        self.municipal = []
 
         municipal_json = mole.__file__
         mole_path = os.path.dirname(municipal_json)
@@ -51,19 +51,20 @@ class MunicipalInformationParser():
         self.municipal_json_file = municipal_json
 
     def parse_municipal(self, postcode):
+        self.municipal = []
         try:
             with open(self.municipal_json_file, encoding='utf-8') as file:
                 for line in file:
                     entry = json.loads(line, encoding='utf-8')
 
                     try:
+                        municipal_entry = {}
                         if entry['POSTCODE'] == postcode:
-                            self.municipal = {}
                             for key, value in entry.iteritems():
-                                self.municipal[key.encode('utf-8')] = value
+                                municipal_entry[key.encode('utf-8')] = value
 
-                            self.municipal['NAME'] = self.municipal['NAME'].encode('utf-8')
-                            break
+                            municipal_entry['NAME'] = municipal_entry['NAME'].encode('utf-8')
+                            self.municipal.append(municipal_entry)
                     except KeyError, Error:
                         print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 

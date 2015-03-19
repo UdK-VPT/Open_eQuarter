@@ -337,10 +337,10 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
                 return
 
             json_parser.parse_municipal(postcode)
-            if json_parser.municipal:
-                city_name = '{}'.format(json_parser.municipal['NAME'])
-                pop_dens = '{}'.format(json_parser.municipal['POP_DENS'])
-                avg_yoc = '{}'.format(json_parser.municipal['AVG_YOC'])
+            if json_parser.municipal[0]:
+                city_name = '{}'.format(json_parser.municipal[0]['NAME'])
+                pop_dens = '{}'.format(json_parser.municipal[0]['POP_DENS'])
+                avg_yoc = '{}'.format(json_parser.municipal[0]['AVG_YOC'])
                 self.location_city.setText(city_name)
                 self.average_build_year.setText(avg_yoc)
                 self.population_density.setText(pop_dens)

@@ -3,7 +3,7 @@
 import unittest
 import sys, io, json, os
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser, MunicipalInformationTree
 
 
 class MyTestCase(unittest.TestCase):
@@ -11,6 +11,7 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.cem = ColorEntryManager()
         self.mip = MunicipalInformationParser()
+        self.mit = MunicipalInformationTree()
 
     def test_dict_can_be_added_to_layer_in_color_entry_manager(self):
 
@@ -126,6 +127,29 @@ class MyTestCase(unittest.TestCase):
         json_content = {"NAME":"Gunderath","POP_DENS":95,"POSTCODE":56767,"GEO_L":6.97902,"GEO_L.1":6.97902,"AVG_YOC":1964}
         self.mip.parse_municipal(56767)
         self.assertDictContainsSubset(json_content, self.mip.municipal[0])
+
+    def test_keys_on_first_level(self):
+        keys = self.mit.find_keys_on_level(0)
+        self.assertNotEqual(keys, {})
+
+    def test_keys_on_second_level(self):
+        keys = self.mit.find_keys_on_level(1)
+        self.assertNotEqual(keys, {})
+
+    def test_data_tree_contains_first_row(self):
+        self.mit.split_data_to_tree_model()
+        tree = self.mit.tree
+        self.assertNotEqual(tree, {})
+        first_row = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_L.1":9.43751,"AVG_YOC":1954,"_row":"010010000000"}
+        self.assertDictContainsSubset(first_row, tree['2']['4']['937'][0])
+
+    def test_data_tree_contains_last_row(self):
+        self.mit.split_data_to_tree_model()
+        tree = self.mit.tree
+        self.assertNotEqual(tree, {})
+        last_row = {"NAME":"Ponitz","POP_DENS":97,"POSTCODE":4639,"GEO_L":12.42338,"GEO_L.1":12.42338,"AVG_YOC":1912}
+        self.assertDictContainsSubset(last_row, tree['4']['6']['39'][1])
+
 
 
 if __name__ == '__main__':

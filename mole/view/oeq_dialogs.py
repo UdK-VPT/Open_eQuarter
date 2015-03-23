@@ -34,6 +34,7 @@ from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 
+
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
@@ -313,8 +314,8 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.defaults = {}
-        self.municipal = {}
-        self.location_postal.editingFinished.connect(self.autofill_municipal_information)
+        self.municipals = [{}]
+        self.location_postal.editingFinished.connect(self.find_municipal_information)
         self.municipal_information = MunicipalInformationTree()
 
         if self.municipal_information.tree == {}:
@@ -328,7 +329,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
 
-    def autofill_municipal_information(self):
+    def find_municipal_information(self):
         postcode = self.location_postal.text()
 
         if postcode:
@@ -341,22 +342,32 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
                 self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
                 return
 
+            self.municipals = municipals
             if len(municipals) == 1:
-                self.initialise_city_layout()
-                city_name = _fromUtf8(municipals[0]['NAME'])
-                pop_dens = '{}'.format(municipals[0]['POP_DENS'])
-                avg_yoc = '{}'.format(municipals[0]['AVG_YOC'])
-                self.location_city.setText(city_name)
-                self.average_build_year.setText(avg_yoc)
-                self.population_density.setText(pop_dens)
-                self.location_postal.setText(postcode)
+                self.lineedit_city_layout()
+                self.fill_municipal_information(0)
 
             elif len(municipals) > 1:
                 self.combobox_city_layout()
+                self.location_city.clear()
 
                 for municipal in municipals:
                     self.location_city.addItem(_fromUtf8(municipal['NAME']))
 
+                self.location_city.currentIndexChanged.connect(self.fill_municipal_information)
+                self.fill_municipal_information(0)
+
+    def fill_municipal_information(self, index):
+        municipal = self.municipals[index]
+
+        if issubclass(type(self.location_city), QLineEdit):
+            city_name = _fromUtf8(municipal['NAME'])
+            self.location_city.setText(city_name)
+
+        pop_dens = '{}'.format(municipal['POP_DENS'])
+        avg_yoc = '{}'.format(municipal['AVG_YOC'])
+        self.average_build_year.setText(avg_yoc)
+        self.population_density.setText(pop_dens)
 
     def combobox_city_layout(self):
         location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
@@ -369,7 +380,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             self.location_city.setObjectName('location_city')
             location_box.insertWidget(0, self.location_city)
 
-    def initialise_city_layout(self):
+    def lineedit_city_layout(self):
         location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
@@ -379,6 +390,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             self.location_city = QLineEdit(self.form)
             self.location_city.setMinimumSize(QSize(0, 0))
             self.location_city.setObjectName(_fromUtf8("location_city"))
+            self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)
 
 

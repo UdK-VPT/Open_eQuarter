@@ -32,7 +32,7 @@ from ui_project_settings_form import Ui_project_settings_form
 from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 
 class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
@@ -314,6 +314,10 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         self.setupUi(self)
         self.defaults = {}
         self.location_postal.editingFinished.connect(self.autofill_municipal_information)
+        self.municipal_information = MunicipalInformationTree()
+
+        if self.municipal_information.tree == {}:
+            self.municipal_information.split_data_to_tree_model()
 
         for field in self.form.findChildren(QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
@@ -327,20 +331,19 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         postcode = self.location_postal.text()
 
         if postcode:
-            json_parser = MunicipalInformationParser()
-
             try:
-                postcode = int(postcode)
-
-            except ValueError:
+                l0_key = postcode[0]
+                l1_key = postcode[1]
+                l2_key = postcode[2:]
+                municipals = self.municipal_information.tree[l0_key][l1_key][l2_key]
+            except (KeyError, ValueError):
                 self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
                 return
 
-            json_parser.parse_municipal(postcode)
-            if json_parser.municipal[0]:
-                city_name = '{}'.format(json_parser.municipal[0]['NAME'])
-                pop_dens = '{}'.format(json_parser.municipal[0]['POP_DENS'])
-                avg_yoc = '{}'.format(json_parser.municipal[0]['AVG_YOC'])
+            if municipals[0]:
+                city_name = _fromUtf8(municipals[0]['NAME'])
+                pop_dens = '{}'.format(municipals[0]['POP_DENS'])
+                avg_yoc = '{}'.format(municipals[0]['AVG_YOC'])
                 self.location_city.setText(city_name)
                 self.average_build_year.setText(avg_yoc)
                 self.population_density.setText(pop_dens)

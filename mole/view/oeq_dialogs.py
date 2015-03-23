@@ -313,6 +313,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.defaults = {}
+        self.municipal = {}
         self.location_postal.editingFinished.connect(self.autofill_municipal_information)
         self.municipal_information = MunicipalInformationTree()
 
@@ -340,13 +341,47 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
                 self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
                 return
 
-            if municipals[0]:
+            if len(municipals) == 1:
+                self.initialise_city_layout()
                 city_name = _fromUtf8(municipals[0]['NAME'])
                 pop_dens = '{}'.format(municipals[0]['POP_DENS'])
                 avg_yoc = '{}'.format(municipals[0]['AVG_YOC'])
                 self.location_city.setText(city_name)
                 self.average_build_year.setText(avg_yoc)
                 self.population_density.setText(pop_dens)
+                self.location_postal.setText(postcode)
+
+            elif len(municipals) > 1:
+                self.combobox_city_layout()
+
+                for municipal in municipals:
+                    self.location_city.addItem(_fromUtf8(municipal['NAME']))
+
+
+    def combobox_city_layout(self):
+        location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
+        city_edit = location_box.itemAt(0).widget()
+
+        if issubclass(type(city_edit), QLineEdit):
+            location_box.removeWidget(city_edit)
+            city_edit.deleteLater()
+            self.location_city = QComboBox()
+            self.location_city.setObjectName('location_city')
+            location_box.insertWidget(0, self.location_city)
+
+    def initialise_city_layout(self):
+        location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
+        city_edit = location_box.itemAt(0).widget()
+
+        if issubclass(type(city_edit), QComboBox):
+            location_box.removeWidget(city_edit)
+            city_edit.deleteLater()
+            self.location_city = QLineEdit(self.form)
+            self.location_city.setMinimumSize(QSize(0, 0))
+            self.location_city.setObjectName(_fromUtf8("location_city"))
+            location_box.insertWidget(0, self.location_city)
+
+
 
 class ModularInfo_dialog(QDialog, Ui_ModularInfo_dialog):
     def __init__(self):

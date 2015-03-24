@@ -62,7 +62,7 @@ class ExportWMSasTif:
 
         return
 
-    #ToDo Deal with bug resulting from different crs
+    #ToDo Deal with bug resulting from different crs - at some point the investigation area is not extracted properly (after export, the IA is displayed approx. 1000m away from the source IA)
     def export(self, clipped_raster_name = 'Investigation Area'):
         """
         Put the steps necessary for the export together in one procedure
@@ -90,7 +90,9 @@ class ExportWMSasTif:
                 return None
 
             crs = raster_layer_interaction.get_wms_crs(export_layer)
-            if not QgsCoordinateReferenceSystem().createFromUserInput(crs):
+
+            #ToDo replace with proper check
+            if not QgsCoordinateReferenceSystem(crs).toProj4():
                 #ToDo
                 QMessageBox.information(self.iface.mainWindow(), 'Error', 'Crs is missing.')
                 return None
@@ -192,7 +194,8 @@ class ExportWMSasTif:
                 time.sleep(0.1)
                 no_timeout -= 1
 
-            if not QgsCoordinateReferenceSystem().createFromUserInput(crs):
+            #ToDo Replace with proper check
+            if not QgsCoordinateReferenceSystem(crs).toProj4():
                 # crs is not valid
                 # save current settings and set Qgis to prompt for CRS
                 old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))

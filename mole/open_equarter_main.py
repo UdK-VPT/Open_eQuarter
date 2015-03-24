@@ -31,7 +31,6 @@ import sys
 import httplib
 import unittest
 import time
-import numpy
 import os
 
 from model.progress_model import ProgressModel
@@ -90,11 +89,12 @@ class OpenEQuarterMain:
 
 
         ### Default values
-        # default extent, after the OSM-layer was loaded (currently: extent of Berlin - Germany)
-        self.default_extent = QgsRectangle(numpy.float64(1541791.863584674), numpy.float64(6929650.281509268),
-                                           numpy.float64(1434669.8536058515), numpy.float64(6847465.188708487))
-        self.default_extent_crs = 'EPSG:3857'
-        self.default_scale = 4607478
+        # default extent is set, after the OSM-layer was loaded (currently: extent of Germany)
+        x = 10.447683
+        y = 51.163375
+        scale = 4
+        self.default_extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
+        self.default_extent_crs = 'EPSG:4326'
 
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
@@ -275,7 +275,13 @@ class OpenEQuarterMain:
         :rtype:
         """
         try:
-            self.open_layer.setExtent(self.default_extent)
+            canvas = self.iface.mapCanvas()
+            map_crs = canvas.mapSettings().destinationCrs()
+            source_crs = QgsCoordinateReferenceSystem(self.default_extent_crs)
+            transformer = QgsCoordinateTransform(source_crs, map_crs)
+            extent = transformer.transform(self.default_extent)
+
+            self.open_layer.setExtent(extent)
             self.iface.setActiveLayer(self.open_layer)
             self.iface.actionZoomToLayer().trigger()
 
@@ -672,8 +678,25 @@ class OpenEQuarterMain:
             self.oeq_project_settings_form.show()
             save_or_abort = self.oeq_project_settings_form.exec_()
 
-        print save_or_abort
         if save_or_abort:
+
+            municipal = self.oeq_project_settings_form.municipals[0]
+
+            if len(municipal) > 0:
+                index = 0
+                if isinstance(self.oeq_project_settings_form.location_city, QComboBox):
+                    index = self.oeq_project_settings_form.location_city.currentIndex()
+                try:
+                    municipal = self.oeq_project_settings_form.municipals[index]
+                    x = municipal['GEO_L']
+                    y = municipal['GEO_W']
+                    scale = 0.05
+                    extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
+                    self.default_extent = extent
+                    self.default_extent_crs = 'EPSG:4326'
+                except (IndexError, KeyError), Error:
+                    print(Error)
+
             self.check_status()
             self.auto_run()
 
@@ -730,13 +753,9 @@ class OpenEQuarterMain:
 
         try:
             for i in range(len(steps)):
-                if self.iface.mapCanvas().isDrawing():
-                    i - 1
-                else:
-                    next = self.progress_model.last_step_executed + 1
-                    time.sleep(1.5)
-                    self.continue_process()
-                    i = next
+                next = self.progress_model.last_step_executed + 1
+                time.sleep(0.5)
+                self.continue_process()
 
         except IndexError, error:
             print error

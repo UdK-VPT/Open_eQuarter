@@ -373,7 +373,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if issubclass(type(city_edit), QLineEdit):
+        if isinstance(city_edit, QLineEdit):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
             self.location_city = QComboBox()
@@ -384,7 +384,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if issubclass(type(city_edit), QComboBox):
+        if isinstance(city_edit, QComboBox):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
             self.location_city = QLineEdit(self.form)

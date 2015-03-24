@@ -20,24 +20,20 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from platform import system
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 
-
 # Import additional packages
 import numpy
 import os
-import subprocess
 import time
 
 # Import self-written packages
-from qgisinteraction import GdalUtils
+from mole.qgisinteraction import layer_interaction, raster_layer_interaction
+
 
 class ExportWMSasTif:
-
 
     def __init__(self, iface):
         """
@@ -80,13 +76,12 @@ class ExportWMSasTif:
         return
 
     #ToDo Deal with bug resulting from different crs
-    def     export(self, clipped_raster_name = 'Investigation Area'):
+    def export(self, clipped_raster_name = 'Investigation Area'):
         """
         Put the steps necessary for the export together in one procedure
         :return:
         :rtype:
         """
-
         if not clipped_raster_name.isspace() and clipped_raster_name != self.export_name:
             self.export_name = clipped_raster_name
 
@@ -136,19 +131,14 @@ class ExportWMSasTif:
 
         :return url: The url to the wms-server
         :rtype url: str
-
         :return wms_crs: The coordinate reference system, which is currently in use
         :rtype wms_crs: str
-
         :return upper_left_x: The x value of the current extents upper left corner
         :rtype upper_left_x: int
-
         :return upper_left_y: The y value of the current extents upper left corner
         :rtype upper_left_y: int
-
         :return lower_right_x: The x value of the current extents lower right corner
         :rtype lower_right_x: int
-
         :return lower_right_x: The y value of the current extents lower right corner
         :rtype lower_right_y: int
          """
@@ -226,7 +216,7 @@ class ExportWMSasTif:
 
         # append the resolution to the filename and call the save method
         filename = self.path_to_file + self.export_name + '-' + str(resolution['width']) + '_' + str(resolution['height'])
-        filename = self.save_image(resolution['width'], resolution['height'], filename)
+        filename = layer_interaction.save_layer_as_image(self.active_layer, self.transformed_extent, resolution['width'], resolution['height'], filename)
 
         # check if the image was saved to disk
         if not filename or filename.isspace():
@@ -236,27 +226,6 @@ class ExportWMSasTif:
 
         # the image was created and shall get geo-referenced
         elif geo_ref:
-            # setup the MacOSX path to both GDAL executables and python modules
-            if system() == 'Darwin':
-                GdalUtils.setMacOSXDefaultEnvironment()
-
-            environment = GdalUtils.setProcessEnvironment()
-
-            if system() == 'Windows':
-                # The gdal-processing executables are located at <QGIS Installation folder>\bin
-                # The gcs.csv-file (required as a GDAL_DATA env-var) is stored in <QGIS Installation folder>\share\gdal
-                # The projection files (required as a PROJ_LIB env-var) are stored in <QGIS Installation folder>\share\proj
-                # prefixPath() returns <QGIS Installation folder>\apps\qgis
-                gdal_location = os.path.join(QgsApplication.prefixPath(), '..', '..', 'bin')
-                gdal_data = os.path.join(QgsApplication.prefixPath(), '..', '..', 'share', 'gdal')
-                gdal_python_tools = os.path.join(QgsApplication.prefixPath(), 'python', 'plugins', 'GdalTools')
-                gdal_projection = os.path.join(QgsApplication.prefixPath(), '..', '..', 'share', 'proj')
-                environment['PATH'] = str(os.path.abspath(gdal_location))
-                environment['PYTHONPATH'] = str(os.path.abspath(gdal_python_tools))
-                environment['GDAL_DATA'] = str(os.path.abspath(gdal_data))
-                environment['PROJ_LIB'] = str(os.path.abspath(gdal_projection))
-
-
             dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
 
             # wait until the file exists to add geo-references
@@ -265,7 +234,7 @@ class ExportWMSasTif:
                 time.sleep(0.1)
                 no_timeout -= 1
 
-            referencing = self.add_geo_reference(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry, environment)
+            referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry)
 
             if referencing != 0:
                 print 'Error number {} occured, while referencing the output .tif'.format(referencing)
@@ -276,7 +245,7 @@ class ExportWMSasTif:
                 while not os.path.exists(dest_filename) and no_timeout:
                     time.sleep(0.1)
                     no_timeout -= 1
-                building_pyramids = self.build_pyramids(dest_filename, self.res_algorithm, self.number_of_pyramids, environment)
+                building_pyramids = raster_layer_interaction.gdal_addo_layerfile(dest_filename, self.res_algorithm, self.number_of_pyramids)
 
                 if building_pyramids != 0:
                     print 'Error number {} occured, while building pyramids.'.format(building_pyramids)
@@ -315,106 +284,3 @@ class ExportWMSasTif:
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
         return recent_file_desc_name
-
-    def save_image(self, width, height, filename='export'):
-        """
-        Select and save the currently visible extent to a .tif file
-
-        :param width: image width
-        :type width: int
-
-        :param height: image height
-        :type height: int
-
-        :param name: name of the created file
-        :type name: str
-
-        :return:
-        :rtype: none
-        """
-        image_type = 'tif'
-
-        # set image's background color and format
-        img_color = QColor(255, 255, 255)
-        img_format = QImage.Format_ARGB32_Premultiplied
-
-        # create image
-        img = self.active_layer.previewAsImage(QSize(width, height), img_color, img_format)
-
-        # create painter
-        painter = QPainter()
-        painter.begin(img)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        # set layer set
-        renderer = QgsMapRenderer()
-        layer_set = []
-        layer_set.append(self.active_layer.id())
-        renderer.setLayerSet(layer_set)
-
-        # set extent to currently visible extent
-        renderer.setExtent(self.transformed_extent)
-
-        # set output size
-        renderer.setOutputSize(img.size(), img.logicalDpiX())
-
-        # do the rendering
-        renderer.render(painter)
-
-        painter.end()
-        # save image
-        save_as = filename + '.' + image_type
-        if img.save(save_as, image_type):
-            return save_as
-
-        return ''
-
-    def add_geo_reference(self, file, dst_filename, crs, ulx, uly, lrx, lry, environment):
-        """
-        Call the gdal_translate command and add the missing geo-information.
-
-        :param file: The file (in the format "/folder/subfolder/filename.tif") that needs to be referenced
-        :type file: str
-
-        :param crs: The destination coordinate reference system
-        :type crs: str
-
-        :param ulx: The x-coordinate of the upper left image border
-        :type ulx: int
-
-        :param uly: The y-coordinate of the upper left image border
-        :type uly: int
-
-        :param lrx: The x-coordinate of the lower right image border
-        :type lrx: int
-
-        :param lry: The y-coordinate of the lower right image border
-        :type lry: int
-
-        :return:
-        :rtype: none
-        """
-
-        cmd = ['gdal_translate', '-a_srs', crs, '-a_ullr', repr(ulx), repr(uly), repr(lrx), repr(lry), str(file.encode('utf-8')),
-               str(dst_filename.encode('utf-8'))]
-
-        # Error code 127 corresponds to 'command not found'
-        gdal_process = subprocess.Popen(cmd, env=environment)
-
-        #ToDo Add timeout function
-        return gdal_process.wait()
-
-    def build_pyramids(self, file, sampling_algorithm, amount, environment):
-
-        pyramids = []
-        for i in range(1,amount+1):
-            pyramids.append(str(2**i))
-
-        cmd = ['gdaladdo', '-r', sampling_algorithm, file] + pyramids
-
-        gdaladdo = subprocess.Popen(cmd, env=environment)
-
-        #ToDo Add timeout function
-        return gdaladdo.wait()
-
-

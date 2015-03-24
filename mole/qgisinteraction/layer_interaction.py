@@ -1,6 +1,10 @@
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapLayerRegistry, QgsMapLayer, QGis, QgsProject, QgsFeature
-from PyQt4.QtCore import QSettings
-import os, time
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject
+from PyQt4.QtCore import QSettings, QSize
+from PyQt4.QtGui import QPainter, QColor, QImage
+import os
+import time
+
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -38,6 +42,10 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
 
     else:
         return None
+
+
+def load_layer_from_disk(path_to_layer):
+    pass
 
 
 def add_style_to_layer(path_to_style, layer):
@@ -300,3 +308,44 @@ def move_layer_to_position(iface, layer_name, position):
             root.removeChildNode(layer_node)
             iface.setActiveLayer(clone.layer())
             break
+
+
+def save_layer_as_image(self, layer, extent, width, height, filename='export', image_type = 'tif'):
+    """
+    Select and save the currently visible extent to a .tif file
+
+    :param width: image width
+    :type width: int
+
+    :param height: image height
+    :type height: int
+
+    :param name: name of the created file
+    :type name: str
+
+    :return:
+    :rtype: none
+    """
+    img_color = QColor(255, 255, 255)
+    img_format = QImage.Format_ARGB32_Premultiplied
+    img = self.active_layer.previewAsImage(QSize(width, height), img_color, img_format)
+
+    painter = QPainter()
+    painter.begin(img)
+    painter.setRenderHint(QPainter.Antialiasing)
+    renderer = QgsMapRenderer()
+    layer_set = [layer]
+    renderer.setLayerSet(layer_set)
+
+    # set extent to currently visible extent
+    renderer.setExtent(extent)
+    # set output size to image size (the given width and height, as initialised above)
+    renderer.setOutputSize(img.size(), img.logicalDpiX())
+    renderer.render(painter)
+    painter.end()
+
+    save_as = filename + '.' + image_type
+    if img.save(save_as, image_type):
+        return save_as
+    else:
+        return ''

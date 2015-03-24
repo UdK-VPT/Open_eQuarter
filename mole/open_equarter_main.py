@@ -539,8 +539,8 @@ class OpenEQuarterMain:
 
         try:
             layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
-        except None, Error:
-            print(Error)
+        except AttributeError, NoneTypeError:
+            print(NoneTypeError)
 
         for layer_name in extracted_layers:
             try:

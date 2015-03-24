@@ -75,7 +75,8 @@ def gdal_translate_layerfile(src_filename, dst_filename, crs, extent):
     Call the gdal_translate command and add geo-information.
     :param src_filename: The file (in the format "/folder/subfolder/filename.tif") that needs to be referenced
     :type src_filename: str
-    :param crs: The destination coordinate reference system
+    :param dst_filename: The destination of the referenced file in the format "/folder/subfolder/filename_goe.tif"
+    :param crs: The destination coordinate reference system (must be the same crs as the extent's crs)
     :type crs: str
     :param extent: The extent holding the x- and y-coordinates of the layer
     :type extent: QgsRectangle

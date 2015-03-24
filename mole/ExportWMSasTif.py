@@ -25,7 +25,6 @@ from PyQt4.QtGui import *
 from qgis.core import *
 
 # Import additional packages
-import numpy
 import os
 import time
 
@@ -49,22 +48,10 @@ class ExportWMSasTif:
         # Save reference to the QGIS interface
         self.iface = iface
         self.canvas = None
-        self.active_layer = None
 
         # Information to find the file on disk
         self.export_name = 'Investigation Area'
         self.path_to_file = ''
-
-        # Data needed for geo-referencing
-        self.crs = ''
-        self.ulx = numpy.float64(0)
-        self.uly = numpy.float64(0)
-        self.lrx = numpy.float64(0)
-        self.lry = numpy.float64(0)
-        self.transformed_extent = QgsRectangle()
-
-        # Source url of the wms file
-        self.src_url = ''
 
         # max width of output file
         self.max_res = 2064
@@ -82,205 +69,149 @@ class ExportWMSasTif:
         :return:
         :rtype:
         """
-        if not clipped_raster_name.isspace() and clipped_raster_name != self.export_name:
+        if clipped_raster_name:
             self.export_name = clipped_raster_name
 
-        self.active_layer = self.iface.activeLayer()
+        export_layer = layer_interaction.find_layer_by_name(self.export_name)
         self.canvas = self.iface.mapCanvas()
 
-        if not isinstance(self.active_layer, QgsRasterLayer):
-            QMessageBox.information(self.iface.mainWindow(), 'Info', 'The selected layer is not a raster layer and can not be clipped! \n Make sure to select a raster layer for clipping.')
+        if not isinstance(export_layer, QgsRasterLayer):
+            error_message = 'The selected layer is not a raster layer and can not be clipped! \n Make sure to select a raster layer for clipping.'
+            QMessageBox.information(self.iface.mainWindow(), 'Error', error_message)
             return None
 
         else:
+            # Get the geo-values from url, hence they need to be added to the clipped layer at the end of the process
+            raster_url = raster_layer_interaction.get_wms_url(export_layer)
 
-            if self.active_layer is None or self.canvas is None:
+            if not raster_url:
                 #ToDo
-                QMessageBox.information(self.iface.mainWindow(), 'Info', 'Please select a layer.')
+                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Url is missing.')
                 return None
-            else:
 
-                self.path_to_file = QgsProject.instance().readPath('./') + '/'
+            crs = raster_layer_interaction.get_wms_crs(export_layer)
+            if not QgsCoordinateReferenceSystem().createFromUserInput(crs):
+                #ToDo
+                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Crs is missing.')
+                return None
 
-                # Get the geo-values from url, hence they need to be added to the clipped layer at the end of the process
-                self.src_url, self.crs, self.ulx, self.uly, self.lrx, self.lry = self.get_geo_data()
+            current_crs = self.canvas.mapSettings().destinationCrs()
+            current_extent = self.canvas.extent()
+            export_extent = raster_layer_interaction.transform_wms_geo_data(export_layer, current_extent, current_crs)
 
-                if not self.src_url or self.src_url.isspace():
-                    #ToDo
-                    QMessageBox.information(self.iface.mainWindow(), 'Info', 'Url is missing.')
-                    return None
+            info_text = 'The current extent will now be clipped. This may take some time.'
+            QMessageBox.information(self.iface.mainWindow(), 'Info',info_text)
 
-                # check if a crs-string was found and if a Qgs-Object can be created from that string
-                if not self.crs or self.crs.isspace() or not QgsCoordinateReferenceSystem().createFromUserInput(self.crs):
-                    #ToDo
-                    QMessageBox.information(self.iface.mainWindow(), 'Info', 'Crs is missing.')
-                    return None
+            create_geo_reference = True
+            # Start calculating export files
+            layer_name = self.create_multiple_rasters(export_layer, export_extent, create_geo_reference, 6)
 
-                info_text = 'The current extent will now be clipped. This may take some time.'
-                QMessageBox.information(self.iface.mainWindow(), 'Info',info_text)
+            return layer_name
 
-                create_geo_reference = True
-                # Start calculating export files
-                layer_name = self.create_multiple_rasters(1, create_geo_reference, 6)
-
-                return layer_name
-
-    def get_geo_data(self):
-        """
-        Return the data needed to geo-reference the snapshot of the current view after saving.
-
-        :return url: The url to the wms-server
-        :rtype url: str
-        :return wms_crs: The coordinate reference system, which is currently in use
-        :rtype wms_crs: str
-        :return upper_left_x: The x value of the current extents upper left corner
-        :rtype upper_left_x: int
-        :return upper_left_y: The y value of the current extents upper left corner
-        :rtype upper_left_y: int
-        :return lower_right_x: The x value of the current extents lower right corner
-        :rtype lower_right_x: int
-        :return lower_right_x: The y value of the current extents lower right corner
-        :rtype lower_right_y: int
-         """
-
-        # get layers source information
-        src = self.active_layer.source()
-
-        # extract the current crs from layer-source
-        wms_crs = ''
-        start = src.find('crs=')
-        if start > -1:
-            start += 4
-            end = src.find('&', start)
-            if end > -1:
-                wms_crs = src[start:end]
-            else:
-                wms_crs = src[start:]
-
-        # extract the wms source-url from layer-source
-        url = ''
-        start = src.find('url=')
-        if start > -1:
-            start += 4
-            end = src.find('&', start)
-            if end > -1:
-                url = src[start:end]
-            else:
-                url = src[start:]
-
-        # get the currently viewed coordinate range and crs
-        view_extent = self.canvas.extent()
-        current_crs = self.canvas.mapSettings().destinationCrs()
-        target_crs = QgsCoordinateReferenceSystem(wms_crs)
-
-        # check if the extent coresponds to the same crs as the map on the server
-        if not current_crs == target_crs:
-            # set extent, by transforming the formerly saved extent to new Projection
-            coord_transformer = QgsCoordinateTransform(current_crs, target_crs)
-            view_extent = coord_transformer.transform(view_extent)
-
-        self.transformed_extent = view_extent
-
-        upper_left_x = self.transformed_extent.xMinimum()
-        upper_left_y = self.transformed_extent.yMaximum()
-        lower_right_x = self.transformed_extent.xMaximum()
-        lower_right_y = self.transformed_extent.yMinimum()
-
-        return url, wms_crs, upper_left_x, upper_left_y, lower_right_x, lower_right_y
-
-    def create_multiple_rasters(self, amount, geo_ref = False, pyramids = 0):
+    def create_multiple_rasters(self, layer, extent, geo_ref = False, pyramids = 0):
         """
         Calculate the amount and the resolution of the pyramids based on the number of pyramids requested
-
-        :type amount: int
-        :param amount: number of pyramids, that will be created
+        :param extent: The canvas-extent from which the layer will be clipped
+        :type extent: QgsRectangle
+        :param geo_ref: If the exportet .tif shall be geo-referenced afterwards or not
+        :type geo_ref: bool
+        :param pyramids: number of pyramids, that will be created
+        :type pyramids: int
         :return:
         :rtype: none
         """
 
         # calculate the extents width and height
-        extent_width = numpy.float64(numpy.abs(self.lrx) - numpy.abs(self.ulx))
-        extent_height = numpy.float64(numpy.abs(self.uly) - numpy.abs(self.lry))
+        extent_width = extent.width()
+        extent_height = extent.height()
+        crs = raster_layer_interaction.get_wms_crs(layer)
+        # extent_width = numpy.float64(numpy.abs(self.lrx) - numpy.abs(self.ulx))
+        # extent_height = numpy.float64(numpy.abs(self.uly) - numpy.abs(self.lry))
 
         # calculate the missing value (width or height) of the output file, based on the extent
         resolution = dict()
 
         if extent_width >= extent_height:
-            height_as_dec = numpy.float64(self.max_res) / extent_width * extent_height
+            height_as_dec = self.max_res / extent_width * extent_height
             resolution['width'] = self.max_res
             resolution['height'] = int(height_as_dec)
         else:
-            width_as_dec = numpy.float64(self.max_res) / extent_height * extent_width
+            width_as_dec = self.max_res / extent_height * extent_width
             resolution['width'] = int(width_as_dec)
             resolution['height'] = self.max_res
 
         # append the resolution to the filename and call the save method
-        filename = self.path_to_file + self.export_name + '-' + str(resolution['width']) + '_' + str(resolution['height'])
-        filename = layer_interaction.save_layer_as_image(self.active_layer, self.transformed_extent, resolution['width'], resolution['height'], filename)
+        resolution_postfix = '-{}_{}'.format(resolution['width'], resolution['height'])
+        export_name = self.export_name + resolution_postfix
+        path_to_file = QgsProject.instance().readPath('./')
+        filename = os.path.join(path_to_file, export_name)
+        filename = layer_interaction.save_layer_as_image(layer, extent, filename)
 
         # check if the image was saved to disk
         if not filename or filename.isspace():
             #ToDo
-            QMessageBox.information(self.iface.mainWindow(), 'Info', 'Could not save image.')
+            QMessageBox.information(self.iface.mainWindow(), 'Error', 'Could not save image.')
             return
 
-        # the image was created and shall get geo-referenced
-        elif geo_ref:
-            dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
+        else:
+            # the image was created and shall get geo-referenced
+            if geo_ref:
+                # wait until the file exists to add geo-references
+                no_timeout = 50
+                while not os.path.exists(filename) and no_timeout:
+                    time.sleep(0.1)
+                    no_timeout -= 1
 
-            # wait until the file exists to add geo-references
+                dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
+                referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, crs, extent)
+
+                # remove the formerly created, non-georeferenced .tif-file
+                os.remove(filename)
+
+                if referencing != 0:
+                    print 'Error number {} occured, while referencing the output .tif'.format(referencing)
+
+                if pyramids > 0:
+                    # wait until the geo-referenced file was created before building pyramids
+                    no_timeout = 30
+                    while not os.path.exists(dest_filename) and no_timeout:
+                        time.sleep(0.1)
+                        no_timeout -= 1
+                    building_pyramids = raster_layer_interaction.gdal_addo_layerfile(dest_filename, self.res_algorithm, pyramids)
+
+                    if building_pyramids != 0:
+                        print 'Error number {} occured, while building pyramids.'.format(building_pyramids)
+
+            # once the layer was created, open in QGIS
+            recent_file = os.path.splitext(filename)[0]
+            recent_file_name = recent_file + '_geo.tif'
+            recent_file_desc_name = recent_file.split('/')[-1]
+
             no_timeout = 50
-            while not os.path.exists(filename) and no_timeout:
+            while not os.path.exists(recent_file_name) and no_timeout:
                 time.sleep(0.1)
                 no_timeout -= 1
 
-            referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, self.crs, self.ulx, self.uly, self.lrx, self.lry)
+            if not QgsCoordinateReferenceSystem().createFromUserInput(crs):
+                # crs is not valid
+                # save current settings and set Qgis to prompt for CRS
+                old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
+                QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
 
-            if referencing != 0:
-                print 'Error number {} occured, while referencing the output .tif'.format(referencing)
+            else:
+                # crs is a valid crs
+                # surpress prompt to chose crs and use project-crs
+                old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+                QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-            if pyramids > 0:
-                # wait until the geo-referenced file was created before building pyramids
-                no_timeout = 30
-                while not os.path.exists(dest_filename) and no_timeout:
-                    time.sleep(0.1)
-                    no_timeout -= 1
-                building_pyramids = raster_layer_interaction.gdal_addo_layerfile(dest_filename, self.res_algorithm, self.number_of_pyramids)
+            rlayer = QgsRasterLayer(recent_file_name, recent_file_desc_name)
+            if not rlayer.isValid():
+                print 'Layer failed to load!'
 
-                if building_pyramids != 0:
-                    print 'Error number {} occured, while building pyramids.'.format(building_pyramids)
+            rlayer.setCrs(QgsCoordinateReferenceSystem(crs))
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+            self.canvas.refresh()
+            # restore former settings
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
 
-            # remove the formerly created, non-georeferenced .tif-file
-            os.remove(filename)
-
-        # once the layer was created, open in QGIS
-        recent_file = os.path.splitext(filename)[0]
-        recent_file_name = recent_file + '_geo.tif'
-        recent_file_desc_name = recent_file.split('/')[-1]
-
-        while not os.path.exists(recent_file_name):
-            time.sleep(0.2)
-
-        if not self.crs or self.crs.isspace() or not QgsCoordinateReferenceSystem(self.crs):
-            # crs is not valid
-            # save current settings and set Qgis to prompt for CRS
-            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
-            QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
-
-        else:
-            # crs is a valid crs
-            # surpress prompt to chose crs and use project-crs
-            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
-            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
-
-        rlayer = QgsRasterLayer(recent_file_name, recent_file_desc_name)
-        if not rlayer.isValid():
-            print 'Layer failed to load!'
-
-        rlayer.setCrs(QgsCoordinateReferenceSystem(self.crs))
-        QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-        self.canvas.refresh()
-        # restore former settings
-        QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-
-        return recent_file_desc_name
+            return recent_file_desc_name

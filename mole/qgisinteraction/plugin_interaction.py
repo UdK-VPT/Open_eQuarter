@@ -89,7 +89,7 @@ class PstInteraction(object):
 
         # ToDo change the range to full select and eliminate duplicates
         #for i in range(0, number_of_samples):
-        for i in range(0, number_of_samples):
+        for i in range(number_of_samples):
             print sample_list.item(i).text()
             sample_list.setItemSelected(sample_list.item(i), True)
 

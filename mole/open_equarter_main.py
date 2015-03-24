@@ -501,7 +501,11 @@ class OpenEQuarterMain:
         try:
             investigation_area = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
             disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(self.project_path, investigation_area.name()))
+        except IOError, Error:
+            print('The "Investigation Area"-layer could not be saved to disk:')
+            print(Error)
 
+        try:
             if disk_layer.isValid():
                 layer_interaction.hide_or_remove_layer(self.investigation_shape_layer_name, 'remove')
                 layer_interaction.add_layer_to_registry(disk_layer)
@@ -510,10 +514,10 @@ class OpenEQuarterMain:
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name())
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name(), 'off')
                 disk_layer.setLayerName(self.investigation_shape_layer_name)
-
-        except IOError, Error:
+        except AttributeError, NoneTypeError:
             print('The "Investigation Area"-layer could not be saved to disk:')
-            print(Error)
+            print(NoneTypeError)
+
         return True
 
     # step 2.0

@@ -310,42 +310,41 @@ def move_layer_to_position(iface, layer_name, position):
             break
 
 
-def save_layer_as_image(self, layer, extent, width, height, filename='export', image_type = 'tif'):
+def save_layer_as_image(layer, extent, filename='export', image_type = 'tif'):
     """
     Select and save the currently visible extent to a .tif file
-
     :param width: image width
     :type width: int
-
     :param height: image height
     :type height: int
-
     :param name: name of the created file
     :type name: str
-
     :return:
-    :rtype: none
+    :rtype:
     """
-    img_color = QColor(255, 255, 255)
-    img_format = QImage.Format_ARGB32_Premultiplied
-    img = self.active_layer.previewAsImage(QSize(width, height), img_color, img_format)
+    width = int(extent.width())
+    height = int(extent.height())
+    extent.scale(1.1)
 
-    painter = QPainter()
-    painter.begin(img)
-    painter.setRenderHint(QPainter.Antialiasing)
+    img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
+    color = QColor(187, 187, 187, 0)
+    img.fill(color.rgba())
+
+    leonardo = QPainter()
+    leonardo.begin(img)
+    leonardo.setRenderHint(QPainter.Antialiasing)
+
     renderer = QgsMapRenderer()
-    layer_set = [layer]
-    renderer.setLayerSet(layer_set)
+    lst = [layer.id()]
 
-    # set extent to currently visible extent
+    renderer.setLayerSet(lst)
     renderer.setExtent(extent)
-    # set output size to image size (the given width and height, as initialised above)
     renderer.setOutputSize(img.size(), img.logicalDpiX())
-    renderer.render(painter)
-    painter.end()
+    renderer.render(leonardo)
+    leonardo.end()
 
-    save_as = filename + '.' + image_type
-    if img.save(save_as, image_type):
-        return save_as
+    filename += '.{}'.format(image_type)
+    if img.save(filename, image_type):
+        return filename
     else:
         return ''

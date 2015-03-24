@@ -33,8 +33,6 @@ class ExportWMSasTif_test(TestCase):
     def test_export(self):
         self.fail()
 
-
-    #ToDo
     def test_get_geo_data(self):
         self.fail()
 

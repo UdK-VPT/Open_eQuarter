@@ -6,12 +6,10 @@ import sys, io, json, os
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser, MunicipalInformationTree
 
 
-class MyTestCase(unittest.TestCase):
+class ColorEntryManagerTestCase(unittest.TestCase):
 
     def setUp(self):
         self.cem = ColorEntryManager()
-        self.mip = MunicipalInformationParser()
-        self.mit = MunicipalInformationTree()
 
     def test_dict_can_be_added_to_layer_in_color_entry_manager(self):
 
@@ -111,20 +109,27 @@ class MyTestCase(unittest.TestCase):
             except IOError, Error:
                 print(Error)
 
+
+class MunicipalInformationParserTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.mip = MunicipalInformationParser()
+        self.mit = MunicipalInformationTree()
+
     def test_municipal_json_file_can_be_found(self):
         self.assertTrue(os.path.exists(self.mip.municipal_json_file))
 
     def test_municipal_is_found_if_in_first_rows(self):
-        json_content = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_L.1":9.43751,"AVG_YOC":1954,"_row":"010010000000"}
+        json_content = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_W":54.78252,"AVG_YOC":1954}
         self.mip.parse_municipal(24937)
         self.assertDictContainsSubset(json_content, self.mip.municipal[0])
 
-        json_content = {"NAME":"Lübeck, Hansestadt","POP_DENS":983,"POSTCODE":23539,"GEO_L":10.68393,"GEO_L.1":10.68393,"AVG_YOC":1944,"_row":"010030000000"}
+        json_content = {"NAME":"Lübeck, Hansestadt","POP_DENS":983,"POSTCODE":23539,"GEO_L":10.68393,"GEO_W":53.86627,"AVG_YOC":1944}
         self.mip.parse_municipal(23539)
         self.assertDictContainsSubset(json_content, self.mip.municipal[0])
 
     def test_municipal_is_found_if_in_row_10001(self):
-        json_content = {"NAME":"Gunderath","POP_DENS":95,"POSTCODE":56767,"GEO_L":6.97902,"GEO_L.1":6.97902,"AVG_YOC":1964}
+        json_content = {"NAME":"Gunderath","POP_DENS":95,"POSTCODE":56767,"GEO_L":6.97902,"GEO_W":50.25468,"AVG_YOC":1964}
         self.mip.parse_municipal(56767)
         self.assertDictContainsSubset(json_content, self.mip.municipal[0])
 
@@ -140,16 +145,15 @@ class MyTestCase(unittest.TestCase):
         self.mit.split_data_to_tree_model()
         tree = self.mit.tree
         self.assertNotEqual(tree, {})
-        first_row = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_L.1":9.43751,"AVG_YOC":1954,"_row":"010010000000"}
+        first_row = {"NAME":"Flensburg, Stadt","POP_DENS":1575,"POSTCODE":24937,"GEO_L":9.43751,"GEO_W":54.78252,"AVG_YOC":1954}
         self.assertDictContainsSubset(first_row, tree['2']['4']['937'][0])
 
     def test_data_tree_contains_last_row(self):
         self.mit.split_data_to_tree_model()
         tree = self.mit.tree
         self.assertNotEqual(tree, {})
-        last_row = {"NAME":"Ponitz","POP_DENS":97,"POSTCODE":4639,"GEO_L":12.42338,"GEO_L.1":12.42338,"AVG_YOC":1912}
+        last_row = {"NAME":"Ponitz","POP_DENS":97,"POSTCODE":4639,"GEO_L":12.42338,"GEO_W":50.8562,"AVG_YOC":1912}
         self.assertDictContainsSubset(last_row, tree['4']['6']['39'][1])
-
 
 
 if __name__ == '__main__':

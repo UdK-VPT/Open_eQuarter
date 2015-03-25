@@ -6,7 +6,7 @@ from mole.model.progress_model import *
 class ProgressModel_test(unittest.TestCase):
 
     def setUp(self):
-        self._pages = ['project_basics', 'investigation_area', 'real_estate_cadaster', 'building_shapes', 'sampling_points']
+        self._pages = ['project_basics', 'investigation_area', 'building_shapes', 'real_estate_cadaster', 'sampling_points']
         self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded']
         self._steps1 = ['temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped']
         self._steps2 = ['housing_layer_loaded', 'building_coordinates_loaded']

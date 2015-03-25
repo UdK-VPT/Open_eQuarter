@@ -77,8 +77,9 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
             last_row = self.row_count - self.row_offset
             color_field = self.color_table.itemAtPosition(last_row, 1).widget()
-            value_field_one = self.color_table.itemAtPosition(last_row, 2).widget()
-            value_field_two = self.color_table.itemAtPosition(last_row, 3).widget()
+            parameter_name = self.color_table.itemAtPosition(last_row, 2).widget()
+            value_field_one = self.color_table.itemAtPosition(last_row, 3).widget()
+            value_field_two = self.color_table.itemAtPosition(last_row, 4).widget()
 
             color_field.setText(color_key)
             color_field.colorize(color.red(), color.green(), color.blue(), color.alpha())
@@ -115,9 +116,10 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         for i in range(0, self.row_count-2):
             row = i + self.row_offset
             color = grid.itemAtPosition(row, 1).widget().text()
-            value1 = grid.itemAtPosition(row, 2).widget().text()
-            value2 = grid.itemAtPosition(row, 3).widget().text()
-            removal.append(grid.itemAtPosition(row, 3).widget())
+            para_name = grid.itemAtPosition(row, 2).widget().text()
+            value1 = grid.itemAtPosition(row, 3).widget().text()
+            value2 = grid.itemAtPosition(row, 4).widget().text()
+            removal.append(grid.itemAtPosition(row, 5).widget())
             self.color_entry_manager.add_color_value_triple_to_layer((color, value1, value2), self.recent_layer)
 
         for remove_button in removal:
@@ -146,19 +148,23 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         chosen_color.setObjectName('chosen_color_{}'.format(current_row - 1))
         self.color_table.addWidget(chosen_color, current_row, 1, 1, 1)
 
+        parameter_name = QLineEdit(self)
+        parameter_name.setObjectName('parameter_name_{}'.format(current_row - 1))
+        self.color_table.addWidget(parameter_name, current_row, 2, 1, 1)
+
         value_one = QLineEdit(self)
         value_one.setObjectName('value_one_{}'.format(current_row - 1))
-        self.color_table.addWidget(value_one, current_row, 2, 1, 1)
+        self.color_table.addWidget(value_one, current_row, 3, 1, 1)
 
         value_two = QLineEdit(self)
         value_two.setObjectName('value_two_{}'.format(current_row - 1))
-        self.color_table.addWidget(value_two, current_row, 3, 1, 1)
+        self.color_table.addWidget(value_two, current_row, 4, 1, 1)
 
         remove_entries = QRemoveEntryButton(self)
         remove_entries.setObjectName('remove_entries_{}'.format(current_row - 1))
         remove_entries.stylize()
         self.connect(remove_entries, SIGNAL('remove_entry'), self.remove_entry)
-        self.color_table.addWidget(remove_entries, current_row, 4, 1, 1)
+        self.color_table.addWidget(remove_entries, current_row, 5, 1, 1)
         self.row_count += 1
 
     def remove_entry(self, button):
@@ -179,9 +185,10 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
         number_field = self.color_table.itemAtPosition(row_number, 0).widget()
         color_field = self.color_table.itemAtPosition(row_number, 1).widget()
-        value_one = self.color_table.itemAtPosition(row_number, 2).widget()
-        value_two = self.color_table.itemAtPosition(row_number, 3).widget()
-        remove_button = self.color_table.itemAtPosition(row_number, 4).widget()
+        parameter_name = self.color_table.itemAtPosition(row_number, 2).widget()
+        value_one = self.color_table.itemAtPosition(row_number, 3).widget()
+        value_two = self.color_table.itemAtPosition(row_number, 4).widget()
+        remove_button = self.color_table.itemAtPosition(row_number, 5).widget()
 
         if row_number == last_row:
             color_field.clear()
@@ -191,12 +198,14 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         else:
             self.color_table.removeWidget(number_field)
             self.color_table.removeWidget(color_field)
+            self.color_table.removeWidget(parameter_name)
             self.color_table.removeWidget(value_one)
             self.color_table.removeWidget(value_two)
             self.color_table.removeWidget(remove_button)
 
             number_field.deleteLater()
             color_field.deleteLater()
+            parameter_name.deleteLater()
             value_one.deleteLater()
             value_two.deleteLater()
             remove_button.deleteLater()
@@ -208,18 +217,21 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         for i in range(empty_row, self.row_count):
             number_field = self.color_table.itemAtPosition(i+1, 0).widget()
             color_field = self.color_table.itemAtPosition(i+1, 1).widget()
-            value_one = self.color_table.itemAtPosition(i+1, 2).widget()
-            value_two = self.color_table.itemAtPosition(i+1, 3).widget()
-            remove_button = self.color_table.itemAtPosition(i+1, 4).widget()
+            parameter_name = self.color_table.itemAtPosition(i+1, 2).widget()
+            value_one = self.color_table.itemAtPosition(i+1, 3).widget()
+            value_two = self.color_table.itemAtPosition(i+1, 4).widget()
+            remove_button = self.color_table.itemAtPosition(i+1, 5).widget()
 
             self.color_table.removeWidget(number_field)
             self.color_table.removeWidget(color_field)
+            self.color_table.removeWidget(parameter_name)
             self.color_table.removeWidget(value_one)
             self.color_table.removeWidget(value_two)
             self.color_table.removeWidget(remove_button)
 
             number_field.setObjectName('row_number_{}'.format(i - self.row_offset))
             color_field.setObjectName('chosen_color_{}'.format(i - self.row_offset))
+            parameter_name.setObjectName('parameter_name_{}'.format(i - self.row_offset))
             value_one.setObjectName('value_one_{}'.format(i - self.row_offset))
             value_two.setObjectName('value_two_{}'.format(i - self.row_offset))
             remove_button.setObjectName('remove_entries_{}'.format(i - self.row_offset))
@@ -227,9 +239,10 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
             self.color_table.addWidget(number_field, i, 0)
             self.color_table.addWidget(color_field, i, 1)
-            self.color_table.addWidget(value_one, i, 2)
-            self.color_table.addWidget(value_two, i, 3)
-            self.color_table.addWidget(remove_button, i, 4)
+            self.color_table.addWidget(parameter_name, i, 2)
+            self.color_table.addWidget(value_one, i, 3)
+            self.color_table.addWidget(value_two, i, 4)
+            self.color_table.addWidget(remove_button, i, 5)
 
 
 class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):

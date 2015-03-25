@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
+    <width>656</width>
     <height>285</height>
    </rect>
   </property>
@@ -104,29 +104,13 @@
      <property name="leftMargin">
       <number>0</number>
      </property>
-     <item row="0" column="2">
-      <widget class="QLabel" name="value_one_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Value 1</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QLabel" name="value_two_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Value 2</string>
+     <item row="1" column="3">
+      <widget class="QLineEdit" name="value_one_0">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -149,13 +133,39 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QLineEdit" name="value_one_0">
+     <item row="1" column="4">
+      <widget class="QLineEdit" name="value_two_0">
        <property name="minimumSize">
         <size>
-         <width>190</width>
+         <width>30</width>
          <height>0</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="value_one_label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>From</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="value_two_label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>To</string>
        </property>
       </widget>
      </item>
@@ -172,17 +182,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QLineEdit" name="value_two_0">
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
+     <item row="1" column="5">
       <widget class="QRemoveEntryButton" name="remove_entries_0">
        <property name="minimumSize">
         <size>
@@ -234,6 +234,29 @@
        </property>
        <property name="text">
         <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="parameter_name_label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Parameter Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLineEdit" name="parameter_name_0">
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>0</height>
+        </size>
        </property>
       </widget>
      </item>

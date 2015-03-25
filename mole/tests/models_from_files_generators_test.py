@@ -10,48 +10,41 @@ class ColorEntryManagerTestCase(unittest.TestCase):
 
     def setUp(self):
         self.cem = ColorEntryManager()
+        self.test_dict = { 'RGBa(0, 0, 255, 255)' : ('Fieldname1', 70, 20), 'RGBa(0, 0, 220, 255)' : ('Fieldname2', 70, 20) }
+        self.test_layer = 'my_test_layer'
 
     def test_dict_can_be_added_to_layer_in_color_entry_manager(self):
-
-        test_layer = 'my_test_layer'
-        test_dict = { 'RGBa(0, 0, 255, 255)' : (70, 20), 'RGBa(0, 0, 220, 255)' : (70, 20) }
-        self.cem.set_color_map_of_layer(test_dict, test_layer)
-        self.assertDictContainsSubset({test_layer: test_dict}, self.cem.layer_values_map)
+        self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
+        self.assertDictContainsSubset({self.test_layer: self.test_dict}, self.cem.layer_values_map)
 
     def test_layer_can_be_passed_to_color_entry_manager(self):
-
         test_layer = 'my_test_layer.tif'
         self.cem.add_layer(test_layer)
 
         self.assertDictContainsSubset({test_layer: {}}, self.cem.layer_values_map)
 
     def test_layer_map_does_not_get_overwritten_in_cem(self):
+        self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
+        self.cem.add_layer(self.test_layer)
+        self.assertDictContainsSubset({self.test_layer: self.test_dict}, self.cem.layer_values_map)
 
-        test_layer = 'my_test_layer'
-        test_dict = { 'RGBa(0, 0, 255, 255)' : (70, 20), 'RGBa(0, 0, 220, 255)' : (70, 20) }
-        self.cem.set_color_map_of_layer(test_dict, test_layer)
-        self.cem.add_layer(test_layer)
-        self.assertDictContainsSubset({test_layer: test_dict}, self.cem.layer_values_map)
-
-        test_dict['RGBa(0, 20, 255, 255)'] = (47,11)
-        self.assertNotEqual(self.cem.layer_values_map[test_layer], test_dict)
+        self.test_dict['RGBa(0, 20, 255, 255)'] = ('Invalid', 47,11)
+        self.assertNotEqual(self.cem.layer_values_map[self.test_layer], self.test_dict)
 
     def test_color_value_triple_can_be_added_to_layer_in_cem(self):
-        test_layer = 'my_test_layer'
-        test_dict = { 'RGBa(0, 0, 255, 255)' : (70, 20), 'RGBa(0, 0, 220, 255)' : (70, 20) }
-        self.cem.set_color_map_of_layer(test_dict, test_layer)
-        color_value_triple = ('RGBa(0, 20, 255, 255)', 47, 11)
+        self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
+        color_value_quadruple = ('RGBa(0, 20, 255, 255)', 'name', 47, 11)
 
-        self.cem.add_color_value_triple_to_layer(color_value_triple, test_layer)
-        test_dict[color_value_triple[0]] = color_value_triple[1:]
-        self.assertDictContainsSubset({test_layer: test_dict}, self.cem.layer_values_map)
+        self.cem.add_color_value_quadruple_to_layer(color_value_quadruple, self.test_layer)
+        self.test_dict[color_value_quadruple[0]] = color_value_quadruple[1:]
+        self.assertDictContainsSubset({self.test_layer: self.test_dict}, self.cem.layer_values_map)
 
     def test_cem_writes_map_to_correct_path(self):
         path = sys.path[0]
         cem = ColorEntryManager()
         layer_name = 'my_test_layer'
         cem.add_layer(layer_name)
-        cem.add_color_value_triple_to_layer(('Color', 0, 1), layer_name)
+        cem.add_color_value_quadruple_to_layer(('Color', 'name', 0, 1), layer_name)
         out_path = os.path.join(path, layer_name + '.txt')
         cem.write_map_to_disk(layer_name, out_path)
 
@@ -79,11 +72,13 @@ class ColorEntryManagerTestCase(unittest.TestCase):
         layer_name = 'my_test_layer'
         out_path = os.path.join(path, layer_name + '.txt')
         cem.add_layer(layer_name)
-        dict = {'RGBa(0, 0, 255, 255)': (120, 11)}
-        dict['RGBa(0, 0, 255, 255)'] = (131,28)
-        dict['RGBa(123, 21, 255, 255)'] = (2,8)
-        dict['RGBa(2, 33, 25, 2)'] = (1,4)
-        dict['RGBa(170, 12, 17, 36)'] = (12,238)
+
+        dict = {'RGBa(0, 0, 255, 255)': ('name0', 120, 11)}
+        dict['RGBa(0, 0, 255, 255)'] = ('name1', 131,28)
+        dict['RGBa(123, 21, 255, 255)'] = ('name2', 2,8)
+        dict['RGBa(2, 33, 25, 2)'] = ('name3', 1,4)
+        dict['RGBa(170, 12, 17, 36)'] = ('name4', 12,238)
+
         cem.set_color_map_of_layer(dict, layer_name)
         cem.write_map_to_disk(layer_name, out_path)
         self.assertTrue(os.path.exists(out_path))
@@ -94,11 +89,10 @@ class ColorEntryManagerTestCase(unittest.TestCase):
             result_dict = {}
 
             for color, value_list in data.iteritems():
-                result_dict[color] = tuple(value_list)
+                result_dict[color] = (value_list[0], value_list[1], value_list[2])
 
             self.assertDictContainsSubset(dict, result_dict)
             json_data.close()
-            print(data)
 
         except IOError, Error:
             self.fail(Error)

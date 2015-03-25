@@ -17,12 +17,12 @@ class ColorEntryManager():
     def set_color_map_of_layer(self, color_map, layer_name):
         self.layer_values_map[layer_name] = dict(color_map)
 
-    def add_color_value_triple_to_layer(self, cv_triple, layer):
-        color_key = cv_triple[0]
-        value_tuple = cv_triple[1:]
+    def add_color_value_quadruple_to_layer(self, cv_quadruple, layer):
+        color_key = cv_quadruple[0]
+        value_triple = cv_quadruple[1:]
         try:
             layer_colors = self.layer_values_map[layer]
-            layer_colors[color_key] = value_tuple
+            layer_colors[color_key] = value_triple
         except KeyError, Error:
             print(Error)
 

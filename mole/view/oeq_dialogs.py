@@ -52,14 +52,16 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
 
-    def add_color(self, color, value1=0, value2=0):
+    def add_color(self, color, name = '', value1=0, value2=0):
         """
         Insert a new color (and the values associated to it, if any), into the color-table. Append a new row, afterwards.
         :param color: The color in RGBa
         :type color: QColor
-        :param value1: Lower threshold
+        :param name: The parameter name
+        :type name: str
+        :param value1: Lower bound
         :type value1: int
-        :param value2: Upper threshold
+        :param value2: Upper bound
         :type value2: int
         :return:
         :rtype:
@@ -73,7 +75,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
         else:
             self.warning_label.clear()
-            self.color_entry_manager.add_color_value_triple_to_layer((color_key, 0, 0), layer)
+            self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, name, 0, 0), layer)
 
             last_row = self.row_count - self.row_offset
             color_field = self.color_table.itemAtPosition(last_row, 1).widget()
@@ -87,6 +89,8 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
                 value_field_one.setText(str(value1))
             if value_field_two.text().isspace():
                 value_field_two.setText(str(value2))
+            if parameter_name.text().isspace():
+                parameter_name.setText(name)
 
             self.add_row()
 
@@ -96,15 +100,17 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
             row = self.row_offset
             for color, values in color_map.iteritems():
                 color_field = self.color_table.itemAtPosition(row, 1).widget()
-                value_field_one = self.color_table.itemAtPosition(row, 2).widget()
-                value_field_two = self.color_table.itemAtPosition(row, 3).widget()
+                parameter_name = self.color_table.itemAtPosition(row, 2).widget()
+                value_field_one = self.color_table.itemAtPosition(row, 3).widget()
+                value_field_two = self.color_table.itemAtPosition(row, 4).widget()
                 row += 1
                 color_field.setText(color)
                 color = color[5:-1]
                 colors = color.split(',')
                 color_field.colorize(colors[0], colors[1], colors[2], colors[3])
-                value_field_one.setText(values[0])
-                value_field_two.setText(values[1])
+                parameter_name.setText(values[0])
+                value_field_one.setText(values[1])
+                value_field_two.setText(values[2])
                 self.add_row()
 
         except KeyError, Error:
@@ -120,7 +126,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
             value1 = grid.itemAtPosition(row, 3).widget().text()
             value2 = grid.itemAtPosition(row, 4).widget().text()
             removal.append(grid.itemAtPosition(row, 5).widget())
-            self.color_entry_manager.add_color_value_triple_to_layer((color, value1, value2), self.recent_layer)
+            self.color_entry_manager.add_color_value_quadruple_to_layer((color, para_name, value1, value2), self.recent_layer)
 
         for remove_button in removal:
             self.remove_entry(remove_button)

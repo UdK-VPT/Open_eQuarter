@@ -1,5 +1,6 @@
 from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject
+from qgis.analysis import QgsOverlayAnalyzer
 from PyQt4.QtCore import QSettings, QSize
 from PyQt4.QtGui import QPainter, QColor, QImage
 import os
@@ -348,3 +349,13 @@ def save_layer_as_image(layer, extent, filename='export', image_type = 'tif'):
         return filename
     else:
         return ''
+
+
+def intersect_shapefiles(shape1, shape2, output_path):
+
+    try:
+        if shape1.isValid() and shape2.isValid():
+            analyser = QgsOverlayAnalyzer()
+            return analyser.intersection(shape1, shape2, output_path)
+    except AttributeError, Error:
+        print(Error)

@@ -6,11 +6,12 @@ from mole.model.progress_model import *
 class ProgressModel_test(unittest.TestCase):
 
     def setUp(self):
-        self._pages = ['project_basics', 'investigation_area', 'building_shapes', 'sampling_points']
+        self._pages = ['project_basics', 'investigation_area', 'real_estate_cadaster', 'building_shapes', 'sampling_points']
         self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded']
         self._steps1 = ['temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped']
-        self._steps2 = ['raster_loaded', 'extent_clipped', 'pyramids_built']
-        self._steps3 = ['temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined', 'editing_temp_pointlayer_stopped', 'information_sampled']
+        self._steps2 = ['housing_layer_loaded', 'building_coordinates_loaded']
+        self._steps3 = ['raster_loaded', 'extent_clipped', 'pyramids_built']
+        self._steps4 = ['temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined', 'editing_temp_pointlayer_stopped', 'information_sampled']
         self._prog_model = ProgressModel()
 
     def test_if_the_whole_progress_can_be_updated(self):
@@ -18,24 +19,28 @@ class ProgressModel_test(unittest.TestCase):
         for step in self._steps0:
             self._prog_model.update_progress(self._pages[0], step, True)
 
-        self.assertEqual(self._prog_model.last_step_executed, 3)
+        last_step = len(self._steps0) - 1
+        self.assertEqual(self._prog_model.last_step_executed, last_step)
 
         for step in self._steps1:
             self._prog_model.update_progress(self._pages[1], step, True)
 
-        self.assertEqual(self._prog_model.last_step_executed, 7)
+        last_step += len(self._steps1)
+        self.assertEqual(self._prog_model.last_step_executed, last_step)
 
         for step in self._steps2:
             self._prog_model.update_progress(self._pages[2], step, True)
 
-        self.assertEqual(self._prog_model.last_step_executed, 10)
+        last_step += len(self._steps2)
+        self.assertEqual(self._prog_model.last_step_executed, last_step)
 
         for step in self._steps3:
             self._prog_model.update_progress(self._pages[3], step, True)
 
-        self.assertEqual(self._prog_model.last_step_executed, 15)
+        last_step += len(self._steps3)
+        self.assertEqual(self._prog_model.last_step_executed, last_step)
         self.assertRaises(KeyError, self._prog_model.update_progress(self._steps0[1], self._pages[1], False))
-        self.assertEqual(self._prog_model.last_step_executed, 15)
+        self.assertEqual(self._prog_model.last_step_executed, last_step)
 
     def test_prerequisites_when_nothing_is_true(self):
         self.assertFalse(self._prog_model.prerequisites_are_given('information_sampled'))

@@ -394,7 +394,6 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             location_box.insertWidget(0, self.location_city)
 
 
-
 class ModularInfo_dialog(QDialog, Ui_ModularInfo_dialog):
     def __init__(self):
         QDialog.__init__(self)

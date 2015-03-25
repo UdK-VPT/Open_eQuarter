@@ -192,7 +192,7 @@ QStackedWidget QAbstractButton:active {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="project_basics_page">
        <property name="accessibleName">
@@ -290,6 +290,40 @@ investigation area with</string>
         </item>
         <item>
          <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="real_estate_cadaster">
+       <property name="accessibleName">
+        <string>Real Estate Cadaster</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QProcessButton" name="housing_layer_loaded_chckBox">
+          <property name="text">
+           <string>Load a floor plan layer ('Hausumringe')</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="building_coordinates_loaded_chckBox">
+          <property name="text">
+           <string>Load building coordinates</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>

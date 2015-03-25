@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Tue Mar 17 16:39:50 2015
+# Created: Wed Mar 25 10:21:53 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,6 +157,19 @@ class Ui_MainProcess_dock(object):
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem3)
         self.process_page.addWidget(self.investigation_area_page)
+        self.real_estate_cadaster = QtGui.QWidget()
+        self.real_estate_cadaster.setObjectName(_fromUtf8("real_estate_cadaster"))
+        self.verticalLayout_6 = QtGui.QVBoxLayout(self.real_estate_cadaster)
+        self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
+        self.housing_layer_loaded_chckBox = QProcessButton(self.real_estate_cadaster)
+        self.housing_layer_loaded_chckBox.setObjectName(_fromUtf8("housing_layer_loaded_chckBox"))
+        self.verticalLayout_6.addWidget(self.housing_layer_loaded_chckBox)
+        self.building_coordinates_loaded_chckBox = QProcessButton(self.real_estate_cadaster)
+        self.building_coordinates_loaded_chckBox.setObjectName(_fromUtf8("building_coordinates_loaded_chckBox"))
+        self.verticalLayout_6.addWidget(self.building_coordinates_loaded_chckBox)
+        spacerItem4 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_6.addItem(spacerItem4)
+        self.process_page.addWidget(self.real_estate_cadaster)
         self.building_shapes_page = QtGui.QWidget()
         self.building_shapes_page.setAccessibleDescription(_fromUtf8(""))
         self.building_shapes_page.setObjectName(_fromUtf8("building_shapes_page"))
@@ -171,8 +184,8 @@ class Ui_MainProcess_dock(object):
         self.pyramids_built_chckBox = QProcessButton(self.building_shapes_page)
         self.pyramids_built_chckBox.setObjectName(_fromUtf8("pyramids_built_chckBox"))
         self.verticalLayout_3.addWidget(self.pyramids_built_chckBox)
-        spacerItem4 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem4)
+        spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem5)
         self.process_page.addWidget(self.building_shapes_page)
         self.sampling_points_page = QtGui.QWidget()
         self.sampling_points_page.setAccessibleDescription(_fromUtf8(""))
@@ -194,8 +207,8 @@ class Ui_MainProcess_dock(object):
         self.information_sampled_chckBox = QProcessButton(self.sampling_points_page)
         self.information_sampled_chckBox.setObjectName(_fromUtf8("information_sampled_chckBox"))
         self.verticalLayout_4.addWidget(self.information_sampled_chckBox)
-        spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem5)
+        spacerItem6 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem6)
         self.process_page.addWidget(self.sampling_points_page)
         self.verticalLayout_5.addWidget(self.process_page)
         self.button_layout = QtGui.QHBoxLayout()
@@ -204,8 +217,8 @@ class Ui_MainProcess_dock(object):
         self.pushButton = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.button_layout.addWidget(self.pushButton)
-        spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.button_layout.addItem(spacerItem6)
+        spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.button_layout.addItem(spacerItem7)
         self.process_button_auto = QtGui.QPushButton(self.dockWidgetContents)
         self.process_button_auto.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
@@ -228,8 +241,8 @@ class Ui_MainProcess_dock(object):
         self.process_button_next.setObjectName(_fromUtf8("process_button_next"))
         self.button_layout.addWidget(self.process_button_next)
         self.verticalLayout_5.addLayout(self.button_layout)
-        spacerItem7 = QtGui.QSpacerItem(20, 32, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_5.addItem(spacerItem7)
+        spacerItem8 = QtGui.QSpacerItem(20, 32, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_5.addItem(spacerItem8)
         self.logo_layout = QtGui.QHBoxLayout()
         self.logo_layout.setObjectName(_fromUtf8("logo_layout"))
         self.oeq_clickable_logo = QClickableLabel(self.dockWidgetContents)
@@ -238,13 +251,13 @@ class Ui_MainProcess_dock(object):
         self.oeq_clickable_logo.setPixmap(QtGui.QPixmap(_fromUtf8(":/Brands/icons/OeQ_logo_footer.png")))
         self.oeq_clickable_logo.setObjectName(_fromUtf8("oeq_clickable_logo"))
         self.logo_layout.addWidget(self.oeq_clickable_logo)
-        spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.logo_layout.addItem(spacerItem8)
+        spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.logo_layout.addItem(spacerItem9)
         self.verticalLayout_5.addLayout(self.logo_layout)
         MainProcess_dock.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(MainProcess_dock)
-        self.process_page.setCurrentIndex(3)
+        self.process_page.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainProcess_dock)
 
     def retranslateUi(self, MainProcess_dock):
@@ -262,6 +275,9 @@ class Ui_MainProcess_dock(object):
         self.investigation_area_selected_chckBox.setText(_translate("MainProcess_dock", "Add new features to cover your\n"
 "investigation area with", None))
         self.editing_temp_shapefile_stopped_chckBox.setText(_translate("MainProcess_dock", "Deactivate the edit mode", None))
+        self.real_estate_cadaster.setAccessibleName(_translate("MainProcess_dock", "Real Estate Cadaster", None))
+        self.housing_layer_loaded_chckBox.setText(_translate("MainProcess_dock", "Load a floor plan layer (\'Hausumringe\')", None))
+        self.building_coordinates_loaded_chckBox.setText(_translate("MainProcess_dock", "Load building coordinates", None))
         self.building_shapes_page.setAccessibleName(_translate("MainProcess_dock", "Building Shapes", None))
         self.raster_loaded_chckBox.setText(_translate("MainProcess_dock", "Load a new (wms) raster-map", None))
         self.extent_clipped_chckBox.setText(_translate("MainProcess_dock", "Export the investigation areas extent as .tif", None))

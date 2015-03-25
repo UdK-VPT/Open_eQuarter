@@ -527,6 +527,10 @@ class OpenEQuarterMain:
         return True
 
     # step 2.0
+    def handle_housing_layer_loaded(self):
+        pass
+
+    # step 3.0
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
         investigation_raster_layer = layer_interaction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name)
@@ -539,7 +543,7 @@ class OpenEQuarterMain:
             self.iface.actionAddWmsLayer().trigger()
             return True
 
-    # step 2.1
+    # step 3.1
     def handle_extent_clipped(self):
         extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
 
@@ -576,37 +580,37 @@ class OpenEQuarterMain:
         time.sleep(1.0)
         return True
 
-    # step 2.2
+    # step 3.2
     def handle_pyramids_built(self):
         return True
 
-    # step 3.0
+    # step 4.0
     def handle_temp_pointlayer_created(self):
         pst_input_layer = layer_interaction.create_temporary_layer(self.pst_input_layer_name, 'Point',
                                                                   self.project_crs)
         layer_interaction.add_layer_to_registry(pst_input_layer)
         return True
 
-    # step 3.1
+    # step 4.1
     def handle_editing_temp_pointlayer_started(self):
         layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
         pst_input_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
         self.iface.setActiveLayer(pst_input_layer)
         return True
 
-    # step 3.2
+    # step 4.2
     def handle_points_of_interest_defined(self):
         self.confirm_selection_of_investigation_area_dlg.set_dialog_text(
             "Click 'OK' once the sampling points are selected.", "Choose sample points")
         points_selected = self.confirm_selection_of_investigation_area(self.pst_input_layer_name)
         return points_selected
 
-    # step 3.3
+    # step 4.3
     def handle_editing_temp_pointlayer_stopped(self):
         layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
         return True
 
-    # step 3.4
+    # step 4.4
     def handle_information_sampled(self):
         pst_plugin = plugin_interaction.get_plugin_ifexists(self.pst_plugin_name)
         psti = PstInteraction(pst_plugin, iface)

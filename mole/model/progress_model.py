@@ -10,9 +10,10 @@ class ProgressModel(object):
         if save_file == 'default':
             self._project_basics = OrderedDict([('ol_plugin_installed', False), ('pst_plugin_installed', False), ('project_created', False), ('osm_layer_loaded', False)])
             self._investigation_area = OrderedDict([('temp_shapefile_created', False), ('editing_temp_shapefile_started', False), ('investigation_area_selected', False), ('editing_temp_shapefile_stopped', False)])
+            self._real_estate_cadaster = OrderedDict([('housing_layer_loaded', False), ('building_coordinates_loaded', False)])
             self._building_shapes = OrderedDict([('raster_loaded', False), ('extent_clipped', False), ('pyramids_built', False)])
             self._sampling_points = OrderedDict([('temp_pointlayer_created', False), ('editing_temp_pointlayer_started', False), ('points_of_interest_defined', False), ('editing_temp_pointlayer_stopped', False), ('information_sampled', False)])
-            self._progress = OrderedDict([('project_basics', self._project_basics), ('investigation_area', self._investigation_area), ('building_shapes', self._building_shapes), ('sampling_points', self._sampling_points)])
+            self._progress = OrderedDict([('project_basics', self._project_basics), ('investigation_area', self._investigation_area), ('real_estate_cadaster', self._real_estate_cadaster), ('building_shapes', self._building_shapes), ('sampling_points', self._sampling_points)])
         # else:
             # check if the given config-file exists
 
@@ -32,8 +33,8 @@ class ProgressModel(object):
             self._progress[section][step] = is_done
             self.last_step_executed = self.get_position_of_step(step)
 
-        except KeyError, error:
-            print error
+        except KeyError, Error:
+            print(Error)
 
     def prerequisites_are_given(self, step):
         """

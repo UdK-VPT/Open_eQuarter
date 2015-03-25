@@ -45,9 +45,21 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
         return None
 
 
-def load_layer_from_disk(path_to_layer):
-    pass
-
+def load_layer_from_disk(path_to_layer, name):
+    """
+    Load a layer from disk
+    :param path_to_layer: Location of the .shp-file
+    :type path_to_layer: str
+    :param name: Display-name of the loaded layer
+    :type name: str
+    :return:
+    :rtype:
+    """
+    if os.path.exists(path_to_layer):
+        disk_layer = QgsVectorLayer(path_to_layer, name, 'ogr')
+        return disk_layer
+    else:
+        return None
 
 def add_style_to_layer(path_to_style, layer):
     """
@@ -352,10 +364,21 @@ def save_layer_as_image(layer, extent, filename='export', image_type = 'tif'):
 
 
 def intersect_shapefiles(shape1, shape2, output_path):
-
+    """
+    Intersect two shapefiles and wirte the result to disk
+    :param shape1: First shapefile
+    :type shape1: QgsVectorLayer
+    :param shape2: Second shapefile
+    :type shape2: QgsVectorLayer
+    :param output_path: The place where the intersection shall be stored
+    :type output_path: str
+    :return: If the layers were intersected successfully
+    :rtype: bool
+    """
     try:
         if shape1.isValid() and shape2.isValid():
             analyser = QgsOverlayAnalyzer()
             return analyser.intersection(shape1, shape2, output_path)
     except AttributeError, Error:
+        return False
         print(Error)

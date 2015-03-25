@@ -99,7 +99,7 @@ class OpenEQuarterMain:
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_name = 'Investigation Area'
         self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project_data', 'oeq_ia_style.qml')
-        self.housing_layer_name = ''
+        self.housing_layer_name = 'Floor plan'
         self.housing_coordinate_layer_name = ''
         # name of the wms-raster which will be loaded and is the basis for the clipping
         self.clipping_raster_layer_name = 'Investigation Area - raster'
@@ -528,7 +528,19 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-        pass
+
+        housing_layer = os.path.join('/', 'Users', 'VPTtutor', 'Desktop', 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        if os.path.exists(housing_layer):
+            housing_layer = layer_interaction.load_layer_from_disk(housing_layer, self.housing_layer_name)
+            investigation_area = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
+            out_layer = os.path.join(self.project_path, self.housing_layer_name + '.shp')
+
+            intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer)
+            if intersection_done:
+                out_layer = layer_interaction.load_layer_from_disk(out_layer, self.housing_layer_name)
+                layer_interaction.add_layer_to_registry(out_layer)
+
+            return intersection_done
 
     # step 3.0
     def handle_raster_loaded(self):

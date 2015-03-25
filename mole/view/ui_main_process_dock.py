@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Wed Mar 25 10:21:53 2015
+# Created: Wed Mar 25 11:38:24 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,19 +157,19 @@ class Ui_MainProcess_dock(object):
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem3)
         self.process_page.addWidget(self.investigation_area_page)
-        self.real_estate_cadaster = QtGui.QWidget()
-        self.real_estate_cadaster.setObjectName(_fromUtf8("real_estate_cadaster"))
-        self.verticalLayout_6 = QtGui.QVBoxLayout(self.real_estate_cadaster)
+        self.real_estate_cadaster_page = QtGui.QWidget()
+        self.real_estate_cadaster_page.setObjectName(_fromUtf8("real_estate_cadaster_page"))
+        self.verticalLayout_6 = QtGui.QVBoxLayout(self.real_estate_cadaster_page)
         self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
-        self.housing_layer_loaded_chckBox = QProcessButton(self.real_estate_cadaster)
+        self.housing_layer_loaded_chckBox = QProcessButton(self.real_estate_cadaster_page)
         self.housing_layer_loaded_chckBox.setObjectName(_fromUtf8("housing_layer_loaded_chckBox"))
         self.verticalLayout_6.addWidget(self.housing_layer_loaded_chckBox)
-        self.building_coordinates_loaded_chckBox = QProcessButton(self.real_estate_cadaster)
+        self.building_coordinates_loaded_chckBox = QProcessButton(self.real_estate_cadaster_page)
         self.building_coordinates_loaded_chckBox.setObjectName(_fromUtf8("building_coordinates_loaded_chckBox"))
         self.verticalLayout_6.addWidget(self.building_coordinates_loaded_chckBox)
         spacerItem4 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_6.addItem(spacerItem4)
-        self.process_page.addWidget(self.real_estate_cadaster)
+        self.process_page.addWidget(self.real_estate_cadaster_page)
         self.building_shapes_page = QtGui.QWidget()
         self.building_shapes_page.setAccessibleDescription(_fromUtf8(""))
         self.building_shapes_page.setObjectName(_fromUtf8("building_shapes_page"))
@@ -275,7 +275,7 @@ class Ui_MainProcess_dock(object):
         self.investigation_area_selected_chckBox.setText(_translate("MainProcess_dock", "Add new features to cover your\n"
 "investigation area with", None))
         self.editing_temp_shapefile_stopped_chckBox.setText(_translate("MainProcess_dock", "Deactivate the edit mode", None))
-        self.real_estate_cadaster.setAccessibleName(_translate("MainProcess_dock", "Real Estate Cadaster", None))
+        self.real_estate_cadaster_page.setAccessibleName(_translate("MainProcess_dock", "Real Estate Cadaster", None))
         self.housing_layer_loaded_chckBox.setText(_translate("MainProcess_dock", "Load a floor plan layer (\'Hausumringe\')", None))
         self.building_coordinates_loaded_chckBox.setText(_translate("MainProcess_dock", "Load building coordinates", None))
         self.building_shapes_page.setAccessibleName(_translate("MainProcess_dock", "Building Shapes", None))

@@ -303,7 +303,7 @@ investigation area with</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="real_estate_cadaster">
+      <widget class="QWidget" name="real_estate_cadaster_page">
        <property name="accessibleName">
         <string>Real Estate Cadaster</string>
        </property>

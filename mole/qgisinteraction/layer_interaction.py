@@ -2,7 +2,7 @@ from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSyst
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject, QgsField
 from qgis.analysis import QgsOverlayAnalyzer
 from PyQt4.QtCore import QSettings, QSize, QVariant
-from PyQt4.QtGui import QPainter, QColor, QImage
+from PyQt4.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
 import os
 import time
 
@@ -378,14 +378,26 @@ def intersect_shapefiles(shape1, shape2, output_path):
     try:
         if shape1.isValid() and shape2.isValid():
             analyser = QgsOverlayAnalyzer()
-            return analyser.intersection(shape1, shape2, output_path)
+            progress = QProgressDialog()
+            info = QLabel('Intersecting layers')
+            progress.setLabel(info)
+            progress.setMinimum(0)
+            progress.setMaximum(100)
+            return analyser.intersection(shape1, shape2, output_path, p=progress)
     except AttributeError, Error:
         return False
         print(Error)
 
 
 def edit_housing_layer_attributes(housing_layer):
-
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
     try:
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
@@ -398,7 +410,9 @@ def edit_housing_layer_attributes(housing_layer):
         area_index = name_to_index['AREA']
         perimeter_index = name_to_index['PERIMETER']
         building_index = name_to_index['BLD_ID']
+        fid_index = name_to_index['FID']
         building_id = 0
+
         for feature in provider.getFeatures():
             if feature.attribute('FID') == 0:
                 geometry = feature.geometry()
@@ -406,8 +420,11 @@ def edit_housing_layer_attributes(housing_layer):
                 provider.changeAttributeValues({feature.id() : values})
                 building_id += 1
             else:
-                print(feature.id())
+                # These features are most likely to be duplicates of those that have an FID-entry
+                provider.deleteFeatures([feature.id()])
 
-        housing_layer.commitChanges()
+        provider.deleteAttributes([fid_index])
+        return housing_layer.commitChanges()
     except AttributeError, Error:
+        return False
         print(Error)

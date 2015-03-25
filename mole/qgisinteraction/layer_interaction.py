@@ -390,13 +390,23 @@ def edit_housing_layer_attributes(housing_layer):
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
 
-        attributes = [QgsField('AREA', QVariant.Double), QgsField('PERIMETER', QVariant.Double)]
+        attributes = [QgsField('AREA', QVariant.Double),
+                      QgsField('PERIMETER', QVariant.Double),
+                      QgsField('BLD_ID', QVariant.String)]
         provider.addAttributes(attributes)
-
+        name_to_index = provider.fieldNameMap()
+        area_index = name_to_index['AREA']
+        perimeter_index = name_to_index['PERIMETER']
+        building_index = name_to_index['BLD_ID']
+        building_id = 0
         for feature in provider.getFeatures():
-            geometry = feature.geometry()
-            values = {5 : geometry.area(), 6 : geometry.length()}
-            provider.changeAttributeValues({feature.id() : values})
+            if feature.attribute('FID') == 0:
+                geometry = feature.geometry()
+                values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
+                provider.changeAttributeValues({feature.id() : values})
+                building_id += 1
+            else:
+                print(feature.id())
 
         housing_layer.commitChanges()
     except AttributeError, Error:

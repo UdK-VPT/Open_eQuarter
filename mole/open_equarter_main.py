@@ -539,7 +539,7 @@ class OpenEQuarterMain:
             if intersection_done:
                 out_layer = layer_interaction.load_layer_from_disk(out_layer, self.housing_layer_name)
                 layer_interaction.add_layer_to_registry(out_layer)
-
+                layer_interaction.edit_housing_layer_attributes(out_layer)
             return intersection_done
 
     # step 3.0

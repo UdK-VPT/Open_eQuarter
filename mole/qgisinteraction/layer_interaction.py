@@ -1,7 +1,7 @@
 from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject, QgsField
 from qgis.analysis import QgsOverlayAnalyzer
-from PyQt4.QtCore import QSettings, QSize
+from PyQt4.QtCore import QSettings, QSize, QVariant
 from PyQt4.QtGui import QPainter, QColor, QImage
 import os
 import time
@@ -381,4 +381,23 @@ def intersect_shapefiles(shape1, shape2, output_path):
             return analyser.intersection(shape1, shape2, output_path)
     except AttributeError, Error:
         return False
+        print(Error)
+
+
+def edit_housing_layer_attributes(housing_layer):
+
+    try:
+        provider = housing_layer.dataProvider()
+        housing_layer.startEditing()
+
+        attributes = [QgsField('AREA', QVariant.Double), QgsField('PERIMETER', QVariant.Double)]
+        provider.addAttributes(attributes)
+
+        for feature in provider.getFeatures():
+            geometry = feature.geometry()
+            values = {5 : geometry.area(), 6 : geometry.length()}
+            provider.changeAttributeValues({feature.id() : values})
+
+        housing_layer.commitChanges()
+    except AttributeError, Error:
         print(Error)

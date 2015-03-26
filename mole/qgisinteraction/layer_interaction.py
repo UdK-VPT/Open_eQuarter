@@ -323,7 +323,7 @@ def move_layer_to_position(iface, layer_name, position):
             break
 
 
-def save_layer_as_image(layer, extent, filename='export', image_type = 'tif'):
+def save_layer_as_image(layer, extent, filename='export', max_resolution='1024', image_type = 'tif'):
     """
     Select and save the currently visible extent to a .tif file
     :param width: image width
@@ -335,11 +335,22 @@ def save_layer_as_image(layer, extent, filename='export', image_type = 'tif'):
     :return:
     :rtype:
     """
-    width = int(extent.width())
-    height = int(extent.height())
+    extent_width = int(extent.width())
+    extent_height = int(extent.height())
     extent.scale(1.1)
+    
+    # calculate the missing value (width or height) of the output file, based on the extent
+    resolution = dict()
+    if extent_width >= extent_height:
+        height_as_dec = max_resolution / extent_width * extent_height
+        resolution['width'] = max_resolution
+        resolution['height'] = int(height_as_dec)
+    else:
+        width_as_dec = max_resolution / extent_height * extent_width
+        resolution['width'] = int(width_as_dec)
+        resolution['height'] = max_resolution
 
-    img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
+    img = QImage(QSize(resolution['width'], resolution['height']), QImage.Format_ARGB32_Premultiplied)
     color = QColor(187, 187, 187, 0)
     img.fill(color.rgba())
 

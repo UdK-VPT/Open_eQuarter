@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Wed Mar 25 16:01:16 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Thu Mar 26 10:30:30 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 

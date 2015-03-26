@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Wed Mar 25 16:01:15 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Thu Mar 26 10:30:30 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -43,6 +43,7 @@ class Ui_project_settings_form(object):
         self.form.setObjectName(_fromUtf8("form"))
         self.gridLayout = QtGui.QGridLayout(self.form)
         self.gridLayout.setHorizontalSpacing(15)
+        self.gridLayout.setVerticalSpacing(6)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.location_label = QtGui.QLabel(self.form)
         self.location_label.setObjectName(_fromUtf8("location_label"))
@@ -82,7 +83,7 @@ class Ui_project_settings_form(object):
         self.location_layout = QtGui.QHBoxLayout()
         self.location_layout.setObjectName(_fromUtf8("location_layout"))
         self.location_city = QtGui.QLineEdit(self.form)
-        self.location_city.setMinimumSize(QtCore.QSize(0, 0))
+        self.location_city.setMinimumSize(QtCore.QSize(228, 0))
         self.location_city.setObjectName(_fromUtf8("location_city"))
         self.location_layout.addWidget(self.location_city)
         self.location_postal = QtGui.QLineEdit(self.form)

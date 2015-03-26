@@ -397,6 +397,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             city_edit.deleteLater()
             self.location_city = QComboBox()
             self.location_city.setObjectName('location_city')
+            self.location_city.setMinimumWidth(228)
             location_box.insertWidget(0, self.location_city)
 
     def lineedit_city_layout(self):
@@ -407,7 +408,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
             self.location_city = QLineEdit(self.form)
-            self.location_city.setMinimumSize(QSize(0, 0))
+            self.location_city.setMinimumWidth(228)
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)

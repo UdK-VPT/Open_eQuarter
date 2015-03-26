@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Thu Mar 26 10:30:30 2015
+# Created: Thu Mar 26 10:43:05 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -181,9 +181,9 @@ class Ui_MainProcess_dock(object):
         self.extent_clipped_chckBox = QProcessButton(self.real_estate_cadaster_page)
         self.extent_clipped_chckBox.setObjectName(_fromUtf8("extent_clipped_chckBox"))
         self.verticalLayout_3.addWidget(self.extent_clipped_chckBox)
-        self.pyramids_built_chckBox = QProcessButton(self.real_estate_cadaster_page)
-        self.pyramids_built_chckBox.setObjectName(_fromUtf8("pyramids_built_chckBox"))
-        self.verticalLayout_3.addWidget(self.pyramids_built_chckBox)
+        self.legend_created_chckBox = QProcessButton(self.real_estate_cadaster_page)
+        self.legend_created_chckBox.setObjectName(_fromUtf8("legend_created_chckBox"))
+        self.verticalLayout_3.addWidget(self.legend_created_chckBox)
         spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem5)
         self.process_page.addWidget(self.real_estate_cadaster_page)
@@ -257,7 +257,7 @@ class Ui_MainProcess_dock(object):
         MainProcess_dock.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(MainProcess_dock)
-        self.process_page.setCurrentIndex(2)
+        self.process_page.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(MainProcess_dock)
 
     def retranslateUi(self, MainProcess_dock):
@@ -281,7 +281,7 @@ class Ui_MainProcess_dock(object):
         self.real_estate_cadaster_page.setAccessibleName(_translate("MainProcess_dock", "Real Estate Cadaster", None))
         self.raster_loaded_chckBox.setText(_translate("MainProcess_dock", "Load a new (wms) raster-map", None))
         self.extent_clipped_chckBox.setText(_translate("MainProcess_dock", "Export the investigation areas extent as .tif", None))
-        self.pyramids_built_chckBox.setText(_translate("MainProcess_dock", "Open the created .tif-file and build pyramids", None))
+        self.legend_created_chckBox.setText(_translate("MainProcess_dock", "Create a legend for the clipped .tif-file", None))
         self.sampling_points_page.setAccessibleName(_translate("MainProcess_dock", "Point Sampling", None))
         self.temp_pointlayer_created_chckBox.setText(_translate("MainProcess_dock", "Create a new Pointlayer", None))
         self.editing_temp_pointlayer_started_chckBox.setText(_translate("MainProcess_dock", "Activate the edit mode", None))

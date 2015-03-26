@@ -145,7 +145,7 @@ class OpenEQuarterMain:
         settings_dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
-        tools_dropdown_menu.addAction('Color Picker', self.chose_color)
+        tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
@@ -172,29 +172,6 @@ class OpenEQuarterMain:
 
     def load_wms(self):
         print('Load wms')
-
-    def chose_color(self):
-        self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
-        self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
-        self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
-        self.refresh_layer_list()
-
-        dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
-        dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
-        self.color_picker_dlg.show()
-        save_or_abort = self.color_picker_dlg.exec_()
-
-        if save_or_abort:
-            layer = self.iface.activeLayer()
-            out_path = os.path.dirname(layer.publicSource())
-            out_path = os.path.join(out_path, layer.name() + '.txt')
-            self.color_picker_dlg.update_color_values()
-            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
-        else:
-            self.color_picker_dlg.__init__()
-
-        self.iface.actionPan().trigger()
 
     # ToDo Check if this has to be put in a separate method
     def refresh_layer_list(self):
@@ -593,8 +570,28 @@ class OpenEQuarterMain:
         return True
 
     # step 3.2
-    def handle_pyramids_built(self):
-        return True
+    def handle_legend_created(self):
+        self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
+        self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
+        self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
+        self.refresh_layer_list()
+
+        dropdown = self.color_picker_dlg.layers_dropdown
+        dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
+        dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
+        self.color_picker_dlg.show()
+        save_or_abort = self.color_picker_dlg.exec_()
+
+        if save_or_abort:
+            layer = self.iface.activeLayer()
+            out_path = os.path.dirname(layer.publicSource())
+            out_path = os.path.join(out_path, layer.name() + '.txt')
+            self.color_picker_dlg.update_color_values()
+            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
+        else:
+            self.color_picker_dlg.__init__()
+
+        self.iface.actionPan().trigger()
 
     # step 4.0
     def handle_temp_pointlayer_created(self):

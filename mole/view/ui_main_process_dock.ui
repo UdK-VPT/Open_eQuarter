@@ -192,7 +192,7 @@ QStackedWidget QAbstractButton:active {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="project_basics_page">
        <property name="accessibleName">
@@ -360,9 +360,9 @@ investigation area with</string>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="pyramids_built_chckBox">
+         <widget class="QProcessButton" name="legend_created_chckBox">
           <property name="text">
-           <string>Open the created .tif-file and build pyramids</string>
+           <string>Create a legend for the clipped .tif-file</string>
           </property>
          </widget>
         </item>

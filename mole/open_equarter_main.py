@@ -66,8 +66,8 @@ class OpenEQuarterMain:
 
 
         ### Project specific settings
-        # the project path is './' as long as the project has not been saved
-        self.project_path = QgsProject.instance().readPath('')
+        # the project path equals './' as long as the project has not been saved
+        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
         self.project_crs = 'EPSG:3857'
         self.oeq_project = ''
 
@@ -369,8 +369,8 @@ class OpenEQuarterMain:
             pyramid_exporter = ExportWMSasTif(self.iface)
             return pyramid_exporter.export(raster_layer.name())
 
-        except None as exception:
-            print exception
+        except AttributeError as NoneException:
+            print NoneException
             return None
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):
@@ -401,13 +401,9 @@ class OpenEQuarterMain:
                     clipped_layers.append(self.clip_from_raster(clipping_raster))
 
                 return clipped_layers
-        except None as exception:
-            print exception
+        except AttributeError as NoneException:
+            print NoneException
             return None
-
-    def load_housing_layer(self):
-        # ToDo
-        return
 
     def add_housing_coordinates(self):
         # ToDo
@@ -425,7 +421,7 @@ class OpenEQuarterMain:
     def handle_project_created(self):
         # if no project exists, create one first
         self.create_project_ifNotExists()
-        self.project_path = QgsProject.instance().readPath('./')
+        self.project_path = os.path.normpath(QgsProject.instance().readPath('./'))
 
         # if project was created stop execution
         if self.project_path != './':

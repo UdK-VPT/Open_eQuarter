@@ -86,7 +86,7 @@ class ExportWMSasTif:
 
             if not raster_url:
                 #ToDo
-                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Url is missing.')
+                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Url of raster "{}" is missing.'.format(clipped_raster_name))
                 return None
 
             crs = raster_layer_interaction.get_wms_crs(export_layer)
@@ -94,7 +94,7 @@ class ExportWMSasTif:
             #ToDo replace with proper check
             if not QgsCoordinateReferenceSystem(crs).toProj4():
                 #ToDo
-                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Crs is missing.')
+                QMessageBox.information(self.iface.mainWindow(), 'Error', 'Crs of raster "{}" is missing.'.format(clipped_raster_name))
                 return None
 
             current_crs = self.canvas.mapSettings().destinationCrs()
@@ -110,7 +110,7 @@ class ExportWMSasTif:
 
             return layer_name
 
-    def create_multiple_rasters(self, layer, extent, geo_ref = False, pyramids = 0):
+    def create_multiple_rasters(self, layer, extent, geo_ref=False, pyramids=0):
         """
         Calculate the amount and the resolution of the pyramids based on the number of pyramids requested
         :param extent: The canvas-extent from which the layer will be clipped
@@ -127,12 +127,9 @@ class ExportWMSasTif:
         extent_width = extent.width()
         extent_height = extent.height()
         crs = raster_layer_interaction.get_wms_crs(layer)
-        # extent_width = numpy.float64(numpy.abs(self.lrx) - numpy.abs(self.ulx))
-        # extent_height = numpy.float64(numpy.abs(self.uly) - numpy.abs(self.lry))
 
         # calculate the missing value (width or height) of the output file, based on the extent
         resolution = dict()
-
         if extent_width >= extent_height:
             height_as_dec = self.max_res / extent_width * extent_height
             resolution['width'] = self.max_res
@@ -145,9 +142,9 @@ class ExportWMSasTif:
         # append the resolution to the filename and call the save method
         resolution_postfix = '-{}_{}'.format(resolution['width'], resolution['height'])
         export_name = self.export_name + resolution_postfix
-        path_to_file = QgsProject.instance().readPath('./')
+        path_to_file = os.path.normpath(QgsProject.instance().readPath('./'))
         filename = os.path.join(path_to_file, export_name)
-        filename = layer_interaction.save_layer_as_image(layer, extent, filename)
+        filename = layer_interaction.save_layer_as_image(layer, extent, filename, self.max_res)
 
         # check if the image was saved to disk
         if not filename or filename.isspace():
@@ -187,7 +184,7 @@ class ExportWMSasTif:
             # once the layer was created, open in QGIS
             recent_file = os.path.splitext(filename)[0]
             recent_file_name = recent_file + '_geo.tif'
-            recent_file_desc_name = recent_file.split('/')[-1]
+            recent_file_desc_name = recent_file.split(os.path.sep)[-1]
 
             no_timeout = 50
             while not os.path.exists(recent_file_name) and no_timeout:

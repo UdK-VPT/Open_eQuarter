@@ -36,7 +36,10 @@ class ColorEntryManager():
                     with open(out_path, 'w', encoding='utf-8') as json_outfile:
                         json_string = json.dumps(color_dict, ensure_ascii=False)
                         json_outfile.write(unicode(json_string))
+
+                    return os.path.exists(out_path)
                 except IOError, Error:
+                    return False
                     print(Error)
 
 

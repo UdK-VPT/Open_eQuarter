@@ -405,10 +405,6 @@ class OpenEQuarterMain:
             print NoneException
             return None
 
-    def add_housing_coordinates(self):
-        # ToDo
-        return
-
     # step 0.0
     def handle_ol_plugin_installed(self):
         return plugin_interaction.get_plugin_ifexists(self.ol_plugin_name) is not None
@@ -493,6 +489,8 @@ class OpenEQuarterMain:
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name())
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name(), 'off')
                 disk_layer.setLayerName(self.investigation_shape_layer_name)
+                self.iface.setActiveLayer(disk_layer)
+                self.iface.actionZoomToLayer().trigger()
         except AttributeError, NoneTypeError:
             print('The "Investigation Area"-layer could not be saved to disk:')
             print(NoneTypeError)
@@ -515,18 +513,34 @@ class OpenEQuarterMain:
                 layer_interaction.edit_housing_layer_attributes(out_layer)
             return intersection_done
 
+    # step 2.1
+    def handle_building_coordinates_loaded(self):
+        # ToDo
+        return True
+
     # step 3.0
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
-        investigation_raster_layer = layer_interaction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name)
+        raster_layers = []
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'Building height'))
 
-        if investigation_raster_layer is not None and investigation_raster_layer.isValid():
-            layer_interaction.add_layer_to_registry(investigation_raster_layer)
-            self.iface.setActiveLayer(investigation_raster_layer)
-            return True
-        else:
+        raster_loaded = False
+        for raster in raster_layers:
+            print raster
+            try:
+                if raster.isValid():
+                    layer_interaction.add_layer_to_registry(raster)
+                    self.iface.setActiveLayer(raster)
+                    raster_loaded = True
+            except AttributeError as NoneTypeError:
+                print(__name__, NoneTypeError)
+
+        if not raster_loaded:
             self.iface.actionAddWmsLayer().trigger()
-            return True
+
+        # returns True, since either the clipped raster was loaded or the add-raster-menu was opened
+        return True
 
     # step 3.1
     def handle_extent_clipped(self):
@@ -583,11 +597,14 @@ class OpenEQuarterMain:
             out_path = os.path.dirname(layer.publicSource())
             out_path = os.path.join(out_path, layer.name() + '.txt')
             self.color_picker_dlg.update_color_values()
-            self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
+            self.iface.actionPan().trigger()
+            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
+            if entry_written:
+                QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+                return True
         else:
             self.color_picker_dlg.__init__()
-
-        self.iface.actionPan().trigger()
+            self.iface.actionPan().trigger()
 
     # step 4.0
     def handle_temp_pointlayer_created(self):

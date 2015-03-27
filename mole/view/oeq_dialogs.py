@@ -383,10 +383,19 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             city_name = _fromUtf8(municipal['NAME'])
             self.location_city.setText(city_name)
 
-        pop_dens = '{}'.format(municipal['POP_DENS'])
-        avg_yoc = '{}'.format(municipal['AVG_YOC'])
-        self.average_build_year.setText(avg_yoc)
-        self.population_density.setText(pop_dens)
+        try:
+            pop_dens = '{}'.format(municipal['POP_DENS'])
+            self.population_density.setText(pop_dens)
+        except KeyError as Error:
+            print(__name__, Error)
+
+        try:
+            avg_yoc = '{}'.format(municipal['AVG_YOC'])
+            self.average_build_year.setText(avg_yoc)
+        except KeyError as Error:
+            print(__name__, Error)
+
+
 
     def combobox_city_layout(self):
         location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')

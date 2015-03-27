@@ -390,7 +390,7 @@ def intersect_shapefiles(shape1, shape2, output_path):
         if shape1.isValid() and shape2.isValid():
             analyser = QgsOverlayAnalyzer()
             progress = QProgressDialog()
-            info = QLabel('Intersecting layers')
+            info = QLabel('Intersecting floor plan with investigation layer.\nThis may take up to 30 seconds.')
             progress.setLabel(info)
             progress.setMinimum(0)
             progress.setMaximum(100)

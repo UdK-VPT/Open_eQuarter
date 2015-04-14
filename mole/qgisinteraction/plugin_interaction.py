@@ -85,6 +85,7 @@ class PstInteraction(object):
     def select_files_for_sampling(self):
 
         sample_list = self.pst_dialog.inData
+        fields_table = self.pst_dialog.fieldsTable
         number_of_samples = len(sample_list)
 
         # ToDo change the range to full select and eliminate duplicates
@@ -96,7 +97,6 @@ class PstInteraction(object):
 
 
     def start_sampling(self, path_to_layer, layer_name):
-
         if path_to_layer and not path_to_layer.isspace() and \
                 layer_name and not layer_name.isspace():
 

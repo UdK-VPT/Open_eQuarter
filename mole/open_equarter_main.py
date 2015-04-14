@@ -731,9 +731,10 @@ class OpenEQuarterMain:
         test_loader = unittest.TestLoader()
         test_names = test_loader.getTestCaseNames(test_class)
 
+        print(test_names)
         suite = unittest.TestSuite()
         for test_method in test_names:
-            suite.addTest(test_class(test_method, self.iface))
+            suite.addTest(test_class(test_method))
 
         unittest.TextTestRunner(sys.stdout).run(suite)
 

@@ -108,9 +108,9 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
                 color = color[5:-1]
                 colors = color.split(',')
                 color_field.colorize(colors[0], colors[1], colors[2], colors[3])
-                parameter_name.setText(values[0])
-                value_field_one.setText(values[1])
-                value_field_two.setText(values[2])
+                parameter_name.setText(str(values[0]))
+                value_field_one.setText(str(values[1]))
+                value_field_two.setText(str(values[2]))
                 self.add_row()
 
         except KeyError, Error:

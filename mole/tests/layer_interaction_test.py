@@ -1,40 +1,32 @@
-from unittest import TestCase
 from os import path, remove, walk
+import sys
+import unittest
 
-from qgis.core import QgsApplication, QgsProviderRegistry, QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
-from PyQt4 import QtCore
-
+from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
+from qgis.utils import iface
 from mole.qgisinteraction import layer_interaction
-from qgis_test_interface import QgisTestInterface
+from qgis_interface import set_up_interface
 
-
-class LayerInteraction_test(TestCase):
-
-    def __init__(self, testName, iface = QgisTestInterface()):
-        super(LayerInteraction_test, self).__init__(testName)
-        self.iface = iface
-        self.layer_list = []
-        self.valid_wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
+class LayerInteraction_test(unittest.TestCase):
 
     def setUp(self):
-        QgsApplication.setPrefixPath('/Applications/QGIS.app/Contents/MacOS', True)
-        QgsApplication.initQgis()
-
-        if len(QgsProviderRegistry.instance().providerList()) == 0:
-            raise RuntimeError('No data providers available.')
+        if iface is None:
+            self.qgis_app, self.canvas, self.iface = set_up_interface()
+        else:
+            self.iface = iface
 
         self.layer_list = []
-
-        QtCore.QCoreApplication.setOrganizationName('QGIS')
-        QtCore.QCoreApplication.setApplicationName('QGIS2')
+        self.valid_wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
 
     def tearDown(self):
         for layer_name in self.layer_list:
             layer = QgsMapLayerRegistry.instance().mapLayersByName(layer_name)
             if( len(layer) == 1):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer[0].id())
-        QgsApplication.exitQgis
 
+        if iface is None:
+            del(self.qgis_app)
+        
     def test_create_temporary_layer(self):
 
         layer_name = layer_type = ''
@@ -65,12 +57,14 @@ class LayerInteraction_test(TestCase):
         layer = QgsVectorLayer('Polygon?crs=EPSG:3857', layer_name, 'memory', False)
 
         number_of_layers = len(QgsMapLayerRegistry.instance().mapLayers())
-
         layer_interaction.add_layer_to_registry(layer)
         self.layer_list.append(layer.name())
 
         map_layers = QgsMapLayerRegistry.instance().mapLayers()
-        self.assertEqual(len(map_layers), number_of_layers + 1, 'An error occured when adding a layer to the MapLayerRegistry.')
+        actual = len(map_layers)
+        expected = number_of_layers + 1
+        message = 'An error occured when adding a layer to the MapLayerRegistry. {} is not {}!'.format(actual, expected)
+        self.assertEqual(actual, expected, message)
 
         layer_added = False
         for layer_key in map_layers:
@@ -80,11 +74,8 @@ class LayerInteraction_test(TestCase):
                 break
 
         self.assertTrue(layer_added, 'An error occured when adding a layer to the MapLayerRegistry.')
-
         number_of_layers = len(map_layers)
-
         layer_interaction.add_layer_to_registry(None)
-
         self.assertEqual(len(QgsMapLayerRegistry.instance().mapLayers()), number_of_layers, 'An error occured when trying to add a none-type-layer to the MapLayerRegistry. The number of layers should not increase.')
 
     def test_find_layer_by_name(self):
@@ -211,12 +202,12 @@ class LayerInteraction_test(TestCase):
         wms_url_with_parameters = self.valid_wms_url
         # use this list for proper testing...
         visibility = [True, False, True, True, True, False]
-        # when debuggng, use the list below instead
+        # when debugging, use the list below instead
         # visibility = [True]
 
 
         for i, visible in enumerate(visibility):
-            layer_name = layer_interaction.biuniquify_layer_name('r{0}_visible:{1}'.format(i, visible))
+            layer_name = layer_interaction.biuniquify_layer_name('r{}_visible:{}'.format(i, visible))
             rlayer = QgsRasterLayer(wms_url_with_parameters, layer_name, 'wms')
             self.assertTrue(rlayer.isValid(), layer_name.join(' is not a valid raster layer'))
             QgsMapLayerRegistry.instance().addMapLayer(rlayer)
@@ -293,10 +284,9 @@ class LayerInteraction_test(TestCase):
 
         self.iface.setActiveLayer(inactive_layer)
         self.assertEqual(inactive_layer, self.iface.activeLayer(), 'The layer \"{}\" has not been activated'.format(inactive_layer_name))
-        layer_interaction.zoom_to_layer(self.iface, zoom_layer_name)
-
-        # if the passed zoom_layer was set active, it has been found and used as the basis for the zoom
+        # if the given zoom_layer was set active, it has been found and used as the basis for the zoom
         # in that case, the formerly activated layer has to be inactive now!
+        layer_interaction.zoom_to_layer(self.iface, zoom_layer_name)
         self.assertEqual(zoom_layer, self.iface.activeLayer())
         self.assertNotEqual(inactive_layer, self.iface.activeLayer())
 
@@ -354,5 +344,5 @@ class LayerInteraction_test(TestCase):
     def test_gdal_warp_layer_list(self):
         pass
 
-
-
+if __name__ == '__main__':
+    unittest.main()

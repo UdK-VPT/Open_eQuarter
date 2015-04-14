@@ -1,0 +1,39 @@
+Wichtige Informationen zum GV100:
+
+Bei den Angaben zur Fläche und Bevölkerung handelt es sich um
+fortgeschriebene Daten zum Stand am 31.12.2010 (Jahr).
+ABWEICHUNGEN hierzu sind bei den Gemeinden möglich,
+deren Fläche und/oder Bevölkerung im Zuge einer Gebietsänderung
+verändert wurde(n).
+ABWEICHUNGEN bei den Flächenangaben sind durch Runden der Zahlen möglich.
+
+Bitte beachten Sie auch, dass sich zum 01.01.2009 
+der Regionalschlüssel (RS) geändert hat.
+Der Amtliche Gemeindeschlüssel (AGS) bleibt 
+hiervon unberührt.
+
+Die bundeseinheitliche Verschlüsselung bezieht sich 
+auf die Schlüsselstellen 6 bis 9 des Regionalschlüssels 
+und regelt die Zugehörigkeit der Gemeinden zu sog. 
+Gemeindeverbänden und unterscheidet verbandsangehörige 
+sowie verbandsfreie Gemeinden und gemeindefreie Gebiete.
+
+Mit der künftigen Verschlüsselung soll die flächendeckende 
+Abgrenzung bzw. Ermittlung der Gemeindeverbandsebene 
+in der statistischen Aufbereitung erreicht werden. Hierzu 
+wird auch für die Gemeinden ein Schlüssel in den Stellen 
+6 bis 9 vergeben, der <> 0000 ist, da diese künftig, 
+in Ländern, die nicht über eine Einteilung in Gemeindeverbände 
+verfügen, wie ein eigener Gemeindeverband behandelt werden. 
+
+Die Unterscheidung, ob eine Gemeinde einem Gemeindeverband 
+angehört oder nicht, oder ob es sich um ein gemeindefreies 
+Gebiet handelt, wird in der Schlüsselstelle 6 des 
+Regionalschlüssels, dem sog. t-Kennzeichen vorgenommen.
+
+Hierbei bedeutet: 
+
+t = 0 Verbandsfreie Gemeinde
+t = 5 Verbandsangehörige Gemeinde
+t = 9 Gemeindefreies Gebiet
+

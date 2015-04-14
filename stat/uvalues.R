@@ -1,7 +1,39 @@
 
+#######################################################################################
+#
+# Project:      Open eQuarter 
+#
+# Part:         STAT: Datamining Toolbox / U-Value Database
+#
+# Status:       Active
+#
+# Author:       Werner Kaul
+#
+# Date:         21.10.2014
+#
+# Descrription: 
+# The Open eQuarter Stat tries to find correlations between building specific parameters 
+# and very general demographic facts In the run-up the basic statistical data have to 
+# be imported and reviewed.
+# Here we use data from the IWU Institute, which have to be already sorted and formatted 
+# in advance and saved as .csv. On run the depending databases 
+#    - database/oeq_uvalues_roof.RData
+#    - database/oeq_uvalues_base.RData
+#    - database/oeq_uvalues_wall.RData
+# will be generated if not already present. 
+# 
+# In addition this file provides some functions to extract u-values of a component wall,
+# roof or base for a given year of construction
+#
+# Base files in: csv_Gebmod_OeQ/U Values Wall-Heat Demand Wall.csv
+#                csv_Gebmod_OeQ/U Values Roof-Heat Demand Roof.csv
+#                csv_Gebmod_OeQ/U Values Ground-U Values Ground.csv
+#
+#######################################################################################
 
-
+# check if the wall uvalues database exists
 if(!(file.exists("database/oeq_uvalues_wall.RData", showWarnings = FALSE)[1])){
+  # if not generate it from the basefile
   oeq_uvalues_wall_src=read.csv2(AS_choose.file("Select UValues Data for Walls"),stringsAsFactors=FALSE,encoding="latin1",dec=",")
   oeq_uvalues_wall_src=oeq_uvalues_wall_src[-nrow(oeq_uvalues_wall_src),]
   oeq_uvalues_wall_src=apply(oeq_uvalues_wall_src,c(1,2),force.numeric)
@@ -52,7 +84,7 @@ uvalue_of_wall<-function(year=NULL){
 }
 
 
-
+# check if the roof uvalues database exists
 if(!(file.exists("database/oeq_uvalues_roof.RData", showWarnings = FALSE)[1])){
   oeq_uvalues_roof_src=read.csv2(AS_choose.file("Select UValues Data for Roofs"),stringsAsFactors=FALSE,encoding="latin1",dec=",")
   oeq_uvalues_roof_src=oeq_uvalues_roof_src[-nrow(oeq_uvalues_roof_src),]
@@ -111,7 +143,7 @@ uvalue_of_roof<-function(year=NULL){
   return(l.out[,-1])
 }
 
-
+# check if the base uvalues database exists
 if(!(file.exists("database/oeq_uvalues_base.RData", showWarnings = FALSE)[1])){
   oeq_uvalues_base_src=read.csv2(AS_choose.file("Select UValues Data for Bases"),stringsAsFactors=FALSE,encoding="latin1",dec=",")
   oeq_uvalues_base_src=oeq_uvalues_base_src[-nrow(oeq_uvalues_base_src),]

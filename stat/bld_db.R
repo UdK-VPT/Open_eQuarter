@@ -27,8 +27,8 @@
 #
 #######################################################################################
 # basic includes
-#source("init.R")
-#source("mun_db.R")
+source("init.R")
+source("mun_db.R")
 
 #defining groups for gui 
 BLD_GROUPS=c("BUILDINGS_BY_TYPE","BUILDINGS_BY_TYPE1","BUILDINGS_BY_TYPE2","BUILDINGS_BY_AGE1","BUILDINGS_BY_AGE2","BUILDINGS_BY_OWNER","BUILDINGS_BY_HEATSYS",
@@ -146,6 +146,7 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
 #defining corresponding datagroups (first ist always the sum of the others)
 BUILDINGS_BY_NOFLATS=c("BLD_NOFLAT_TOTAL","BLD_NOFLAT_1","BLD_NOFLAT_2","BLD_NOFLAT_3TO6","BLD_NOFLAT_7TO12","BLD_NOFLAT_MTH13")
 BUILDINGS_BY_NOFLATS_LIMITS=list(KEY=15000,BLD_NOFLAT_1=0,BLD_NOFLAT_2=0,BLD_NOFLAT_3TO6=0.40,BLD_NOFLAT_7TO12=0.40,BLD_NOFLAT_MTH13=0.20)
+BUILDINGS_BY_NOFLATS_WEIGHTS=list(1,2,4.5,9.5,20)
 #adding verbose. VERBOSE is initialized in mun.db.R
 VERBOSE= as.data.frame(rbind(VERBOSE,
                              BUILDINGS_BY_NOFLATS=list(label="",unit="",info="Bld w Hous by Flats",title="Buildings w/ housing by number of flats",description="Buildings with housing by number of flats"),

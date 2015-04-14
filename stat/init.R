@@ -18,10 +18,16 @@
 # basic includes
 library(ASdialogs)  # Basic System dialogs for Mac
 library(R.oo)       # Support for object oriented programming in R 
+library(inlinedocs) # Inlinedocumentation Tool
 library(KernSmooth) # Support for Smooth distribution plots in R 
 
 # output palette definitions
-#source('config/plotpalettes.R')
+source('config/plotpalettes.R')
+
+# pathdefinition export
+CORR_PY_EXPORT_PATH="../mole/stat_corr"
+CORR_R_EXPORT_PATH="stat_corr"
+PDF_PATH="pdfout"
 
 #basic Verbose
 VERBOSE= as.data.frame(rbind(DISTR_PLOT_TITLE=list(label="",unit="",info="Distribution review",title="Distribution Check",description=""),

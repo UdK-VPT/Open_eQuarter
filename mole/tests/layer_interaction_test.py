@@ -141,7 +141,7 @@ class LayerInteraction_test(unittest.TestCase):
         v_layer_name = layer_interaction.biuniquify_layer_name('MyWriteTestLayer')
         v_layer = QgsVectorLayer('Polygon?crs=EPSG:3857', v_layer_name, 'memory', False)
 
-        test_path = path.join('/', 'Users', 'VPTtutor', 'Desktop', v_layer_name)
+        test_path = path.join('./', v_layer_name)
 
 
         if path.exists(test_path + '.shp'):

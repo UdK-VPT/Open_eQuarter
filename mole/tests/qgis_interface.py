@@ -13,6 +13,7 @@
      Copyright (c) 2014 Tim Sutton, tim@linfiniti.com
 
 """
+from qgis._core import QgsVectorLayer
 
 __author__ = 'tim@linfiniti.com'
 __revision__ = '$Format:%H$'
@@ -25,11 +26,13 @@ __copyright__ = (
 
 from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QCoreApplication, QSize
 from PyQt4.QtGui import QWidget
-from qgis.core import QgsMapLayerRegistry, QgsApplication
+from qgis.core import QgsMapLayerRegistry, QgsApplication, QgsVectorLayer
 from qgis.gui import QgsMapCanvasLayer, QgsMapCanvas
 
 import logging
 import sys
+
+from mole import config
 
 LOGGER = logging.getLogger('QGIS')
 
@@ -47,14 +50,16 @@ def set_up_interface():
     """
     gui_flag = True  # All test will run qgis in gui mode
     qgis_app = QgsApplication(sys.argv, gui_flag)
-    qgis_app.setPrefixPath('/Applications/QGIS.app/Contents/MacOS', True)
+    prefix_path = config.qgis_prefix_path()
+    qgis_app.setPrefixPath(prefix_path, True)
     qgis_app.initQgis()
     QCoreApplication.setOrganizationName('QGIS')
     QCoreApplication.setApplicationName('QGIS2')
 
-    parent = QWidget()
-    canvas = QgsMapCanvas(parent)
-    canvas.resize(QSize(400, 400))
+    # parent = QWidget()
+    # canvas = QgsMapCanvas(parent)
+    # canvas.resize(QSize(400, 400))
+    canvas = MyMapCanvas()
 
     iface = QgisInterface(canvas)
 
@@ -81,7 +86,7 @@ class QgisInterface(QObject):
         # are added.
         LOGGER.debug('Initialising canvas...')
         # noinspection PyArgumentList
-        QgsMapLayerRegistry.instance().layersAdded.connect(self.addLayers)
+        QgsMapLayerRegistry.instance().layersAdded.connect(self.addLayer)
         # noinspection PyArgumentList
         QgsMapLayerRegistry.instance().layerWasAdded.connect(self.addLayer)
         # noinspection PyArgumentList
@@ -90,27 +95,6 @@ class QgisInterface(QObject):
         # For processing module
         self.destCrs = None
 
-    @pyqtSlot('QStringList')
-    def addLayers(self, layers):
-        """Handle layers being added to the registry so they show up in canvas.
-
-        :param layers: list<QgsMapLayer> list of map layers that were added
-
-        .. note:: The QgsInterface api does not include this method,
-            it is added here as a helper to facilitate testing.
-        """
-        #LOGGER.debug('addLayers called on qgis_interface')
-        #LOGGER.debug('Number of layers being added: %s' % len(layers))
-        #LOGGER.debug('Layer Count Before: %s' % len(self.canvas.layers()))
-        current_layers = self.canvas.layers()
-        final_layers = []
-        for layer in current_layers:
-            final_layers.append(QgsMapCanvasLayer(layer))
-        for layer in layers:
-            final_layers.append(QgsMapCanvasLayer(layer))
-
-        self.canvas.setLayerSet(final_layers)
-        #LOGGER.debug('Layer Count After: %s' % len(self.canvas.layers()))
 
     @pyqtSlot('QgsMapLayer')
     def addLayer(self, layer):
@@ -125,6 +109,11 @@ class QgisInterface(QObject):
                  not need this method much.
         """
         # set the recently added layer as active
+        # LOGGER.debug('Layer Count Before: %s' % len(self.canvas.layers()))
+        current_layers = self.canvas.layers()
+        final_layers = [] + current_layers
+        final_layers.append(QgsMapCanvasLayer(layer))
+        self.canvas.setLayerSet(final_layers)
         self.active_layer = layer
 
     @pyqtSlot()
@@ -271,3 +260,22 @@ class MyLegendInterface(object):
         except KeyError:
             print('Layer {} has not been set (in)visible yet.'.format(layer.name()))
             return False
+
+
+class MyMapCanvas(object):
+
+    def __init__(self):
+        self.layer_set = []
+
+    def layers(self):
+        return self.layer_set
+
+    def layer(self, index):
+        layer = self.layer_set[index].layer()
+        return layer
+
+    def setLayerSet(self, layer_set):
+        self.layer_set = layer_set
+
+    def layerCount(self):
+        return len(self.layer_set)

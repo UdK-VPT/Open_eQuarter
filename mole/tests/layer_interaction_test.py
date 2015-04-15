@@ -1,5 +1,4 @@
 from os import path, remove, walk
-import sys
 import unittest
 
 from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
@@ -143,7 +142,6 @@ class LayerInteraction_test(unittest.TestCase):
 
         test_path = path.join('./', v_layer_name)
 
-
         if path.exists(test_path + '.shp'):
             appendix = 0
             temp_path = test_path
@@ -158,7 +156,6 @@ class LayerInteraction_test(unittest.TestCase):
 
         return_layer = layer_interaction.write_vector_layer_to_disk(v_layer, invalid_path)
         self.assertIsNone(return_layer)
-
         return_layer = layer_interaction.write_vector_layer_to_disk(None, invalid_path)
         self.assertIsNone(return_layer)
 
@@ -172,12 +169,14 @@ class LayerInteraction_test(unittest.TestCase):
         self.assertEqual(return_layer.name(), v_layer_name + '1')
         self.assertTrue(path.exists(test_path + '1.shp'))
 
-
         test_dir = path.dirname(test_path)
         for subdir, dirs, files in walk(test_dir):
             for file in files:
                 if file.startswith(v_layer_name) or file.startswith(v_layer_name + '1'):
-                    remove(path.join(test_dir, file))
+                    try:
+                        remove(path.join(test_dir, file))
+                    except:
+                        print('\tTest layer could not be deleted.')
 
     def test_add_style_to_layer(self):
         pass

@@ -23,9 +23,7 @@ def get_plugin_ifexists(plugin_name):
 
 class PstInteraction(object):
 
-    def __init__(self, plugin, iface, plugin_name='pointsamplingtool'):
-
-        self.point_sampling_tool = plugin
+    def __init__(self, iface, plugin_name='pointsamplingtool'):
         self.plugin_folder = path.dirname(sys.modules[plugin_name].__file__)
 
         # if the pst is not part of the path, add it to the path, so the modules can be imported
@@ -59,8 +57,6 @@ class PstInteraction(object):
                 while in_layer.currentText() != layer_name:
                     index += 1
                     in_layer.setCurrentIndex(index)
-
-                print in_layer.currentText()
 
     # def set_output_layer(self, path_to_layer, encoding, crs_name):
     #

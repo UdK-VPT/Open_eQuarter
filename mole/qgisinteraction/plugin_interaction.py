@@ -24,11 +24,14 @@ def get_plugin_ifexists(plugin_name):
 class PstInteraction(object):
 
     def __init__(self, iface, plugin_name='pointsamplingtool'):
-        self.plugin_folder = path.dirname(sys.modules[plugin_name].__file__)
-
-        # if the pst is not part of the path, add it to the path, so the modules can be imported
-        if self.plugin_folder not in sys.path:
-            sys.path.insert(0, self.plugin_folder)
+        if isinstance(plugin_name, str):
+            try:
+                self.plugin_folder = path.dirname(sys.modules[plugin_name].__file__)
+                # if the pst is not part of the path, add it to the path, so the modules can be imported
+                if self.plugin_folder not in sys.path:
+                    sys.path.insert(0, self.plugin_folder)
+            except KeyError:
+                print(KeyError, plugin_name)
 
         from doPointSamplingTool import Dialog
 
@@ -48,15 +51,10 @@ class PstInteraction(object):
                     layer_available = True
 
             if layer_available:
-                index = 0
                 # drop down menu, listing all available layers
                 in_layer = self.pst_dialog.inSample
+                index = in_layer.findText(layer_name)
                 in_layer.setCurrentIndex(index)
-
-                # while the given layer is not active, iterate over the menu
-                while in_layer.currentText() != layer_name:
-                    index += 1
-                    in_layer.setCurrentIndex(index)
 
     # def set_output_layer(self, path_to_layer, encoding, crs_name):
     #

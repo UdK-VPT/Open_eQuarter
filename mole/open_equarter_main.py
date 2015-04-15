@@ -634,8 +634,7 @@ class OpenEQuarterMain:
 
     # step 4.4
     def handle_information_sampled(self):
-        pst_plugin = plugin_interaction.get_plugin_ifexists(self.pst_plugin_name)
-        psti = PstInteraction(pst_plugin, iface)
+        psti = PstInteraction(iface, self.pst_plugin_name)
 
         psti.set_input_layer(self.pst_input_layer_name)
         psti.select_files_for_sampling()

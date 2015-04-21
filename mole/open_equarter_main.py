@@ -40,6 +40,7 @@ from qgisinteraction import plugin_interaction
 from qgisinteraction.plugin_interaction import PstInteraction, OlInteraction
 from qgisinteraction import layer_interaction
 from qgisinteraction import raster_layer_interaction
+from qgisinteraction import project_interaction
 from ExportWMSasTif import ExportWMSasTif
 from tests import layer_interaction_test
 
@@ -154,9 +155,18 @@ class OpenEQuarterMain:
         self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
 
     def update_layer_positions(self):
-        layer_interaction.move_layer_to_position(self.iface, self.investigation_shape_layer_name, 0)
-        layer_interaction.move_layer_to_position(self.iface, self.housing_coordinate_layer_name, 1)
-        layer_interaction.move_layer_to_position(self.iface, self.housing_layer_name, 2)
+        position = -1
+        if layer_interaction.find_layer_by_name(self.investigation_shape_layer_name):
+            position += 1
+            layer_interaction.move_layer_to_position(self.iface, self.investigation_shape_layer_name, position)
+
+        if layer_interaction.find_layer_by_name(self.housing_coordinate_layer_name):
+            position += 1
+            layer_interaction.move_layer_to_position(self.iface, self.housing_coordinate_layer_name, 1)
+
+        if layer_interaction.find_layer_by_name(self.housing_layer_name):
+            position += 1
+            layer_interaction.move_layer_to_position(self.iface, self.housing_layer_name, 2)
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -215,20 +225,15 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        # read the current project path
-        self.project_path = QgsProject.instance().readPath('./')
-
-        # if the path is './', the project has not yet been saved
-        if self.project_path == './':
-
+        if not project_interaction.project_exists():
             # prompt the user to save the project
             self.project_does_not_exist_dlg.show()
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
-                # trigger qgis "Save As"-function
                 self.get_default_extent_by_zip_code()
                 iface.actionSaveProjectAs().trigger()
+                self.project_path = QgsProject.instance().readPath('./')
 
     def osm_layer_is_loaded(self):
         """

@@ -52,17 +52,11 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
 
-    def add_color(self, color, name = '', value1=0, value2=0):
+    def add_color(self, color):
         """
         Insert a new color (and the values associated to it, if any), into the color-table. Append a new row, afterwards.
         :param color: The color in RGBa
         :type color: QColor
-        :param name: The parameter name
-        :type name: str
-        :param value1: Lower bound
-        :type value1: int
-        :param value2: Upper bound
-        :type value2: int
         :return:
         :rtype:
         """
@@ -75,22 +69,17 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
         else:
             self.warning_label.clear()
-            self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, name, 0, 0), layer)
+            self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, '', 0, 0), layer)
 
             last_row = self.row_count - self.row_offset
             color_field = self.color_table.itemAtPosition(last_row, 1).widget()
-            parameter_name = self.color_table.itemAtPosition(last_row, 2).widget()
-            value_field_one = self.color_table.itemAtPosition(last_row, 3).widget()
-            value_field_two = self.color_table.itemAtPosition(last_row, 4).widget()
-
             color_field.setText(color_key)
             color_field.colorize(color.red(), color.green(), color.blue(), color.alpha())
-            if value_field_one.text().isspace():
-                value_field_one.setText(str(value1))
-            if value_field_two.text().isspace():
-                value_field_two.setText(str(value2))
-            if parameter_name.text().isspace():
-                parameter_name.setText(name)
+
+            # Hence each color-pair is likely to describe the same parameter, the name (text) of the above cell is inserted
+            parameter_above = self.color_table.itemAtPosition(last_row-1, 2).widget()
+            parameter_current = self.color_table.itemAtPosition(last_row, 2).widget()
+            parameter_current.setText(parameter_above.text())
 
             self.add_row()
 

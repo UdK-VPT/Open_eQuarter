@@ -637,7 +637,7 @@ class OpenEQuarterMain:
         psti = PstInteraction(iface, self.pst_plugin_name)
 
         psti.set_input_layer(self.pst_input_layer_name)
-        psti.select_files_for_sampling()
+        psti.select_and_rename_files_for_sampling()
 
         pst_output_layer = psti.start_sampling(self.project_path, self.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")

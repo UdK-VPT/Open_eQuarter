@@ -39,16 +39,9 @@ class PstInteraction(object):
         self.path_to_output_layer = ''
 
     def set_input_layer(self, layer_name):
-
         if layer_name is not None and not layer_name.isspace():
-
-            layer_available = False
-            layer_dict = QgsMapLayerRegistry.instance().mapLayers()
-            for layer_key in layer_dict:
-                layer = layer_dict[layer_key]
-
-                if layer.name() == layer_name:
-                    layer_available = True
+            layer_registry = QgsMapLayerRegistry.instance()
+            layer_available = layer_registry.mapLayersByName(layer_name)
 
             if layer_available:
                 # drop down menu, listing all available layers
@@ -56,44 +49,55 @@ class PstInteraction(object):
                 index = in_layer.findText(layer_name)
                 in_layer.setCurrentIndex(index)
 
-    # def set_output_layer(self, path_to_layer, encoding, crs_name):
-    #
-    #     if path_to_layer is not None and not path_to_layer.isspace() and not path.exists(path_to_layer):
-    #
-    #         if (encoding is not None and not encoding.isspace()) and \
-    #                 (crs_name is not None and QgsCoordinateReferenceSystem().createFromUserInput(crs_name)):
-    #
-    #             out_path, out_name = path.split(path_to_layer)
-    #             if out_name.upper().endswith('.SHP'):
-    #                 out_name = out_name[:-4]
-    #
-    #             full_path = path.join(out_path, out_name + '.shp')
-    #
-    #             vlayer = QgsVectorLayer('Point?crs=EPSG:4326', 'pas_out2', 'memory', False)
-    #             return_code = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, QgsCoordinateReferenceSystem(crs_name), 'ogr')
-    #
-    #             if return_code == QgsVectorFileWriter.NoError:
-    #                 QgsMapLayerRegistry.instance().addMapLayer(vlayer)
-    #                 self.path_to_output_layer = full_path
-
-    def select_files_for_sampling(self):
-
+    def select_and_rename_files_for_sampling(self):
+        """
+        Select all available layers for the point sampling and rename multiple occurrences of the same name.
+        Prepend an index, to separate the layers and append the information, which color value is displayed.
+        :return plugin: Return the plugin if it was found or None otherwise
+        :rtype: plugin instance
+        """
         sample_list = self.pst_dialog.inData
-        fields_table = self.pst_dialog.fieldsTable
+        table = self.pst_dialog.fieldsTable
         number_of_samples = len(sample_list)
 
-        # ToDo change the range to full select and eliminate duplicates
-        #for i in range(0, number_of_samples):
+        RGBa_appendix = ['R', 'G', 'B', 'a']
+        RGBa_index = 0
+        last_name = ''
+        prefix = 0
+
+        replacement_map = {}
+
         for i in range(number_of_samples):
-            print sample_list.item(i).text()
+            # select all fields via the inData-view,
+            # so the point sampling tool can manage its model accordingly/appropriately
             sample_list.setItemSelected(sample_list.item(i), True)
 
+            # Get the source-name (as displayed in the field-table) and check if it was used already
+            # (the name has to be split, since it is displayed in the form 'layer_name : Band x' to get the layer_name)
+            layer_name = table.item(i, 0).text().split(' : ')[0]
+            if last_name != layer_name:
+                last_name = layer_name
+                prefix += 1
+                RGBa_index = 0
 
+            # Truncate the name to a maximum of 6 characters, since QGIS limits the length of a feature's name to 10
+            # prepend prefix (with leading zero), truncated name and RGBa RGBa_appendix
+            rgba = RGBa_appendix[RGBa_index]
+            RGBa_index += 1
+            export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+
+            replacement_map[layer_name] = export_name[:-2]
+            # Change the text in the table, so the pst can manage its model accordingly/appropriately
+            table.item(i, 1).setText(export_name)
+
+        return replacement_map
 
     def start_sampling(self, path_to_layer, layer_name):
-        if path_to_layer and not path_to_layer.isspace() and \
-                layer_name and not layer_name.isspace():
 
+        if not path_to_layer or path_to_layer.isspace() or not layer_name or layer_name.isspace():
+            return ''
+
+        else:
             if path.exists(path_to_layer):
 
                 if layer_name.upper().endswith('.SHP'):
@@ -109,13 +113,11 @@ class PstInteraction(object):
 
                     layer_name = new_name
 
-                full_path = path.join(path_to_layer,layer_name + '.shp')
+                full_path = path.join(path_to_layer, layer_name + '.shp')
                 self.pst_dialog.sampling(full_path)
 
                 return full_path
 
-        else:
-            return ''
 
 
 class OlInteraction(object):

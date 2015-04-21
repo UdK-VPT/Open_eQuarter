@@ -61,6 +61,7 @@ def load_layer_from_disk(path_to_layer, name):
     else:
         return None
 
+
 def add_style_to_layer(path_to_style, layer):
     """
     Set the style of the layer to the given style

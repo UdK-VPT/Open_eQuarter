@@ -28,7 +28,7 @@ source('config/plotpalettes.R')
 CORR_PY_EXPORT_PATH="../mole/stat_corr"
 CORR_R_EXPORT_PATH="stat_corr"
 PDF_PATH="pdfout"
-
+CSV_PATH="csvout"
 #basic Verbose
 VERBOSE= as.data.frame(rbind(DISTR_PLOT_TITLE=list(label="",unit="",info="Distribution review",title="Distribution Check",description=""),
                              DISTR_PLOT_XLAB=list(label="Value Ranges [(n,m)]",unit="(n,m)",info="Value Ranges",title="",description=""),

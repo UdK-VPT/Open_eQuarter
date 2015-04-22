@@ -43,6 +43,16 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
                              FLT_DENS=list(label="Density of Flats",unit="[n/km2]",info="Density of Flats",title="Density of flats",description="Density of flats")
 ),stringsAsFactors=FALSE)
 
+#manually defined limits based on visual investigation of the regression results to improve the prediction functions
+#limits for building distribution depending on population density
+BUILDINGS_BY_NOFLATS_LIMITS=list(KEY=15000,BLD_NOFLAT_1=0,BLD_NOFLAT_2=0,BLD_NOFLAT_3TO6=0.40,BLD_NOFLAT_7TO12=0.40,BLD_NOFLAT_MTH13=0.20)
+#limits for building distribution depending on average age of construction
+BUILDINGS_BY_AGE1_LIMITS=list(KEY=2020,BLD_AGE1_BEFORE1919=0,BLD_AGE1_1919TO1949=0,
+                              BLD_AGE1_1950TO1959=0,BLD_AGE1_1960TO1969=0,BLD_AGE1_1970TO1979=0.05,
+                              BLD_AGE1_1980TO1989=0.10,BLD_AGE1_1990TO1999=0.20,BLD_AGE1_2000TO2005=0.30,BLD_AGE1_AFTER2006=0.35)
+
+
+
 #buildings by type
 #defining corresponding datagroups (first ist always the sum of the others)
 BUILDINGS_BY_TYPE=c("BLD_TYPE_TOTAL","BLD_TYPE_ONLY","BLD_TYPE_woDORM","BLD_TYPE_DORM","BLD_TYPE_OTHER")
@@ -65,6 +75,7 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
 #defining corresponding datagroups (first ist always the sum of the others)
 BUILDINGS_BY_AGE1=c("BLD_AGE1_TOTAL","BLD_AGE1_BEFORE1919","BLD_AGE1_1919TO1949","BLD_AGE1_1950TO1959","BLD_AGE1_1960TO1969",
                     "BLD_AGE1_1970TO1979","BLD_AGE1_1980TO1989","BLD_AGE1_1990TO1999","BLD_AGE1_2000TO2005","BLD_AGE1_AFTER2006")
+BUILDINGS_BY_AGE1_WEIGHTS=c(1850,1935,1954.5,1964.5,1974.5,1984.5,1994.5,2002.5,2050)
 
 #adding verbose. VERBOSE is initialized in mun.db.R
 VERBOSE= as.data.frame(rbind(VERBOSE,
@@ -145,7 +156,6 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
 #buildings by number of flats
 #defining corresponding datagroups (first ist always the sum of the others)
 BUILDINGS_BY_NOFLATS=c("BLD_NOFLAT_TOTAL","BLD_NOFLAT_1","BLD_NOFLAT_2","BLD_NOFLAT_3TO6","BLD_NOFLAT_7TO12","BLD_NOFLAT_MTH13")
-BUILDINGS_BY_NOFLATS_LIMITS=list(KEY=15000,BLD_NOFLAT_1=0,BLD_NOFLAT_2=0,BLD_NOFLAT_3TO6=0.40,BLD_NOFLAT_7TO12=0.40,BLD_NOFLAT_MTH13=0.20)
 BUILDINGS_BY_NOFLATS_WEIGHTS=list(1,2,4.5,9.5,20)
 #adding verbose. VERBOSE is initialized in mun.db.R
 VERBOSE= as.data.frame(rbind(VERBOSE,

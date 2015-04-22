@@ -49,6 +49,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.row_offset = 1
         self.row_count = 2
         self.connect(self.remove_entries_0, SIGNAL('remove_entry'), self.remove_entry)
+        self.parameter_name_0.textChanged.connect(self.check_character_constraint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
 
@@ -145,6 +146,8 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
         parameter_name = QLineEdit(self)
         parameter_name.setObjectName('parameter_name_{}'.format(current_row - 1))
+        parameter_name.setMaxLength(10)
+        parameter_name.textChanged.connect(self.check_character_constraint)
         self.color_table.addWidget(parameter_name, current_row, 2, 1, 1)
 
         value_one = QLineEdit(self)
@@ -161,6 +164,12 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.connect(remove_entries, SIGNAL('remove_entry'), self.remove_entry)
         self.color_table.addWidget(remove_entries, current_row, 5, 1, 1)
         self.row_count += 1
+
+    def check_character_constraint(self, parameter_name):
+        if len(parameter_name) == 10 and parameter_name != 'Parameter ':
+            self.warning_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
+        else:
+            self.warning_label.clear()
 
     def remove_entry(self, button):
         """

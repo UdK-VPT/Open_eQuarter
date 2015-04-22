@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_does_not_exist_dialog.ui'
 #
-# Created: Thu Mar 26 10:43:05 2015
+# Created: Wed Apr 22 17:01:57 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -53,5 +53,5 @@ class Ui_ProjectDoesNotExist_dialog(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Lucida Grande\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">Please save your workspace as a project before continuing the process.</span></p></body></html>", None))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">Please save your workspace as a project before calling the Open eQuarter plugin.</span></p></body></html>", None))
 

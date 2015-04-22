@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Thu Mar 26 10:43:06 2015
+# Created: Wed Apr 22 17:01:58 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -143,6 +143,7 @@ class Ui_color_picker_dialog(object):
         self.color_table.addWidget(self.parameter_name_label, 0, 2, 1, 1)
         self.parameter_name_0 = QtGui.QLineEdit(color_picker_dialog)
         self.parameter_name_0.setMinimumSize(QtCore.QSize(190, 0))
+        self.parameter_name_0.setMaxLength(10)
         self.parameter_name_0.setObjectName(_fromUtf8("parameter_name_0"))
         self.color_table.addWidget(self.parameter_name_0, 1, 2, 1, 1)
         self.verticalLayout.addLayout(self.color_table)

@@ -6,7 +6,10 @@ import json
 import mole
 
 class ColorEntryManager():
-
+    """
+    Model for the color picker, which keeps track of the colors which are related to a layer
+    and can save/read these information to/from disk.
+    """
     def __init__(self):
         self.layer_values_map = {}
 
@@ -24,7 +27,7 @@ class ColorEntryManager():
             layer_colors = self.layer_values_map[layer]
             layer_colors[color_key] = value_triple
         except KeyError, Error:
-            print(Error)
+            print(Error.filename + ': ' + Error)
 
     def write_map_to_disk(self, layer_name, out_path):
         if self.layer_values_map.has_key(layer_name):
@@ -40,11 +43,31 @@ class ColorEntryManager():
                     return os.path.exists(out_path)
                 except IOError, Error:
                     return False
-                    print(Error)
+                    print(Error.filename + ': ' + Error)
 
+    def read_color_map_from_disk(self, in_path):
+        file_name = os.path.basename(in_path)
+        layer_name = os.path.splitext(file_name)[0]
+        self.layer_values_map[layer_name] = {}
+
+        result_dict = {}
+        try:
+            json_data = open(in_path)
+            data = json.load(json_data)
+
+            for color, value_list in data.iteritems():
+                result_dict[color] = (value_list[0], value_list[1], value_list[2])
+
+            json_data.close()
+        except IOError, Error:
+            print(Error.filename + ': ' + Error)
+
+        self.set_color_map_of_layer(result_dict, layer_name)
 
 class MunicipalInformationParser():
-
+    """
+    A parser-class to scan a .json file for all municipals with a given postcode.
+    """
     def __init__(self):
         self.municipal = []
 
@@ -72,10 +95,13 @@ class MunicipalInformationParser():
                         print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 
         except IOError, Error:
-            print(Error)
+            print(Error.filename + ': ' + Error)
+
 
 class MunicipalInformationTree():
-
+    """
+    A model which stores all municipal information ordered by postal-code in a tree-like array-structure.
+    """
     def __init__(self):
         self.tree = {}
         mole_path = mole.__file__
@@ -99,7 +125,7 @@ class MunicipalInformationTree():
                             print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 
             except IOError, Error:
-                print(Error)
+                print(Error.filename + ': ' + Error)
         return keys
 
     def split_data_to_tree_model(self):
@@ -133,7 +159,7 @@ class MunicipalInformationTree():
 
 
         except IOError, Error:
-            print(Error)
+            print(Error.filename + ': ' + Error)
 
     def write_tree_to_disk(self, tree):
         pass

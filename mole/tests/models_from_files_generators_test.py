@@ -1,7 +1,9 @@
 # coding=utf-8
-
 import unittest
-import sys, io, json, os
+import sys
+import io
+import json
+import os
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser, MunicipalInformationTree
 
@@ -10,8 +12,16 @@ class ColorEntryManagerTestCase(unittest.TestCase):
 
     def setUp(self):
         self.cem = ColorEntryManager()
-        self.test_dict = { 'RGBa(0, 0, 255, 255)' : ('Fieldname1', 70, 20), 'RGBa(0, 0, 220, 255)' : ('Fieldname2', 70, 20) }
+        self.test_dict = { 'RGBa(0, 0, 255, 255)' : ('Fieldname1', 70, 20), 'RGBa(0, 0, 220, 255)' : ('Fieldname1', 70, 20) }
         self.test_layer = 'my_test_layer'
+
+    def tearDown(self):
+        path = sys.path[0]
+        out_path = os.path.join(path, self.test_layer + '.txt')
+        try:
+            os.remove(out_path)
+        except OSError:
+            pass
 
     def test_dict_can_be_added_to_layer_in_color_entry_manager(self):
         self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
@@ -103,8 +113,31 @@ class ColorEntryManagerTestCase(unittest.TestCase):
             except IOError, Error:
                 print(Error)
 
+    def test_cem_reads_file_from_disk_into_color_entry(self):
+        path = sys.path[0]
+        out_path = os.path.join(path, self.test_layer + '.txt')
 
-class MunicipalInformationParserTestCase(unittest.TestCase):
+        dict = {'RGBa(0, 0, 255, 255)': ('name1', 120, 11)}
+        dict['RGBa(0, 0, 255, 255)'] = ('name1', 131,28)
+        dict['RGBa(123, 21, 255, 255)'] = ('name1', 2,8)
+        dict['RGBa(2, 33, 25, 2)'] = ('name1', 1,4)
+        dict['RGBa(170, 12, 17, 36)'] = ('name1', 12,238)
+
+        try:
+            with io.open(out_path, 'w', encoding='utf-8') as json_outfile:
+                json_string = json.dumps(dict, ensure_ascii=False)
+                json_outfile.write(unicode(json_string))
+        except (IOError, OSError) as Error:
+            self.fail('Could not write test-data due to error: ' + Error)
+
+        self.cem.read_color_map_from_disk(out_path)
+
+        color_map = self.cem.layer_values_map[self.test_layer]
+        self.assertDictEqual(dict, color_map, 'Error when reading a color-map from disk: \n\tReceived: {}\n\tExpected: {}'.format(color_map, dict))
+
+
+
+class MunicipalInformationParserAndTreeTestCase(unittest.TestCase):
 
     def setUp(self):
         self.mip = MunicipalInformationParser()

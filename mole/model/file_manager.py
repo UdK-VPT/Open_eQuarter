@@ -27,7 +27,7 @@ class ColorEntryManager():
             layer_colors = self.layer_values_map[layer]
             layer_colors[color_key] = value_triple
         except KeyError, Error:
-            print(Error.filename + ': ' + Error)
+            print('{}: {}'.format(self.__module__, Error))
 
     def write_map_to_disk(self, layer_name, out_path):
         if self.layer_values_map.has_key(layer_name):
@@ -43,7 +43,7 @@ class ColorEntryManager():
                     return os.path.exists(out_path)
                 except IOError, Error:
                     return False
-                    print(Error.filename + ': ' + Error)
+                    print('{}: {}'.format(self.__module__, Error))
 
     def read_color_map_from_disk(self, in_path):
         file_name = os.path.basename(in_path)
@@ -60,7 +60,7 @@ class ColorEntryManager():
 
             json_data.close()
         except IOError, Error:
-            print(Error.filename + ': ' + Error)
+            print('{}: {}'.format(self.__module__, Error))
 
         self.set_color_map_of_layer(result_dict, layer_name)
 
@@ -95,7 +95,7 @@ class MunicipalInformationParser():
                         print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 
         except IOError, Error:
-            print(Error.filename + ': ' + Error)
+            print('{}: {}'.format(self.__module__, Error))
 
 
 class MunicipalInformationTree():
@@ -125,7 +125,7 @@ class MunicipalInformationTree():
                             print('{} \n Resulted in KeyError: {}'.format(entry, Error))
 
             except IOError, Error:
-                print(Error.filename + ': ' + Error)
+                print('{}: {}'.format(self.__module__, Error))
         return keys
 
     def split_data_to_tree_model(self):
@@ -159,7 +159,7 @@ class MunicipalInformationTree():
 
 
         except IOError, Error:
-            print(Error.filename + ': ' + Error)
+            print('{}: {}'.format(self.__module__, Error))
 
     def write_tree_to_disk(self, tree):
         pass

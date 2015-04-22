@@ -286,14 +286,8 @@ class OpenEQuarterMain:
             if edit_layer:
 
                 self.confirm_selection_of_investigation_area_dlg.show()
-                confirmation = self.confirm_selection_of_investigation_area_dlg.exec_()
-
-                # if the finalization of the process was confirmed, return True
-                if confirmation:
-                    return True
-
-                else:
-                    return False
+                is_confirmed = self.confirm_selection_of_investigation_area_dlg.exec_()
+                return is_confirmed
 
     # method currently not in use
     def request_wms_layer_url(self):
@@ -620,8 +614,9 @@ class OpenEQuarterMain:
 
     # step 4.1
     def handle_editing_temp_pointlayer_started(self):
-        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
         pst_input_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
+        layer_interaction.move_layer_to_position(self.iface, pst_input_layer.name(), 0)
+        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
         self.iface.setActiveLayer(pst_input_layer)
         return True
 
@@ -635,6 +630,10 @@ class OpenEQuarterMain:
     # step 4.3
     def handle_editing_temp_pointlayer_stopped(self):
         layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
+        sampling_points_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
+        full_out_path = os.path.join(self.project_path, self.pst_input_layer_name)
+        layer_interaction.write_vector_layer_to_disk(sampling_points_layer, full_out_path)
+        self.update_layer_positions()
         return True
 
     # step 4.4
@@ -642,8 +641,13 @@ class OpenEQuarterMain:
         psti = PstInteraction(iface, self.pst_plugin_name)
 
         psti.set_input_layer(self.pst_input_layer_name)
-        psti.select_and_rename_files_for_sampling()
+        layer_keys = psti.select_and_rename_files_for_sampling()
 
+        for layer_name in layer_keys.keys():
+            in_path = os.path.join(self.project_path, layer_name + '.txt')
+            self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
+
+        print(self.color_picker_dlg.color_entry_manager.layer_values_map)
         pst_output_layer = psti.start_sampling(self.project_path, self.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")
         layer_interaction.add_layer_to_registry(vlayer)

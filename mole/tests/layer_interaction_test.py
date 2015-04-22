@@ -1,8 +1,9 @@
 from os import path, remove, walk
 import unittest
 
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem
+from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsField
 from qgis.utils import iface
+from PyQt4.QtCore import QVariant
 from mole.qgisinteraction import layer_interaction
 from qgis_interface import set_up_interface
 
@@ -342,6 +343,46 @@ class LayerInteraction_test(unittest.TestCase):
     # ToDo
     def test_gdal_warp_layer_list(self):
         pass
+
+    def test_if_parameter_info_is_added_to_a_layer(self):
+        # create a temporary layer
+        v_layer_name = layer_interaction.biuniquify_layer_name('my_test_layer')
+        v_layer = QgsVectorLayer('Point?crs=EPSG:3857', v_layer_name, 'memory', False)
+
+        provider = v_layer.dataProvider()
+        v_layer.startEditing()
+
+        attributes = [QgsField('00Test_no_R', QVariant.Double),
+                      QgsField('00Test_no_G', QVariant.Double),
+                      QgsField('00Test_no_B', QVariant.Double),
+                      QgsField('00Test_no_a', QVariant.Double),
+                      QgsField('01Testyl_R', QVariant.Double),
+                      QgsField('01Testyl_G', QVariant.Double),
+                      QgsField('01Testyl_B', QVariant.Double),
+                      QgsField('01Testyl_a', QVariant.Double),
+                      QgsField('02Test_no_R', QVariant.Double),
+                      QgsField('02Test_no_G', QVariant.Double),
+                      QgsField('02Test_no_B', QVariant.Double),
+                      QgsField('02Test_no_a', QVariant.Double)]
+
+        provider.addAttributes(attributes)
+        name_to_index = provider.fieldNameMap()
+        r_index = name_to_index['01Testyl_R']
+        g_index = name_to_index['01Testyl_G']
+        b_index = name_to_index['01Testyl_B']
+        a_index = name_to_index['01Testyl_a']
+
+        # Add features (color-values) to provider
+
+        v_layer.commitChanges()
+
+        # create color values which shall be added
+        color_dict = {'RGBa(0, 0, 255, 255)': ('height', 0, 4),
+                'RGBa(170, 12, 17, 36)': ('height', 4,8)}
+
+        layer_interaction.add_parameter_info_to_layer()
+        self.fail('Finish me')
+
 
 if __name__ == '__main__':
     unittest.main()

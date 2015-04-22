@@ -159,7 +159,7 @@ def write_vector_layer_to_disk(vlayer, full_path):
         write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
 
         if write_error == QgsVectorFileWriter.WriterError:
-            raise IOError('Can\'t create the file: {0}'.format(layer_path))
+            raise IOError('Can\'t create the file: {0}'.format(full_path))
             return None
         else:
 
@@ -440,3 +440,5 @@ def edit_housing_layer_attributes(housing_layer):
     except AttributeError, Error:
         return False
         print(Error)
+
+

@@ -55,4 +55,4 @@ def distribution_by_population_density(xin,mode='distribution'):
 
     return(BLD_NOFLAT_1/l_sum * 1 + BLD_NOFLAT_2/l_sum * 2 + BLD_NOFLAT_3TO6/l_sum * 4.5 + BLD_NOFLAT_7TO12/l_sum * 9.5 + BLD_NOFLAT_MTH13/l_sum * 20 )
 
-print distribution_by_population_density(5000,"average")
+

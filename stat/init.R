@@ -71,8 +71,8 @@ verbose<-function(message,level=VERBOSE_LEVEL){
   if(level<VERBOSE_LEVEL) print(message)
 }
 
-# python like dictionary
-lookuptable<-function(...){ # Constructor for a single regression model 1
+# S3 constructor definition for class lookuptable
+lookuptable<-function(...){ 
   args=list(...)
   if((length(args)==1)&&(length(args[1])>1)) args=args[1]
   if((length(args)==2)&&(length(args[1])==(length(args[2])))){
@@ -84,12 +84,9 @@ lookuptable<-function(...){ # Constructor for a single regression model 1
     names(out)<-args[c(1:(length(args)%/%2))*2-1]
   }
   class(out)<-"lookuptable"
-    invisible(out)
+  invisible(out)
 }
 
-
-as.data.frame.lookuptable<-function(object,...) data.frame(KEY=names(object),VALUE=as.vector(object),stringsAsFactors=FALSE)
-as.matrix.lookuptable<-function(object,...) cbind(KEY=names(object),VALUE=as.vector(object))
 keys<-function(object,...) UseMethod("keys",object)
 keys.default<- function(object,...) keys(object,...)
 keys.lookuptable<-function(object,...) names(object)
@@ -103,3 +100,90 @@ lookup.lookuptable<-function(object,...)  values(object)[keys(object)%in% c(...)
 reverse_lookup<-function(object,...) UseMethod("reverse_lookup",object)
 reverse_lookup.default<-function(object,...) warning("No generic definition for 'reverse_lookup'")
 reverse_lookup.lookuptable<-function(object,...)  keys(object)[values(object)%in% c(...)]
+save2csv<-function(object,...)  UseMethod("save2csv",object)
+save2csv.default<- function(object,...) save2csv(object,...)
+save2csv.lookuptable<-function(object,...)   write.csv(as.data.frame(object),row.names=FALSE,...)
+
+as.data.frame.lookuptable<-function(object,...) data.frame(KEY=names(object),VALUE=as.vector(object),stringsAsFactors=FALSE)
+as.matrix.lookuptable<-function(object,...) cbind(KEY=names(object),VALUE=as.vector(object))
+
+# S3 constructor for class correlation (only factors, no model)
+correlation<-function(Const=0,a=0,b=0,c=0,d=0,mode="log",...){ 
+  out=list(.Const=Const,.a=a,.b=b,.c=c,.d=d,.mode=mode)
+  class(out)<-"correlation"
+  invisible(out)
+}
+
+lookup.correlation<-function(object,...){
+  x=c(...)
+  if (object$.mode=="log") x=log(x)
+  object$.const + object$.a*x + object$.b*x^2 + object$.c*x^3 + object$.d*x^4
+}
+
+as.data.frame.correlation<-function(object,start,end,stepwidth=1,...) {
+  xin=seq(from = start, to = end, by =  stepwidth)
+  data.frame(KEY=xin,VALUE=lookup(object,xin),stringsAsFactors=FALSE)
+}
+as.matrix.correlation<-function(object,start,end,stepwidth=1,...) {
+  xin=seq(from = start, to = end, by =  stepwidth)
+  cbind(KEY=xin,VALUE=lookup(object,xin))
+}
+
+save2csv.correlation<-function(object,start,end,stepwidth=1,...)   write.csv(as.data.frame(object,start,end,stepwidth),row.names=FALSE,...)
+
+verbose_equation<-function(object,...) UseMethod("verbose_equation",object)
+verbose_equation.default<- function(object,...) equation(object,...)
+verbose_equation.correlation<-function(object,symbolical=TRUE,...){
+  if(symbolical) {
+    out= paste(c(if (object$.Const==0) "" else paste("Const =",object$.Const),
+                 if (object$.a==0) "" else     paste("a     =",object$.a),
+                 if (object$.b==0) "" else     paste("b     =",object$.b),
+                 if (object$.c==0) "" else     paste("c     =",object$.c),
+                 if (object$.d==0) "" else     paste("d     =",object$.d)),collapse="\n")
+    
+    if(object$.mode=="log")   { 
+      out= paste(out, "\n\nx' = log(x)\n\ny = ",paste(c( if (object$.Const==0) "" else "Const " ,
+                                                         if (object$.a==0) "" else "a * x' " ,
+                                                         if (object$.b==0) "" else "b * x'^2" ,
+                                                         if (object$.c==0) "" else "c * x'^3",
+                                                         if (object$.d==0) "" else "d * x'^4"),
+                                                      collapse = "+ "),
+                 sep="")
+    }else{
+      out= paste(out, "\n\ny = ",paste(c( if (object$.Const==0) "" else "Const " ,
+                                          if (object$.a==0) "" else "a * x " ,
+                                          if (object$.b==0) "" else "b * x^2" ,
+                                          if (object$.c==0) "" else "c * x^3",
+                                          if (object$.d==0) "" else "d * x^4"),
+                                       collapse = "+ "),
+                 sep="")
+    }
+  }else{
+    if(object$.mode=="log")   { 
+      out= paste( "\n\nx' = log(x)\n\ny = ",paste(c( if (object$.Const==0) "" else  paste(object$.Const,"\n  ") ,
+                                                         if (object$.a==0) "" else paste(object$.a,"* x'\n  "),
+                                                         if (object$.b==0) "" else paste(object$.b,"* x'^2\n  ") ,
+                                                         if (object$.c==0) "" else paste(object$.c,"* x'^3\n  "),
+                                                         if (object$.d==0) "" else paste(object$.d,"* x'^4\n  ")),
+                                                      collapse = "+ "),
+                 sep="")
+    }else{
+      out= paste( "\n\ny = ",paste(c( if (object$.Const==0) "" else  paste(object$.Const,"\n  ") ,
+                                          if (object$.a==0) "" else paste(object$.a,"* x\n  "),
+                                          if (object$.b==0) "" else paste(object$.b,"* x^2\n  ") ,
+                                          if (object$.c==0) "" else paste(object$.c,"* x^3\n  "),
+                                          if (object$.d==0) "" else paste(object$.d,"* x^4\n  ")),
+                                       collapse = "+ "),
+                 sep="")
+    }
+  }
+  return(out)
+}
+
+
+
+winf=correlation(const= 120046.968215,
+                 a=     -249.82114301,
+                 b=     0.194718483741,
+                 c=     -6.73636413768e-05,
+                 d=     8.72705641799e-09,"log")

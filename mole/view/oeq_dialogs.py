@@ -385,13 +385,13 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
             pop_dens = '{}'.format(municipal['POP_DENS'])
             self.population_density.setText(pop_dens)
         except KeyError as Error:
-            print(__name__, Error)
+            print(self.__module__, Error)
 
         try:
             avg_yoc = '{}'.format(municipal['AVG_YOC'])
             self.average_build_year.setText(avg_yoc)
         except KeyError as Error:
-            print(__name__, Error)
+            print(self.__module__, Error)
 
 
 

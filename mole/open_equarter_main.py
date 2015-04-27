@@ -45,7 +45,9 @@ from ExportWMSasTif import ExportWMSasTif
 from tests import layer_interaction_test
 import config
 
+
 class OpenEQuarterMain:
+
     def __init__(self, iface):
         # Save reference to the QGIS interface
         self.iface = iface
@@ -266,7 +268,7 @@ class OpenEQuarterMain:
             self.iface.actionZoomToLayer().trigger()
 
         except None, Error:
-            print(__name__, 'Could nor zoom to default extent: {}'.format(Error))
+            print(self.__module__, 'Could nor zoom to default extent: {}'.format(Error))
 
     def confirm_selection_of_investigation_area(self, layer_name):
         """
@@ -310,7 +312,7 @@ class OpenEQuarterMain:
                     socket.connect()
 
             except (httplib.HTTPException, gaierror) as InetException:
-                print(__name__, 'Exception {} occured. URL seems to be invalid!'.format(InetException))
+                print(self.__module__, 'Exception {} occured. URL seems to be invalid!'.format(InetException))
                 return
 
             self.wms_url = wms_url
@@ -373,7 +375,7 @@ class OpenEQuarterMain:
             return pyramid_exporter.export(raster_layer.name())
 
         except AttributeError as NoneException:
-            print(__name__, NoneException)
+            print(self.__module__, NoneException)
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):
         """
@@ -404,7 +406,7 @@ class OpenEQuarterMain:
 
                 return clipped_layers
         except AttributeError as NoneException:
-            print(__name__, NoneException)
+            print(self.__module__, NoneException)
             return None
 
     # step 0.0
@@ -479,7 +481,7 @@ class OpenEQuarterMain:
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
             disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(self.project_path, investigation_area.name()))
         except IOError, Error:
-            print(__name__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
+            print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
             if disk_layer.isValid():
                 layer_interaction.hide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
@@ -492,7 +494,7 @@ class OpenEQuarterMain:
                 self.iface.setActiveLayer(disk_layer)
                 self.iface.actionZoomToLayer().trigger()
         except AttributeError, NoneTypeError:
-            print(__name__, 'The "Investigation Area"-layer could not be saved to disk: ', NoneTypeError)
+            print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', NoneTypeError)
 
         return True
 
@@ -532,7 +534,7 @@ class OpenEQuarterMain:
                     self.iface.setActiveLayer(raster)
                     raster_loaded = True
             except AttributeError as NoneTypeError:
-                print(__name__, NoneTypeError)
+                print(self.__module__, NoneTypeError)
 
         if not raster_loaded:
             self.iface.actionAddWmsLayer().trigger()
@@ -547,7 +549,7 @@ class OpenEQuarterMain:
         try:
             layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
         except AttributeError, NoneTypeError:
-            print(__name__, NoneTypeError)
+            print(self.__module__, NoneTypeError)
 
         for layer_name in extracted_layers:
             try:
@@ -571,7 +573,7 @@ class OpenEQuarterMain:
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
             except (OSError, AttributeError) as Clipping_Error:
-                print(__name__, Clipping_Error)
+                print(self.__module__, Clipping_Error)
                 pass
 
         time.sleep(1.0)
@@ -640,15 +642,18 @@ class OpenEQuarterMain:
         psti = PstInteraction(iface, config.pst_plugin_name)
 
         psti.set_input_layer(config.pst_input_layer_name)
-        layer_keys = psti.select_and_rename_files_for_sampling()
-
-        for layer_name in layer_keys.keys():
-            in_path = os.path.join(self.project_path, layer_name + '.txt')
-            self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
-
-        print(self.color_picker_dlg.color_entry_manager.layer_values_map)
+        abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")
+
+        # in case the plugin was re-started, reload the color-entries
+        for layer_name, abbreviation in abbreviations.iteritems():
+            in_path = os.path.join(self.project_path, layer_name + '.txt')
+            self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
+            layer_color_map = self.color_picker_dlg.color_entry_manager.layer_values_map
+            color_dict = layer_color_map[layer_name]
+            layer_interaction.add_parameter_info_to_layer(color_dict, abbreviation, vlayer)
+
         layer_interaction.add_layer_to_registry(vlayer)
         return True
 
@@ -676,7 +681,7 @@ class OpenEQuarterMain:
                 if self.progress_model.is_section_done(step_section):
                     self.main_process_dock.set_current_page_done(True)
         except IndexError, InvalidIndexError:
-            print(__name__, InvalidIndexError)
+            print(self.__module__, InvalidIndexError)
 
     def process_button_clicked(self, *args):
         """
@@ -728,7 +733,7 @@ class OpenEQuarterMain:
                     config.default_extent = extent
                     config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
-                    print(__name__, Error)
+                    print(self.__module__, Error)
 
             self.check_status()
             self.auto_run()
@@ -790,7 +795,7 @@ class OpenEQuarterMain:
                 self.main_process_dock.set_current_page_done(is_done)
 
         except IndexError, InvalidIndexError:
-                print(__name__, InvalidIndexError)
+                print(self.__module__, InvalidIndexError)
 
     def auto_run(self):
         """
@@ -809,7 +814,7 @@ class OpenEQuarterMain:
                 self.continue_process()
 
         except IndexError, Error:
-            print(__name__, Error)
+            print(self.__module__, Error)
 
 
 

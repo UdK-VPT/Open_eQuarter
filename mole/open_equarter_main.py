@@ -43,7 +43,7 @@ from qgisinteraction import raster_layer_interaction
 from qgisinteraction import project_interaction
 from ExportWMSasTif import ExportWMSasTif
 from tests import layer_interaction_test
-
+import config
 
 class OpenEQuarterMain:
     def __init__(self, iface):
@@ -69,41 +69,16 @@ class OpenEQuarterMain:
         ### Project specific settings
         # the project path equals './' as long as the project has not been saved
         self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
-        self.project_crs = 'EPSG:3857'
         self.oeq_project = ''
 
 
-        ### Information needed to use external plugins
-        # PointSamplingTool
-        self.pst_plugin_name = 'pointsamplingtool'
-        self.pst_input_layer_name = 'pst_points_of_interest'
-        self.pst_output_layer_name = 'pst_out'
-
-
-        # OpenStreetMap plugin
-        self.ol_plugin_name = 'openlayers_plugin'
-        # id=0 - Google Physical
-        # id=1 - Google Streets
-        # id=4 - OpenStreetMap
-        self.open_layer_type_id = 4
+        # OpenStreetMap-plugin-layer
         self.open_layer = None
 
 
         ### Default values
-        # default extent is set, after the OSM-layer was loaded (currently: extent of Germany)
-        x = 10.447683
-        y = 51.163375
-        scale = 4
-        self.default_extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-        self.default_extent_crs = 'EPSG:4326'
-
         # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_name = 'Investigation Area'
         self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project_data', 'oeq_ia_style.qml')
-        self.housing_layer_name = 'Floor plan'
-        self.housing_coordinate_layer_name = ''
-        # name of the wms-raster which will be loaded and is the basis for the clipping
-        self.clipping_raster_layer_name = 'Investigation Area - raster'
 
         ### Monitor the users progress
         self.progress_model = ProgressModel()
@@ -155,18 +130,26 @@ class OpenEQuarterMain:
         self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
 
     def update_layer_positions(self):
+        """
+        Reorder the layers so that they are ordered (from top to bottom) as follows:
+            1. investigation_area
+            2. housing_coordinate_layer
+            3. housing_layer
+        :return:
+        :rtype:
+        """
         position = -1
-        if layer_interaction.find_layer_by_name(self.investigation_shape_layer_name):
+        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, self.investigation_shape_layer_name, position)
+            layer_interaction.move_layer_to_position(self.iface, config.investigation_shape_layer_name, position)
 
-        if layer_interaction.find_layer_by_name(self.housing_coordinate_layer_name):
+        if layer_interaction.find_layer_by_name(config.housing_coordinate_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, self.housing_coordinate_layer_name, 1)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, 1)
 
-        if layer_interaction.find_layer_by_name(self.housing_layer_name):
+        if layer_interaction.find_layer_by_name(config.housing_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, self.housing_layer_name, 2)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, 2)
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -185,6 +168,11 @@ class OpenEQuarterMain:
 
     # ToDo Check if this has to be put in a separate method
     def refresh_layer_list(self):
+        """
+        Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
+        :return:
+        :rtype:
+        """
         dropdown = self.color_picker_dlg.layers_dropdown
         dropdown.clear()
         wms_list = layer_interaction.get_wms_layer_list(self.iface, visibility='visible')
@@ -199,6 +187,15 @@ class OpenEQuarterMain:
         layer_interaction.move_layer_to_position(self.iface, layer, 0)
 
     def handle_canvas_click(self, point, button):
+        """
+        Handle a user's click on the map-canvas.
+        :param point: Coordinates of the point which was clicked
+        :type point: QgsPoint
+        :param button: The (mouse-)button which triggered the signal
+        :type button: Qt::MouseButton
+        :return:
+        :rtype:
+        """
         canvas = self.iface.mapCanvas()
         crs = canvas.mapRenderer().destinationCrs()
         raster = self.iface.activeLayer()
@@ -210,7 +207,11 @@ class OpenEQuarterMain:
                 self.color_picker_dlg.add_color(color)
 
     def unload(self):
-        # Remove the plugin menu item and icon
+        """
+        Called, when the plugin is uninstalled to remove the plugin menu item and icons
+        :return:
+        :rtype:
+        """
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
         self.iface.removePluginMenu(u"&OpenEQuarter", self.clipping_action)
         self.iface.removePluginMenu(u"&OpenEQuarter", self.testing_action)
@@ -247,28 +248,25 @@ class OpenEQuarterMain:
 
         return False
 
-    def get_default_extent_by_zip_code(self):
-        pass
-
     def zoom_to_default_extent(self):
         """
-        Set the extent of the open layer to the default extent and scale specified as in self.default_extent and self.default_scale
+        Set the extent of the open layer to the default extent and scale specified as in config.default_extent and self.default_scale
         :return:
         :rtype:
         """
         try:
             canvas = self.iface.mapCanvas()
             map_crs = canvas.mapSettings().destinationCrs()
-            source_crs = QgsCoordinateReferenceSystem(self.default_extent_crs)
+            source_crs = QgsCoordinateReferenceSystem(config.default_extent_crs)
             transformer = QgsCoordinateTransform(source_crs, map_crs)
-            extent = transformer.transform(self.default_extent)
+            extent = transformer.transform(config.default_extent)
 
             self.open_layer.setExtent(extent)
             self.iface.setActiveLayer(self.open_layer)
             self.iface.actionZoomToLayer().trigger()
 
         except None, Error:
-            print('Could nor zoom to default extent: {}'.format(Error))
+            print(__name__, 'Could nor zoom to default extent: {}'.format(Error))
 
     def confirm_selection_of_investigation_area(self, layer_name):
         """
@@ -311,8 +309,8 @@ class OpenEQuarterMain:
                     socket = httplib.HTTPConnection(wms_url)
                     socket.connect()
 
-            except (httplib.HTTPException, gaierror) as ex:
-                print "Invalid url"
+            except (httplib.HTTPException, gaierror) as InetException:
+                print(__name__, 'Exception {} occured. URL seems to be invalid!'.format(InetException))
                 return
 
             self.wms_url = wms_url
@@ -361,7 +359,13 @@ class OpenEQuarterMain:
         return crs
 
     def clip_from_raster(self, raster_layer):
-
+        """
+        Clip the current extent from the given raster-layer
+        :param raster_layer: The raster-layer which will be clipped
+        :type raster_layer: QgsRasterLayer
+        :return:
+        :rtype:
+        """
         try:
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
@@ -369,8 +373,7 @@ class OpenEQuarterMain:
             return pyramid_exporter.export(raster_layer.name())
 
         except AttributeError as NoneException:
-            print NoneException
-            return None
+            print(__name__, NoneException)
 
     def clip_zoom_to_layer_view_from_raster(self, layer_name):
         """
@@ -401,16 +404,16 @@ class OpenEQuarterMain:
 
                 return clipped_layers
         except AttributeError as NoneException:
-            print NoneException
+            print(__name__, NoneException)
             return None
 
     # step 0.0
     def handle_ol_plugin_installed(self):
-        return plugin_interaction.get_plugin_ifexists(self.ol_plugin_name) is not None
+        return plugin_interaction.get_plugin_ifexists(config.ol_plugin_name) is not None
 
     # step 0.1
     def handle_pst_plugin_installed(self):
-        return plugin_interaction.get_plugin_ifexists(self.pst_plugin_name) is not None
+        return plugin_interaction.get_plugin_ifexists(config.pst_plugin_name) is not None
 
     # step 0.2
     def handle_project_created(self):
@@ -430,9 +433,9 @@ class OpenEQuarterMain:
             return True
 
         else:
-            ol_plugin = OlInteraction(self.ol_plugin_name)
+            ol_plugin = OlInteraction(config.ol_plugin_name)
 
-            if ol_plugin.open_osm_layer(self.open_layer_type_id):
+            if ol_plugin.open_osm_layer(config.open_layer_type_id):
                 layer_dict = QgsMapLayerRegistry.instance().mapLayers()
                 for layer_name, layer in layer_dict.iteritems():
                     if 'OpenLayers_plugin_layer' in layer_name:
@@ -447,8 +450,8 @@ class OpenEQuarterMain:
 
     # step 1.0
     def handle_temp_shapefile_created(self):
-        investigation_area = layer_interaction.create_temporary_layer(self.investigation_shape_layer_name, 'Polygon',
-                                                                     self.project_crs)
+        investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
+                                                                     config.project_crs)
 
         if investigation_area is not None:
             layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
@@ -459,40 +462,37 @@ class OpenEQuarterMain:
 
     # step 1.1
     def handle_editing_temp_shapefile_started(self):
-        layer_interaction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name)
+        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
         return True
 
     # step 1.2
     def handle_investigation_area_selected(self):
         self.confirm_selection_of_investigation_area_dlg.set_dialog_text(
             "Click 'OK' once the investigatoion area is selected.", "Define investigaion area")
-        ia_covered = self.confirm_selection_of_investigation_area(self.investigation_shape_layer_name)
+        ia_covered = self.confirm_selection_of_investigation_area(config.investigation_shape_layer_name)
         return ia_covered
 
     # step 1.3
     def handle_editing_temp_shapefile_stopped(self):
-        layer_interaction.trigger_edit_mode(self.iface, self.investigation_shape_layer_name, 'off')
+        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         try:
-            investigation_area = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
+            investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
             disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(self.project_path, investigation_area.name()))
         except IOError, Error:
-            print('The "Investigation Area"-layer could not be saved to disk:')
-            print(Error)
-
+            print(__name__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
             if disk_layer.isValid():
-                layer_interaction.hide_or_remove_layer(self.investigation_shape_layer_name, 'remove')
+                layer_interaction.hide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
                 layer_interaction.add_layer_to_registry(disk_layer)
                 layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, disk_layer)
                 # trigger the edit-mode, to have the style displayed.
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name())
                 layer_interaction.trigger_edit_mode(self.iface, disk_layer.name(), 'off')
-                disk_layer.setLayerName(self.investigation_shape_layer_name)
+                disk_layer.setLayerName(config.investigation_shape_layer_name)
                 self.iface.setActiveLayer(disk_layer)
                 self.iface.actionZoomToLayer().trigger()
         except AttributeError, NoneTypeError:
-            print('The "Investigation Area"-layer could not be saved to disk:')
-            print(NoneTypeError)
+            print(__name__, 'The "Investigation Area"-layer could not be saved to disk: ', NoneTypeError)
 
         return True
 
@@ -501,13 +501,13 @@ class OpenEQuarterMain:
 
         housing_layer = os.path.join('/', 'Users', 'VPTtutor', 'Desktop', 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         if os.path.exists(housing_layer):
-            housing_layer = layer_interaction.load_layer_from_disk(housing_layer, self.housing_layer_name)
-            investigation_area = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
-            out_layer = os.path.join(self.project_path, self.housing_layer_name + '.shp')
+            housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
+            investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            out_layer = os.path.join(self.project_path, config.housing_layer_name + '.shp')
 
             intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer)
             if intersection_done:
-                out_layer = layer_interaction.load_layer_from_disk(out_layer, self.housing_layer_name)
+                out_layer = layer_interaction.load_layer_from_disk(out_layer, config.housing_layer_name)
                 layer_interaction.add_layer_to_registry(out_layer)
                 layer_interaction.edit_housing_layer_attributes(out_layer)
             return intersection_done
@@ -521,12 +521,11 @@ class OpenEQuarterMain:
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
         raster_layers = []
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, self.wms_url, self.clipping_raster_layer_name))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, self.wms_url, config.clipping_raster_layer_name))
         raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'Building height'))
 
         raster_loaded = False
         for raster in raster_layers:
-            print raster
             try:
                 if raster.isValid():
                     layer_interaction.add_layer_to_registry(raster)
@@ -543,17 +542,17 @@ class OpenEQuarterMain:
 
     # step 3.1
     def handle_extent_clipped(self):
-        extracted_layers = self.clip_zoom_to_layer_view_from_raster(self.investigation_shape_layer_name)
+        extracted_layers = self.clip_zoom_to_layer_view_from_raster(config.investigation_shape_layer_name)
 
         try:
             layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
         except AttributeError, NoneTypeError:
-            print(NoneTypeError)
+            print(__name__, NoneTypeError)
 
         for layer_name in extracted_layers:
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
-                raster_layer_interaction.gdal_warp_layer(layer, self.project_crs)
+                raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 
@@ -565,14 +564,14 @@ class OpenEQuarterMain:
                     layer_interaction.hide_or_remove_layer(layer_name,'remove',self.iface)
 
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
-                    rlayer.setCrs(QgsCoordinateReferenceSystem(self.project_crs))
+                    rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
                     os.remove(path_geo)
                     self.iface.mapCanvas().refresh()
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
             except (OSError, AttributeError) as Clipping_Error:
-                print(Clipping_Error)
+                print(__name__, Clipping_Error)
                 pass
 
         time.sleep(1.0)
@@ -607,16 +606,16 @@ class OpenEQuarterMain:
 
     # step 4.0
     def handle_temp_pointlayer_created(self):
-        pst_input_layer = layer_interaction.create_temporary_layer(self.pst_input_layer_name, 'Point',
-                                                                  self.project_crs)
+        pst_input_layer = layer_interaction.create_temporary_layer(config.pst_input_layer_name, 'Point',
+                                                                  config.project_crs)
         layer_interaction.add_layer_to_registry(pst_input_layer)
         return True
 
     # step 4.1
     def handle_editing_temp_pointlayer_started(self):
-        pst_input_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
+        pst_input_layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
         layer_interaction.move_layer_to_position(self.iface, pst_input_layer.name(), 0)
-        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name)
+        layer_interaction.trigger_edit_mode(self.iface, config.pst_input_layer_name)
         self.iface.setActiveLayer(pst_input_layer)
         return True
 
@@ -624,23 +623,23 @@ class OpenEQuarterMain:
     def handle_points_of_interest_defined(self):
         self.confirm_selection_of_investigation_area_dlg.set_dialog_text(
             "Click 'OK' once the sampling points are selected.", "Choose sample points")
-        points_selected = self.confirm_selection_of_investigation_area(self.pst_input_layer_name)
+        points_selected = self.confirm_selection_of_investigation_area(config.pst_input_layer_name)
         return points_selected
 
     # step 4.3
     def handle_editing_temp_pointlayer_stopped(self):
-        layer_interaction.trigger_edit_mode(self.iface, self.pst_input_layer_name, 'off')
-        sampling_points_layer = layer_interaction.find_layer_by_name(self.pst_input_layer_name)
-        full_out_path = os.path.join(self.project_path, self.pst_input_layer_name)
+        layer_interaction.trigger_edit_mode(self.iface, config.pst_input_layer_name, 'off')
+        sampling_points_layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
+        full_out_path = os.path.join(self.project_path, config.pst_input_layer_name)
         layer_interaction.write_vector_layer_to_disk(sampling_points_layer, full_out_path)
         self.update_layer_positions()
         return True
 
     # step 4.4
     def handle_information_sampled(self):
-        psti = PstInteraction(iface, self.pst_plugin_name)
+        psti = PstInteraction(iface, config.pst_plugin_name)
 
-        psti.set_input_layer(self.pst_input_layer_name)
+        psti.set_input_layer(config.pst_input_layer_name)
         layer_keys = psti.select_and_rename_files_for_sampling()
 
         for layer_name in layer_keys.keys():
@@ -648,7 +647,7 @@ class OpenEQuarterMain:
             self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
 
         print(self.color_picker_dlg.color_entry_manager.layer_values_map)
-        pst_output_layer = psti.start_sampling(self.project_path, self.pst_output_layer_name)
+        pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")
         layer_interaction.add_layer_to_registry(vlayer)
         return True
@@ -676,8 +675,8 @@ class OpenEQuarterMain:
 
                 if self.progress_model.is_section_done(step_section):
                     self.main_process_dock.set_current_page_done(True)
-        except IndexError, error:
-            print error
+        except IndexError, InvalidIndexError:
+            print(__name__, InvalidIndexError)
 
     def process_button_clicked(self, *args):
         """
@@ -726,10 +725,10 @@ class OpenEQuarterMain:
                     y = municipal['GEO_W']
                     scale = 0.05
                     extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-                    self.default_extent = extent
-                    self.default_extent_crs = 'EPSG:4326'
+                    config.default_extent = extent
+                    config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
-                    print(Error)
+                    print(__name__, Error)
 
             self.check_status()
             self.auto_run()
@@ -747,12 +746,16 @@ class OpenEQuarterMain:
         unittest.TextTestRunner(sys.stdout).run(suite)
 
     def check_status(self):
-
+        """
+        Check the user's current progress and where the process should be continued.
+        :return:
+        :rtype:
+        """
         self.continue_process() #OL-Plugin
         self.continue_process() #PST-Plugin
         self.continue_process() #Proje. saved
 
-        investigation_layer = layer_interaction.find_layer_by_name(self.investigation_shape_layer_name)
+        investigation_layer = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
 
         if self.osm_layer_is_loaded() or investigation_layer:
             self.set_next_step_done(True) # open OL-map
@@ -766,6 +769,13 @@ class OpenEQuarterMain:
                     self.set_next_step_done(True) # deactivate edit mode
 
     def set_next_step_done(self, is_done):
+        """
+        Find the next step in the progress model and change its status to is_done
+        :param is_done: The status of the next step
+        :type is_done: bool
+        :return:
+        :rtype:
+        """
         try:
             next_open_step_no = self.progress_model.last_step_executed + 1
             next_open_step = self.progress_model.get_step_list()[next_open_step_no]
@@ -779,10 +789,16 @@ class OpenEQuarterMain:
             if self.progress_model.is_section_done(step_section):
                 self.main_process_dock.set_current_page_done(is_done)
 
-        except IndexError, error:
-                print error
+        except IndexError, InvalidIndexError:
+                print(__name__, InvalidIndexError)
 
     def auto_run(self):
+        """
+        Iterate through the progress step by step and successively auto-initiated each step,
+        once its prerequisites are given.
+        :return:
+        :rtype:
+        """
         steps = self.progress_model.get_step_list()
         next = self.progress_model.last_step_executed
 
@@ -792,8 +808,8 @@ class OpenEQuarterMain:
                 time.sleep(0.5)
                 self.continue_process()
 
-        except IndexError, error:
-            print error
+        except IndexError, Error:
+            print(__name__, Error)
 
 
 

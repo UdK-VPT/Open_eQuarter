@@ -269,6 +269,15 @@ def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
 
 
 def zoom_to_layer(iface, layer_name):
+    """
+    Trigger the iface's zoom-to-layer-action on the layer given by its name.
+    :param iface: Reference to Qgis interface
+    :type iface: QgisInterface
+    :param layer_name: Name of the layer to zoom to
+    :type layer_name: str
+    :return:
+    :rtype:
+    """
     if layer_name and not layer_name.isspace():
 
         zoom_layer = find_layer_by_name(layer_name)
@@ -280,6 +289,13 @@ def zoom_to_layer(iface, layer_name):
 
 
 def biuniquify_layer_name(layer_name):
+    """
+    Check the layer-registry if a layer with the same name exists and if so, append a number to make the name unique.
+    :param layer_name: Name which will be checked for uniqueness
+    :type layer_name: str
+    :return: The (now) unique name
+    :rtype: str
+    """
     biunique_name = ''
     if layer_name and not layer_name.isspace():
 
@@ -291,15 +307,6 @@ def biuniquify_layer_name(layer_name):
             suffix += 1
 
     return biunique_name
-
-
-def change_crs_of_layers(layer_list, dest_crs):
-
-    for layer_name in layer_list:
-        layer = find_layer_by_name(layer_name)
-
-        if layer and layer.isValid():
-            layer.setCrs(dest_crs)
 
 
 def move_layer_to_position(iface, layer_name, position):

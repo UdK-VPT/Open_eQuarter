@@ -322,23 +322,6 @@ class LayerInteraction_test(unittest.TestCase):
         self.assertEqual(layer1_name +'2', layer_interaction.biuniquify_layer_name(layer1_name + str(2)))
         self.assertEqual(layer2_name +'0', layer_interaction.biuniquify_layer_name(layer2_name))
 
-    def test_change_group_crs(self):
-        layer1_name = 'asdhhkhlu18927309hgdkaghdzuz7817982_unique'
-        layer2_name = 'asdhhkhlu18927309hgdkaghdzuz781712ziadgwz_unique'
-        layer1 = QgsVectorLayer('Polygon?crs=EPSG:3068', layer1_name, 'memory', False)
-        layer2 = QgsVectorLayer('Polygon?crs=EPSG:4326', layer2_name, 'memory', False)
-        self.layer_list.extend([layer1_name, layer2_name])
-
-        reg = QgsMapLayerRegistry.instance()
-        reg.addMapLayer(layer1)
-        reg.addMapLayer(layer2)
-
-        layer_group = [layer1.name(), layer2.name()]
-        target_crs = QgsCoordinateReferenceSystem('EPSG:3857')
-        layer_interaction.change_crs_of_layers(layer_group,target_crs)
-
-        self.assertEqual(layer1.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer1.name()))
-        self.assertEqual(layer2.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer2.name()))
     # ToDo
     def test_gdal_warp_layer_list(self):
         pass

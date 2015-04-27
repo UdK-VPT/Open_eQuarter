@@ -1,7 +1,7 @@
 from os import path, remove, walk
 import unittest
 
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsField
+from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsField, QgsFeature
 from qgis.utils import iface
 from PyQt4.QtCore import QVariant
 from mole.qgisinteraction import layer_interaction
@@ -339,7 +339,6 @@ class LayerInteraction_test(unittest.TestCase):
 
         self.assertEqual(layer1.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer1.name()))
         self.assertEqual(layer2.crs(), target_crs, 'The crs of the layer {} is not equal to the target crs.'.format(layer2.name()))
-
     # ToDo
     def test_gdal_warp_layer_list(self):
         pass
@@ -373,15 +372,41 @@ class LayerInteraction_test(unittest.TestCase):
         a_index = name_to_index['01Testyl_a']
 
         # Add features (color-values) to provider
+        feature1 = QgsFeature()
+        feature1.setAttributes([0, 0, 0, 0, 0, 0.0, 255.0, 255, 0, 0, 0, 0])
+        feature2 = QgsFeature()
+        feature2.setAttributes([0, 0, 0, 0, 170, 12, 17, 36, 0, 0, 0, 0])
+        feature3 = QgsFeature()
+        feature3.setAttributes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        provider.addFeatures([feature1, feature2, feature3])
 
         v_layer.commitChanges()
-
         # create color values which shall be added
         color_dict = {'RGBa(0, 0, 255, 255)': ('height', 0, 4),
                 'RGBa(170, 12, 17, 36)': ('height', 4,8)}
+        field_name_prefix = '01Testyl'
+        layer_interaction.add_parameter_info_to_layer(color_dict, field_name_prefix, v_layer)
 
-        layer_interaction.add_parameter_info_to_layer()
-        self.fail('Finish me')
+        field_names = provider.fieldNameMap()
+        self.assertTrue('01Testyl_L' in field_names)
+        self.assertTrue('01Testyl_H' in field_names)
+        self.assertTrue('01Testyl_P' in field_names)
+        self.assertTrue('01Testyl_0' not in field_names)
+        self.assertTrue('01Testyl_1' not in field_names)
+
+        for feat in provider.getFeatures():
+            if feat.attribute('01Testyl_R') == 0 and feat.attribute('01Testyl_a') == 255:
+                self.assertEqual(feat.attribute('01Testyl_P'), 'height')
+                self.assertEqual(feat.attribute('01Testyl_L'), 0)
+                self.assertEqual(feat.attribute('01Testyl_H'), 4)
+            if feat.attribute('01Testyl_R') == 170 and feat.attribute('01Testyl_a') == 36:
+                self.assertEqual(feat.attribute('01Testyl_P'), 'height')
+                self.assertEqual(feat.attribute('01Testyl_L'), 4)
+                self.assertEqual(feat.attribute('01Testyl_H'), 8)
+            if feat.attribute('01Testyl_R') == 0 and feat.attribute('01Testyl_a') == 0:
+                self.assertEqual(feat.attribute('01Testyl_P'), None)
+                self.assertEqual(feat.attribute('01Testyl_L'), None)
+                self.assertEqual(feat.attribute('01Testyl_H'), None)
 
 
 if __name__ == '__main__':

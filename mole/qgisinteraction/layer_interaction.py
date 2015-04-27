@@ -294,6 +294,7 @@ def biuniquify_layer_name(layer_name):
 
 
 def change_crs_of_layers(layer_list, dest_crs):
+
     for layer_name in layer_list:
         layer = find_layer_by_name(layer_name)
 
@@ -438,7 +439,93 @@ def edit_housing_layer_attributes(housing_layer):
         provider.deleteAttributes([fid_index])
         return housing_layer.commitChanges()
     except AttributeError, Error:
+        print(__name__, Error)
         return False
-        print(Error)
 
 
+def add_parameter_info_to_layer(color_dict, field_name, layer):
+    """
+    Adds the color-legend to the given layers corresponding field
+    :param color_dict: Dictionary containing the color-value map
+    :type color_dict: dict
+    :param field_name: The fields name-prefix to which the information belongs
+    :type field_name: str
+    :param layer: The layer which holds the fields
+    :type layer: QgsVectorLayer
+    :return:
+    :rtype:
+    """
+    provider = None
+    try:
+        provider = layer.dataProvider()
+    except AttributeError, NoneTypeError:
+        print(__name__, NoneTypeError)
+        return
+
+    for color_key in color_dict.keys():
+        color_quadriple = color_key[5:-1].split(',')
+        color_quadriple = map(int,  color_quadriple)
+
+        for feat in provider.getFeatures():
+            if colors_match_feature(color_quadriple, feat, field_name):
+                parameter_name = field_name + '_P'
+                parameter_low = field_name + '_L'
+                parameter_high = field_name + '_H'
+                attributes = [QgsField(parameter_name, QVariant.String),
+                              QgsField(parameter_low, QVariant.Double),
+                              QgsField(parameter_high, QVariant.Double),
+                              ]
+                add_attributes_if_not_exists(layer, attributes)
+
+                name_index = provider.fieldNameIndex(parameter_name)
+                low_index = provider.fieldNameIndex(parameter_low)
+                high_index = provider.fieldNameIndex(parameter_high)
+
+                name_value = color_dict[color_key][0]
+                low_value = color_dict[color_key][1]
+                high_value = color_dict[color_key][2]
+
+                values = {name_index: name_value, low_index: low_value, high_index: high_value}
+                provider.changeAttributeValues({feat.id(): values})
+
+
+def colors_match_feature(color_quadriple, feature, field_name):
+    """
+    Check if the given color quadriple contains the same color-values as the feature at the given field_name.
+    :param color_quadriple: A color-quadriple in the form [R, G, B, a]
+    :type color_quadriple: list
+    :param feature: The feater which will be checked against
+    :type feature: QgsFeature
+    :param field_name: The field name, which needs to be prepended with the appropriate color-suffix
+    :type field_name: str
+    :return: If the quadriple matches
+    :rtype: bool
+    """
+    match = ((color_quadriple[0] == feature.attribute(field_name + '_R')) \
+            and (color_quadriple[1] == feature.attribute(field_name + '_G'))
+            and (color_quadriple[2] == feature.attribute(field_name + '_B'))
+            and (color_quadriple[3] == feature.attribute(field_name + '_a'))
+            )
+
+    return match
+
+
+def add_attributes_if_not_exists(layer, attribute):
+    """
+    Adds given attributes to a layer's data layer
+    if there is no attribute with the same name already.
+    :param layer: The layer
+    :type layer: QgsVectorLayer
+    :param attribute: List with the attributes that shall be appended
+    :type attribute: list
+    :return:
+    :rtype:
+    """
+    layer.startEditing()
+    provider = layer.dataProvider()
+    name_map = provider.fieldNameMap()
+    for att in attribute:
+        if att.name() not in name_map:
+            provider.addAttributes([att])
+
+    layer.commitChanges()

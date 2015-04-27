@@ -135,7 +135,13 @@ class ColorEntryManagerTestCase(unittest.TestCase):
         color_map = self.cem.layer_values_map[self.test_layer]
         self.assertDictEqual(dict, color_map, 'Error when reading a color-map from disk: \n\tReceived: {}\n\tExpected: {}'.format(color_map, dict))
 
-
+    def test_dict_can_be_removed_from_layer_entry(self):
+        self.cem.add_layer(self.test_layer)
+        self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
+        deleted_entry = 'RGBa(0, 0, 255, 255)'
+        self.cem.remove_color_entry_from_layer(deleted_entry, self.test_layer)
+        self.assertNotIn(deleted_entry, self.cem.layer_values_map[self.test_layer])
+        self.assertIn('RGBa(0, 0, 220, 255)', self.cem.layer_values_map[self.test_layer])
 
 class MunicipalInformationParserAndTreeTestCase(unittest.TestCase):
 

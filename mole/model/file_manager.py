@@ -64,6 +64,12 @@ class ColorEntryManager():
 
         self.set_color_map_of_layer(result_dict, layer_name)
 
+    def remove_color_entry_from_layer(self, color_entry, layer):
+        entries = self.layer_values_map[layer]
+        del entries[color_entry]
+        self.set_color_map_of_layer(entries, layer)
+
+
 class MunicipalInformationParser():
     """
     A parser-class to scan a .json file for all municipals with a given postcode.

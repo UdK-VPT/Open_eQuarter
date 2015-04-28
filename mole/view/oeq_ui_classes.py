@@ -53,7 +53,7 @@ class QRemoveEntryButton(QPushButton):
         QPushButton.__init(self, parent)
 
     def mouseReleaseEvent(self, event):
-        self.emit(SIGNAL('remove_entry'), self)
+        self.emit(SIGNAL('remove_widget_and_entry'), self)
 
     def stylize(self):
         self.setMinimumSize(QtCore.QSize(18, 0))

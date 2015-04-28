@@ -48,7 +48,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.row_offset = 1
         self.row_count = 2
-        self.connect(self.remove_entries_0, SIGNAL('remove_entry'), self.remove_entry)
+        self.connect(self.remove_entries_0, SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
         self.parameter_name_0.textChanged.connect(self.check_character_constraint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
@@ -119,7 +119,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
             self.color_entry_manager.add_color_value_quadruple_to_layer((color, para_name, value1, value2), self.recent_layer)
 
         for remove_button in removal:
-            self.remove_entry(remove_button)
+            self.remove_widget_and_entry(remove_button, False)
 
         layer = self.layers_dropdown.currentText()
         self.restore_color_value_pairs(layer)
@@ -161,17 +161,25 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         remove_entries = QRemoveEntryButton(self)
         remove_entries.setObjectName('remove_entries_{}'.format(current_row - 1))
         remove_entries.stylize()
-        self.connect(remove_entries, SIGNAL('remove_entry'), self.remove_entry)
+        self.connect(remove_entries, SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
         self.color_table.addWidget(remove_entries, current_row, 5, 1, 1)
         self.row_count += 1
 
     def check_character_constraint(self, parameter_name):
+        """
+        Check if the parameter-name has a length of ten characters at most,
+        since layer-attributes are limited to 10 characters.
+        :param parameter_name:
+        :type parameter_name:
+        :return:
+        :rtype:
+        """
         if len(parameter_name) == 10 and parameter_name != 'Parameter ':
             self.warning_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
         else:
             self.warning_label.clear()
 
-    def remove_entry(self, button):
+    def remove_widget_and_entry(self, button, remove_entry=True):
         """
         Remove a row consisting of number, color, value1, value2 and remove-button from the
         color-picker-table. The row-number is identified by the characters in the invoking buttons name,
@@ -193,6 +201,14 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         value_one = self.color_table.itemAtPosition(row_number, 3).widget()
         value_two = self.color_table.itemAtPosition(row_number, 4).widget()
         remove_button = self.color_table.itemAtPosition(row_number, 5).widget()
+
+        color_entry = color_field.text()
+        if not color_entry:
+            return
+
+        if remove_entry:
+            layer_key = self.layers_dropdown.currentText()
+            self.color_entry_manager.remove_color_entry_from_layer(color_entry, layer_key)
 
         if row_number == last_row:
             color_field.clear()

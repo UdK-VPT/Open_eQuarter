@@ -129,9 +129,9 @@ class OpenEQuarterMain:
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
-        self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
+        self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
 
-    def update_layer_positions(self):
+    def reorder_layers(self):
         """
         Reorder the layers so that they are ordered (from top to bottom) as follows:
             1. investigation_area
@@ -220,7 +220,7 @@ class OpenEQuarterMain:
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
         self.iface.removeToolBarIcon(self.testing_action)
-        self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.update_layer_positions)
+        self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
 
     def create_project_ifNotExists(self):
         """
@@ -589,6 +589,7 @@ class OpenEQuarterMain:
         dropdown = self.color_picker_dlg.layers_dropdown
         dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
         dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
+        layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0)
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
 
@@ -605,6 +606,7 @@ class OpenEQuarterMain:
         else:
             self.color_picker_dlg.__init__()
             self.iface.actionPan().trigger()
+            self.reorder_layers()
 
     # step 4.0
     def handle_temp_pointlayer_created(self):
@@ -634,7 +636,7 @@ class OpenEQuarterMain:
         sampling_points_layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
         full_out_path = os.path.join(self.project_path, config.pst_input_layer_name)
         layer_interaction.write_vector_layer_to_disk(sampling_points_layer, full_out_path)
-        self.update_layer_positions()
+        self.reorder_layers()
         return True
 
     # step 4.4

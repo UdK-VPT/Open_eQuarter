@@ -1,5 +1,9 @@
+import os
+
 from platform import system
 from qgis.core import QgsRectangle
+
+import mole
 
 # Project information
 project_crs = 'EPSG:3857'
@@ -31,6 +35,11 @@ housing_layer_name = 'Floor plan'
 housing_coordinate_layer_name = ''
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
+
+
+### Default paths
+plugin_dir = os.path.dirname(mole.__file__)
+progress_model = os.path.join(plugin_dir, 'project', 'default_progress')
 
 
 def qgis_prefix_path():

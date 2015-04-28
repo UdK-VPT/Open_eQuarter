@@ -1,0 +1,9 @@
+{"section_name": "sampling_points", "description" : "", "steplist":
+[
+  {"step_name": "temp_pointlayer_created", "description" : "", "state": 0},
+  {"step_name": "editing_temp_pointlayer_started", "description" : "", "state": 0},
+  {"step_name": "points_of_interest_defined", "description" : "", "state": 0},
+  {"step_name": "editing_temp_pointlayer_stopped", "description" : "", "state": 0},
+  {"step_name": "information_sampled", "description" : "", "state": 0}
+]
+}

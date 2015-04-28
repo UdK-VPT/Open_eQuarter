@@ -1,0 +1,8 @@
+{"section_name": "investigation_area", "description" : "", "steplist":
+[
+  {"step_name": "temp_shapefile_created", "description" : "", "state": 0},
+  {"step_name": "editing_temp_shapefile_started", "description" : "", "state": 0},
+  {"step_name": "investigation_area_selected", "description" : "", "state": 0},
+  {"step_name": "editing_temp_shapefile_stopped", "description" : "", "state": 0}
+]
+}

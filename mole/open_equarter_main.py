@@ -33,7 +33,7 @@ from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import *
 from qgis.utils import iface
 
-from model.progress_model import ProgressModel
+from model.progress_model import ProgressModel, ProgressItemsModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
 from view.oeq_ui_classes import QProcessButton
 from qgisinteraction import plugin_interaction
@@ -52,9 +52,9 @@ class OpenEQuarterMain:
         # Save reference to the QGIS interface
         self.iface = iface
 
-        ### Plugin specific settings
-        # initialize plugin directory
-        self.plugin_dir = os.path.dirname(__file__)
+        ### Monitor the users progress
+        self.progress_model = ProgressModel()
+        self.progress_items_model = ProgressItemsModel()
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
@@ -77,10 +77,7 @@ class OpenEQuarterMain:
 
         ### Default values
         # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project', 'oeq_ia_style.qml')
-
-        ### Monitor the users progress
-        self.progress_model = ProgressModel()
+        self.investigation_shape_layer_style = os.path.join(config.plugin_dir, 'project', 'oeq_ia_style.qml')
 
     def initGui(self):
         # Create action that will start plugin configuration
@@ -127,6 +124,12 @@ class OpenEQuarterMain:
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
         self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
+
+        #ToDo Move to View-Class later
+        self.main_process_dock.process_page = QStackedWidget()
+        stack = self.main_process_dock.process_page
+        for list_view in self.progress_items_model.section_models:
+            stack.addWidget(list_view)
 
     def reorder_layers(self):
         """

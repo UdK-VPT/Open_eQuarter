@@ -1,0 +1,7 @@
+{"section_name": "real_estate_cadaster", "description" : "", "steplist":
+[
+  {"step_name": "raster_loaded", "description" : "", "state": 0},
+  {"step_name": "extent_clipped", "description" : "", "state": 0},
+  {"step_name": "legend_created", "description" : "", "state": 0}
+]
+}

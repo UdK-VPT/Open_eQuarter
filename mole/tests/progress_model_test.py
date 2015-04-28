@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 from mole.model.progress_model import *
 
@@ -155,6 +156,18 @@ class ProgressModel_test(unittest.TestCase):
         self.assertEqual(step_list.intersection(set(self._steps1)), set(self._steps1))
         self.assertEqual(step_list.intersection(set(self._steps2)), set(self._steps2))
         self.assertEqual(step_list.intersection(set(self._steps3)), set(self._steps3))
+
+
+class ProgressItemsModel_test(unittest.TestCase):
+
+    def setUp(self):
+        self.app = QApplication(sys.argv)
+        self.pim = ProgressItemsModel()
+
+    def test_if_pim_was_initialised_according_json_file(self):
+        self.assertEqual(len(self.pim.section_models), 5)
+
+
 
 if __name__ == '__main__':
     unittest.main()

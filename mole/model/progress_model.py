@@ -1,4 +1,11 @@
+import io
+import os
+import json
+
 from collections import OrderedDict
+from PyQt4.QtGui import *
+
+from mole.project import config
 
 
 class ProgressModel(object):
@@ -138,3 +145,37 @@ class ProgressModel(object):
         :rtype:
         """
         return self.get_progress_list()[self.get_position_of_step(step)]
+
+
+class ProgressItemsModel():
+    def __init__(self):
+        self.section_models = []
+        self.load_section_models(config.progress_model)
+
+    def load_section_models(self, path):
+        try:
+            dir_entries = map(lambda entry: os.path.join(path, entry), os.listdir(path))
+            files = filter(lambda entry: os.path.isfile(entry) and entry.endswith('.json'), dir_entries)
+
+            for json_section in files:
+                data = io.open(json_section)
+                json_data = json.load(data)
+
+                step_items = QListView()
+                step_items.setAccessibleName(json_data['section_name'])
+                section_model = QStandardItemModel(step_items)
+
+                for step in json_data['steplist']:
+                    item = QStandardItem(step['step_name'])
+                    item.setCheckable(True)
+                    item.setTristate(True)
+                    item.setAccessibleText(step['description'])
+                    item.setCheckState(step['state'])
+                    section_model.appendRow(item)
+
+                self.section_models.append(step_items)
+
+                data.close()
+
+        except IOError, FileNotFoundError:
+            print(self.__module__, FileNotFoundError)

@@ -1,0 +1,8 @@
+{"section_name": "project_basics", "description": "", "steplist":
+[
+  {"step_name": "ol_plugin_installed", "description": "", "state": 0},
+  {"step_name": "pst_plugin_installed", "description": "", "state": 0},
+  {"step_name": "project_created", "description": "", "state": 0},
+  {"step_name": "osm_layer_loaded", "description": "", "state": 0}
+]
+}

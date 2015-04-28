@@ -79,7 +79,7 @@ class MunicipalInformationParser():
 
         mole_path = mole.__file__
         mole_path = os.path.dirname(mole_path)
-        municipal_json_path = os.path.join(mole_path, 'project_data', 'municipal_db.json')
+        municipal_json_path = os.path.join(mole_path, 'project', 'municipal_db.json')
         self.municipal_json_file = municipal_json_path
 
     def parse_municipal(self, postcode):
@@ -112,7 +112,7 @@ class MunicipalInformationTree():
         self.tree = {}
         mole_path = mole.__file__
         mole_path = os.path.dirname(mole_path)
-        municipal_json_path = os.path.join(mole_path, 'project_data', 'municipal_db.json')
+        municipal_json_path = os.path.join(mole_path, 'project', 'municipal_db.json')
         self.municipal_json_file = municipal_json_path
 
     def find_keys_on_level(self, level):

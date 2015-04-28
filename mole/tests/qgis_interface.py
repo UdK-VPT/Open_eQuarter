@@ -13,16 +13,15 @@
      Copyright (c) 2014 Tim Sutton, tim@linfiniti.com
 
 """
-from qgis._core import QgsVectorLayer
-from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QCoreApplication, QSize
-from PyQt4.QtGui import QWidget
-from qgis.core import QgsMapLayerRegistry, QgsApplication, QgsVectorLayer
-from qgis.gui import QgsMapCanvasLayer, QgsMapCanvas
-
 import logging
 import sys
 
-from mole import config
+from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QCoreApplication
+from qgis.core import QgsMapLayerRegistry, QgsApplication
+from qgis.gui import QgsMapCanvasLayer
+
+from mole.project import config
+
 
 LOGGER = logging.getLogger('QGIS')
 

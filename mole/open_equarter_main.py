@@ -20,18 +20,18 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from PyQt4.QtGui import *
-from PyQt4.QtCore import SIGNAL, Qt, QSettings
-from qgis.gui import QgsMapToolEmitPoint
-from qgis.core import *
-from qgis.utils import iface
 from socket import gaierror
-
 import sys
 import httplib
 import unittest
 import time
 import os
+
+from PyQt4.QtGui import *
+from PyQt4.QtCore import SIGNAL, Qt, QSettings
+from qgis.gui import QgsMapToolEmitPoint
+from qgis.core import *
+from qgis.utils import iface
 
 from model.progress_model import ProgressModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
@@ -43,7 +43,7 @@ from qgisinteraction import raster_layer_interaction
 from qgisinteraction import project_interaction
 from ExportWMSasTif import ExportWMSasTif
 from tests import layer_interaction_test
-import config
+from mole.project import config
 
 
 class OpenEQuarterMain:
@@ -67,20 +67,17 @@ class OpenEQuarterMain:
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = Modular_dialog()
 
-
         ### Project specific settings
         # the project path equals './' as long as the project has not been saved
         self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
         self.oeq_project = ''
 
-
         # OpenStreetMap-plugin-layer
         self.open_layer = None
 
-
         ### Default values
         # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project_data', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(self.plugin_dir, 'project', 'oeq_ia_style.qml')
 
         ### Monitor the users progress
         self.progress_model = ProgressModel()
@@ -234,7 +231,6 @@ class OpenEQuarterMain:
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
-                self.get_default_extent_by_zip_code()
                 iface.actionSaveProjectAs().trigger()
                 self.project_path = QgsProject.instance().readPath('./')
 
@@ -268,7 +264,7 @@ class OpenEQuarterMain:
             self.iface.actionZoomToLayer().trigger()
 
         except None, Error:
-            print(self.__module__, 'Could nor zoom to default extent: {}'.format(Error))
+            print(self.__module__, 'Could not zoom to default extent: {}'.format(Error))
 
     def confirm_selection_of_investigation_area(self, layer_name):
         """

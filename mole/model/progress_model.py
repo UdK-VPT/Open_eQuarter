@@ -3,7 +3,8 @@ import os
 import json
 
 from collections import OrderedDict
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
+from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
@@ -164,6 +165,8 @@ class ProgressItemsModel():
                 step_items = QListView()
                 step_items.setItemDelegate(QProcessViewDelegate(step_items))
                 step_items.setAccessibleName(json_data['description'])
+                step_items.setGridSize(QSize(320,40))
+                step_items.setSpacing(5)
                 section_model = QStandardItemModel(step_items)
 
                 for step in json_data['steplist']:

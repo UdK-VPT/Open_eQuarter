@@ -13,8 +13,6 @@ class QProcessViewDelegate(QItemDelegate):
 
     def __init__(self, parent):
         QItemDelegate.__init__(self, parent)
-        self.item_spacing = 30
-        self.max_width = 320
         self.margin_left = 5
         self.icon_size = 17
 
@@ -23,23 +21,16 @@ class QProcessViewDelegate(QItemDelegate):
         item = model.item(index.row())
         text = item.text()
 
-        x = option.rect.x() + 2*self.margin_left + self.icon_size
-
-        if index.row() == 0:
-            y = option.rect.y() + self.item_spacing / 4
-        else:
-            y = option.rect.y() + (self.item_spacing * index.row())
-
+        x = option.rect.x() + 2 * self.margin_left + self.icon_size
         rectangle = QRect(option.rect)
         rectangle.setX(x)
-        rectangle.setY(y)
-        rectangle.setWidth(self.max_width)
-        rectangle.setHeight(self.item_spacing)
-        print(rectangle)
+
         painter.drawText(rectangle, Qt.AlignLeft, text)
 
         x = x - self.margin_left - self.icon_size
+        y = rectangle.y() - 1
         rectangle.setX(x)
+        rectangle.setY(y)
 
         self.drawCheck(painter, option, rectangle, item.checkState())
 

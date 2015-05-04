@@ -1,5 +1,5 @@
-from PyQt4.QtGui import QLabel, QPushButton, QLineEdit
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QLabel, QPushButton, QLineEdit, QItemDelegate, QIcon
+from PyQt4.QtCore import SIGNAL, QSize, QPoint, QRect
 from PyQt4 import QtCore
 
 try:
@@ -7,6 +7,38 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
+
+
+class QProcessViewDelegate(QItemDelegate):
+
+    def __init__(self, parent):
+        QItemDelegate.__init__(self, parent)
+        self.item_spacing = 40
+        self.max_width = 320
+
+    # def paint(self, painter, style_option, index):
+    #     index.model()
+    #
+    # def drawDisplay(self, painter, style_option, rectangle, text):
+    #     item_offset = rectangle.y() / 18
+    #     x = rectangle.x()
+    #     y = item_offset * self.item_spacing
+    #     painter.drawText(x, y, text)
+
+    def drawCheck(self, painter, style_option, rectangle, check_state):
+        item_offset = rectangle.y() / 18
+        start_point = QPoint(rectangle.x(), item_offset * self.item_spacing)
+        size = QSize(17,17)
+        pixmap = None
+
+        if check_state == 0:
+            pixmap = QIcon(":/Controls/icons/openmark.png").pixmap(size)
+        if check_state == 1:
+            pixmap = QIcon(":/Controls/icons/semiopenmark.png").pixmap(size)
+        elif check_state == 2:
+            pixmap = QIcon(":/Controls/icons/checkmark.png").pixmap(size)
+
+        painter.drawPixmap(start_point, pixmap)
 
 
 class QClickableLabel(QLabel):

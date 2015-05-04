@@ -1,8 +1,8 @@
-{"section_name": "project_basics", "description": "", "steplist":
+{"section_name": "project_basics", "description": "Project Basics", "steplist":
 [
-  {"step_name": "ol_plugin_installed", "description": "", "state": 0},
-  {"step_name": "pst_plugin_installed", "description": "", "state": 0},
-  {"step_name": "project_created", "description": "", "state": 0},
-  {"step_name": "osm_layer_loaded", "description": "", "state": 0}
+  {"step_name": "ol_plugin_installed", "description": "Install the \"Open Street Map\"-Plugin", "state": 0},
+  {"step_name": "pst_plugin_installed", "description": "Install the \"Point Sampling Tool\"-Plugin", "state": 0},
+  {"step_name": "project_created", "description": "Create a new project and save it", "state": 0},
+  {"step_name": "osm_layer_loaded", "description": "Open an Open Layers Map", "state": 0}
 ]
 }

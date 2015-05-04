@@ -267,38 +267,27 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
 
 class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
 
-    def __init__(self):
+    def __init__(self, progress_model):
         QDockWidget.__init__(self)
         self.setupUi(self)
         self.selection_to_page = OrderedDict([])
         self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
+        self.progress_model = progress_model
 
-        page_triples = []
-
-        # put each page-widget in a list of triples, as they are not sorted properly
-        for page in self.process_page.children():
-            if isinstance(page, QWidget):
-                index = self.process_page.indexOf(page)
-                page_triples.append((index, page.accessibleName(), page))
-
-        page_triples_sorted = sorted(page_triples, key=lambda tup: tup[0])
-        self.selection_to_page = OrderedDict(map(lambda trip: trip[1:], page_triples_sorted))
-
-
-        # add page-names to according position in dropdown-menu, so the user can navigate through the process
-        for page_number, page in enumerate(self.selection_to_page.keys()):
-            self.active_page_dropdown.addItem(page)
-            self.active_page_dropdown.setItemData(page_number, self._open_mark, Qt.DecorationRole)
+        for dropdown_index, list_view in enumerate(self.progress_model.section_models):
+            self.process_page.addWidget(list_view)
+            self.active_page_dropdown.addItem(list_view.accessibleName())
+            self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, Qt.DecorationRole)
 
         self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
 
-        # set the currently displayed widget to the first process-page, otherwise the correct display is not guaranteed
-        self.process_page.setCurrentWidget(self.selection_to_page.values()[0])
 
     def go_to_page(self, selection_name):
-        [self.process_page.setCurrentWidget(page)
-         for page in self.selection_to_page.values() if selection_name == page.accessibleName()]
+        for child in self.process_page.children():
+            if isinstance(child, QListView) and child.accessibleName() == selection_name:
+                self.process_page.setCurrentWidget(child)
+                break
 
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
         if isinstance(check_yes_no, bool):

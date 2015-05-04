@@ -6,7 +6,7 @@ from collections import OrderedDict
 from PyQt4.QtGui import *
 
 from mole.project import config
-
+from mole.view.oeq_ui_classes import QProcessViewDelegate
 
 class ProgressModel(object):
     def __init__(self, save_file='default'):
@@ -162,17 +162,20 @@ class ProgressItemsModel():
                 json_data = json.load(data)
 
                 step_items = QListView()
-                step_items.setAccessibleName(json_data['section_name'])
+                step_items.setItemDelegate(QProcessViewDelegate(step_items))
+                step_items.setAccessibleName(json_data['description'])
                 section_model = QStandardItemModel(step_items)
 
                 for step in json_data['steplist']:
-                    item = QStandardItem(step['step_name'])
+                    item = QStandardItem(step['description'])
                     item.setCheckable(True)
                     item.setTristate(True)
-                    item.setAccessibleText(step['description'])
+                    item.setEditable(False)
+                    item.setAccessibleText(step['step_name'])
                     item.setCheckState(step['state'])
                     section_model.appendRow(item)
 
+                step_items.setModel(section_model)
                 self.section_models.append(step_items)
 
                 data.close()

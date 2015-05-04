@@ -1,6 +1,6 @@
-{"section_name": "building_shapes", "description" : "", "steplist":
+{"section_name": "building_shapes", "description" : "Building Shapes", "steplist":
 [
-  {"step_name": "housing_layer_loaded", "description" : "", "state": 0},
-  {"step_name": "building_coordinates_loaded", "description" : "", "state": 0}
+  {"step_name": "housing_layer_loaded", "description" : "Load a floor plan layer (\"Hausumringe\")", "state": 0},
+  {"step_name": "building_coordinates_loaded", "description" : "Load building coordinates", "state": 0}
 ]
 }

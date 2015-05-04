@@ -1,7 +1,7 @@
-{"section_name": "real_estate_cadaster", "description" : "", "steplist":
+{"section_name": "real_estate_cadaster", "description" : "Real Estate Cadaster", "steplist":
 [
-  {"step_name": "raster_loaded", "description" : "", "state": 0},
-  {"step_name": "extent_clipped", "description" : "", "state": 0},
-  {"step_name": "legend_created", "description" : "", "state": 0}
+  {"step_name": "raster_loaded", "description" : "Load a new (WMS) raster-map", "state": 0},
+  {"step_name": "extent_clipped", "description" : "Export the investigation areas extent as .tif", "state": 0},
+  {"step_name": "legend_created", "description" : "Create a legend for the clipped .tif-file", "state": 0}
 ]
 }

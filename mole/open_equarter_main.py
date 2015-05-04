@@ -58,7 +58,7 @@ class OpenEQuarterMain:
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
-        self.main_process_dock = MainProcess_dock()
+        self.main_process_dock = MainProcess_dock(self.progress_items_model)
         self.oeq_project_settings_form = ProjectSettings_form()
         self.color_picker_dlg = ColorPicker_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
@@ -124,12 +124,6 @@ class OpenEQuarterMain:
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
         self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
-
-        #ToDo Move to View-Class later
-        self.main_process_dock.process_page = QStackedWidget()
-        stack = self.main_process_dock.process_page
-        for list_view in self.progress_items_model.section_models:
-            stack.addWidget(list_view)
 
     def reorder_layers(self):
         """

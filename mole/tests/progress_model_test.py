@@ -167,6 +167,15 @@ class ProgressItemsModel_test(unittest.TestCase):
     def test_if_pim_was_initialised_according_json_file(self):
         self.assertEqual(len(self.pim.section_models), 5)
 
+        names = ['Project Basics', 'Investigation Area', 'Building Shapes', 'Real Estate Cadaster', 'Sampling Points']
+        rows = [4, 4, 2, 3, 5]
+        for index, section in enumerate(self.pim.section_models):
+            self.assertEqual(section.accessibleName(), names[index])
+            self.assertEqual(section.model().rowCount(), rows[index])
+
+
+
+
 
 
 if __name__ == '__main__':

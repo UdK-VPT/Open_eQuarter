@@ -1,5 +1,5 @@
 from PyQt4.QtGui import QLabel, QPushButton, QLineEdit, QItemDelegate, QIcon
-from PyQt4.QtCore import SIGNAL, QSize, QPoint, QRect
+from PyQt4.QtCore import SIGNAL, QSize, QPoint, QRect, Qt
 from PyQt4 import QtCore
 
 try:
@@ -13,22 +13,39 @@ class QProcessViewDelegate(QItemDelegate):
 
     def __init__(self, parent):
         QItemDelegate.__init__(self, parent)
-        self.item_spacing = 40
+        self.item_spacing = 30
         self.max_width = 320
+        self.margin_left = 5
+        self.icon_size = 17
 
-    # def paint(self, painter, style_option, index):
-    #     index.model()
-    #
-    # def drawDisplay(self, painter, style_option, rectangle, text):
-    #     item_offset = rectangle.y() / 18
-    #     x = rectangle.x()
-    #     y = item_offset * self.item_spacing
-    #     painter.drawText(x, y, text)
+    def paint(self, painter, option, index):
+        model = index.model()
+        item = model.item(index.row())
+        text = item.text()
+
+        x = option.rect.x() + 2*self.margin_left + self.icon_size
+
+        if index.row() == 0:
+            y = option.rect.y() + self.item_spacing / 4
+        else:
+            y = option.rect.y() + (self.item_spacing * index.row())
+
+        rectangle = QRect(option.rect)
+        rectangle.setX(x)
+        rectangle.setY(y)
+        rectangle.setWidth(self.max_width)
+        rectangle.setHeight(self.item_spacing)
+        print(rectangle)
+        painter.drawText(rectangle, Qt.AlignLeft, text)
+
+        x = x - self.margin_left - self.icon_size
+        rectangle.setX(x)
+
+        self.drawCheck(painter, option, rectangle, item.checkState())
 
     def drawCheck(self, painter, style_option, rectangle, check_state):
-        item_offset = rectangle.y() / 18
-        start_point = QPoint(rectangle.x(), item_offset * self.item_spacing)
-        size = QSize(17,17)
+        start_point = QPoint(rectangle.x(), rectangle.y())
+        size = QSize(self.icon_size, self.icon_size)
         pixmap = None
 
         if check_state == 0:

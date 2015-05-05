@@ -150,7 +150,7 @@ class ProgressModel(object):
 
 class ProgressItemsModel():
     def __init__(self):
-        self.section_models = []
+        self.section_views = []
         self.load_section_models(config.progress_model)
 
     def load_section_models(self, path):
@@ -179,9 +179,38 @@ class ProgressItemsModel():
                     section_model.appendRow(item)
 
                 step_items.setModel(section_model)
-                self.section_models.append(step_items)
+                self.section_views.append(step_items)
 
                 data.close()
 
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
+
+    def check_prerequisites_of(self, step_name):
+        """
+        Check whether every previous step has a checkState of 2 (including steps in previous models)
+        :param step_name: Name of the step to which the process is checked
+        :type step_name: str
+        :return: Whether the predecessing steps have a checkState of 2
+        :rtype: bool
+        """
+        first_section = self.section_views[0].model()
+        if step_name == first_section.item(0).accessibleText():
+            return True
+
+        prereq_given = True
+        for view in self.section_views:
+            section = view.model()
+
+            i = 0
+            while section.item(i) and prereq_given:
+                item = section.item(i)
+                if step_name == item.accessibleText():
+                    return prereq_given
+                else:
+                    item_done = True if item.checkState() == 2 else False
+                    prereq_given = prereq_given and item_done
+                    i += 1
+
+            if not prereq_given:
+                return False

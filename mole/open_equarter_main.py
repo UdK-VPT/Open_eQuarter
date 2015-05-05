@@ -105,10 +105,9 @@ class OpenEQuarterMain:
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
         self.main_process_dock.process_button_auto.clicked.connect(self.auto_run)
 
-        for page in self.main_process_dock.selection_to_page.values():
-            for button in page.children():
-                if isinstance(button, QProcessButton):
-                    self.main_process_dock.connect(button, SIGNAL('process_button_click'), self.process_button_clicked)
+        sections = self.progress_items_model.section_views
+        for list_view in sections:
+            list_view.clicked.connect(self.process_button_clicked)
 
         settings_dropdown_menu = QMenu()
         settings_dropdown_menu.addAction('Open project setup..', self.open_settings)
@@ -678,31 +677,34 @@ class OpenEQuarterMain:
         except IndexError, InvalidIndexError:
             print(self.__module__, InvalidIndexError)
 
-    def process_button_clicked(self, *args):
+    def process_button_clicked(self, model_index):
         """
-        Call the appropriate handle-function, depending on the objet which triggered the function call.
-        :param args: The sender name and the sender object in a list
-        :type args: list
+        Call the appropriate handle-function, depending on the QStandardItem which triggered the function call.
+        :param model_index: The senders model_index
+        :type model_index: QModelIndex
         :return:
         :rtype:
         """
-        sender_name = args[0]
-        sender_object = args[1]
-        next_step = sender_name[:-8]
+        model = model_index.model()
+        row = model_index.row()
+        item = model.item(row)
+        clicked_step = item.accessibleText()
 
-        next_page = sender_object.parent()
-        next_section = next_page.objectName()[0:-5]
+        # next_page = sender_object.parent()
+        # next_section = next_page.objectName()[0:-5]
 
         # for debugging uncomment the following line
         if True:
         #if self.progress_model.prerequisites_are_given(next_step) or True:
-            handler = 'handle_' + next_step
-            next_call = getattr(self, handler)
+            handler = 'handle_' + clicked_step
+            step_call = getattr(self, handler)
 
-            is_done = next_call()
-            self.progress_model.update_progress(next_section, next_step, is_done)
-            self.main_process_dock.go_to_page(next_page.accessibleName())
-            self.main_process_dock.set_checkbox_on_page(next_step + '_chckBox', next_section + '_page', is_done)
+            is_done = step_call()
+            # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
+            if is_done:
+                item.setCheckState(2)
+            else:
+                item.setCheckState(0)
 
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)

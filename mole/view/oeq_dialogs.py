@@ -21,7 +21,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-from collections import OrderedDict
 from functools import partial
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -270,7 +269,6 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
     def __init__(self, progress_model):
         QDockWidget.__init__(self)
         self.setupUi(self)
-        self.selection_to_page = OrderedDict([])
         self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self.progress_model = progress_model
@@ -279,9 +277,25 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
             self.process_page.addWidget(list_view)
             self.active_page_dropdown.addItem(list_view.accessibleName())
             self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, Qt.DecorationRole)
+            list_view.model().itemChanged.connect(self.check_progress_status)
 
         self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
 
+    def check_progress_status(self, changed_item):
+        model = changed_item.model()
+        section_done = True
+        index = 0
+        while model.item(index) and section_done:
+            item_done = model.item(index).checkState()
+            section_done = section_done and item_done
+            index += 1
+
+        if section_done:
+            current_index = self.active_page_dropdown.currentIndex()
+            self.active_page_dropdown.setItemData(current_index, self._check_mark, Qt.DecorationRole)
+        else:
+            current_index = self.active_page_dropdown.currentIndex()
+            self.active_page_dropdown.setItemData(current_index, self._open_mark, Qt.DecorationRole)
 
     def go_to_page(self, selection_name):
         for child in self.process_page.children():

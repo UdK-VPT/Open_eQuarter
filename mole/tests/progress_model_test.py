@@ -191,33 +191,37 @@ class ProgressItemsModel_test(unittest.TestCase):
                 self.assertEqual(section.model().rowCount(), len(steps))
 
     def test_if_prerequisites_are_checked_correctly(self):
-        prereq_of_first_section = self.pim.check_prerequisites_of(self._steps0[0])
-        self.assertTrue(prereq_of_first_section)
+        step_name = self._steps0[0]
+        prereq_of_first_section = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(prereq_of_first_section, step_name)
 
-        last_step_first_section = self.pim.check_prerequisites_of(self._steps0[-1])
-        self.assertFalse(last_step_first_section)
+        step_name = self._steps0[-1]
+        last_step_first_section_fails_due_to_first = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(last_step_first_section_fails_due_to_first, self._steps0[0])
 
         section_model = self.pim.section_views[0].model()
         end = len(self._steps0) - 1
         self.set_prerequisites(section_model, 0, end)
-        last_step_first_section = self.pim.check_prerequisites_of(self._steps0[-1])
-        self.assertTrue(last_step_first_section)
+        last_step_first_section = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(last_step_first_section, step_name)
 
+        step_name = self._steps1[0]
         self.set_prerequisites(section_model, 0, len(self._steps0))
-        first_step_second_section = self.pim.check_prerequisites_of(self._steps1[0])
-        self.assertTrue(first_step_second_section)
+        first_step_second_section = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(first_step_second_section, step_name)
 
         section_model = self.pim.section_views[1].model()
         self.set_prerequisites(section_model, 0, len(self._steps1))
         section_model = self.pim.section_views[2].model()
         self.set_prerequisites(section_model, 0, 1)
 
-        second_step_third_section = self.pim.check_prerequisites_of(self._steps2[1])
-        self.assertTrue(second_step_third_section)
+        step_name = self._steps2[1]
+        second_step_third_section = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(second_step_third_section, step_name)
 
         self.set_prerequisites(section_model, 0, 1, 0)
-        second_step_third_section = self.pim.check_prerequisites_of(self._steps2[1])
-        self.assertFalse(second_step_third_section)
+        second_step_third_section_fails_due_to_first = self.pim.check_prerequisites_of(step_name)
+        self.assertEqual(second_step_third_section_fails_due_to_first, self._steps2[0])
 
 
 if __name__ == '__main__':

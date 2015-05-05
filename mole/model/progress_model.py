@@ -191,12 +191,13 @@ class ProgressItemsModel():
         Check whether every previous step has a checkState of 2 (including steps in previous models)
         :param step_name: Name of the step to which the process is checked
         :type step_name: str
-        :return: Whether the predecessing steps have a checkState of 2
-        :rtype: bool
+        :return: The name of the first step, which does not have a checkState set to 2
+        :rtype: str
         """
         first_section = self.section_views[0].model()
-        if step_name == first_section.item(0).accessibleText():
-            return True
+        item_name = first_section.item(0).accessibleText()
+        if step_name == item_name:
+            return item_name
 
         prereq_given = True
         for view in self.section_views:
@@ -205,12 +206,13 @@ class ProgressItemsModel():
             i = 0
             while section.item(i) and prereq_given:
                 item = section.item(i)
-                if step_name == item.accessibleText():
-                    return prereq_given
+                item_name = item.accessibleText()
+                if step_name == item_name:
+                    return item_name
                 else:
                     item_done = True if item.checkState() == 2 else False
                     prereq_given = prereq_given and item_done
                     i += 1
 
             if not prereq_given:
-                return False
+                return item_name

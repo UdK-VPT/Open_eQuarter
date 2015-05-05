@@ -273,7 +273,7 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
         self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self.progress_model = progress_model
 
-        for dropdown_index, list_view in enumerate(self.progress_model.section_models):
+        for dropdown_index, list_view in enumerate(self.progress_model.section_views):
             self.process_page.addWidget(list_view)
             self.active_page_dropdown.addItem(list_view.accessibleName())
             self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, Qt.DecorationRole)

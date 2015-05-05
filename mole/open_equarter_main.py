@@ -653,29 +653,50 @@ class OpenEQuarterMain:
 
     def continue_process(self):
         """
-        Call the appropriate handle-function, depending on the progress-step, that shall has to be executed next.
+        Call the appropriate handle-function, depending on the progress-step, that has to be executed next.
         :return:
         :rtype:
         """
-        try:
-            next_open_step_no = self.progress_model.last_step_executed + 1
-            next_open_step = self.progress_model.get_step_list()[next_open_step_no]
+        last_view = self.progress_items_model.section_views[-1]
 
-            step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
-            step_section = step_page.objectName()[0:-5]
+        i = 0
+        while last_view.model().item(i):
+            i += 1
 
-            if self.progress_model.prerequisites_are_given(next_open_step):
-                handler = 'handle_' + next_open_step
-                next_call = getattr(self, handler)
+        last_step_name = last_view.model().item(i-1).accessibleText()
+        first_open_step = self.progress_items_model.check_prerequisites_of(last_step_name)
 
-                step_completed = next_call()
-                self.progress_model.update_progress(step_section, next_open_step, step_completed)
-                self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', step_completed)
+        handler = 'handle_{}'.format(first_open_step)
+        next_call = getattr(self, handler)
+        id_done = next_call()
 
-                if self.progress_model.is_section_done(step_section):
-                    self.main_process_dock.set_current_page_done(True)
-        except IndexError, InvalidIndexError:
-            print(self.__module__, InvalidIndexError)
+        #ToDo Find item by name
+        # # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
+        # if is_done:
+        #     item.setCheckState(2)
+        # else:
+        #     item.setCheckState(0)
+
+
+        # try:
+        #     next_open_step_no = self.progress_model.last_step_executed + 1
+        #     next_open_step = self.progress_model.get_step_list()[next_open_step_no]
+        #
+        #     step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
+        #     step_section = step_page.objectName()[0:-5]
+        #
+        #     if self.progress_model.prerequisites_are_given(next_open_step):
+        #         handler = 'handle_' + next_open_step
+        #         next_call = getattr(self, handler)
+        #
+        #         step_completed = next_call()
+        #         self.progress_model.update_progress(step_section, next_open_step, step_completed)
+        #         self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', step_completed)
+        #
+        #         if self.progress_model.is_section_done(step_section):
+        #             self.main_process_dock.set_current_page_done(True)
+        # except IndexError, InvalidIndexError:
+        #     print(self.__module__, InvalidIndexError)
 
     def process_button_clicked(self, model_index):
         """

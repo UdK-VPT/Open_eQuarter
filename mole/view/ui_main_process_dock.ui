@@ -39,6 +39,10 @@ QStackedWidget QAbstractButton:active {
 	border: none;
 }
 
+QListView {
+	text-align: left;
+    background-color: #f0f0f0;
+}
 #menu_bar {
 	padding: -10px;
 }
@@ -192,7 +196,7 @@ QStackedWidget QAbstractButton:active {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="project_basics_page">
        <property name="accessibleName">

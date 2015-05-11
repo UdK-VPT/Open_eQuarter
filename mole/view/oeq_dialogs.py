@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 '''
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 from functools import partial
 
@@ -34,20 +34,20 @@ from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 
 
-class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
+class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.row_offset = 1
         self.row_count = 2
-        self.connect(self.remove_entries_0, SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
+        self.connect(self.remove_entries_0, QtCore.SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
         self.parameter_name_0.textChanged.connect(self.check_character_constraint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
@@ -133,7 +133,7 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         """
         entry_number = self.row_count - self.row_offset + 1
         current_row = self.row_count
-        row_number = QLabel(self)
+        row_number = QtGui.QLabel(self)
         row_number.setObjectName('row_number_{}'.format(current_row - 1))
         row_number.setText(str(entry_number))
         self.color_table.addWidget(row_number, current_row, 0, 1, 1)
@@ -143,24 +143,24 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
         chosen_color.setObjectName('chosen_color_{}'.format(current_row - 1))
         self.color_table.addWidget(chosen_color, current_row, 1, 1, 1)
 
-        parameter_name = QLineEdit(self)
+        parameter_name = QtGui.QLineEdit(self)
         parameter_name.setObjectName('parameter_name_{}'.format(current_row - 1))
         parameter_name.setMaxLength(10)
         parameter_name.textChanged.connect(self.check_character_constraint)
         self.color_table.addWidget(parameter_name, current_row, 2, 1, 1)
 
-        value_one = QLineEdit(self)
+        value_one = QtGui.QLineEdit(self)
         value_one.setObjectName('value_one_{}'.format(current_row - 1))
         self.color_table.addWidget(value_one, current_row, 3, 1, 1)
 
-        value_two = QLineEdit(self)
+        value_two = QtGui.QLineEdit(self)
         value_two.setObjectName('value_two_{}'.format(current_row - 1))
         self.color_table.addWidget(value_two, current_row, 4, 1, 1)
 
         remove_entries = QRemoveEntryButton(self)
         remove_entries.setObjectName('remove_entries_{}'.format(current_row - 1))
         remove_entries.stylize()
-        self.connect(remove_entries, SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
+        self.connect(remove_entries, QtCore.SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
         self.color_table.addWidget(remove_entries, current_row, 5, 1, 1)
         self.row_count += 1
 
@@ -264,29 +264,33 @@ class ColorPicker_dialog(QDialog, Ui_color_picker_dialog):
             self.color_table.addWidget(remove_button, i, 5)
 
 
-class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
+class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def __init__(self, progress_model):
-        QDockWidget.__init__(self)
+        QtGui.QDockWidget.__init__(self)
         self.setupUi(self)
-        self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
-        self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
-        self._semiopen_mark = QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
+        self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
+        self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
+        self._semiopen_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
         self.progress_model = progress_model
 
         for dropdown_index, list_view in enumerate(self.progress_model.section_views):
             self.process_page.addWidget(list_view)
             self.active_page_dropdown.addItem(list_view.accessibleName())
-            self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, Qt.DecorationRole)
+            self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, QtCore.Qt.DecorationRole)
             list_view.model().itemChanged.connect(self.check_progress_status)
 
         self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
+
+        # Remove once the ui_main_process_dock was adopted to the new model
+        self.active_page_dropdown.setCurrentIndex(2)
+        self.active_page_dropdown.setCurrentIndex(0)
 
     def check_progress_status(self, changed_item):
         # explicitly check the state, since otherwise the next section gets changed, too
         if changed_item.checkState() == 1:
             current_index = self.active_page_dropdown.currentIndex()
-            self.active_page_dropdown.setItemData(current_index, self._semiopen_mark, Qt.DecorationRole)
+            self.active_page_dropdown.setItemData(current_index, self._semiopen_mark, QtCore.Qt.DecorationRole)
 
         elif changed_item.checkState() == 2:
             model = changed_item.model()
@@ -299,26 +303,26 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
 
             if section_done:
                 current_index = self.active_page_dropdown.currentIndex()
-                self.active_page_dropdown.setItemData(current_index, self._check_mark, Qt.DecorationRole)
+                self.active_page_dropdown.setItemData(current_index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex(current_index+1)
 
     def go_to_page(self, selection_name):
         for child in self.process_page.children():
-            if isinstance(child, QListView) and child.accessibleName() == selection_name:
+            if isinstance(child, QtGui.QListView) and child.accessibleName() == selection_name:
                 self.process_page.setCurrentWidget(child)
                 break
 
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
         if isinstance(check_yes_no, bool):
-            page = self.findChild(QWidget, page_name)
-            checkbox = page.findChild(QPushButton, checkbox_name)
+            page = self.findChild(QtGui.QWidget, page_name)
+            checkbox = page.findChild(QtGui.QPushButton, checkbox_name)
 
             if checkbox:
                 checkbox.setChecked(check_yes_no)
 
     def is_checkbox_on_page_checked(self, checkbox_name, page_name):
-        page = self.process_page.findChild(QWidget, page_name)
-        return page.findChild(QPushButton, checkbox_name).isChecked()
+        page = self.process_page.findChild(QtGui.QWidget, page_name)
+        return page.findChild(QtGui.QPushButton, checkbox_name).isChecked()
 
     def set_current_page_done(self, value):
         if isinstance(value, bool):
@@ -331,23 +335,23 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
 
 
-class ProjectDoesNotExist_dialog(QDialog, Ui_ProjectDoesNotExist_dialog):
+class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
 
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
 
-class ProjectSettings_form(QDialog, Ui_project_settings_form):
+class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -362,7 +366,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
         if self.municipal_information.tree == {}:
             self.municipal_information.split_data_to_tree_model()
 
-        for field in self.form.findChildren(QLineEdit)[:]:
+        for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
 
@@ -401,7 +405,7 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
     def fill_municipal_information(self, index):
         municipal = self.municipals[index]
 
-        if issubclass(type(self.location_city), QLineEdit):
+        if issubclass(type(self.location_city), QtGui.QLineEdit):
             city_name = _fromUtf8(municipal['NAME'])
             self.location_city.setText(city_name)
 
@@ -420,34 +424,34 @@ class ProjectSettings_form(QDialog, Ui_project_settings_form):
 
 
     def combobox_city_layout(self):
-        location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if isinstance(city_edit, QLineEdit):
+        if isinstance(city_edit, QtGui.QLineEdit):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
-            self.location_city = QComboBox()
+            self.location_city = QtGui.QComboBox()
             self.location_city.setObjectName('location_city')
             self.location_city.setMinimumWidth(228)
             location_box.insertWidget(0, self.location_city)
 
     def lineedit_city_layout(self):
-        location_box = self.gridLayout.findChild(QHBoxLayout, 'location_layout')
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if isinstance(city_edit, QComboBox):
+        if isinstance(city_edit, QtGui.QComboBox):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
-            self.location_city = QLineEdit(self.form)
+            self.location_city = QtGui.QLineEdit(self.form)
             self.location_city.setMinimumWidth(228)
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)
 
 
-class ModularInfo_dialog(QDialog, Ui_ModularInfo_dialog):
+class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -455,12 +459,12 @@ class ModularInfo_dialog(QDialog, Ui_ModularInfo_dialog):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
 
-class Modular_dialog(QDialog, Ui_Modular_dialog):
+class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -469,9 +473,9 @@ class Modular_dialog(QDialog, Ui_Modular_dialog):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.setContentsMargins(500, 500, 0, 0)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.help_dialog = ModularInfo_dialog()
-        self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
+        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
 
     def set_dialog_text(self, text, title=""):
 
@@ -485,12 +489,12 @@ class Modular_dialog(QDialog, Ui_Modular_dialog):
 
             html_postfix = "</p>"
             browser_text = html_prefix + text + html_postfix
-            self.textBrowser.setHtml(QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))
+            self.textBrowser.setHtml(QtGui.QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))
 
 
-class RequestWmsUrl_dialog(QDialog, Ui_RequestWmsUrl_dialog):
+class RequestWmsUrl_dialog(QtGui.QDialog, Ui_RequestWmsUrl_dialog):
     def __init__(self):
-        QDialog.__init__(self)
+        QtGui.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see

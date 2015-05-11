@@ -33,9 +33,8 @@ from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import *
 from qgis.utils import iface
 
-from model.progress_model import ProgressModel, ProgressItemsModel
+from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
-from view.oeq_ui_classes import QProcessButton
 from qgisinteraction import plugin_interaction
 from qgisinteraction.plugin_interaction import PstInteraction, OlInteraction
 from qgisinteraction import layer_interaction
@@ -53,7 +52,6 @@ class OpenEQuarterMain:
         self.iface = iface
 
         ### Monitor the users progress
-        self.progress_model = ProgressModel()
         self.progress_items_model = ProgressItemsModel()
 
         ### UI specific settings
@@ -664,39 +662,18 @@ class OpenEQuarterMain:
             i += 1
 
         last_step_name = last_view.model().item(i-1).accessibleText()
-        first_open_step = self.progress_items_model.check_prerequisites_of(last_step_name)
+        first_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
+        first_open_item.setCheckState(1)
 
-        handler = 'handle_{}'.format(first_open_step)
+        handler = 'handle_{}'.format(first_open_item.accessibleText())
         next_call = getattr(self, handler)
-        id_done = next_call()
+        is_done = next_call()
 
-        #ToDo Find item by name
-        # # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
-        # if is_done:
-        #     item.setCheckState(2)
-        # else:
-        #     item.setCheckState(0)
-
-
-        # try:
-        #     next_open_step_no = self.progress_model.last_step_executed + 1
-        #     next_open_step = self.progress_model.get_step_list()[next_open_step_no]
-        #
-        #     step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
-        #     step_section = step_page.objectName()[0:-5]
-        #
-        #     if self.progress_model.prerequisites_are_given(next_open_step):
-        #         handler = 'handle_' + next_open_step
-        #         next_call = getattr(self, handler)
-        #
-        #         step_completed = next_call()
-        #         self.progress_model.update_progress(step_section, next_open_step, step_completed)
-        #         self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', step_completed)
-        #
-        #         if self.progress_model.is_section_done(step_section):
-        #             self.main_process_dock.set_current_page_done(True)
-        # except IndexError, InvalidIndexError:
-        #     print(self.__module__, InvalidIndexError)
+        # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
+        if is_done:
+            first_open_item.setCheckState(2)
+        else:
+            first_open_item.setCheckState(0)
 
     def process_button_clicked(self, model_index):
         """
@@ -711,15 +688,13 @@ class OpenEQuarterMain:
         item = model.item(row)
         clicked_step = item.accessibleText()
 
-        # next_page = sender_object.parent()
-        # next_section = next_page.objectName()[0:-5]
-
         # for debugging uncomment the following line
         if True:
-        #if self.progress_model.prerequisites_are_given(next_step) or True:
+        # if self.progress_items_model.check_prerequisites_for(clicked_step):
+            item.setCheckState(1)
+
             handler = 'handle_' + clicked_step
             step_call = getattr(self, handler)
-
             is_done = step_call()
             # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
             if is_done:
@@ -799,41 +774,32 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        try:
-            next_open_step_no = self.progress_model.last_step_executed + 1
-            next_open_step = self.progress_model.get_step_list()[next_open_step_no]
+        last_view = self.progress_items_model.section_views[-1]
 
-            step_page = self.main_process_dock.findChild(QProcessButton, next_open_step + '_chckBox').parent()
-            step_section = step_page.objectName()[0:-5]
+        i = 0
+        while last_view.model().item(i):
+            i += 1
 
-            self.progress_model.update_progress(step_section, next_open_step, is_done)
-            self.main_process_dock.set_checkbox_on_page(next_open_step + '_chckBox', step_section + '_page', is_done)
+        last_step_name = last_view.model().item(i-1).accessibleText()
+        next_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
 
-            if self.progress_model.is_section_done(step_section):
-                self.main_process_dock.set_current_page_done(is_done)
-
-        except IndexError, InvalidIndexError:
-                print(self.__module__, InvalidIndexError)
+        next_open_item.setCheckState(is_done)
 
     def auto_run(self):
         """
-        Iterate through the progress step by step and successively auto-initiated each step,
+        Iterate through the progress step by step and successively auto-initiate each step,
         once its prerequisites are given.
         :return:
         :rtype:
         """
-        steps = self.progress_model.get_step_list()
-        next = self.progress_model.last_step_executed
 
-        try:
-            for i in range(len(steps)):
-                next = self.progress_model.last_step_executed + 1
-                time.sleep(0.5)
-                self.continue_process()
+        for view in self.progress_items_model.section_views:
+            model = view.model()
+            no_timeout = 20
+            i = 0
+            while model.item(i) and no_timeout:
+                if model.item(i).checkState() != 2:
+                    self.continue_process()
 
-        except IndexError, Error:
-            print(self.__module__, Error)
-
-
-
-
+                i += 1
+                no_timeout -= 1

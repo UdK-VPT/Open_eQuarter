@@ -632,7 +632,6 @@ class OpenEQuarterMain:
     # step 4.4
     def handle_information_sampled(self):
         psti = PstInteraction(iface, config.pst_plugin_name)
-
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)

@@ -1,8 +1,9 @@
-from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem
+from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsMapLayer, QgsRasterLayer
 from qgis.utils import plugins
 from os import path
 import sys
 
+from mole.qgisinteraction.layer_interaction import find_layer_by_name
 
 def get_plugin_ifexists(plugin_name):
     """
@@ -74,21 +75,35 @@ class PstInteraction(object):
 
             # Get the source-name (as displayed in the field-table) and check if it was used already
             # (the name has to be split, since it is displayed in the form 'layer_name : Band x' to get the layer_name)
-            layer_name = table.item(i, 0).text().split(' : ')[0]
+            table_index = table.rowCount()-1
+            layer_name = table.item(table_index, 0).text().split(' : ')[0]
+            layer = find_layer_by_name(layer_name)
+            if not (layer.type() == QgsMapLayer.RasterLayer and
+                    layer.rasterType() == QgsRasterLayer.Multiband and
+                    layer.bandCount() == 4):
+                sample_list.setItemSelected(sample_list.item(i), False)
+                print('deselected ' + sample_list.item(i).text())
+                continue
+
             if last_name != layer_name:
                 last_name = layer_name
                 prefix += 1
                 RGBa_index = 0
 
             # Truncate the name to a maximum of 6 characters, since QGIS limits the length of a feature's name to 10
-            # prepend prefix (with leading zero), truncated name and RGBa RGBa_appendix
-            rgba = RGBa_appendix[RGBa_index]
-            RGBa_index += 1
+            # prepend prefix (with leading zero), truncated name and RGBa-appendix
+            try:
+                rgba = RGBa_appendix[RGBa_index]
+                RGBa_index += 1
+            except IndexError as IError:
+                RGBa_index = 0
+                print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
+
             export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
 
             replacement_map[layer_name] = export_name[:-2]
             # Change the text in the table, so the pst can manage its model accordingly/appropriately
-            table.item(i, 1).setText(export_name)
+            table.item(table_index, 1).setText(export_name)
 
         return replacement_map
 

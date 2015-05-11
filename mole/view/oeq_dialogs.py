@@ -271,6 +271,7 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
         self.setupUi(self)
         self._check_mark = QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
+        self._semiopen_mark = QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
         self.progress_model = progress_model
 
         for dropdown_index, list_view in enumerate(self.progress_model.section_views):
@@ -282,20 +283,24 @@ class MainProcess_dock(QDockWidget, Ui_MainProcess_dock):
         self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
 
     def check_progress_status(self, changed_item):
-        model = changed_item.model()
-        section_done = True
-        index = 0
-        while model.item(index) and section_done:
-            item_done = model.item(index).checkState()
-            section_done = section_done and item_done
-            index += 1
+        # explicitly check the state, since otherwise the next section gets changed, too
+        if changed_item.checkState() == 1:
+            current_index = self.active_page_dropdown.currentIndex()
+            self.active_page_dropdown.setItemData(current_index, self._semiopen_mark, Qt.DecorationRole)
 
-        if section_done:
-            current_index = self.active_page_dropdown.currentIndex()
-            self.active_page_dropdown.setItemData(current_index, self._check_mark, Qt.DecorationRole)
-        else:
-            current_index = self.active_page_dropdown.currentIndex()
-            self.active_page_dropdown.setItemData(current_index, self._open_mark, Qt.DecorationRole)
+        elif changed_item.checkState() == 2:
+            model = changed_item.model()
+            section_done = True
+            index = 0
+            while model.item(index) and section_done:
+                item_done = model.item(index).checkState()
+                section_done = section_done and item_done
+                index += 1
+
+            if section_done:
+                current_index = self.active_page_dropdown.currentIndex()
+                self.active_page_dropdown.setItemData(current_index, self._check_mark, Qt.DecorationRole)
+                self.active_page_dropdown.setCurrentIndex(current_index+1)
 
     def go_to_page(self, selection_name):
         for child in self.process_page.children():

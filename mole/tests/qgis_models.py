@@ -17,7 +17,7 @@ import logging
 import sys
 
 from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal, QCoreApplication
-from qgis.core import QgsMapLayerRegistry, QgsApplication
+from qgis.core import QgsMapLayerRegistry, QgsApplication, QgsVectorLayer
 from qgis.gui import QgsMapCanvasLayer
 
 from mole.project import config
@@ -268,3 +268,25 @@ class MyMapCanvas(object):
 
     def layerCount(self):
         return len(self.layer_set)
+
+
+class HybridLayer(QgsVectorLayer):
+
+    def __init__(self, layer_type, layer_name):
+        type = '{}?crs=EPSG:3857'.format(layer_type)
+        QgsVectorLayer.__init__(self, type, layer_name, 'memory', False)
+
+    def type(self):
+        # QgsMapLayer.RasterLayer
+        return 1
+
+    def rasterType(self):
+        # QgsRasterLayer.Multiband
+        return 2
+
+    def bandCount(self):
+        # One band for each RGBa
+        return 4
+
+    def bandName(self, index):
+        return 'Band {}'.format(index)

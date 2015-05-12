@@ -5,7 +5,7 @@ import unittest
 import os
 
 from mole.qgisinteraction import project_interaction
-from qgis_interface import set_up_interface
+from qgis_models import set_up_interface
 
 class QgisProjectTest(unittest.TestCase):
 

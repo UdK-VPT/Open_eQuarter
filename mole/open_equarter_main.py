@@ -802,3 +802,6 @@ class OpenEQuarterMain:
 
                 i += 1
                 no_timeout -= 1
+
+        # execute continue process to make sure all steps were executed
+        self.continue_process()

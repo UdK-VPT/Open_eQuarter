@@ -5,7 +5,7 @@ from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsRasterLayer, QgsCo
 from qgis.utils import iface
 from PyQt4.QtCore import QVariant
 from mole.qgisinteraction import layer_interaction
-from qgis_interface import set_up_interface
+from qgis_models import set_up_interface
 
 class LayerInteraction_test(unittest.TestCase):
 

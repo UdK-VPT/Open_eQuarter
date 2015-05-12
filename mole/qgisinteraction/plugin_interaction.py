@@ -4,6 +4,7 @@ from os import path
 import sys
 
 from mole.qgisinteraction.layer_interaction import find_layer_by_name
+from mole.project import config
 
 def get_plugin_ifexists(plugin_name):
     """
@@ -61,7 +62,7 @@ class PstInteraction(object):
         table = self.pst_dialog.fieldsTable
         number_of_samples = len(sample_list)
 
-        RGBa_appendix = ['R', 'G', 'B', 'a']
+        RGBa_appendices = ['R', 'G', 'B', 'a']
         RGBa_index = 0
         last_name = ''
         prefix = 0
@@ -76,34 +77,42 @@ class PstInteraction(object):
             # Get the source-name (as displayed in the field-table) and check if it was used already
             # (the name has to be split, since it is displayed in the form 'layer_name : Band x' to get the layer_name)
             table_index = table.rowCount()-1
-            layer_name = table.item(table_index, 0).text().split(' : ')[0]
+            table_text = table.item(table_index, 0).text().split(' : ')
+            layer_name = table_text[0]
+            band_name = table_text[1]
             layer = find_layer_by_name(layer_name)
-            if not (layer.type() == QgsMapLayer.RasterLayer and
-                    layer.rasterType() == QgsRasterLayer.Multiband and
-                    layer.bandCount() == 4):
-                sample_list.setItemSelected(sample_list.item(i), False)
-                print('deselected ' + sample_list.item(i).text())
-                continue
 
+            # Check if the layer was already used
             if last_name != layer_name:
                 last_name = layer_name
                 prefix += 1
                 RGBa_index = 0
 
-            # Truncate the name to a maximum of 6 characters, since QGIS limits the length of a feature's name to 10
-            # prepend prefix (with leading zero), truncated name and RGBa-appendix
-            try:
-                rgba = RGBa_appendix[RGBa_index]
-                RGBa_index += 1
-            except IndexError as IError:
-                RGBa_index = 0
-                print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
 
-            export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+            if (layer.name() == config.housing_layer_name and
+                    (band_name.startswith('AREA') or band_name.startswith('PERIMETER'))):
+                continue
+            elif (layer.type() == QgsMapLayer.RasterLayer and
+                  layer.rasterType() == QgsRasterLayer.Multiband and
+                  layer.bandCount() == 4
+                  ):
+                # Truncate the name to a maximum of 6 characters, since QGIS limits the length of a feature's name to 10
+                # prepend prefix (with leading zero), truncated name and RGBa-appendix
+                try:
+                    rgba = RGBa_appendices[RGBa_index]
+                    RGBa_index += 1
+                except IndexError as IError:
+                    RGBa_index = 0
+                    print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
 
-            replacement_map[layer_name] = export_name[:-2]
-            # Change the text in the table, so the pst can manage its model accordingly/appropriately
-            table.item(table_index, 1).setText(export_name)
+                export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+
+                replacement_map[layer_name] = export_name[:-2]
+                # Change the text in the table, so the pst can manage its model accordingly/appropriately
+                table.item(table_index, 1).setText(export_name)
+            else:
+                sample_list.setItemSelected(sample_list.item(i), False)
+                continue
 
         return replacement_map
 

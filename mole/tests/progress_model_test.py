@@ -38,22 +38,22 @@ class ProgressItemsModel_test(unittest.TestCase):
 
     def test_if_prerequisites_are_checked_correctly(self):
         step_name = self._steps0[0]
-        prereq_of_first_section_item = self.pim.check_prerequisites_of(step_name)
+        prereq_of_first_section_item = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(prereq_of_first_section_item.accessibleText(), step_name)
 
         step_name = self._steps0[-1]
-        last_step_first_section_fails_due_to_first = self.pim.check_prerequisites_of(step_name)
+        last_step_first_section_fails_due_to_first = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(last_step_first_section_fails_due_to_first.accessibleText(), self._steps0[0])
 
         section_model = self.pim.section_views[0].model()
         end = len(self._steps0) - 1
         self.set_prerequisites(section_model, 0, end)
-        last_step_first_section = self.pim.check_prerequisites_of(step_name)
+        last_step_first_section = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(last_step_first_section.accessibleText(), step_name)
 
         step_name = self._steps1[0]
         self.set_prerequisites(section_model, 0, len(self._steps0))
-        first_step_second_section = self.pim.check_prerequisites_of(step_name)
+        first_step_second_section = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(first_step_second_section.accessibleText(), step_name)
 
         section_model = self.pim.section_views[1].model()
@@ -62,11 +62,11 @@ class ProgressItemsModel_test(unittest.TestCase):
         self.set_prerequisites(section_model, 0, 1)
 
         step_name = self._steps2[1]
-        second_step_third_section = self.pim.check_prerequisites_of(step_name)
+        second_step_third_section = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(second_step_third_section.accessibleText(), step_name)
 
         self.set_prerequisites(section_model, 0, 1, 0)
-        second_step_third_section_fails_due_to_first = self.pim.check_prerequisites_of(step_name)
+        second_step_third_section_fails_due_to_first = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(second_step_third_section_fails_due_to_first.accessibleText(), self._steps2[0])
 
 

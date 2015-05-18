@@ -110,8 +110,6 @@ class PstPluginInteractionTest(unittest.TestCase):
         self.assertEqual(map[poly_layer2.name()], '02{}'.format(poly_layer2.name()[:6]))
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
 

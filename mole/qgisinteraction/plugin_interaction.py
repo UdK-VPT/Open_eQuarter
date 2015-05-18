@@ -1,6 +1,8 @@
-from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsMapLayer, QgsRasterLayer
-from qgis.utils import plugins
+from PyQt4 import QtCore
+from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsMapLayer, QgsRasterLayer, QgsVectorLayer
+from qgis import utils
 from os import path
+
 import sys
 
 from mole.qgisinteraction.layer_interaction import find_layer_by_name
@@ -17,7 +19,7 @@ def get_plugin_ifexists(plugin_name):
     :rtype: plugin instance
     """
     try:
-        plugin = plugins[plugin_name]
+        plugin = utils.plugins[plugin_name]
         return plugin
     except KeyError:
         print "No plugin with the given name '" + plugin_name + "' found. Please check the plugin settings."
@@ -143,16 +145,21 @@ class PstInteraction(object):
                 return full_path
 
 
-
 class OlInteraction(object):
 
 
     def __init__(self, plugin_name = 'openlayers_plugin'):
-
+        """
+        Make the plugin accessible by looking it up in the plugin-dictionary
+        :param plugin_name: Name of the open-layers-plugin (as stored in utils.plugins)
+        :type plugin_name: str
+        :return:
+        :rtype:
+        """
         self.plugin = None
 
         try:
-            plugin = plugins[plugin_name]
+            plugin = utils.plugins[plugin_name]
         except KeyError as ke:
             print "The open layers plugin has not been found under the given name " + plugin_name
             return None
@@ -187,3 +194,43 @@ class OlInteraction(object):
         # if the given crs is valid
         if not crs_string.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs_string):
             self.plugin.setMapCrs(QgsCoordinateReferenceSystem(crs_string))
+
+
+class RealCentroidInteraction(object):
+
+    def __init__(self, plugin_name='realcentroid'):
+        """
+        Make the plugin accessible by looking it up in the plugin-dictionary
+        :param plugin_name: Name of the realcentroids-plugin (as stored in utils.plugins)
+        :type plugin_name: str
+        :return:
+        :rtype:
+        """
+        self.plugin = None
+
+        try:
+            plugin = utils.plugins[plugin_name]
+            self.plugin = plugin
+        except KeyError as KError:
+            print(KError, 'The realcentroid plugin has not been found by the given name "{}"'.format(plugin_name))
+
+    def create_centroids(self, polygon_name, path_to_output_shape):
+        polygon_combobox = self.plugin.dlg.ui.layerBox
+
+        for i in range(polygon_combobox.count()):
+            if polygon_combobox.itemText(i) == polygon_name:
+                polygon_combobox.setCurrentIndex(i)
+                break
+        else:
+            return None
+
+        self.plugin.dlg.shapefileName = path_to_output_shape
+        self.plugin.centroids()
+
+        file_info = QtCore.QFileInfo(path_to_output_shape)
+        if file_info.exists():
+            layer_name = file_info.completeBaseName()
+            output_layer = QgsVectorLayer(path_to_output_shape,layer_name, "ogr")
+            return output_layer
+        else:
+            return None

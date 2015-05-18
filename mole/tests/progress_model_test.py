@@ -10,14 +10,18 @@ class ProgressItemsModel_test(unittest.TestCase):
 
     def setUp(self):
         self._sections = ['Project Basics', 'Investigation Area', 'Building Shapes', 'Real Estate Cadaster', 'Sampling Points']
-        self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'project_created', 'osm_layer_loaded']
+        self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'real_centroid_plugin_installed', 'project_created', 'osm_layer_loaded']
         self._steps1 = ['temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped']
         self._steps2 = ['housing_layer_loaded', 'building_coordinates_loaded']
         self._steps3 = ['raster_loaded', 'extent_clipped', 'legend_created']
-        self._steps4 = ['temp_pointlayer_created', 'editing_temp_pointlayer_started', 'points_of_interest_defined', 'editing_temp_pointlayer_stopped', 'information_sampled']
+        self._steps4 = ['generate_real_centroids', 'information_sampled']
 
         self.app = QApplication(sys.argv)
         self.pim = ProgressItemsModel()
+
+    def tearDown(self):
+        if self.app is not None:
+            del(self.app)
 
     def set_prerequisites(self, section, start, end, value=2):
         i = start

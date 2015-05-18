@@ -19,7 +19,10 @@ open_layer_type_id = 4
 # Point Sampling Tool
 pst_plugin_name = 'pointsamplingtool'
 pst_output_layer_name = 'pst_out'
-pst_input_layer_name = 'pst_points_of_interest'
+pst_input_layer_name = 'centroids'
+
+# Realcentroid plugin
+real_centroid_plugin_name = 'realcentroid'
 
 ### Default values
 # default extent is set, after the OSM-layer was loaded (currently: extent of Germany)

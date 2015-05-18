@@ -36,7 +36,6 @@ from qgis.utils import iface
 from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
 from qgisinteraction import plugin_interaction
-from qgisinteraction.plugin_interaction import PstInteraction, OlInteraction
 from qgisinteraction import layer_interaction
 from qgisinteraction import raster_layer_interaction
 from qgisinteraction import project_interaction
@@ -408,6 +407,10 @@ class OpenEQuarterMain:
         return plugin_interaction.get_plugin_ifexists(config.pst_plugin_name) is not None
 
     # step 0.2
+    def handle_real_centroid_plugin_installed(self):
+        return plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name) is not None
+
+    # step 0.3
     def handle_project_created(self):
         # if no project exists, create one first
         self.create_project_ifNotExists()
@@ -419,13 +422,13 @@ class OpenEQuarterMain:
         else:
             return False
 
-    # step 0.3
+    # step 0.4
     def handle_osm_layer_loaded(self):
         if self.osm_layer_is_loaded():
             return True
 
         else:
-            ol_plugin = OlInteraction(config.ol_plugin_name)
+            ol_plugin = plugin_interaction.OlInteraction(config.ol_plugin_name)
 
             if ol_plugin.open_osm_layer(config.open_layer_type_id):
                 layer_dict = QgsMapLayerRegistry.instance().mapLayers()
@@ -599,39 +602,19 @@ class OpenEQuarterMain:
             self.reorder_layers()
 
     # step 4.0
-    def handle_temp_pointlayer_created(self):
-        pst_input_layer = layer_interaction.create_temporary_layer(config.pst_input_layer_name, 'Point',
-                                                                  config.project_crs)
-        layer_interaction.add_layer_to_registry(pst_input_layer)
-        return True
-
-    # step 4.1
-    def handle_editing_temp_pointlayer_started(self):
-        pst_input_layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
-        layer_interaction.move_layer_to_position(self.iface, pst_input_layer.name(), 0)
-        layer_interaction.trigger_edit_mode(self.iface, config.pst_input_layer_name)
-        self.iface.setActiveLayer(pst_input_layer)
-        return True
-
-    # step 4.2
-    def handle_points_of_interest_defined(self):
-        self.confirm_selection_of_investigation_area_dlg.set_dialog_text(
-            "Click 'OK' once the sampling points are selected.", "Choose sample points")
-        points_selected = self.confirm_selection_of_investigation_area(config.pst_input_layer_name)
-        return points_selected
-
-    # step 4.3
-    def handle_editing_temp_pointlayer_stopped(self):
-        layer_interaction.trigger_edit_mode(self.iface, config.pst_input_layer_name, 'off')
-        sampling_points_layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
-        full_out_path = os.path.join(self.project_path, config.pst_input_layer_name)
-        layer_interaction.write_vector_layer_to_disk(sampling_points_layer, full_out_path)
+    def handle_generate_real_centroids(self):
+        rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
+        polygon = config.housing_layer_name
+        output = os.path.join(self.project_path, config.pst_input_layer_name + '.shp')
+        centroid_layer = rci.create_centroids(polygon, output)
+        if centroid_layer.isValid():
+            layer_interaction.add_layer_to_registry(centroid_layer)
         self.reorder_layers()
         return True
 
-    # step 4.4
+    # step 4.1
     def handle_information_sampled(self):
-        psti = PstInteraction(iface, config.pst_plugin_name)
+        psti = plugin_interaction.PstInteraction(iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)

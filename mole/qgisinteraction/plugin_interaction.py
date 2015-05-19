@@ -211,10 +211,12 @@ class RealCentroidInteraction(object):
         try:
             plugin = utils.plugins[plugin_name]
             self.plugin = plugin
+            self.plugin.__init__(utils.iface)
         except KeyError as KError:
             print(KError, 'The realcentroid plugin has not been found by the given name "{}"'.format(plugin_name))
 
     def create_centroids(self, polygon_name, path_to_output_shape):
+        self.plugin.dlg.showEvent(QtCore.QEvent.Show)
         polygon_combobox = self.plugin.dlg.ui.layerBox
 
         for i in range(polygon_combobox.count()):
@@ -222,9 +224,11 @@ class RealCentroidInteraction(object):
                 polygon_combobox.setCurrentIndex(i)
                 break
         else:
+            print('Layer {} not found in combobox.'.format(polygon_name))
             return None
 
         self.plugin.dlg.shapefileName = path_to_output_shape
+        self.plugin.dlg.encoding = sys.getfilesystemencoding()
         self.plugin.centroids()
 
         file_info = QtCore.QFileInfo(path_to_output_shape)

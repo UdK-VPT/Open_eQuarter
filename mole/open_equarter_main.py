@@ -607,52 +607,16 @@ class OpenEQuarterMain:
         polygon = config.housing_layer_name
         output = os.path.join(self.project_path, config.pst_input_layer_name + '.shp')
         centroid_layer = rci.create_centroids(polygon, output)
+
         if centroid_layer.isValid():
             layer_interaction.add_layer_to_registry(centroid_layer)
-
-            ### TODO put into seperate method
-
-            cp = centroid_layer.dataProvider()
-            layer_interaction.add_attributes_if_not_exists(centroid_layer, [QgsField('DIST', QVariant.Double)])
-
-            fp = layer_interaction.find_layer_by_name(config.housing_layer_name)
-            d = QgsDistanceArea()
-            floor_iter = fp.dataProvider().getFeatures()
-            point_iter = cp.getFeatures()
-            floor_feat = QgsFeature()
-            point_feat = QgsFeature()
-
-            while floor_iter.nextFeature(floor_feat) and point_iter.nextFeature(point_feat):
-                poly_point = floor_feat.geometry().asPolygon()[0]
-                cent = point_feat.geometry().asPoint()
-                distances = {}
-                for i, p in enumerate(poly_point):
-                    end = poly_point[(i+1) % len(poly_point)]
-                    if p.sqrDist(end) <= 0:
-                        continue
-                    inter = self.intersect_point_to_line(cent, p, end)
-                    if inter != cent:
-                        dist = d.measureLine(cent, inter)
-                        distances[inter] = dist
-
-                field_index = cp.fieldNameIndex('DIST')
-                values = {field_index: min(distances.values())}
-                cp.changeAttributeValues({point_feat.id(): values})
-
+            polygon = layer_interaction.find_layer_by_name(polygon)
+            rci.calculate_accuracy(polygon, centroid_layer)
             layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
-        self.reorder_layers()
-        return True
-
-    def intersect_point_to_line(self, point, line_start, line_end):
-        ''' Calc minimum distance from a point and a line segment and intersection'''
-        # sqrDist of the line (PyQGIS function = magnitude (length) of a line **2)
-        magnitude2 = line_start.sqrDist(line_end)
-        # minimum distance
-        u = ((point.x() - line_start.x()) * (line_end.x() - line_start.x()) + (point.y() - line_start.y()) * (line_end.y() - line_start.y()))/(magnitude2)
-        # intersection point on the line
-        ix = line_start.x() + u * (line_end.x() - line_start.x())
-        iy = line_start.y() + u * (line_end.y() - line_start.y())
-        return QgsPoint(ix,iy)
+            self.reorder_layers()
+            return True
+        else:
+            return False
 
     # step 4.1
     def handle_information_sampled(self):

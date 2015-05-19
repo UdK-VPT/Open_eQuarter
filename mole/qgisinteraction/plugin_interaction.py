@@ -1,11 +1,12 @@
 from PyQt4 import QtCore
 from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsMapLayer, QgsRasterLayer, QgsVectorLayer
+from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint
 from qgis import utils
 from os import path
 
 import sys
 
-from mole.qgisinteraction.layer_interaction import find_layer_by_name
+from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
 from mole.project import config
 
 def get_plugin_ifexists(plugin_name):
@@ -238,3 +239,60 @@ class RealCentroidInteraction(object):
             return output_layer
         else:
             return None
+
+    def calculate_accuracy(self, polygon_layer, point_layer):
+        """
+        Calculate the distance of each centroid on a point-layer to their surrounding polygons
+        :param polygon_layer: A layer containing polygons
+        :type polygon_layer: QgsVectorLayer
+        :param point_layer: A layer containing the (supposed to be) centroids of that polygon
+        :type point_layer: QgsVectorLayer
+        :return:
+        :rtype:
+        """
+        point_provider = point_layer.dataProvider()
+        add_attributes_if_not_exists(point_layer, [QgsField('DIST', QtCore.QVariant.Double)])
+
+        distance_area = QgsDistanceArea()
+        poly_iterator = polygon_layer.dataProvider().getFeatures()
+        point_iterator = point_provider.getFeatures()
+        poly_feature = QgsFeature()
+        point_feature = QgsFeature()
+        field_index = point_provider.fieldNameIndex('DIST')
+
+        while (poly_iterator.nextFeature(poly_feature) and
+               point_iterator.nextFeature(point_feature)):
+            poly_point = poly_feature.geometry().asPolygon()[0]
+            centroid = point_feature.geometry().asPoint()
+            distances = {}
+            for i, point in enumerate(poly_point):
+                end = poly_point[(i+1) % len(poly_point)]
+                try:
+                    intersect = self.intersect_point_to_line(centroid, point, end)
+                    if intersect != centroid:
+                        dist = distance_area.measureLine(centroid, intersect)
+                        distances[intersect] = dist
+                except ZeroDivisionError as InvalidMath:
+                    continue
+            values = {field_index: min(distances.values())}
+            point_provider.changeAttributeValues({point_feature.id(): values})
+
+    def intersect_point_to_line(self, point, line_start, line_end):
+        """
+        Finds the point i on a line which, given a point p describes a line ip, orthogonal to a given line
+        :param point: The point p
+        :type point: QgsPoint
+        :param line_start: The lines start
+        :type line_start: QgsPoint
+        :param line_end: The lines end
+        :type line_end: QgsPoint
+        :return: The point i, which is the end of the orthogonal line
+        :rtype: QgsPoint
+        """
+        magnitude = line_start.sqrDist(line_end)
+        # minimum distance
+        u = ((point.x() - line_start.x()) * (line_end.x() - line_start.x()) + (point.y() - line_start.y()) * (line_end.y() - line_start.y()))/(magnitude)
+        # intersection point on the line
+        ix = line_start.x() + u * (line_end.x() - line_start.x())
+        iy = line_start.y() + u * (line_end.y() - line_start.y())
+        return QgsPoint(ix,iy)

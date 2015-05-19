@@ -680,7 +680,7 @@ class OpenEQuarterMain:
                 floors = feat.attribute(floors_fld)
                 if not floors or floors == 'NULL':
                     continue
-                est_ed = energy_demand(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+                est_ed = energy_demand(pop_dens, area, perimeter, floors=floors)
                 value = {att_index: est_ed}
                 out_provider.changeAttributeValues({feat.id(): value})
 

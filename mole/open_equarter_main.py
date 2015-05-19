@@ -611,10 +611,9 @@ class OpenEQuarterMain:
             layer_interaction.add_layer_to_registry(centroid_layer)
 
             ### TODO put into seperate method
-            centroid_layer.startEditing()
+
             cp = centroid_layer.dataProvider()
-            cp.addAttributes([QgsField('DIST', QVariant.Double)])
-            centroid_layer.commitChanges()
+            layer_interaction.add_attributes_if_not_exists(centroid_layer, [QgsField('DIST', QVariant.Double)])
 
             fp = layer_interaction.find_layer_by_name(config.housing_layer_name)
             d = QgsDistanceArea()
@@ -636,12 +635,11 @@ class OpenEQuarterMain:
                         dist = d.measureLine(cent, inter)
                         distances[inter] = dist
 
-                values = {'DIST': min(distances.values())}
-                values = {'DIST': 1.7}
-                centroid_layer.startEditing()
+                field_index = cp.fieldNameIndex('DIST')
+                values = {field_index: min(distances.values())}
                 cp.changeAttributeValues({point_feat.id(): values})
-                centroid_layer.commitChanges()
 
+            layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
         self.reorder_layers()
         return True
 

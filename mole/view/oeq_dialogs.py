@@ -21,6 +21,7 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from functools import partial
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
 from oeq_ui_classes import QRemoveEntryButton, QColorizedLineEdit
@@ -30,7 +31,9 @@ from ui_project_settings_form import Ui_project_settings_form
 from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
+from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
+from mole.qgisinteraction import layer_interaction
 
 
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
@@ -494,9 +497,36 @@ class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
 class RequestWmsUrl_dialog(QtGui.QDialog, Ui_RequestWmsUrl_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+
+class EstimatedEnergyDemand_dialog(QtGui.QDialog, Ui_EstimatedEnergyDemand_dialog):
+    def __init__(self):
+        QtGui.QDialog.__init__(self)
+        self.setupUi(self)
+
+        layer_dict = QgsMapLayerRegistry.instance().mapLayers()
+        vector_layers = filter(lambda x: x.type() == QgsMapLayer.VectorLayer, layer_dict.values())
+        for layer in vector_layers:
+            self.input_layer.addItem(layer.name())
+            self.output_layer.addItem(layer.name())
+
+        self.input_layer.currentIndexChanged.connect(self.update_field_dropdowns)
+
+    def update_field_dropdowns(self, index):
+        print(index)
+        layer = layer_interaction.find_layer_by_name(self.input_layer.currentText())
+        provider = layer.dataProvider()
+        fields = provider.fieldNameMap().keys()
+        self.area.clear()
+        self.perimeter.clear()
+        self.height.clear()
+        self.floors.clear()
+        self.yoc.clear()
+
+        for field in fields:
+            self.area.addItem(field)
+            self.perimeter.addItem(field)
+            self.height.addItem(field)
+            self.floors.addItem(field)
+            self.yoc.addItem(field)

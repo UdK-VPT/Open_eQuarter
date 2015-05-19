@@ -36,7 +36,7 @@ class QProcessViewDelegate(QItemDelegate):
         text = item.text()
 
         x_top, y_top, x_btm, y_btm = option.rect.getCoords()
-        print(x_top, y_top, x_btm, y_btm)
+        # print(x_top, y_top, x_btm, y_btm)
         x_top = x_top + 2 * self.margin_left + self.icon_size
         y_top = y_top + self.margin_top
         x_btm = self.width

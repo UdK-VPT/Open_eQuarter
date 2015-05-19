@@ -280,6 +280,7 @@ class RealCentroidInteraction(object):
     def intersect_point_to_line(self, point, line_start, line_end):
         """
         Finds the point i on a line which, given a point p describes a line ip, orthogonal to a given line
+        (as found on http://gis.stackexchange.com/questions/59169/how-to-draw-perpendicular-lines-in-qgis)
         :param point: The point p
         :type point: QgsPoint
         :param line_start: The lines start

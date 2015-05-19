@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_modular_dialog.ui'
 #
-# Created: Mon May 11 11:11:32 2015
+# Created: Tue May 19 17:20:17 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!

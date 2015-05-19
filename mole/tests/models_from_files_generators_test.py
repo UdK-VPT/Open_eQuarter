@@ -143,6 +143,7 @@ class ColorEntryManagerTestCase(unittest.TestCase):
         self.assertNotIn(deleted_entry, self.cem.layer_values_map[self.test_layer])
         self.assertIn('RGBa(0, 0, 220, 255)', self.cem.layer_values_map[self.test_layer])
 
+
 class MunicipalInformationParserAndTreeTestCase(unittest.TestCase):
 
     def setUp(self):

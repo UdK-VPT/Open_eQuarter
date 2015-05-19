@@ -29,6 +29,7 @@ CORR_PY_EXPORT_PATH="../mole/stat_corr"
 CORR_R_EXPORT_PATH="stat_corr"
 PDF_PATH="pdfout"
 CSV_PATH="csvout"
+DB_PATH="database"
 #basic Verbose
 VERBOSE= as.data.frame(rbind(DISTR_PLOT_TITLE=list(label="",unit="",info="Distribution review",title="Distribution Check",description=""),
                              DISTR_PLOT_XLAB=list(label="Value Ranges [(n,m)]",unit="(n,m)",info="Value Ranges",title="",description=""),
@@ -71,6 +72,8 @@ verbose<-function(message,level=VERBOSE_LEVEL){
   if(level<VERBOSE_LEVEL) print(message)
 }
 
+
+########### LOOKUPTABLE ##############
 # S3 constructor definition for class lookuptable
 lookuptable<-function(...){ 
   args=list(...)
@@ -87,26 +90,79 @@ lookuptable<-function(...){
   invisible(out)
 }
 
+# S3 method definitions for class lookuptable
 keys<-function(object,...) UseMethod("keys",object)
 keys.default<- function(object,...) keys(object,...)
 keys.lookuptable<-function(object,...) names(object)
-print.lookuptable<-function(object,...) print(as.data.frame(object))
+
 values<-function(object,...) UseMethod("values",object)
 values.default<-function(object,...) warning("No generic definition for 'values'")
 values.lookuptable<-function(object,...) as.vector(object)
+
+print.lookuptable<-function(object,...) print(as.data.frame(object))
+
 lookup<-function(object,...) UseMethod("lookup",object)
 lookup.default<-function(object,...) warning("No generic definition for 'lookup'")
 lookup.lookuptable<-function(object,...)  values(object)[keys(object)%in% c(...)]
+
 reverse_lookup<-function(object,...) UseMethod("reverse_lookup",object)
 reverse_lookup.default<-function(object,...) warning("No generic definition for 'reverse_lookup'")
 reverse_lookup.lookuptable<-function(object,...)  keys(object)[values(object)%in% c(...)]
+
 save2csv<-function(object,...)  UseMethod("save2csv",object)
 save2csv.default<- function(object,...) save2csv(object,...)
 save2csv.lookuptable<-function(object,...)   write.csv(as.data.frame(object),row.names=FALSE,...)
 
-as.data.frame.lookuptable<-function(object,...) data.frame(KEY=names(object),VALUE=as.vector(object),stringsAsFactors=FALSE)
-as.matrix.lookuptable<-function(object,...) cbind(KEY=names(object),VALUE=as.vector(object))
+# strip lookuppairs whose keys are out of range given as c(min,max)
+setkeyrange<-function(object,...) UseMethod("setkeyrange",object)
+setkeyrange.default<- function(object,...) setkeyrange(object,...)
+setkeyrange.lookuptable<-function(object,...) {
+  args=c(...)
+  keys=as.numeric(keys(object))
+  lookuptable(keys[(keys>=args[1])&(keys<=args[2])],values(object)[(keys>=args[1])&(keys<=args[2])])
+}
 
+# strip lookuppairs whose values are out of range given as c(min,max)
+setvaluerange<-function(object,...) UseMethod("setvaluerange",object)
+setvaluerange.default<- function(object,...) setvaluerange(object,...)
+setvaluerange.lookuptable<-function(object,...) {
+  args=c(...)
+  values=as.numeric(values(object))
+  lookuptable(keys(object)[(values>=args[1])&(values<=args[2])],values[(values>=args[1])&(values<=args[2])])
+}
+
+# limits values to range given as c(min,max)
+limitvalues<-function(object,...) UseMethod("limitvalues",object)
+limitvalues.default<- function(object,...) limitvalues(object,...)
+limitvalues.lookuptable<-function(object,...) {
+  args=c(...)
+   values=as.numeric(values(object))
+   if(args[1]!=-1) values[values<args[1]]=args[1]
+   if(args[2]!=-2) values[values>args[2]]=args[2]
+   lookuptable(keys(object),values)
+}
+
+# append one or more key/value pairs to the lookuptable (given as c(keys),c(values))
+append<-function(object,...) UseMethod("append",object)
+append.default<- function(object,...) append(object,...)
+append.lookuptable<-function(object,keys,values,...) lookuptable(c(keys(object),keys),c(values(object),values),...)
+
+# prepend one or more key/value pairs to the lookuptable (given as c(keys),c(values))
+prepend<-function(object,...) UseMethod("prepend",object)
+prepend.default<- function(object,...) prepend(object,...)
+prepend.lookuptable<-function(object,keys,values,...) lookuptable(c(keys,keys(object)),c(values,values(object)),...)
+
+# convert lookuptable to data.frame
+as.data.frame.lookuptable<-function(object,...) data.frame(KEY=as.numeric(names(object)),VALUE=as.vector(object),stringsAsFactors=FALSE)
+# convert lookuptable to matrix
+as.matrix.lookuptable<-function(object,...) cbind(KEY=as.numeric(names(object)),VALUE=as.vector(object))
+
+# round values of a lookuptable
+round.lookuptable<-function(object,...) lookuptable(keys(object),round(values(object),...))
+
+
+
+########### CORRELATION ##############
 # S3 constructor for class correlation (only factors, no model)
 correlation<-function(Const=0,a=0,b=0,c=0,d=0,mode="log",...){ 
   out=list(.Const=Const,.a=a,.b=b,.c=c,.d=d,.mode=mode)
@@ -114,16 +170,20 @@ correlation<-function(Const=0,a=0,b=0,c=0,d=0,mode="log",...){
   invisible(out)
 }
 
+# S3 method definitions for class lookuptable
 lookup.correlation<-function(object,...){
   x=c(...)
-  if (object$.mode=="log") x=log(x)
-  object$.const + object$.a*x + object$.b*x^2 + object$.c*x^3 + object$.d*x^4
+   if (object$.mode=="log") x=log(x)
+  return(object$.Const + object$.a*x + object$.b*x^2 + object$.c*x^3 + object$.d*x^4)
 }
 
+# get range as lookuptable of class data.frame
 as.data.frame.correlation<-function(object,start,end,stepwidth=1,...) {
   xin=seq(from = start, to = end, by =  stepwidth)
   data.frame(KEY=xin,VALUE=lookup(object,xin),stringsAsFactors=FALSE)
 }
+
+# get range as lookuptable of class matrix
 as.matrix.correlation<-function(object,start,end,stepwidth=1,...) {
   xin=seq(from = start, to = end, by =  stepwidth)
   cbind(KEY=xin,VALUE=lookup(object,xin))

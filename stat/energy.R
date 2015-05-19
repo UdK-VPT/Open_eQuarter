@@ -27,7 +27,7 @@ energy_demand<-function(population_density, #parameter Type & Fensteranteil
                         floor_area,
                         floor_perimeter=NULL,
                         building_height=NULL,
-                        floors=NULL,
+                        floors=3,
                         window_ratio=0.2, #window ration for each direction
                         year_of_construction=1960,
                         accumulated_heating_hours=80000
@@ -36,7 +36,7 @@ energy_demand<-function(population_density, #parameter Type & Fensteranteil
   if(is.null(floor_perimeter)) floor_perimeter=2*sqrt(floor_area*1.618034)+2*sqrt(floor_area/1.618034)
   if(is.null(building_height)) {
     if(is.null(floors)){
-      floors=building_floors_distribution(population_density)
+     # floors=building_floors_distribution(population_density)
       building_height=building_height_distribution(population_density)
     }else{
       building_height=floors*3.3

@@ -20,7 +20,6 @@
 '''
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-
 from functools import partial
 
 from ui_color_picker_dialog import Ui_color_picker_dialog

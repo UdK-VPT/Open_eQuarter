@@ -39,7 +39,7 @@ from qgisinteraction import plugin_interaction
 from qgisinteraction import layer_interaction
 from qgisinteraction import raster_layer_interaction
 from qgisinteraction import project_interaction
-from ExportWMSasTif import ExportWMSasTif
+from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
 from mole.stat_corr.energy_demand import energy_demand
@@ -115,6 +115,7 @@ class OpenEQuarterMain:
         tools_dropdown_menu = QMenu()
         tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
+        tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
         tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_estimated_energy_demand)
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
@@ -361,43 +362,36 @@ class OpenEQuarterMain:
         try:
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
-            pyramid_exporter = ExportWMSasTif(self.iface)
-            return pyramid_exporter.export(raster_layer.name())
-
-        except AttributeError as NoneException:
-            print(self.__module__, NoneException)
-
-    def clip_zoom_to_layer_view_from_raster(self, layer_name):
-        """
-        Zoom to a given vector-layer, containing shape files. Extract the currently viewed extent from an underlying raster-layer into a new .tif and open it.
-        :param layer_name: Name of the vector-layer
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        try:
-            investigation_shape = layer_interaction.find_layer_by_name(layer_name)
-            # an investigation shape is needed, to trigger the zoom to layer function
-            if investigation_shape is not None and investigation_shape.featureCount() > 0:
-
-                # zoom
-                self.iface.setActiveLayer(investigation_shape)
-                self.iface.actionZoomToLayer().trigger()
-
-                # clip extent from visible raster layers
-                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
-                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
-                for layer in raster_layers:
-                    self.iface.legendInterface().setLayerVisible(layer, False)
-
-                clipped_layers = []
-                for clipping_raster in raster_layers:
-                    clipped_layers.append(self.clip_from_raster(clipping_raster))
-
-                return clipped_layers
+            geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
+            pyramids_built = raster_layer_interaction.gdal_addo_layerfile(geo_export_path, 'gauss', 6)
+            if pyramids_built != 0:
+                print 'Error number {} occured, while building pyramids.'.format(pyramids_built)
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
             return None
+
+        filename = geo_export_path.split(os.path.sep)[-1]
+        filename = os.path.splitext(filename)[0]
+        no_timeout = 50
+        while not os.path.exists(geo_export_path) and no_timeout:
+            time.sleep(0.1)
+            no_timeout -= 1
+
+        raster_layer = QgsRasterLayer(geo_export_path, filename)
+
+        # if the crs is invalid, prompt the user to define an CRS
+        if not raster_layer.crs().authid():
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
+            layer_interaction.add_layer_to_registry(raster_layer)
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+        else:
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+            layer_interaction.add_layer_to_registry(raster_layer)
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+
+        return raster_layer.name()
 
     # step 0.0
     def handle_ol_plugin_installed(self):
@@ -538,7 +532,27 @@ class OpenEQuarterMain:
 
     # step 3.1
     def handle_extent_clipped(self):
-        extracted_layers = self.clip_zoom_to_layer_view_from_raster(config.investigation_shape_layer_name)
+        try:
+            investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            # an investigation shape is needed, to trigger the zoom to layer function
+            if investigation_shape is not None and investigation_shape.featureCount() > 0:
+                # zoom
+                self.iface.setActiveLayer(investigation_shape)
+                self.iface.actionZoomToLayer().trigger()
+
+                # clip extent from visible raster layers
+                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
+                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+                for layer in raster_layers:
+                    self.iface.legendInterface().setLayerVisible(layer, False)
+
+                extracted_layers = []
+                for clipping_raster in raster_layers:
+                    extracted_layers.append(self.clip_from_raster(clipping_raster))
+
+        except AttributeError as NoneException:
+            print(self.__module__, NoneException)
+            return False
 
         try:
             layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
@@ -552,13 +566,17 @@ class OpenEQuarterMain:
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 
+                no_timeout = 50
+                while not os.path.exists(path_transformed) and no_timeout:
+                    time.sleep(0.1)
+                    no_timeout -= 1
+
                 if os.path.exists(path_transformed):
                     # change validation to surpress missing-crs prompt
                     old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                     QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-                    layer_interaction.hide_or_remove_layer(layer_name,'remove',self.iface)
-
+                    layer_interaction.hide_or_remove_layer(layer_name, 'remove', self.iface)
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)

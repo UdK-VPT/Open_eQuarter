@@ -12,10 +12,14 @@ class ColorEntryManager():
     """
     def __init__(self):
         self.layer_values_map = {}
+        self.layer_abbreviation_map = {}
 
-    def add_layer(self, layer):
-        if not self.layer_values_map.has_key(layer):
-            self.layer_values_map[layer] = {}
+    def add_layer(self, layer_name):
+        if not self.layer_values_map.has_key(layer_name):
+            self.layer_values_map[layer_name] = {}
+
+    def set_layer_abbreviation(self, layer_name, abbreviation):
+        self.layer_abbreviation_map[layer_name] = abbreviation
 
     def set_color_map_of_layer(self, color_map, layer_name):
         self.layer_values_map[layer_name] = dict(color_map)
@@ -32,12 +36,14 @@ class ColorEntryManager():
     def write_map_to_disk(self, layer_name, out_path):
         if self.layer_values_map.has_key(layer_name):
 
-            color_dict = self.layer_values_map[layer_name]
-            if color_dict:
+            out_dict = self.layer_values_map[layer_name]
+            if out_dict:
+                if self.layer_abbreviation_map.has_key(layer_name):
+                    out_dict = {'Abbreviation': self.layer_abbreviation_map[layer_name], 'Legend': out_dict}
 
                 try:
                     with open(out_path, 'w', encoding='utf-8') as json_outfile:
-                        json_string = json.dumps(color_dict, ensure_ascii=False)
+                        json_string = json.dumps(out_dict, ensure_ascii=False)
                         json_outfile.write(unicode(json_string))
 
                     return os.path.exists(out_path)
@@ -54,6 +60,10 @@ class ColorEntryManager():
         try:
             json_data = open(in_path)
             data = json.load(json_data)
+
+            if data.has_key('Abbreviation'):
+                self.layer_abbreviation_map[layer_name] = data['Abbreviation']
+                data = data['Legend']
 
             for color, value_list in data.iteritems():
                 result_dict[color] = (value_list[0], value_list[1], value_list[2])

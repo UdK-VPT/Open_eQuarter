@@ -488,8 +488,8 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-
-        housing_layer = os.path.join('/', 'Users', 'VPTtutor', 'Desktop', 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        user_dir = os.path.expanduser('~')
+        housing_layer = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         if os.path.exists(housing_layer):
             housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)

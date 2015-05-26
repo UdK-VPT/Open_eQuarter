@@ -139,11 +139,11 @@ class OpenEQuarterMain:
 
         if layer_interaction.find_layer_by_name(config.housing_coordinate_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, 1)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, position)
 
         if layer_interaction.find_layer_by_name(config.housing_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, 2)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, position)
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -614,6 +614,7 @@ class OpenEQuarterMain:
             entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+                self.reorder_layers()
                 return True
         else:
             self.iface.actionPan().trigger()
@@ -692,11 +693,17 @@ class OpenEQuarterMain:
                 area = feat.attribute(area_fld)
                 perimeter = feat.attribute(peri_fld)
                 # height = feat.attribute(height_fld)
-                # yoc = feat.attribute(yoc_fld)
+                yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)
-                if not floors or floors == 'NULL':
-                    continue
-                est_ed = energy_demand(pop_dens, area, perimeter, floors=floors)
+                if (not floors or floors == 'NULL') and (not yoc or yoc == 'NULL'):
+                    est_ed = energy_demand(pop_dens, area, perimeter)
+                elif not yoc or yoc == 'NULL':
+                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors)
+                elif not floors or floors == 'NULL':
+                    est_ed = energy_demand(pop_dens, area, perimeter, year_of_construction=yoc)
+                else:
+                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+
                 value = {att_index: est_ed}
                 out_provider.changeAttributeValues({feat.id(): value})
 

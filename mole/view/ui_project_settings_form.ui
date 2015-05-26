@@ -86,9 +86,9 @@
        </widget>
       </item>
       <item row="9" column="0">
-       <widget class="QLineEdit" name="climate_zone">
+       <widget class="QLineEdit" name="heating_degree_days">
         <property name="text">
-         <string>e.g. Dfb, Cfb, Dfc</string>
+         <string>390.06</string>
         </property>
        </widget>
       </item>
@@ -172,53 +172,14 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="climate_zone_label">
+         <widget class="QLabel" name="heating_degree_days_label">
           <property name="toolTip">
            <string/>
           </property>
           <property name="text">
-           <string>Climate Zone:</string>
+           <string>Heating degree days:</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="maximumSize">
-           <size>
-            <width>18</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Köppen–Geiger climate classification of the investigation area (for more informatoin visit: http://en.wikipedia.org/wiki/Köppen_climate_classification)</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>:/Controls/icons/info.png</normaloff>:/Controls/icons/info.png</iconset>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>

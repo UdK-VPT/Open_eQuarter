@@ -577,7 +577,6 @@ class OpenEQuarterMain:
     def handle_legend_created(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
-        self.color_picker_dlg.__init__()
         self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
         self.refresh_layer_list()
 

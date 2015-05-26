@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Tue May 19 17:20:17 2015
+# Created: Tue May 26 11:16:04 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,9 +60,9 @@ class Ui_project_settings_form(object):
         self.description = QtGui.QLineEdit(self.form)
         self.description.setObjectName(_fromUtf8("description"))
         self.gridLayout.addWidget(self.description, 3, 0, 1, 1)
-        self.climate_zone = QtGui.QLineEdit(self.form)
-        self.climate_zone.setObjectName(_fromUtf8("climate_zone"))
-        self.gridLayout.addWidget(self.climate_zone, 9, 0, 1, 1)
+        self.heating_degree_days = QtGui.QLineEdit(self.form)
+        self.heating_degree_days.setObjectName(_fromUtf8("heating_degree_days"))
+        self.gridLayout.addWidget(self.heating_degree_days, 9, 0, 1, 1)
         self.average_build_year_label = QtGui.QLabel(self.form)
         self.average_build_year_label.setObjectName(_fromUtf8("average_build_year_label"))
         self.gridLayout.addWidget(self.average_build_year_label, 10, 0, 1, 1)
@@ -94,22 +94,10 @@ class Ui_project_settings_form(object):
         self.climate_zone_layout = QtGui.QHBoxLayout()
         self.climate_zone_layout.setSpacing(0)
         self.climate_zone_layout.setObjectName(_fromUtf8("climate_zone_layout"))
-        self.climate_zone_label = QtGui.QLabel(self.form)
-        self.climate_zone_label.setToolTip(_fromUtf8(""))
-        self.climate_zone_label.setObjectName(_fromUtf8("climate_zone_label"))
-        self.climate_zone_layout.addWidget(self.climate_zone_label)
-        self.pushButton = QtGui.QPushButton(self.form)
-        self.pushButton.setMaximumSize(QtCore.QSize(18, 16777215))
-        self.pushButton.setStyleSheet(_fromUtf8(""))
-        self.pushButton.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/info.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton.setIcon(icon)
-        self.pushButton.setFlat(True)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.climate_zone_layout.addWidget(self.pushButton)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.climate_zone_layout.addItem(spacerItem)
+        self.heating_degree_days_label = QtGui.QLabel(self.form)
+        self.heating_degree_days_label.setToolTip(_fromUtf8(""))
+        self.heating_degree_days_label.setObjectName(_fromUtf8("heating_degree_days_label"))
+        self.climate_zone_layout.addWidget(self.heating_degree_days_label)
         self.gridLayout.addLayout(self.climate_zone_layout, 8, 0, 1, 1)
         self.verticalLayout.addWidget(self.form)
 
@@ -128,7 +116,7 @@ class Ui_project_settings_form(object):
         self.description_label.setToolTip(_translate("project_settings_form", "Short description of the project", None))
         self.description_label.setText(_translate("project_settings_form", "Description:", None))
         self.description.setText(_translate("project_settings_form", "The aim of this project, is to analyse a quarter.", None))
-        self.climate_zone.setText(_translate("project_settings_form", "e.g. Dfb, Cfb, Dfc", None))
+        self.heating_degree_days.setText(_translate("project_settings_form", "390.06", None))
         self.average_build_year_label.setToolTip(_translate("project_settings_form", "Average year of construction on the building stock", None))
         self.average_build_year_label.setText(_translate("project_settings_form", "Average Build Year", None))
         self.average_build_year.setText(_translate("project_settings_form", "1917", None))
@@ -137,7 +125,6 @@ class Ui_project_settings_form(object):
         self.population_density.setText(_translate("project_settings_form", "3.859", None))
         self.location_city.setText(_translate("project_settings_form", "City", None))
         self.location_postal.setText(_translate("project_settings_form", "Postal", None))
-        self.climate_zone_label.setText(_translate("project_settings_form", "Climate Zone:", None))
-        self.pushButton.setToolTip(_translate("project_settings_form", "Köppen–Geiger climate classification of the investigation area (for more informatoin visit: http://en.wikipedia.org/wiki/Köppen_climate_classification)", None))
+        self.heating_degree_days_label.setText(_translate("project_settings_form", "Heating degree days:", None))
 
 import resources_rc

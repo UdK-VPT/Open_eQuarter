@@ -262,8 +262,11 @@ class RealCentroidInteraction(object):
 
         while (poly_iterator.nextFeature(poly_feature) and
                point_iterator.nextFeature(point_feature)):
-            poly_point = poly_feature.geometry().asPolygon()[0]
-            centroid = point_feature.geometry().asPoint()
+            try:
+                poly_point = poly_feature.geometry().asPolygon()[0]
+                centroid = point_feature.geometry().asPoint()
+            except IndexError:
+                continue
             distances = {}
             for i, point in enumerate(poly_point):
                 end = poly_point[(i+1) % len(poly_point)]
@@ -276,6 +279,8 @@ class RealCentroidInteraction(object):
                     continue
             values = {field_index: min(distances.values())}
             point_provider.changeAttributeValues({point_feature.id(): values})
+
+
 
     def intersect_point_to_line(self, point, line_start, line_end):
         """

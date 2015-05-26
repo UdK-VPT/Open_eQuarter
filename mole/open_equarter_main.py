@@ -598,7 +598,6 @@ class OpenEQuarterMain:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
                 return True
         else:
-            self.color_picker_dlg.__init__()
             self.iface.actionPan().trigger()
             self.reorder_layers()
 

@@ -26,7 +26,7 @@ email=firstdayofjune@users.noreply.github.com
 # tags are comma separated with spaces allowed
 tags=
 
-homepage=
+homepage=http://udk-vpt.github.io/Open_eQuarter
 tracker=
 repository=http://udk-vpt.github.io/Open_eQuarter/qgis_repo
 icon=icons/OeQ_plugin_icon.png

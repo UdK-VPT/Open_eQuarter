@@ -47,4 +47,4 @@ def energy_demand(population_density, floor_area, floor_perimeter=0, building_he
   return total_loss_pres
 
 
-print energy_demand(1500,480,100,year_of_construction=2000)
+#print energy_demand(1500,480,100,year_of_construction=2000)

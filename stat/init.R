@@ -74,6 +74,23 @@ verbose<-function(message,level=VERBOSE_LEVEL){
 
 
 ########### LOOKUPTABLE ##############
+
+#adding verbose for lookuptables. VERBOSE is initialized in init.R
+VERBOSE= as.data.frame(rbind(VERBOSE,
+                             KEY=list(label="Key",
+                                      unit="",
+                                      info="Key",
+                                      title="Key",
+                                      description="Key"
+                             ),
+                             VALUE=list(label="Value",
+                                        unit="",
+                                        info="Value",
+                                        title="Value",
+                                        description="Value"
+                             )),stringsAsFactors=FALSE)
+
+                       
 # S3 constructor definition for class lookuptable
 lookuptable<-function(...){ 
   args=list(...)
@@ -103,11 +120,11 @@ print.lookuptable<-function(object,...) print(as.data.frame(object))
 
 lookup<-function(object,...) UseMethod("lookup",object)
 lookup.default<-function(object,...) warning("No generic definition for 'lookup'")
-lookup.lookuptable<-function(object,...)  values(object)[keys(object)%in% c(...)]
+lookup.lookuptable<-function(object,...)   values(object)[sapply(c(...),FUN<-function(i){which(keys(object)==i)})]
 
 reverse_lookup<-function(object,...) UseMethod("reverse_lookup",object)
 reverse_lookup.default<-function(object,...) warning("No generic definition for 'reverse_lookup'")
-reverse_lookup.lookuptable<-function(object,...)  keys(object)[values(object)%in% c(...)]
+reverse_lookup.lookuptable<-function(object,...)  keys(object)[sapply(c(...),FUN<-function(i){which(values(object)==i)})] 
 
 save2csv<-function(object,...)  UseMethod("save2csv",object)
 save2csv.default<- function(object,...) save2csv(object,...)

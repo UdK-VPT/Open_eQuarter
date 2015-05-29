@@ -15,11 +15,11 @@
 #
 #######################################################################################
 
-### corellation analysis
+### corellation analysis and code generat
 build_type_distribution_by_population_density<-function(
   name="distribution_by_population_density",
   description="Buildings with n flats in correlation to population density"){
-  l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS",BUILDINGS_BY_NOFLATS)],normcolumn="BLD_NOFLAT_TOTAL",limits=BUILDINGS_BY_NOFLATS_LIMITS)
+  l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS",BUILDINGS_BY_NOFLATS)],normcolumn="BLD_NOFLAT_TOTAL",limits=BUILDINGS_BY_NOFLATS_LIMITS,n_breaks=300)
   l.investigation$distribution_plot(pdffile=name)
   l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
   l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_NOFLATS_WEIGHTS)
@@ -83,7 +83,7 @@ build_building_density_by_average_year_of_construction<-function(
 
 ### corellation analysis
 build_building_density_by_population_density<-function(
-  name="building density_by_population_density",
+  name="building_density_by_population_density",
   description="Building Density in Correlation to the Population Density"){
   l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS","BLD_DENS")])
   l.investigation$distribution_plot(pdffile=name)
@@ -93,143 +93,17 @@ build_building_density_by_population_density<-function(
 }
 
 ### corellation analysis
-#adding verbose. VERBOSE is initialized in mun.db.R
-WIN_AREA_AVG_BY_AGE=c("YEAR","A_WIN_E_BY_AW","A_WIN_S_BY_AW","A_WIN_W_BY_AW","A_WIN_N_BY_AW","A_WIN_BY_AW") #dwelling or other types
-VERBOSE= as.data.frame(rbind(VERBOSE,
-                             KEY=list(label="Key",
-                                                      unit="",
-                                                      info="Key",
-                                                      title="Key",
-                                                      description="Key"
-                                                      ),
-                             VALUE=list(label="Value",
-                                      unit="",
-                                      info="Value",
-                                      title="Value",
-                                      description="Value"
-                             ),
-                             YEAR=list(label="Year of Construction",
-                                       unit="",
-                                       info="Year of Construction",
-                                       title="Year of Construction",
-                                       description="Year of Construction"
-                             ),
-                             A_WIN_E_BY_AW=list(label="Window/Wall Ratio EAST",
-                                       unit="%",
-                                       info="Window/Wall Ratio EAST",
-                                       title="Window/Wall Ratio EAST",
-                                       description="Window to Wall Ratio in Eastern Direction"
-                             ),
-                             A_WIN_S_BY_AW=list(label="Window/Wall Ratio (SOUTH)",
-                                                unit="%",
-                                                info="Window/Wall Ratio (SOUTH)",
-                                                title="Window/Wall Ratio (SOUTH)",
-                                                description="Window to Wall Ratio in Southern Direction"
-                             ),
-                             A_WIN_W_BY_AW=list(label="Window/Wall Ratio (WEST)",
-                                                unit="%",
-                                                info="Window/Wall Ratio (WEST)",
-                                                title="Window/Wall Ratio (WEST)",
-                                                description="Window to Wall Ratio in Western Direction"
-                             ),
-                             A_WIN_N_BY_AW=list(label="Window/Wall Ratio (NORTH)",
-                                                unit="%",
-                                                info="Window/Wall Ratio (NORTH)",
-                                                title="Window/Wall Ratio (NORTH)",
-                                                description="Window to Wall Ratio in Northern Direction"
-                             ),
-                             A_WIN_BY_AW=list(label="Window/Wall Ratio",
-                                       unit="%",
-                                       info="Window/Wall Ratio (ALL) ",
-                                       title="Window/Wall Ratio (ALL)",
-                                       description="Window to Wall Ratio in all Directions"
-                             )
-),stringsAsFactors=FALSE)
-
-build_window_area_percentage_AVG_by_building_age1<-function(
-  name="window_wall_ratio_by_building_age1",
-  description="Window/Wall Ratio in Correlation to the Building Age"){
-  csvsource="data_sources/150512-IWU-Aufbereitung/SQ_AVG_WIND-OUT.csv"
-  l.db=read.csv2(csvsource)
-  l.investigation=new_OeQ_Inv(l.db,n_breaks=1000)
-  l.investigation$distribution_plot(pdffile=name)
-  #l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
-  str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS))
-  l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS)
-}
-
-#Typical Present Roof U-Value of Large Multifamily Houses
-build_window_area_percentage_AVG_by_building_age2<-function( resolution=74){
-  build_lookup(name="window_wall_ratio_by_building_age1",
-               description="Window/Wall Ratio in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150512-IWU-Aufbereitung/SQ_AVG_WIND-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
+build_flat_area_by_population_density<-function(
+  name="flat_area_by_population_density",
+  description="Flat Area in Correlation to the Population Density"){
+    l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS","FLT_AREA_AVG")])
+    l.investigation$distribution_plot(pdffile=name)
+    l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
+    l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description)
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
 
 
-
-### corellation analysis
-build_window_area_percentage_SFH_by_building_age<-function(
-  name="window_area_percentage_SFH_by_building_age",
-  description="Window Area Percentage at Single Family Houses in Correlation to the Building Age"){
-  csvsource="data_sources/150512-IWU-Aufbereitung/SQ_SFH_WIND-OUT.csv"
-  l.db=read.csv2(csvsource)
-  l.investigation=new_OeQ_Inv(l.db,n_breaks=1000)
-  l.investigation$distribution_plot(pdffile=name)
-  #l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
-  str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS))
-  l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS)
-}
-
-### corellation analysis
-build_window_area_percentage_SDH_by_building_age<-function(
-  name="window_area_percentage_SDH_by_building_age",
-  description="Window Area Percentage at Semi Detached Houses in Correlation to the Building Age"){
-  csvsource="data_sources/150512-IWU-Aufbereitung/SQ_SDH_WIND-OUT.csv"
-  l.db=read.csv2(csvsource)
-  l.investigation=new_OeQ_Inv(l.db,n_breaks=1000)
-  l.investigation$distribution_plot(pdffile=name)
-  #l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
-  str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS))
-  l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS)
-}
-
-### corellation analysis
-build_window_area_percentage_MFH_by_building_age<-function(
-  name="window_area_percentage_MFH_by_building_age",
-  description="Window Area Percentage at Multi Family Houses in Correlation to the Building Age"){
-  csvsource="data_sources/150512-IWU-Aufbereitung/SQ_MFH_WIND-OUT.csv"
-  l.db=read.csv2(csvsource)
-  l.investigation=new_OeQ_Inv(l.db,n_breaks=1000)
-  l.investigation$distribution_plot(pdffile=name)
-  #l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
-  str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS))
-  l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS)
-}
-
-### corellation analysis
-build_window_area_percentage_LMFH_by_building_age<-function(
-  name="window_area_percentage_LMFH_by_building_age",
-  description="Window Area Percentage at Large Multi Family Houses in Correlation to the Building Age"){
-  csvsource="data_sources/150512-IWU-Aufbereitung/SQ_LMFH_WIND-OUT.csv"
-  l.db=read.csv2(csvsource)
-  print(l.db)
-  readline()
-  l.investigation=new_OeQ_Inv(l.db,n_breaks=150)
-  l.investigation$distribution_plot(pdffile=name)
-  #l.investigation$sum_plot(pdffile=paste(name,"_sum",sep=""))
-  str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS))
-  l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description,weights=BUILDINGS_BY_AGE1_WEIGHTS)
-}
 
 
 ########## Code-/Look-Up-Table Generators  ###########
@@ -312,8 +186,7 @@ build_lookup<-function(
   #fix values outside the input data range
   l.lookup_table=limitvalues(l.lookup_table,min(values(lookup_table)),max(values(lookup_table)))
   
-  print()
-  #Plot I/O Comparisonchart
+   #Plot I/O Comparisonchart
   plot(as.data.frame(l.lookup_table),type="l",col="RED",lwd=3,xlim=lookup_range,xpd=FALSE,
        lab=c(10,10,10),frame.plot=TRUE,tck = 1,fg="GREY80",bty="o",las=1,
        main=paste("I/O Comparison Chart for Look-Up-Table Generation R=",resolution,"\n",
@@ -392,14 +265,14 @@ setMethodS3("generate_correlation_code_snippet_in_python", "OeQ_Model", function
   if(is.null(description)) description=par_name
   l.coeff=this$.model$coefficients
   l.coeff[is.na(l.coeff)]=0
-  l.code=paste("    # OeQ autogenerated correlation for '",description,"'\n",
-               "    Const= ",formatC(l.coeff[1],digits=12),"\n",
-               "    a=     ",formatC(l.coeff[2],digits=12),"\n",
-               "    b=     ",formatC(l.coeff[3],digits=12),"\n",sep="")
-  if(!is.na(l.coeff[4])){l.code=paste(l.code,"    c=     ",formatC(l.coeff[4],digits=12),"\n",sep="")}
-  if(!is.na(l.coeff[5])){l.code=paste(l.code,"    d=     ",formatC(l.coeff[5],digits=12),"\n",sep="")}
-  #l.code=paste(l.code,"    x=xin\n",sep="")
-  l.code=paste(l.code,sub("y",par_name,this$.verb_formula_py),"\n",sep="")
+  l.code=paste("    # OeQ autogenerated correlation for '",description,
+               "'\n    ",par_name,"= oeq.correlation(",
+               "\n    const= ",formatC(l.coeff[1],digits=12),",",
+               "\n    a=     ",formatC(l.coeff[2],digits=12),",",
+               "\n    b=     ",formatC(l.coeff[3],digits=12),",",sep="")
+  if(!is.na(l.coeff[4])){l.code=paste(l.code,"\n    c=     ",formatC(l.coeff[4],digits=12),",",sep="")}
+  if(!is.na(l.coeff[5])){l.code=paste(l.code,"\n    d=     ",formatC(l.coeff[5],digits=12),",",sep="")}
+  l.code=paste(l.code,"\n    mode= \"",this$.mode,"\")\n",sep="")
   return(l.code)
 })
 
@@ -412,8 +285,8 @@ setMethodS3("generate_lookup_function_in_R", "OeQ_Inv", function(this,fun_name,d
   #combine function text
   l.code=paste("# OeQ autogenerated lookup function: ",description,"\n",
                fun_name,"<-function(xin){\n",sep="")
-  l.code=paste(l.code,"\nl.lookup = data.frame(rbind(",paste("\nc(",lookuptable[,1],",",lookuptable[,2],")",collapse=",",sep=""),"),\nstringsAsFactors=FALSE)",sep="")
-  l.code=paste(l.code,"\nreturn(l.lookup[l.lookup[,1]==xin,2])\n}\n",sep="")
+  l.code=paste(l.code,"\nl.lookup = lookuptable(",paste("\nc(",lookuptable[,1],",",lookuptable[,2],")",collapse=",",sep=""),")",sep="")
+  l.code=paste(l.code,"\nreturn(lookup(l.lookup,xin))\n}\n",sep="")
   print(filename)
   if (!is.null(filename)) writeLines(l.code,filename)
   return(l.code)
@@ -425,518 +298,68 @@ setMethodS3("generate_lookup_function_in_python", "OeQ_Inv", function(this,fun_n
   if(class(lookuptable)=="lookuptable") lookuptable=as.data.frame(lookuptable)
   #  write.csv(lookuptable,file=paste(CSV_PATH,"/",filename,".csv",sep=","),row.names = FALSE)
   #combine function text
-  l.code=paste("# OeQ autogenerated lookup function for '",description,"'\n\n",
+  l.code=paste("# coding: utf8\n",
+               "# OeQ autogenerated lookup function for '",description,"'\n\n",
                "import math\n",
                "import numpy as np\n",
-               "def ",fun_name,"(xin):\n\n",sep="")
+               "import oeqLookuptable as oeq\n",
+               "def ",fun_name,"(*xin):\n\n",sep="")
   
-  l.code=paste(l.code,"\nl.lookup = data.frame(rbind(",paste("\nc(",lookuptable[,1],",",lookuptable[,2],")",collapse=",",sep=""),"),\nstringsAsFactors=FALSE)",sep="")
-  l.code=paste(l.code,"\nreturn(l.lookup[l.lookup[,1]==xin,2])\n}\n",sep="")
+  l.code=paste(l.code,"\n    l_lookup = oeq.lookuptable(\n[",paste("\n",lookuptable[,1],",",lookuptable[,2],collapse=",",sep=""),"])",sep="")
+  l.code=paste(l.code,"\n    return(l_lookup.lookup(xin))",sep="")
   if (!is.null(filename)) writeLines(l.code,filename)
   return(l.code)
 })
 
 
 # generate_correlation_function_in_R for this Investigation
-setMethodS3("generate_correlation_function_in_R", "OeQ_Inv", function(this,fun_name,description=NULL,filename=NULL,weights=NULL,...){
+setMethodS3("generate_correlation_function_in_R", "OeQ_Inv", function(this,fun_name,description=NULL,filename=fun_name,lookuptable=NULL,...){
   if(is.null(description)) description=fun_name
-  l.code=paste("# OeQ autogenerated correlation function: ",description,"\n",
-               fun_name,"<-function(xin,mode='distribution',...){\n",sep="")
+  l.code=paste("# OeQ autogenerated correlation function: ",description,"\n\n",#source('init.R')\n",
+               fun_name,"<-function(...){\n",sep="")
   l.columns=c()
-  if (is.null(weights)) weights=rep(1,length(this$.regressions))
   for (i in this$.regressions) {
      l.code=paste(l.code, i$generate_bestfit_correlation_code_snippet_in_R(),"\n",sep="") 
     l.columns=c(l.columns,i$.columnname)
   } 
-  l.code=paste(l.code, "# Looking up values")
-  for (i in this$.regressions) {
-    l.code=paste(l.code, "x=xin\n",sep="")
-    l.code=paste(l.code,i$.columnname," = lookup(",i$.columnname,",x)\n\n",sep="") 
-  }
-  l.code=paste(l.code,"\nl.sum = ")
-  for (i in l.columns)  l.code=paste(l.code,i," + ",sep="")
-  l.code=substr(l.code, 1, nchar(l.code)-3)
-  l.code=paste(l.code,"\n if(mode=='distribution'){\n",sep="")
-  l.code=paste(l.code,"return(data.frame(",sep="")
-  for (i in l.columns)  l.code=paste(l.code,i," = ",i,"/l.sum, ",sep="")
-  l.code=substr(l.code, 1, nchar(l.code)-2)
-  l.code=paste(l.code,"),stringsAsFactors=FALSE)\n}",sep="")
-  l.code=paste(l.code,"\nreturn(",sep="")
-  l.cnt=1
-  for (i in l.columns)  {
-    l.code=paste(l.code,i,"/l.sum * ",weights[l.cnt]," + ",sep="")
-    l.cnt=l.cnt+1
-  }
-  l.code=substr(l.code, 1, nchar(l.code)-3)
-  l.code=paste(l.code,")\n}\n")
-  
-  if (!is.null(filename)) writeLines(l.code,paste(CORR_PY_EXPORT_PATH,"/",filename,".R",sep=""))
+  l.code=paste(l.code,"\n    return(data.frame(",l.columns[1],"=lookup(",l.columns[1],",...)",sep="")
+  for (i in l.columns[-1])  l.code=paste(l.code,",\n    ",i,"=lookup(",i,",...)",sep="")
+  l.code=paste(l.code,",\n    stringsAsFactors=FALSE))\n}",sep="")
+  if (!is.null(filename)) writeLines(l.code,paste(CORR_R_EXPORT_PATH,"/",filename,".R",sep=""))
+  #cat(l.code)
+  #readline()
+  str_eval(l.code)
   return(l.code)
-})
+ })
 
 # PYCODE MUSS ANGEPASST WERDEN
 # generate generate_correlation_function_in_python snippet for the bestfit model of this regression
-setMethodS3("generate_correlation_function_in_python", "OeQ_Inv", function(this,fun_name,description,filename=NULL,weights=NULL,lookuptable=NULL,...){
+setMethodS3("generate_correlation_function_in_python", "OeQ_Inv", function(this,fun_name,description=NULL,filename=fun_name,lookuptable=NULL,...){
   if (is.null(weights)) weights=rep(1,length(this$.regressions))
+  if (is.null(description)) description=fun_name
   l.code=paste("# OeQ autogenerated correlation for '",description,"'\n\n",
                "import math\n",
                "import numpy as np\n",
-               "def ",fun_name,"(xin,mode='distribution'):\n\n",sep="")
+               "import oeqCorrelation as oeq\n",
+               "def ",fun_name,"(*xin):\n\n",sep="")
   l.columns=c()
   for (i in this$.regressions) {
     l.code=paste(l.code, i$generate_bestfit_correlation_code_snippet_in_python(),sep="") 
     l.columns=c(l.columns,i$.columnname)
   } 
-  l.code=paste(l.code,"\n    l_sum = ")
-  for (i in l.columns)  l.code=paste(l.code,i," + ",sep="")
-  l.code=substr(l.code, 1, nchar(l.code)-3)
-  l.code=paste(l.code,"\n    if mode is 'distribution':\n",sep="")
-  l.code=paste(l.code,"        return {'",sep="")
-  for (i in l.columns)  l.code=paste(l.code,i,"' : ",i,"/l_sum, '",sep="")
-  l.code=substr(l.code, 1, nchar(l.code)-3)
-  l.code=paste(l.code,"}\n",sep="")
-  l.code=paste(l.code,"\n    return(",sep="")
-  l.cnt=1
-  for (i in l.columns)  {
-    l.code=paste(l.code,i,"/l_sum * ",weights[l.cnt]," + ",sep="")
-    l.cnt=l.cnt+1
-  }
-  l.code=substr(l.code, 1, nchar(l.code)-3)
-  l.code=paste(l.code,")\n\n")
-  
-  if (!is.null(filename)) writeLines(l.code,paste(CORR_PY_EXPORT_PATH,"/",filename,".py",sep=""))
+  l.code=paste(l.code,"\n    return dict(",l.columns[1],"=",l.columns[1],".lookup(*xin)",sep="")
+  for (i in l.columns[-1])  l.code=paste(l.code,",\n    ",i,"=",i,".lookup(*xin)",sep="")
+  l.code=paste(l.code,")\n",sep="")
+    if (!is.null(filename)) writeLines(l.code,paste(CORR_PY_EXPORT_PATH,"/",filename,".py",sep=""))
   return(l.code)
 })
 
 
 
 
-############## IWU ###############
-              ############## Walls ###############
-
-#Contemporary Standard Wall U-Values
-build_standard_wall_uvalue_by_year_of_construction<-function(){
-  build_lookup(name="standard_wall_uvalue_by_year_of_construction",
-               description="Standard Wall U-Value of Buildings in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150505-U-Values/150505-U-Values.csv/Wall-UWerte.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=17,
-                prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Wall U-Value of Single Family Homes
-build_typical_present_wall_uvalue_SFH_by_year_of_construction<-function(resolution=104){
-      build_lookup(name="typical_present_wall_uvalue_SFH_by_year_of_construction",
-                 description="Typical Present Wall U-Value of Single Family Homes in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-                 csvsource="data_sources/150511-IWU-Aufbereitung/SQ_SFH-OUT.csv",
-                 lookup_column=3,
-                 dir_DB=DB_PATH,
-                 dir_CSV=CSV_PATH,
-                 dir_PDF=PDF_PATH,
-                 dir_R=CORR_R_EXPORT_PATH,
-                 dir_py=CORR_PY_EXPORT_PATH,
-                 smoothen=FALSE,
-                 resolution=resolution,
-                 p_mode="lin",
-                 prediction_range=c(1800,2100),
-                 lookup_range=c(1849,2021))
-}
-
-
-#Typical Present Wall U-Value of Single Detached Houses
-build_typical_present_wall_uvalue_SDH_by_year_of_construction<-function(resolution=88){
-  build_lookup(name="typical_present_wall_uvalue_SDH_by_year_of_construction",
-               description="Typical Present Wall U-Value of Single Detached Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_TH-OUT.csv",
-               lookup_column=3,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-
-#Typical Present Wall U-Value of Multifamily Houses
-build_typical_present_wall_uvalue_MFH_by_year_of_construction<-function(resolution=100){
-  build_lookup(name="typical_present_wall_uvalue_MFH_by_year_of_construction",
-               description="Typical Present Wall U-Value of Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_MFH-OUT.csv",
-               lookup_column=3,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-#Typical Present Wall U-Value of Large Multifamily Houses
-build_typical_present_wall_uvalue_LMFH_by_year_of_construction<-function(resolution=84){
-  build_lookup(name="typical_present_wall_uvalue_LMFH_by_year_of_construction",
-               description="Typical Present Wall U-Value of Large Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_LMFH-OUT.csv",
-               lookup_column=3,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-#Typical Present Average Wall U-Value of all types of Residential Houses
-build_typical_present_wall_uvalue_AVG_by_year_of_construction<-function(resolution=86){
-  build_lookup(name="typical_present_wall_uvalue_AVG_by_year_of_construction",
-               description="Typical Present Average Wall U-Value of Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_AVG-OUT.csv",
-               lookup_column=3,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-############## Roofs ###############
-
-#Contemporary Standard Roof U-Values
-build_standard_roof_uvalue_by_year_of_construction<-function(){
-  build_lookup(name="standard_roof_uvalue_by_year_of_construction",
-               description="Standard Roof U-Value of Buildings in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150505-U-Values/150505-U-Values.csv/Roof-UWerte.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=25,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Roof U-Value of Single Family Homes
-build_typical_present_roof_uvalue_SFH_by_year_of_construction<-function(resolution=79){
-  build_lookup(name="typical_present_roof_uvalue_SFH_by_year_of_construction",
-               description="Typical Present Roof U-Value of Single Family Homes in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_SFH-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Roof U-Value of Single Detached Houses
-build_typical_present_roof_uvalue_SDH_by_year_of_construction<-function(resolution=74){
-  build_lookup(name="typical_present_roof_uvalue_SDH_by_year_of_construction",
-               description="Typical Present Roof U-Value of Single Detached Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_TH-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-#Typical Present Roof U-Value of Multifamily Houses
-build_typical_present_roof_uvalue_MFH_by_year_of_construction<-function(resolution=74){
-  build_lookup(name="typical_present_roof_uvalue_MFH_by_year_of_construction",
-               description="Typical Present Roof U-Value of Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_MFH-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Roof U-Value of Large Multifamily Houses
-build_typical_present_roof_uvalue_LMFH_by_year_of_construction<-function( resolution=74){
-  build_lookup(name="typical_present_roof_uvalue_LMFH_by_year_of_construction",
-               description="Typical Present Roof U-Value of Large Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_LMFH-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Average Roof U-Value of all types of Residential Houses
-build_typical_present_roof_uvalue_AVG_by_year_of_construction<-function( resolution=110){
-  build_lookup(name="typical_present_roof_uvalue_AVG_by_year_of_construction",
-               description="Typical Present Average Roof U-Value of Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_AVG-OUT.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
 
 ############## Base ###############
 
-#Contemporary Standard Base U-Values
-build_standard_base_uvalue_by_year_of_construction<-function(){
-  build_lookup(name="standard_base_uvalue_by_year_of_construction",
-               description="Standard Base U-Value of Buildings in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150505-U-Values/150505-U-Values.csv/Base-UWerte.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=19,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Base U-Value of Single Family Homes
-build_typical_present_base_uvalue_SFH_by_year_of_construction<-function(resolution=104){
-  build_lookup(name="typical_present_base_uvalue_SFH_by_year_of_construction",
-               description="Typical Present Base U-Value of Single Family Homes in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_SFH-OUT.csv",
-               lookup_column=2,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Base U-Value of Single Detached Houses
-build_typical_present_base_uvalue_SDH_by_year_of_construction<-function(resolution=118){
-  build_lookup(name="typical_present_base_uvalue_SDH_by_year_of_construction",
-               description="Typical Present Base U-Value of Single Detached Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_TH-OUT.csv",
-               lookup_column=2,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-#Typical Present Base U-Value of Multifamily Houses
-build_typical_present_base_uvalue_MFH_by_year_of_construction<-function(resolution=102){
-  build_lookup(name="typical_present_base_uvalue_MFH_by_year_of_construction",
-               description="Typical Present Base U-Value of Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_MFH-OUT.csv",
-               lookup_column=2,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Base U-Value of Large Multifamily Houses
-build_typical_present_base_uvalue_LMFH_by_year_of_construction<-function(resolution=72){
-  build_lookup(name="typical_present_base_uvalue_LMFH_by_year_of_construction",
-               description="Typical Present Base U-Value of Large Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_LMFH-OUT.csv",
-               lookup_column=2,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Average Base U-Value of all types of Residential Houses
-build_typical_present_base_uvalue_AVG_by_year_of_construction<-function( resolution=104){
-  build_lookup(name="typical_present_base_uvalue_AVG_by_year_of_construction",
-               description="Typical Present Average Base U-Value of Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_AVG-OUT.csv",
-               lookup_column=2,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-############## Windows ###############
-
-#Contemporary Standard Window U-Values
-build_standard_window_uvalue_by_year_of_construction<-function(){
-  build_lookup(name="standard_window_uvalue_by_year_of_construction",
-               description="Standard Window U-Value of Buildings in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150505-U-Values/150505-U-Values.csv/Window-UWerte.csv",
-               lookup_column=4,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=11,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Window U-Value of Single Family Homes
-build_typical_present_window_uvalue_SFH_by_year_of_construction<-function(resolution=104){
-  build_lookup(name="typical_present_window_uvalue_SFH_by_year_of_construction",
-               description="Typical Present Window U-Value of Single Family Homes in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_SFH-OUT.csv",
-               lookup_column=6,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Window U-Value of Single Detached Houses
-build_typical_present_window_uvalue_SDH_by_year_of_construction<-function(resolution=107){
-  build_lookup(name="typical_present_window_uvalue_SDH_by_year_of_construction",
-               description="Typical Present Window U-Value of Single Detached Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_TH-OUT.csv",
-               lookup_column=6,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-
-#Typical Present Window U-Value of Multifamily Houses
-build_typical_present_window_uvalue_MFH_by_year_of_construction<-function(resolution=113){
-  build_lookup(name="typical_present_window_uvalue_MFH_by_year_of_construction",
-               description="Typical Present Window U-Value of Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_MFH-OUT.csv",
-               lookup_column=6,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Window U-Value of Large Multifamily Houses
-build_typical_present_window_uvalue_LMFH_by_year_of_construction<-function(resolution=102){
-  build_lookup(name="typical_present_window_uvalue_LMFH_by_year_of_construction",
-               description="Typical Present Window U-Value of Large Multifamily Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_LMFH-OUT.csv",
-               lookup_column=6,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
-
-#Typical Present Average Window U-Value of all types of Residential Houses
-build_typical_present_window_uvalue_AVG_by_year_of_construction<-function(resolution=110){
-  build_lookup(name="typical_present_window_uvalue_AVG_by_year_of_construction",
-               description="Typical Present Average Window U-Value of Houses in correlation to year of construction, based on the source data of the survey for the \"German Building Typology\ developed by the \"Institut für Wohnen und Umwelt\", Darmstadt/Germany, 2011-2013",
-               csvsource="data_sources/150511-IWU-Aufbereitung/SQ_AVG-OUT.csv",
-               lookup_column=6,
-               dir_DB=DB_PATH,
-               dir_CSV=CSV_PATH,
-               dir_PDF=PDF_PATH,
-               dir_R=CORR_R_EXPORT_PATH,
-               dir_py=CORR_PY_EXPORT_PATH,
-               smoothen=FALSE,
-               resolution=resolution,
-               prediction_range=c(1800,2100),
-               lookup_range=c(1849,2021))
-}  
 
 
 

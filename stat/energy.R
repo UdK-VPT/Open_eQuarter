@@ -24,6 +24,10 @@ source("bld_db.R")
 
 #Predict the energy demand for heating based on only a few basic data
 energy_demand<-function(population_density, #parameter Type & Fensteranteil
+                        
+
+#Predict the energy demand for heating based on only a few basic data
+energy_demand<-function(population_density, #parameter Type & Fensteranteil
                         floor_area,
                         floor_perimeter=NULL,
                         building_height=NULL,
@@ -44,8 +48,8 @@ energy_demand<-function(population_density, #parameter Type & Fensteranteil
   }else{
     floors=building_height/3.3
   }
-  l.type_distribution=building_type_distribution(population_density)
-  l.uvalues=component_uvalues(year_of_construction)
+  l.type_distribution=build_type_distribution_by_population_density(population_density)
+  #l.uvalues=component_uvalues(year_of_construction)
   
   l.base_area=floor_area
   l.base_uvalue=l.type_distribution$EFH*l.uvalues$U_BASE_EFH+

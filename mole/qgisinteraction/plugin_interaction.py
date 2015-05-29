@@ -262,8 +262,11 @@ class RealCentroidInteraction(object):
 
         while (poly_iterator.nextFeature(poly_feature) and
                point_iterator.nextFeature(point_feature)):
-            poly_point = poly_feature.geometry().asPolygon()[0]
-            centroid = point_feature.geometry().asPoint()
+            try:
+                poly_point = poly_feature.geometry().asPolygon()[0]
+                centroid = point_feature.geometry().asPoint()
+            except IndexError:
+                continue
             distances = {}
             for i, point in enumerate(poly_point):
                 end = poly_point[(i+1) % len(poly_point)]
@@ -277,9 +280,12 @@ class RealCentroidInteraction(object):
             values = {field_index: min(distances.values())}
             point_provider.changeAttributeValues({point_feature.id(): values})
 
+
+
     def intersect_point_to_line(self, point, line_start, line_end):
         """
         Finds the point i on a line which, given a point p describes a line ip, orthogonal to a given line
+        (as found on http://gis.stackexchange.com/questions/59169/how-to-draw-perpendicular-lines-in-qgis)
         :param point: The point p
         :type point: QgsPoint
         :param line_start: The lines start

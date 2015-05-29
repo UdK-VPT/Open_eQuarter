@@ -161,7 +161,6 @@ def transform_wms_geo_data(wms_layer, extent, extent_crs):
     if not extent_crs == target_crs:
         coord_transformer = QgsCoordinateTransform(extent_crs, target_crs)
         return coord_transformer.transform(extent)
-
     else:
         return extent
 

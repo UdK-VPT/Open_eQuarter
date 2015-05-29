@@ -34,15 +34,15 @@ from qgis.core import *
 from qgis.utils import iface
 
 from model.progress_model import ProgressItemsModel
-from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog
+from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog, EstimatedEnergyDemand_dialog
 from qgisinteraction import plugin_interaction
 from qgisinteraction import layer_interaction
 from qgisinteraction import raster_layer_interaction
 from qgisinteraction import project_interaction
-from ExportWMSasTif import ExportWMSasTif
+from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
-
+from mole.stat_corr.energy_demand import energy_demand
 
 class OpenEQuarterMain:
 
@@ -115,6 +115,8 @@ class OpenEQuarterMain:
         tools_dropdown_menu = QMenu()
         tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
+        tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
+        tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_estimated_energy_demand)
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
@@ -137,11 +139,11 @@ class OpenEQuarterMain:
 
         if layer_interaction.find_layer_by_name(config.housing_coordinate_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, 1)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, position)
 
         if layer_interaction.find_layer_by_name(config.housing_layer_name):
             position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, 2)
+            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, position)
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -360,43 +362,36 @@ class OpenEQuarterMain:
         try:
             # set the rasterlayer as active, since only the active layer will be clipped and start the export
             self.iface.setActiveLayer(raster_layer)
-            pyramid_exporter = ExportWMSasTif(self.iface)
-            return pyramid_exporter.export(raster_layer.name())
-
-        except AttributeError as NoneException:
-            print(self.__module__, NoneException)
-
-    def clip_zoom_to_layer_view_from_raster(self, layer_name):
-        """
-        Zoom to a given vector-layer, containing shape files. Extract the currently viewed extent from an underlying raster-layer into a new .tif and open it.
-        :param layer_name: Name of the vector-layer
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        try:
-            investigation_shape = layer_interaction.find_layer_by_name(layer_name)
-            # an investigation shape is needed, to trigger the zoom to layer function
-            if investigation_shape is not None and investigation_shape.featureCount() > 0:
-
-                # zoom
-                self.iface.setActiveLayer(investigation_shape)
-                self.iface.actionZoomToLayer().trigger()
-
-                # clip extent from visible raster layers
-                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
-                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
-                for layer in raster_layers:
-                    self.iface.legendInterface().setLayerVisible(layer, False)
-
-                clipped_layers = []
-                for clipping_raster in raster_layers:
-                    clipped_layers.append(self.clip_from_raster(clipping_raster))
-
-                return clipped_layers
+            geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
+            pyramids_built = raster_layer_interaction.gdal_addo_layerfile(geo_export_path, 'gauss', 6)
+            if pyramids_built != 0:
+                print 'Error number {} occured, while building pyramids.'.format(pyramids_built)
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
             return None
+
+        filename = geo_export_path.split(os.path.sep)[-1]
+        filename = os.path.splitext(filename)[0]
+        no_timeout = 50
+        while not os.path.exists(geo_export_path) and no_timeout:
+            time.sleep(0.1)
+            no_timeout -= 1
+
+        raster_layer = QgsRasterLayer(geo_export_path, filename)
+
+        # if the crs is invalid, prompt the user to define an CRS
+        if not raster_layer.crs().authid():
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'prompt'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
+            layer_interaction.add_layer_to_registry(raster_layer)
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+        else:
+            old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
+            QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
+            layer_interaction.add_layer_to_registry(raster_layer)
+            QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+
+        return raster_layer.name()
 
     # step 0.0
     def handle_ol_plugin_installed(self):
@@ -493,8 +488,8 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-
-        housing_layer = os.path.join('/', 'Users', 'VPTtutor', 'Desktop', 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        user_dir = os.path.expanduser('~')
+        housing_layer = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         if os.path.exists(housing_layer):
             housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
@@ -516,8 +511,8 @@ class OpenEQuarterMain:
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
         raster_layers = []
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, self.wms_url, config.clipping_raster_layer_name))
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'Building height'))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'Floors'))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter', 'YOC'))
 
         raster_loaded = False
         for raster in raster_layers:
@@ -537,7 +532,27 @@ class OpenEQuarterMain:
 
     # step 3.1
     def handle_extent_clipped(self):
-        extracted_layers = self.clip_zoom_to_layer_view_from_raster(config.investigation_shape_layer_name)
+        try:
+            investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            # an investigation shape is needed, to trigger the zoom to layer function
+            if investigation_shape is not None and investigation_shape.featureCount() > 0:
+                # zoom
+                self.iface.setActiveLayer(investigation_shape)
+                self.iface.actionZoomToLayer().trigger()
+
+                # clip extent from visible raster layers
+                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
+                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+                for layer in raster_layers:
+                    self.iface.legendInterface().setLayerVisible(layer, False)
+
+                extracted_layers = []
+                for clipping_raster in raster_layers:
+                    extracted_layers.append(self.clip_from_raster(clipping_raster))
+
+        except AttributeError as NoneException:
+            print(self.__module__, NoneException)
+            return False
 
         try:
             layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
@@ -551,13 +566,17 @@ class OpenEQuarterMain:
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
 
+                no_timeout = 50
+                while not os.path.exists(path_transformed) and no_timeout:
+                    time.sleep(0.1)
+                    no_timeout -= 1
+
                 if os.path.exists(path_transformed):
                     # change validation to surpress missing-crs prompt
                     old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                     QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-                    layer_interaction.hide_or_remove_layer(layer_name,'remove',self.iface)
-
+                    layer_interaction.hide_or_remove_layer(layer_name, 'remove', self.iface)
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
@@ -595,9 +614,9 @@ class OpenEQuarterMain:
             entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+                self.reorder_layers()
                 return True
         else:
-            self.color_picker_dlg.__init__()
             self.iface.actionPan().trigger()
             self.reorder_layers()
 
@@ -636,6 +655,61 @@ class OpenEQuarterMain:
 
         layer_interaction.add_layer_to_registry(vlayer)
         return True
+
+    #step 4.2
+    def handle_estimated_energy_demand(self):
+        # ToDo Change to non default-values
+        pop_dens = 3927
+        area = 0
+        perimeter = 0
+        building_height = 0
+        yoc = 1990
+        floors = 3
+
+        dlg = EstimatedEnergyDemand_dialog()
+        dlg.show()
+        start_calc = dlg.exec_()
+        if start_calc:
+            # ToDo It has to be checked, if the in- and out-layer have the same amount of features
+            in_layer = layer_interaction.find_layer_by_name(dlg.input_layer.currentText())
+            out_layer = layer_interaction.find_layer_by_name(dlg.output_layer.currentText())
+            att_name = dlg.field_name.text()[:10]
+            provider = in_layer.dataProvider()
+            out_provider = out_layer.dataProvider()
+
+            if att_name.isspace():
+                att_name = 'est_e_d'
+            attribute = [QgsField(att_name, QVariant.Double)]
+            layer_interaction.add_attributes_if_not_exists(out_layer, attribute)
+            att_index = out_provider.fieldNameMap()[att_name]
+
+            area_fld = dlg.area.currentText()
+            peri_fld = dlg.perimeter.currentText()
+            # height_fld = dlg.height.currentText()
+            yoc_fld = dlg.yoc.currentText()
+            floors_fld = dlg.floors.currentText()
+
+            for feat in provider.getFeatures():
+                area = feat.attribute(area_fld)
+                perimeter = feat.attribute(peri_fld)
+                # height = feat.attribute(height_fld)
+                yoc = feat.attribute(yoc_fld)
+                floors = feat.attribute(floors_fld)
+                if (not floors or floors == 'NULL') and (not yoc or yoc == 'NULL'):
+                    est_ed = energy_demand(pop_dens, area, perimeter)
+                elif not yoc or yoc == 'NULL':
+                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors)
+                elif not floors or floors == 'NULL':
+                    est_ed = energy_demand(pop_dens, area, perimeter, year_of_construction=yoc)
+                else:
+                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+
+                value = {att_index: est_ed}
+                out_provider.changeAttributeValues({feat.id(): value})
+
+            return True
+        else:
+            return False
 
     def continue_process(self):
         """

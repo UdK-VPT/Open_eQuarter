@@ -14,24 +14,42 @@ class QProcessViewDelegate(QItemDelegate):
     def __init__(self, parent):
         QItemDelegate.__init__(self, parent)
         self.margin_left = 5
+        self.margin_top = 7
+        self.height = 10
         self.icon_size = 17
+        self.width = 300
 
     def paint(self, painter, option, index):
+        """
+        Method paints the models item and icon
+        :param painter:
+        :type painter: QPainter
+        :param option:
+        :type option: QStyleOptionViewItem
+        :param index:
+        :type index: QModelIndex
+        :return:
+        :rtype:
+        """
         model = index.model()
         item = model.item(index.row())
         text = item.text()
 
-        x = option.rect.x() + 2 * self.margin_left + self.icon_size
-        rectangle = QRect(option.rect)
-        rectangle.setX(x)
+        x_top, y_top, x_btm, y_btm = option.rect.getCoords()
+        # print(x_top, y_top, x_btm, y_btm)
+        x_top = x_top + 2 * self.margin_left + self.icon_size
+        y_top = y_top + self.margin_top
+        x_btm = self.width
+        y_btm = y_btm + self.height
+        rectangle = QRect(x_top, y_top, x_btm, y_btm)
+        # painter.setBrush(Qt.cyan)
+        # painter.setPen(Qt.darkCyan)
+        # painter.drawRect(rectangle)
+        painter.drawText(rectangle, Qt.AlignLeft | Qt.TextWordWrap, text)
 
-        painter.drawText(rectangle, Qt.AlignLeft, text)
-
-        x = x - self.margin_left - self.icon_size
-        y = rectangle.y() - 1
-        rectangle.setX(x)
-        rectangle.setY(y)
-
+        x_top = x_top - self.margin_left - self.icon_size
+        y_top = y_top - 1
+        rectangle = QRect(x_top, y_top, x_btm, y_btm)
         self.drawCheck(painter, option, rectangle, item.checkState())
 
     def drawCheck(self, painter, style_option, rectangle, check_state):

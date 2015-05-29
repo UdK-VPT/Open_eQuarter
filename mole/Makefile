@@ -38,7 +38,7 @@ EXTRAS = icons/gearwheel.png icons/info.png icons/OeQ_plugin_icon.png icons/OeQ_
 
 PACKAGE_PREFIX = view/
 
-UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_modular_dialog.py ui_modular_info_dialog.py ui_main_process_dock.py ui_project_settings_form.py ui_color_picker_dialog.py
+UI_FILES = ui_project_does_not_exist_dialog.py ui_request_wms_url_dialog.py ui_modular_dialog.py ui_modular_info_dialog.py ui_main_process_dock.py ui_project_settings_form.py ui_color_picker_dialog.py ui_estimated_energy_demand_dialog.py
 
 RESOURCE_FILES = resources_rc.py
 

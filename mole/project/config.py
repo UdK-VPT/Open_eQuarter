@@ -19,7 +19,7 @@ open_layer_type_id = 4
 # Point Sampling Tool
 pst_plugin_name = 'pointsamplingtool'
 pst_output_layer_name = 'pst_out'
-pst_input_layer_name = 'centroids'
+pst_input_layer_name = 'Building centroids'
 
 # Realcentroid plugin
 real_centroid_plugin_name = 'realcentroid'
@@ -35,7 +35,7 @@ default_extent_crs = 'EPSG:4326'
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'
 housing_layer_name = 'Floor plan'
-housing_coordinate_layer_name = ''
+housing_coordinate_layer_name = 'Building centroids'
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
 

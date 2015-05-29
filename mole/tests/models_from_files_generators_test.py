@@ -113,6 +113,45 @@ class ColorEntryManagerTestCase(unittest.TestCase):
             except IOError, Error:
                 print(Error)
 
+    def test_json_file_with_abbreviation_for_correctness(self):
+        path = sys.path[0]
+        cem = ColorEntryManager()
+        layer_name = 'my_test_layer'
+        abbreviation = '01TestLy'
+        out_path = os.path.join(path, layer_name + '.txt')
+        cem.add_layer(layer_name)
+
+        dict = {'RGBa(0, 0, 255, 255)': ('name0', 120, 11)}
+        dict['RGBa(0, 0, 255, 255)'] = ('name1', 131,28)
+        dict['RGBa(123, 21, 255, 255)'] = ('name2', 2,8)
+        dict['RGBa(2, 33, 25, 2)'] = ('name3', 1,4)
+        dict['RGBa(170, 12, 17, 36)'] = ('name4', 12,238)
+
+        cem.set_color_map_of_layer(dict, layer_name)
+        cem.set_layer_abbreviation(layer_name, abbreviation)
+        cem.write_map_to_disk(layer_name, out_path)
+        self.assertTrue(os.path.exists(out_path))
+
+        try:
+            json_data = io.open(out_path)
+            data = json.load(json_data)
+            result_dict = {}
+            for color, value_list in data['Legend'].iteritems():
+                result_dict[color] = (value_list[0], value_list[1], value_list[2])
+
+            self.assertEqual(data['Abbreviation'], abbreviation)
+            self.assertDictContainsSubset(dict, result_dict)
+            json_data.close()
+
+        except IOError, Error:
+            self.fail(Error)
+
+        finally:
+            try:
+                os.remove(out_path)
+            except IOError, Error:
+                print(Error)
+
     def test_cem_reads_file_from_disk_into_color_entry(self):
         path = sys.path[0]
         out_path = os.path.join(path, self.test_layer + '.txt')
@@ -135,6 +174,31 @@ class ColorEntryManagerTestCase(unittest.TestCase):
         color_map = self.cem.layer_values_map[self.test_layer]
         self.assertDictEqual(dict, color_map, 'Error when reading a color-map from disk: \n\tReceived: {}\n\tExpected: {}'.format(color_map, dict))
 
+    def test_cem_reads_file_and_abb_from_disk_into_color_entry(self):
+        path = sys.path[0]
+        out_path = os.path.join(path, self.test_layer + '.txt')
+        abbreviation = '01TestLy'
+
+        color_dict = {'RGBa(0, 0, 255, 255)': ('name1', 120, 11)}
+        color_dict['RGBa(0, 0, 255, 255)'] = ('name1', 131,28)
+        color_dict['RGBa(123, 21, 255, 255)'] = ('name1', 2,8)
+        color_dict['RGBa(2, 33, 25, 2)'] = ('name1', 1,4)
+        color_dict['RGBa(170, 12, 17, 36)'] = ('name1', 12,238)
+
+        out_dict = {'Abbreviation': abbreviation, 'Legend': color_dict}
+        try:
+            with io.open(out_path, 'w', encoding='utf-8') as json_outfile:
+                json_string = json.dumps(out_dict, ensure_ascii=False)
+                json_outfile.write(unicode(json_string))
+        except (IOError, OSError) as Error:
+            self.fail('Could not write test-data due to error: ' + Error)
+
+        self.cem.read_color_map_from_disk(out_path)
+
+        color_map = self.cem.layer_values_map[self.test_layer]
+        self.assertDictEqual(color_dict, color_map, 'Error when reading a color-map from disk: \n\tReceived: {}\n\tExpected: {}'.format(color_map, color_dict))
+        self.assertEqual(self.cem.layer_abbreviation_map[self.test_layer], abbreviation)
+
     def test_dict_can_be_removed_from_layer_entry(self):
         self.cem.add_layer(self.test_layer)
         self.cem.set_color_map_of_layer(self.test_dict, self.test_layer)
@@ -142,6 +206,7 @@ class ColorEntryManagerTestCase(unittest.TestCase):
         self.cem.remove_color_entry_from_layer(deleted_entry, self.test_layer)
         self.assertNotIn(deleted_entry, self.cem.layer_values_map[self.test_layer])
         self.assertIn('RGBa(0, 0, 220, 255)', self.cem.layer_values_map[self.test_layer])
+
 
 class MunicipalInformationParserAndTreeTestCase(unittest.TestCase):
 

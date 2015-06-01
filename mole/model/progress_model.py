@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 
+from zipfile import ZipFile
 from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
 from PyQt4.QtCore import QSize
 
@@ -24,13 +25,13 @@ class ProgressItemsModel():
         :rtype:
         """
         try:
-            dir_entries = map(lambda entry: os.path.join(path, entry), os.listdir(path))
-            files = filter(lambda entry: os.path.isfile(entry) and os.path.basename(entry).startswith('section') and entry.endswith('.json'), dir_entries)
+            dir_entries = ZipFile(path).namelist()
+            files = filter(lambda entry: entry.startswith('section') and entry.endswith('.json'), dir_entries)
             views = []
             for json_section in files:
-                data = io.open(json_section)
-                json_data = json.load(data)
-                data.close()
+                with ZipFile(path, 'r') as oeq_zip:
+                    data = oeq_zip.read(json_section)
+                    json_data = json.loads(data)
 
                 step_items = QListView()
                 step_items.setItemDelegate(QProcessViewDelegate(step_items))
@@ -64,28 +65,25 @@ class ProgressItemsModel():
         :return:
         :rtype:
         """
-        path = os.path.join(path, 'oeq_progress')
-        try:
-            os.makedirs(path)
-        except OSError, FileExistsError:
-            print(self.__module__, FileExistsError)
-
-
         default_progress = os.path.join(config.plugin_dir, 'project', 'default_progress')
-        for i in range(1,6):
-            json_file = os.path.join(default_progress, 'section{}.json'.format(i))
-            shutil.copy2(json_file, path)
-            json_file = os.path.join(path, os.path.basename(json_file))
-            model = self.section_views[i-1].model()
+        path = os.path.join(path, 'oeq_progress.oeq')
+        if os.path.exists(path):
+            os.remove(path)
 
+        for i in range(1, 6):
+            model = self.section_views[i-1].model()
+            json_file = os.path.join(default_progress, 'section{}.json'.format(i))
             with open(json_file, "r") as jsonFile:
                 json_data = json.load(jsonFile)
 
-            for i, step in enumerate(json_data['steplist']):
-                    step['state'] = model.item(i).checkState()
+            for j, step in enumerate(json_data['steplist']):
+                    step['state'] = model.item(j).checkState()
 
-            with open(json_file, "w") as jsonFile:
-                jsonFile.write(json.dumps(json_data))
+            print(json.dumps(json_data))
+
+
+            with ZipFile(path, 'a') as oeq_zip:
+                oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))
 
     def check_prerequisites_for(self, step_name):
         """

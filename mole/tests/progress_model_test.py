@@ -82,7 +82,7 @@ class ProgressItemsModel_test(unittest.TestCase):
         self.set_prerequisites(section_model2, 0, 1)
         self.set_prerequisites(section_model2, 1, 2, 1)
 
-        path = os.path.join('.', 'oeq_progress')
+        path = os.path.join('.', 'oeq_progress.oeq')
         try:
             self.pim.save_section_models('.')
 
@@ -94,8 +94,7 @@ class ProgressItemsModel_test(unittest.TestCase):
         except OSError, FileError:
             print(self.__module__, FileError)
         finally:
-            if os.path.isdir(path):
-                shutil.rmtree(path)
+            os.remove(path)
 
         last_step_first_section = self._steps0[-1]
         self.assertEqual(self.pim.check_prerequisites_for(last_step_first_section).accessibleText(), last_step_first_section)

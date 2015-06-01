@@ -107,10 +107,12 @@ class OpenEQuarterMain:
             list_view.clicked.connect(self.process_button_clicked)
 
         settings_dropdown_menu = QMenu()
-        settings_dropdown_menu.addAction('Open project setup..', self.open_settings)
-        settings_dropdown_menu.addAction('Save current progress', self.save_progress)
-        settings_dropdown_menu.addAction('Save current progress as..', self.save_progress_as)
-        settings_dropdown_menu.addAction('Open OeQ-Project..', self.open_progress)
+        config_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'config.png'))
+        open_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'open.png'))
+        save_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'save_active.png'))
+        settings_dropdown_menu.addAction(config_icon, 'Project configuration..', self.open_settings)
+        settings_dropdown_menu.addAction(save_icon, 'Save current progress', self.save_progress)
+        settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
         tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
@@ -149,13 +151,12 @@ class OpenEQuarterMain:
         self.oeq_project_settings_form.show()
 
     def open_progress(self):
-        print 'Open Project'
+        QFileDialog(self.iface.mainWindow()).getOpenFileName(filter='.oeq')
 
     def save_progress(self):
-        print 'Save progress'
-
-    def save_progress_as(self):
-        print 'Save as'
+        iface.actionSaveProject().trigger()
+        if self.project_path != './':
+            self.progress_items_model.save_section_models(self.project_path)
 
     def load_wms(self):
         print('Load wms')

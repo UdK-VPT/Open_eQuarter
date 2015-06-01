@@ -49,8 +49,12 @@ class QProcessViewDelegate(QItemDelegate):
 
         x_top = x_top - self.margin_left - self.icon_size
         y_top = y_top - 1
-        rectangle = QRect(x_top, y_top, x_btm, y_btm)
-        self.drawCheck(painter, option, rectangle, item.checkState())
+        try:
+            rectangle = QRect(x_top, y_top, x_btm, y_btm)
+            self.drawCheck(painter, option, rectangle, item.checkState())
+        except TypeError as NoneTypeError:
+            print(self.__module__, NoneTypeError)
+
 
     def drawCheck(self, painter, style_option, rectangle, check_state):
         start_point = QPoint(rectangle.x(), rectangle.y())

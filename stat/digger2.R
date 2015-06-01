@@ -1469,6 +1469,7 @@ setMethodS3("sum_plot", "OeQ_Inv", function(this,
                                             ...) {
   op <- par()
   par(xpd=TRUE)
+ # stop()
   if(!is.null(pdffile)) {
     pdf(paste(PDF_PATH,"/",pdffile,".pdf",sep=""),paper="a4", width = 0, height = 0)
     par(mfrow=c(2,1))
@@ -1493,7 +1494,6 @@ setMethodS3("sum_plot", "OeQ_Inv", function(this,
   if(is.null(xrange)) {
     xrange=this$.xrange
   }
-  print(columns)
  # readline()
   if(is.null(palette)) palette=this$.palette
   xpin=seq(xrange[1],xrange[2],length.out = 1000)
@@ -1501,11 +1501,11 @@ setMethodS3("sum_plot", "OeQ_Inv", function(this,
   l.y_out=this$.regressions[[columns[1]]]$bestpredict(xpin,asdf=FALSE)*l.perc_factor
   l.y_out=cbind(l.y_out)
   for (i in columns[-1]){
-    print(this$.regressions[[i]])
+ #   print(this$.regressions[[i]])
     l.y_out=cbind(l.y_out,this$.regressions[[i]]$bestpredict(xpin,asdf=FALSE)*l.perc_factor)
   }
-  colnames(l.y_out)<-columns
-  print(l.y_out)
+ #colnames(l.y_out)<-columns
+#  print(l.y_out[1:10,])
   # plot.stacked(xp,l.y_out)
   # plot.stacked(xp,l.y_out,lwd=0,
   #        main=paste(unlist(VERBOSE["CORR_SUM_PLOT_TITLE",]$title),"\n",columns[1],sep=""),
@@ -1525,9 +1525,7 @@ setMethodS3("sum_plot", "OeQ_Inv", function(this,
   }
   #abline(h=seq(0,200000, 10000), lty=3, col="grey")
   #print(unlist(VERBOSE[columns,]$label))
-  print(columns)
-  print(VERBOSE[columns,"info"])
-  legend("topleft",bty="n", rev(unlist(VERBOSE[columns,]$info)), ncol=3, inset = c(0.02,0), fill=rev(rainbow(length(l.y_out[1,]))),  bg="white", cex=0.8, col=rainbow(length(l.y_out[1,])))
+  legend("topleft",bty="n", legend=rev(unlist(VERBOSE[columns,]$info)), ncol=3, inset = c(0.02,0), fill=rev(rainbow(length(l.y_out[1,]))),  bg="white", cex=0.8, col=rainbow(length(l.y_out[1,])))
   Sys.sleep(1)
   suppressWarnings(par(op))
   if(!is.null(pdffile)) {dev.off()

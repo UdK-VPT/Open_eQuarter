@@ -4,7 +4,7 @@
 import math
 import numpy as np
 import oeqLookuptable as oeq
-def contemporary_opaque_uvalue_by_building_age_lookup(*xin):
+def get(*xin):
 
 
     l_lookup = oeq.lookuptable(

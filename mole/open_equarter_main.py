@@ -42,7 +42,7 @@ from qgisinteraction import project_interaction
 from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
-from mole.stat_corr.energy_demand import energy_demand
+from mole.stat_util.energy_demand import energy_demand
 
 class OpenEQuarterMain:
 
@@ -691,8 +691,9 @@ class OpenEQuarterMain:
             floors_fld = dlg.floors.currentText()
 
             for feat in provider.getFeatures():
-                area = feat.attribute(area_fld)
-                perimeter = feat.attribute(peri_fld)
+                area = feat.attribute("AREA")
+                print area_fld
+                perimeter = feat.attribute("PERIMETER")
                 # height = feat.attribute(height_fld)
                 yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)

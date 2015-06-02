@@ -840,7 +840,7 @@ build_window_wall_ratio_LMFH_by_building_age_lookup<-function( resolution=74){
                lookup_range=c(1849,2021))
 }  
 
-FORCERUN=F
+FORCERUN=T
 if(FORCERUN==TRUE){
 build_window_wall_ratio_east_AVG_by_building_age_correlation()
 build_window_wall_ratio_east_AVG_by_building_age_lookup()

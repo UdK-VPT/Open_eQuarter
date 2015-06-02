@@ -303,7 +303,7 @@ setMethodS3("generate_lookup_function_in_python", "OeQ_Inv", function(this,fun_n
                "import math\n",
                "import numpy as np\n",
                "import oeqLookuptable as oeq\n",
-               "def ",fun_name,"(*xin):\n\n",sep="")
+               "def get(*xin):\n\n",sep="")
   
   l.code=paste(l.code,"\n    l_lookup = oeq.lookuptable(\n[",paste("\n",lookuptable[,1],",",lookuptable[,2],collapse=",",sep=""),"])",sep="")
   l.code=paste(l.code,"\n    return(l_lookup.lookup(xin))",sep="")
@@ -341,7 +341,7 @@ setMethodS3("generate_correlation_function_in_python", "OeQ_Inv", function(this,
                "import math\n",
                "import numpy as np\n",
                "import oeqCorrelation as oeq\n",
-               "def ",fun_name,"(*xin):\n\n",sep="")
+               "def get(*xin):\n\n",sep="")
   l.columns=c()
   for (i in this$.regressions) {
     l.code=paste(l.code, i$generate_bestfit_correlation_code_snippet_in_python(),sep="") 

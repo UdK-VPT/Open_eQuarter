@@ -2,6 +2,7 @@ from PyQt4.QtGui import QApplication
 
 import unittest
 import sys
+import shutil
 
 from mole.model.progress_model import *
 
@@ -28,7 +29,6 @@ class ProgressItemsModel_test(unittest.TestCase):
         while section.item(i) and i < end:
             section.item(i).setCheckState(value)
             i += 1
-
 
     def test_if_pim_was_initialised_according_json_file(self):
             self.assertEqual(len(self.pim.section_views), len(self._sections))
@@ -72,6 +72,36 @@ class ProgressItemsModel_test(unittest.TestCase):
         self.set_prerequisites(section_model, 0, 1, 0)
         second_step_third_section_fails_due_to_first = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(second_step_third_section_fails_due_to_first.accessibleText(), self._steps2[0])
+
+    def test_if_progress_is_saved_correctly(self):
+        section_model0 = self.pim.section_views[0].model()
+        section_model1 = self.pim.section_views[1].model()
+        section_model2 = self.pim.section_views[2].model()
+        self.set_prerequisites(section_model0, 0, len(self._steps0))
+        self.set_prerequisites(section_model1, 0, len(self._steps1))
+        self.set_prerequisites(section_model2, 0, 1)
+        self.set_prerequisites(section_model2, 1, 2, 1)
+
+        path = os.path.join('.', 'oeq_progress.oeq')
+        try:
+            self.pim.save_section_models('.')
+
+            self.set_prerequisites(section_model0, 0, len(self._steps0), 0)
+            self.set_prerequisites(section_model1, 0, len(self._steps1), 0)
+            self.set_prerequisites(section_model2, 0, len(self._steps2), 0)
+
+            self.pim.load_section_models(path)
+        except OSError, FileError:
+            print(self.__module__, FileError)
+        finally:
+            os.remove(path)
+
+        last_step_first_section = self._steps0[-1]
+        self.assertEqual(self.pim.check_prerequisites_for(last_step_first_section).accessibleText(), last_step_first_section)
+
+        last_step = self._steps4[-1]
+        last_completed = self._steps2[1]
+        self.assertEqual(self.pim.check_prerequisites_for(last_step).accessibleText(), last_completed)
 
 
 if __name__ == '__main__':

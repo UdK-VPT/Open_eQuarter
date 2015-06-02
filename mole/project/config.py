@@ -42,7 +42,7 @@ clipping_raster_layer_name = 'Investigation Area - raster'
 
 ### Default paths
 plugin_dir = os.path.dirname(mole.__file__)
-progress_model = os.path.join(plugin_dir, 'project', 'default_progress')
+progress_model = os.path.join(plugin_dir, 'project', 'default_progress.oeq')
 investigation_area_style = os.path.join(plugin_dir, 'project', 'oeq_ia_style.qml')
 valid_centroids_style = os.path.join(plugin_dir, 'project', 'oeq_valid_centroid_style.qml')
 

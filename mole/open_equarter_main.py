@@ -42,7 +42,7 @@ from qgisinteraction import project_interaction
 from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
-from mole.stat_corr.energy_demand import energy_demand
+from mole.stat_util.energy_demand import energy_demand
 
 class OpenEQuarterMain:
 

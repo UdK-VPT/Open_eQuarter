@@ -690,8 +690,9 @@ class OpenEQuarterMain:
             floors_fld = dlg.floors.currentText()
 
             for feat in provider.getFeatures():
-                area = feat.attribute(area_fld)
-                perimeter = feat.attribute(peri_fld)
+                area = feat.attribute("AREA")
+                print area_fld
+                perimeter = feat.attribute("PERIMETER")
                 # height = feat.attribute(height_fld)
                 yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)

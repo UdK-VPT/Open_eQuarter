@@ -4,7 +4,7 @@
 import math
 import numpy as np
 import oeqLookuptable as oeq
-def window_wall_ratio_east_SFH_by_building_age_lookup(*xin):
+def get(*xin):
 
 
     l_lookup = oeq.lookuptable(
@@ -183,5 +183,3 @@ def window_wall_ratio_east_SFH_by_building_age_lookup(*xin):
 2020,0.02,
 2021,0.02])
     return(l_lookup.lookup(xin))
-
-print window_wall_ratio_east_SFH_by_building_age_lookup(1950,1958,2000)

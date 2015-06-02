@@ -4,7 +4,7 @@
 import math
 import numpy as np
 import oeqLookuptable as oeq
-def window_wall_ratio_south_SDH_by_building_age_lookup(*xin):
+def get(*xin):
 
 
     l_lookup = oeq.lookuptable(

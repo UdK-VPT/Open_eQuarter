@@ -34,7 +34,10 @@ from qgis.core import *
 from qgis.utils import iface
 
 from model.progress_model import ProgressItemsModel
-from view.oeq_dialogs import Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog, ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog, EstimatedEnergyDemand_dialog
+from view.oeq_dialogs import (
+    Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
+    ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog,
+    EstimatedEnergyDemand_dialog)
 from qgisinteraction import plugin_interaction
 from qgisinteraction import layer_interaction
 from qgisinteraction import raster_layer_interaction
@@ -42,7 +45,7 @@ from qgisinteraction import project_interaction
 from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
-from mole.stat_util.energy_demand import energy_demand
+# from mole.stat_util.energy_demand import energy_demand
 
 class OpenEQuarterMain:
 
@@ -55,7 +58,6 @@ class OpenEQuarterMain:
 
         ### UI specific settings
         # Create the dialogues (after translation) and keep references
-        self.main_process_dock = MainProcess_dock(self.progress_items_model)
         self.oeq_project_settings_form = ProjectSettings_form()
         self.color_picker_dlg = ColorPicker_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
@@ -63,6 +65,7 @@ class OpenEQuarterMain:
         self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
         self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = Modular_dialog()
+        self.main_process_dock = None
 
         ### Project specific settings
         # the project path equals './' as long as the project has not been saved
@@ -77,13 +80,9 @@ class OpenEQuarterMain:
         self.investigation_shape_layer_style = os.path.join(config.plugin_dir, 'project', 'oeq_ia_style.qml')
 
     def initGui(self):
-        # Create action that will start plugin configuration
         plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
-        # connect the action to the run method
         self.main_action.triggered.connect(self.run)
-
-        # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.main_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
 
@@ -98,6 +97,15 @@ class OpenEQuarterMain:
         self.testing_action.triggered.connect(lambda: self.run_tests())
         self.iface.addToolBarIcon(self.testing_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
+
+        self.iface.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
+        self.iface.connect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
+        self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.save_progress)
+
+        self.initGui_process_dock()
+
+    def initGui_process_dock(self):
+        self.main_process_dock = MainProcess_dock(self.progress_items_model)
 
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
         self.main_process_dock.process_button_auto.clicked.connect(self.auto_run)
@@ -122,8 +130,6 @@ class OpenEQuarterMain:
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
-
-        self.main_process_dock.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
 
     def reorder_layers(self):
         """
@@ -150,13 +156,33 @@ class OpenEQuarterMain:
     def open_settings(self):
         self.oeq_project_settings_form.show()
 
-    def open_progress(self):
-        QFileDialog(self.iface.mainWindow()).getOpenFileName(filter='.oeq')
+    def open_progress(self, doc):
+        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
+        progress = os.path.join(self.project_path, 'oeq_progress.oeq')
+        if os.path.isfile(progress):
+            self.progress_items_model.load_section_models(progress)
+            if self.main_process_dock.isVisible():
+                self.main_process_dock.setVisible(False)
+                self.initGui_process_dock()
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
+
+        else:
+            self.progress_items_model.load_section_models(config.progress_model)
+            if self.main_process_dock.isVisible():
+                self.main_process_dock.setVisible(False)
+                self.initGui_process_dock()
+                self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
+            else:
+                self.initGui_process_dock()
 
     def save_progress(self):
-        iface.actionSaveProject().trigger()
-        if self.project_path != './':
-            self.progress_items_model.save_section_models(self.project_path)
+        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
+
+        while self.project_path == './':
+            self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
+            iface.actionSaveProject().trigger()
+
+        self.progress_items_model.save_section_models(self.project_path)
 
     def load_wms(self):
         print('Load wms')
@@ -214,6 +240,7 @@ class OpenEQuarterMain:
         self.iface.removeToolBarIcon(self.clipping_action)
         self.iface.removeToolBarIcon(self.testing_action)
         self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
+        self.main_process_dock.disconnect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
 
     def create_project_ifNotExists(self):
         """
@@ -733,6 +760,7 @@ class OpenEQuarterMain:
         next_call = getattr(self, handler)
         is_done = next_call()
 
+        QgsProject.instance().setDirty(True)
         # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
         if is_done:
             first_open_item.setCheckState(2)
@@ -755,8 +783,8 @@ class OpenEQuarterMain:
         # for debugging uncomment the following line
         if True:
         # if self.progress_items_model.check_prerequisites_for(clicked_step):
+            QgsProject.instance().setDirty(True)
             item.setCheckState(1)
-
             handler = 'handle_' + clicked_step
             step_call = getattr(self, handler)
             is_done = step_call()
@@ -856,7 +884,6 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-
         for view in self.progress_items_model.section_views:
             model = view.model()
             no_timeout = 20

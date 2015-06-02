@@ -41,15 +41,16 @@ class QProcessViewDelegate(QItemDelegate):
         y_top = y_top + self.margin_top
         x_btm = self.width
         y_btm = y_btm + self.height
-        rectangle = QRect(x_top, y_top, x_btm, y_btm)
-        # painter.setBrush(Qt.cyan)
-        # painter.setPen(Qt.darkCyan)
-        # painter.drawRect(rectangle)
-        painter.drawText(rectangle, Qt.AlignLeft | Qt.TextWordWrap, text)
 
-        x_top = x_top - self.margin_left - self.icon_size
-        y_top = y_top - 1
         try:
+            rectangle = QRect(x_top, y_top, x_btm, y_btm)
+            # painter.setBrush(Qt.cyan)
+            # painter.setPen(Qt.darkCyan)
+            # painter.drawRect(rectangle)
+            painter.drawText(rectangle, Qt.AlignLeft | Qt.TextWordWrap, text)
+
+            x_top = x_top - self.margin_left - self.icon_size
+            y_top = y_top - 1
             rectangle = QRect(x_top, y_top, x_btm, y_btm)
             self.drawCheck(painter, option, rectangle, item.checkState())
         except TypeError as NoneTypeError:

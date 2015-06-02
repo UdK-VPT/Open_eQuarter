@@ -9,7 +9,7 @@ from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
 
 
-class ProgressItemsModel():
+class ProgressItemsModel:
 
     def __init__(self):
         self.section_views = []
@@ -76,8 +76,6 @@ class ProgressItemsModel():
 
             for j, step in enumerate(json_data['steplist']):
                     step['state'] = model.item(j).checkState()
-
-            print(json.dumps(json_data))
 
             with ZipFile(path, 'a') as oeq_zip:
                 oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))

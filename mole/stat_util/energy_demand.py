@@ -4,7 +4,7 @@ sys.path.append( os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 #print sys.path
 import math 
 from stat_corr import * 
-print present_wall_uvalue_AVG_by_building_age_lookup.present_wall_uvalue_AVG_by_building_age_lookup(1950)
+#print present_wall_uvalue_AVG_by_building_age_lookup.present_wall_uvalue_AVG_by_building_age_lookup(1950)
 print "Hallo"
 #print module
 #print stat_corr.__file__

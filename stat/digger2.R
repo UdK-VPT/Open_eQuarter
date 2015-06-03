@@ -174,9 +174,14 @@ setMethodS3("init", "OeQ_Regr", function(this,limit=NULL,plt_title="",...){
   this$.smoothspline$.verb_formula_py="Smooth Spline"
   
   print(data.frame(x,y))
-  x=x[!is.na(y)]
-  y=y[!is.na(y)]
-  this$.smoothspline$.model<-smooth.spline(x,y,spar=1)
+  y=y[is.finite(log(x))]
+  x=x[is.finite(log(x))]
+  x=x[is.finite(y)]
+  y=y[is.finite(y)]
+  x[x==0]=1e-6
+  
+  print(cbind(x,y))
+  this$.smoothspline$.model<-smooth.spline(x,y,spar=1,tol=1e-10)
   this$.smoothspline$.predict= function(x,asdf=TRUE) {
     if(asdf==FALSE) return(predict(this$.smoothspline$.model,x)$y)
     return(data.frame(x=x,y=predict(this$.smoothspline$.model,x)$y,stringsAsFactors=FALSE))
@@ -195,7 +200,7 @@ setMethodS3("init", "OeQ_Regr", function(this,limit=NULL,plt_title="",...){
   this$.smoothsplinelog$.verb_formula_py="Smooth Spline (Log)"  
   this$.smoothsplinelog$.verb_formula_py="Smooth Spline (Log)"
   
-  this$.smoothsplinelog$.model<-smooth.spline(log(x),y,spar=0.7)
+  this$.smoothsplinelog$.model<-smooth.spline(log(x),y,spar=0.7,tol=1e-6)
   this$.smoothsplinelog$.predict= function(x,asdf=TRUE) {
     if(asdf==FALSE) return(predict(this$.smoothsplinelog$.model,log(x))$y)
     return(data.frame(x=x,y=predict(this$.smoothsplinelog$.model,log(x))$y,stringsAsFactors=FALSE))
@@ -279,10 +284,11 @@ setMethodS3("init", "OeQ_Regr", function(this,limit=NULL,plt_title="",...){
   
   #Set best fit to this model if square deviation sum is smaller and validity is the same or better
  # if((this$.lm1log$.sqderiv < this[[this$.bestfit]]$.sqderiv)&&(this$.lm1log$.validity >= this[[this$.bestfit]]$.validity))  { 
-    
-  if((this$.lm1log$.sqderiv < this[[this$.bestfit]]$.sqderiv)){#&&(this$.lm1log$.validity >= this[[this$.bestfit]]$.validity))  { 
+  if(!is.na(this$.lm1log$.sqderiv)){
+    if((this$.lm1log$.sqderiv < this[[this$.bestfit]]$.sqderiv)){#&&(this$.lm1log$.validity >= this[[this$.bestfit]]$.validity))  { 
       
       this$.bestfit=this$.lm1log$.name
+    }
   }
   
   #Regression model 3: Linear model polynomal regression (deg=4) on f(x) ###################
@@ -353,8 +359,10 @@ this$.lm2log$.sqderiv=sum((l.y_comp-l.prediction)^2)
   this$.lm2log$.validity=2*(max(l.prediction)<max(y))+(min(l.prediction)>min(y))
   
   #Set best fit to this model if square deviation sum is smaller and validity is the same or better
-  if((this$.lm2log$.sqderiv < this[[this$.bestfit]]$.sqderiv)){#&&(this$.lm2log$.validity >= this[[this$.bestfit]]$.validity ))  { 
+  if(!is.na(this$.lm2log$.sqderiv)){
+    if((this$.lm2log$.sqderiv < this[[this$.bestfit]]$.sqderiv)){#&&(this$.lm2log$.validity >= this[[this$.bestfit]]$.validity ))  { 
     this$.bestfit=this$.lm2log$.name
+    }
   }
   
   
@@ -414,6 +422,13 @@ this$.lm2log$.sqderiv=sum((l.y_comp-l.prediction)^2)
   
   #Add this regression to the list
   this$.allregr=c(this$.allregr,this$.lm1log_splined$.name)
+  y=y[!is.nan(log(x))]
+  x=x[!is.nan(log(x))]
+  x=x[!is.nan(y)]
+  y=y[!is.nan(y)]
+  x[x==0]=1e-6
+ #print(cbind(x,y))
+  #stop()
   
   this$.lm1log_splined$.model<-lm(y ~ poly(log(x),3,raw=TRUE))
   this$.lm1log_splined$.predict= function(x,asdf=TRUE) {
@@ -1333,6 +1348,12 @@ xy_smooth<-function(xin,y,range=NULL,zoom=1,degree=3,type="log"){
   # default is log smooth
   if(type=="log") x=log(xin) else x=xin
   # regression
+  y=y[is.finite(x)]
+  x=x[is.finite(x)]
+  x=x[is.finite(y)]
+  y=y[is.finite(y)]
+  x[x==0]=1e-6
+  print(cbind(x,y))
   l.lm=lm(y ~ poly(x,degree,raw=TRUE))
   #x=log(seq(range[1],range[2],length.out = 100))
   # set x to a 100 element sequence on the range
@@ -1523,9 +1544,11 @@ setMethodS3("sum_plot", "OeQ_Inv", function(this,
     polygon(c(xpin, rev(xpin)), c(top, rev(bottom)), border=NULL, col=rainbow(length(l.y_out[1,]))[i])
     bottom=top
   }
+  l.legend.text=rev(unlist(VERBOSE[columns,]$info))
+  if (is.null(l.legend.text)) l.legend.text=unlist(columns) 
   #abline(h=seq(0,200000, 10000), lty=3, col="grey")
   #print(unlist(VERBOSE[columns,]$label))
-  legend("topleft",bty="n", legend=rev(unlist(VERBOSE[columns,]$info)), ncol=3, inset = c(0.02,0), fill=rev(rainbow(length(l.y_out[1,]))),  bg="white", cex=0.8, col=rainbow(length(l.y_out[1,])))
+  legend("topleft",bty="n", legend=l.legend.text, ncol=3, inset = c(0.02,0), fill=rev(rainbow(length(l.y_out[1,]))),  bg="white", cex=0.8, col=rainbow(length(l.y_out[1,])))
   Sys.sleep(1)
   suppressWarnings(par(op))
   if(!is.null(pdffile)) {dev.off()

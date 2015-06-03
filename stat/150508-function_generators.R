@@ -103,8 +103,173 @@ build_flat_area_by_population_density<-function(
     l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
   }
 
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_flat_size_by_number_of_flats_corr<-function(
+  name="flat_size_by_number_of_flats_corr",
+  description="Flat Size in Correlation to the Number of Flats"){
+    l.investigation=new_OeQ_Inv(BLD_DB[,c("BLD_NOFLAT_AVG","FLT_AREA_AVG")],limits=list(KEY=150,FLT_AREA_AVG=40))
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
 
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_number_of_flats_by_population_density_corr<-function(
+  name="number_of_flats_by_population_density_corr",
+  description="Number of Flats per Building in Correlation to population density "){
+    l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS","BLD_NOFLAT_AVG")],limits=list(KEY=10000,BLD_NOFLAT_AVG=6))
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
 
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_common_walls_by_population_density_corr<-function(
+  name="common_walls_by_population_density_corr",
+  description="Number of Common walls in Correlation to population density "){
+    l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS","FLT_COMWALL_AVG")],limits=list(KEY=10000,FLT_COMWALL_AVG=2))
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_flat_living_area_by_population_density_corr<-function(
+  name="flat_living_area_by_population_density_corr",
+  description="Flat Living Area in Correlation to population density "){
+    l.investigation=new_OeQ_Inv(BLD_DB[,c("POP_DENS","FLT_AREA_AVG")])
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+VERBOSE= as.data.frame(rbind(VERBOSE,
+                             TOTAL_LIVING_AREA=list(label="Living Area per Buildingz",
+                                                    unit="m2",
+                                                    info="Total Living Area of all Flats of a Building",
+                                                    title="Living Area per Building",
+                                                    description="Total Living Area of all Flats of a Building"
+                             ),stringsAsFactors=FALSE))
+
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_building_living_area_by_population_density_corr<-function(
+  name="building_living_area_by_population_density_corr",
+  description="Living Area in a Building in Correlation to Population Density "){
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+    l.investigation=new_OeQ_Inv(data.frame(POP_DENS=BLD_DB$POP_DENS,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),limits=list(KEY=5000,TOTAL_LIVING_AREA=350),n_breaks=27)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+VERBOSE= as.data.frame(rbind(VERBOSE,
+                             FLAT_1_RATIO=list(label="Portion of 1-Flat Buildings",
+                                               unit="[%]",
+                                               info="Portion of 1-Flat Buildings",
+                                               title="Portion of 1-Flat Buildings",
+                                               description="Portion of 1-Flat Buildings"
+                             ),
+                             FLAT_2_RATIO=list(label="Portion of 2-Flat Buildings",
+                                               unit="[%]",
+                                               info="Portion of 2-Flat Buildings",
+                                               title="Portion of 2-Flat Buildings",
+                                               description="Portion of 2-Flat Buildings"
+                             ),
+                             FLAT_3TO6_RATIO=list(label="Portion of Buildings with 3 to 6 Flats",
+                                               unit="[%]",
+                                               info="Portion of Buildings with 3 to 6 Flats",
+                                               title="Portion of Buildings with 3 to 6 Flats",
+                                               description="Portion of Buildings with 3 to 6 Flats"
+                             ),
+                             FLAT_7TO12_RATIO=list(label="Portion of Buildings with 7 to 12 Flats",
+                                               unit="[%]",
+                                               info="Portion of Buildings with 7 to 12 Flats",
+                                               title="Portion of Buildings with 7 to 12 Flats",
+                                               description="Portion of Buildings with 7 to 12 Flats"
+                             ),
+                             FLAT_MTH13_RATIO=list(label="Portion of Buildings with more than 13 Flats",
+                                               unit="[%]",
+                                               info="Portion of 1-Flat Buildings",
+                                               title="Portion of 1-Flat Buildings",
+                                               description="Portion of 1-Flat Buildings"
+                             ),stringsAsFactors=FALSE))
+
+### average building, windows north
+#Typical Western Window/Wall Ratio depending on the Year of Construction (Corellation)
+build_building_living_area_by_portion_of_1_flat_buildings_corr<-function(
+  name="building_living_area_by_portion_of_1_flat_buildings_corr",
+  description="Living Area in a Building in Correlation to the Portion of 1-Flat-Buildings"){
+    l.noflats=BLD_DB$BLD_NOFLAT_1/BLD_DB$BLD_NOFLAT_TOTAL*100
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+     l.investigation=new_OeQ_Inv(data.frame(FLAT_1_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),n_breaks=27)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+build_building_living_area_by_portion_of_2_flat_buildings_corr<-function(
+  name="building_living_area_by_portion_of_2_flat_buildings_corr",
+  description="Living Area in a Building in Correlation to the Portion of 2-Flat-Buildings"){
+    l.noflats=BLD_DB$BLD_NOFLAT_2/BLD_DB$BLD_NOFLAT_TOTAL
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+    plot(data.frame(FLAT_2_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE))
+    l.investigation=new_OeQ_Inv(data.frame(FLAT_2_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),n_breaks=200,p_mode="lin")
+    #return (l.investigation)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+build_building_living_area_by_portion_of_3to6_flat_buildings_corr<-function(
+  name="living_area_by_portion_of_3to6_flat_buildings_corr",
+  description="Living Area in a Building in Correlation to the Portion of Buildings with 3 to 6 Flats"){
+    l.noflats=BLD_DB$BLD_NOFLAT_3TO6/BLD_DB$BLD_NOFLAT_TOTAL*100
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+    plot(data.frame(FLAT_3TO6_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE))
+    # #stop()
+    l.investigation=new_OeQ_Inv(data.frame(FLAT_3TO6_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),limits=list(KEY=100,TOTAL_LIVING_AREA=450),p_mode="lin",n_breaks=50)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+build_building_living_area_by_portion_of_7to12_flat_buildings_corr<-function(
+  name="living_area_by_portion_of_7to12_flat_buildings_corr",
+  description="Living Area in a Building in Correlation to the Portion of Buildings with 3 to 6 Flats"){
+    l.noflats=BLD_DB$BLD_NOFLAT_7TO12/BLD_DB$BLD_NOFLAT_TOTAL*100
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+    plot(data.frame(FLAT_7TO12_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE))
+    # #stop()
+    l.investigation=new_OeQ_Inv(data.frame(FLAT_7TO12_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),limits=list(KEY=100,TOTAL_LIVING_AREA=600),p_mode="lin",n_breaks=200)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
+
+build_building_living_area_by_portion_of_mth13_flat_buildings_corr<-function(
+  name="living_area_by_portion_of_mth13_flat_buildings_corr",
+  description="Living Area in a Building in Correlation to the Portion of Buildings with more than 13 Flats"){
+    l.noflats=BLD_DB$BLD_NOFLAT_MTH13/BLD_DB$BLD_NOFLAT_TOTAL*100
+    l.total_living_area=BLD_DB$FLT_AREA_AVG*BLD_DB$BLD_NOFLAT_AVG
+    plot(data.frame(FLAT_7TO12_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE))
+    # #stop()
+    l.investigation=new_OeQ_Inv(data.frame(FLAT_MTH13_RATIO=l.noflats,TOTAL_LIVING_AREA=l.total_living_area,stringsAsFactors=FALSE),limits=list(KEY=100,TOTAL_LIVING_AREA=1200),p_mode="lin",n_breaks=1000)
+    #return (l.investigation)
+    l.investigation$distribution_plot(pdffile=name)
+    str_eval(l.investigation$generate_correlation_function_in_R(fun_name=name,filename=name,description=description))
+    l.investigation$generate_correlation_function_in_python(fun_name=name,filename=name,description=description)
+  }
 
 ########## Code-/Look-Up-Table Generators  ###########
 
@@ -249,7 +414,8 @@ setMethodS3("generate_correlation_code_snippet_in_R", "OeQ_Model", function(this
   l.coeff=this$.model$coefficients
   l.coeffnames=c("Const","a","b","c","d")
   l.coeff[is.na(l.coeff)]=0
-  l.code=paste("# OeQ autogenerated correlation for '",description,"'\n",
+  l.coeffnames=l.coeffnames[1:length(l.coeff)]
+   l.code=paste("# OeQ autogenerated correlation for '",description,"'\n",
                par_name," = correlation(\n    ",paste(l.coeffnames,"=",this$.model$coefficients,collapse=",\n    "),",\n    mode=\"",this$.mode,"\")\n",sep="")
   #  "Const= ",formatC(l.coeff[1],digits=12),"\n",
   #  "a=     ",formatC(l.coeff[2],digits=12),"\n",
@@ -265,7 +431,7 @@ setMethodS3("generate_correlation_code_snippet_in_python", "OeQ_Model", function
   if(is.null(description)) description=par_name
   l.coeff=this$.model$coefficients
   l.coeff[is.na(l.coeff)]=0
-  l.code=paste("    # OeQ autogenerated correlation for '",description,
+   l.code=paste("    # OeQ autogenerated correlation for '",description,
                "'\n    ",par_name,"= oeq.correlation(",
                "\n    const= ",formatC(l.coeff[1],digits=12),",",
                "\n    a=     ",formatC(l.coeff[2],digits=12),",",
@@ -347,9 +513,13 @@ setMethodS3("generate_correlation_function_in_python", "OeQ_Inv", function(this,
     l.code=paste(l.code, i$generate_bestfit_correlation_code_snippet_in_python(),sep="") 
     l.columns=c(l.columns,i$.columnname)
   } 
+  if (length(this$.regressions) >1){
   l.code=paste(l.code,"\n    return dict(",l.columns[1],"=",l.columns[1],".lookup(*xin)",sep="")
   for (i in l.columns[-1])  l.code=paste(l.code,",\n    ",i,"=",i,".lookup(*xin)",sep="")
-  l.code=paste(l.code,")\n",sep="")
+  }else{
+    l.code=paste(l.code,"\n    return ",l.columns[1],".lookup(*xin)",sep="")
+  }
+  l.code=paste(l.code,"\n",sep="")
     if (!is.null(filename)) writeLines(l.code,paste(CORR_PY_EXPORT_PATH,"/",filename,".py",sep=""))
   return(l.code)
 })

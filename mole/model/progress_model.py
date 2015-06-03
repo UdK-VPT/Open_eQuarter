@@ -1,7 +1,5 @@
-import io
 import os
 import json
-import shutil
 
 from zipfile import ZipFile
 from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
@@ -11,7 +9,8 @@ from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
 
 
-class ProgressItemsModel():
+class ProgressItemsModel:
+
     def __init__(self):
         self.section_views = []
         self.load_section_models(config.progress_model)
@@ -19,7 +18,7 @@ class ProgressItemsModel():
     def load_section_models(self, path):
         """
         Open every sectionX.json-file in the given directory and build the QStandardItemModel-Classes accordingly
-        :param path: Direcory which contains the .json-files
+        :param path: Directory which contains the .json-files
         :type path: str
         :return:
         :rtype:
@@ -56,7 +55,6 @@ class ProgressItemsModel():
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
 
-
     def save_section_models(self, path):
         """
         Save the current progress to a folder calles 'oeq_progress' under the given path
@@ -78,9 +76,6 @@ class ProgressItemsModel():
 
             for j, step in enumerate(json_data['steplist']):
                     step['state'] = model.item(j).checkState()
-
-            print(json.dumps(json_data))
-
 
             with ZipFile(path, 'a') as oeq_zip:
                 oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))

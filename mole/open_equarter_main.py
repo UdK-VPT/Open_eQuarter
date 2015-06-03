@@ -45,7 +45,7 @@ from qgisinteraction import project_interaction
 from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
-# from mole.stat_util.energy_demand import energy_demand
+from mole.stat_util.building_evaluation import evaluate_building
 
 class OpenEQuarterMain:
 
@@ -720,13 +720,13 @@ class OpenEQuarterMain:
                 yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)
                 if (not floors or floors == 'NULL') and (not yoc or yoc == 'NULL'):
-                    est_ed = energy_demand(pop_dens, area, perimeter)
+                    est_ed = evaluate_building(pop_dens, area, perimeter)
                 elif not yoc or yoc == 'NULL':
-                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors)
+                    est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors)
                 elif not floors or floors == 'NULL':
-                    est_ed = energy_demand(pop_dens, area, perimeter, year_of_construction=yoc)
+                    est_ed = evaluate_building(pop_dens, area, perimeter, year_of_construction=yoc)
                 else:
-                    est_ed = energy_demand(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+                    est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
 
                 
                 for parameter in keys(est_ed):

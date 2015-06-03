@@ -94,5 +94,3 @@ def evaluate_building(population_density,
               "HLC_TOT":total_loss_pres
               }
 
-print evaluate_building(15000,10000,year_of_construction=1970)
-round(12.34448,2)

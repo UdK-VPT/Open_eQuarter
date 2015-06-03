@@ -15,5 +15,3 @@ def get(*xin):
     mode= "log")
 
     return FLT_COMWALL_AVG.lookup(*xin)
-
-print get(1956)

@@ -5,6 +5,7 @@ from PyQt4.QtCore import QSettings, QSize, QVariant
 from PyQt4.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
 import os
 import time
+from mole.project import config
 
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
@@ -479,21 +480,25 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
                 parameter_name = field_name + '_P'
                 parameter_low = field_name + '_L'
                 parameter_high = field_name + '_H'
+                parameter_average = field_name + '_M'
                 attributes = [QgsField(parameter_name, QVariant.String),
                               QgsField(parameter_low, QVariant.Double),
+                              QgsField(parameter_average, QVariant.Double),
                               QgsField(parameter_high, QVariant.Double),
                               ]
                 add_attributes_if_not_exists(layer, attributes)
 
                 name_index = provider.fieldNameIndex(parameter_name)
                 low_index = provider.fieldNameIndex(parameter_low)
+                average_index = provider.fieldNameIndex(parameter_average)
                 high_index = provider.fieldNameIndex(parameter_high)
 
                 name_value = color_dict[color_key][0]
                 low_value = color_dict[color_key][1]
+                average_value = (float(color_dict[color_key][1])+float(color_dict[color_key][2]))/2
                 high_value = color_dict[color_key][2]
 
-                values = {name_index: name_value, low_index: low_value, high_index: high_value}
+                values = {name_index: name_value, low_index: low_value, average_index: average_value, high_index: high_value}
                 provider.changeAttributeValues({feat.id(): values})
 
 
@@ -509,10 +514,10 @@ def colors_match_feature(color_quadriple, feature, field_name):
     :return: If the quadriple matches
     :rtype: bool
     """
-    match = ((color_quadriple[0] == feature.attribute(field_name + '_R')) \
-            and (color_quadriple[1] == feature.attribute(field_name + '_G'))
-            and (color_quadriple[2] == feature.attribute(field_name + '_B'))
-            and (color_quadriple[3] == feature.attribute(field_name + '_a'))
+    match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
+            and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
+            and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))
+            and ((color_quadriple[3]-config.color_match_tolerance) < feature.attribute(field_name + '_a') < (color_quadriple[3]+config.color_match_tolerance))
             )
 
     return match

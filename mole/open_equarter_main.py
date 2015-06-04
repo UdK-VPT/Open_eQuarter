@@ -688,11 +688,6 @@ class OpenEQuarterMain:
     def handle_estimated_energy_demand(self):
         # ToDo Change to non default-values
         pop_dens = 3927
-        area = 'NULL'
-        perimeter = 'NULL'
-        building_height = 'NULL'
-        yoc = 1990
-        floors = 3
 
         dlg = EstimatedEnergyDemand_dialog()
         dlg.show()
@@ -724,7 +719,7 @@ class OpenEQuarterMain:
                 # height = feat.attribute(height_fld)
                 yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)
-                est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+                est_ed = evaluate_building(population_density=pop_dens, area=area, perimeter=perimeter, floors=floors, year_of_construction=yoc)
                 attributes=[QgsField(i, QVariant.Double) for i in est_ed.keys()]
                 layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
                 name_index = [out_provider.fieldNameIndex(i) for i in est_ed.keys()]

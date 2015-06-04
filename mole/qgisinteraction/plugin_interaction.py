@@ -93,7 +93,7 @@ class PstInteraction(object):
 
 
             if (layer.name() == config.housing_layer_name and
-                    (band_name.startswith('AREA') or band_name.startswith('PERIMETER'))):
+                    (band_name.startswith('AREA') or band_name.startswith('PERIMETER') or band_name.startswith('BLD_ID'))):
                 continue
             elif (layer.type() == QgsMapLayer.RasterLayer and
                   layer.rasterType() == QgsRasterLayer.Multiband and

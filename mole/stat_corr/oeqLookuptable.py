@@ -12,7 +12,10 @@ class lookuptable:
       self.dat=dict(zip(args[0::2],args[1::2]))
       
   def __getitem__(self,args): 
-    ret = [ self.values()[i] for i in [self.keys().index(j) for j in args]]
+    fixed_args=[]
+    for j in args:
+      fixed_args.append([min(k ,j ) for k in self.keys() if k <= j][-1])
+    ret = [ self.values()[i] for i in [self.keys().index(j) for j in fixed_args]]
     if len(ret) == 1: return ret[0]#
     else: return ret
  
@@ -21,9 +24,12 @@ class lookuptable:
   
   def values(self):
     return self.dat.values()
-
+  
   def lookup(self,args):
-    ret = [ self.values()[i] for i in [self.keys().index(j) for j in args]]
+    fixed_args=[]
+    for j in args:
+      fixed_args.append([min(k ,j ) for k in self.keys() if k <= j][-1])
+    ret = [ self.values()[i] for i in [self.keys().index(j) for j in fixed_args]]
     if len(ret) == 1: return ret[0]#
     else: return ret
  

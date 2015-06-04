@@ -23,7 +23,11 @@ def dimensions(area='NULL',perimeter='NULL',length='NULL'):
     area = width * length
     return {'AREA':area,'PERIMETER':perimeter,'WIDTH':min(width,length), 'LENGTH':max(width,length)}
 
-  length= abs(sqrt(perimeter**2-16*area)-perimeter)/4
+  if (perimeter**2-16*area) > 0:
+    length= abs(sqrt(perimeter**2-16*area)-perimeter)/4
+  else:
+    #if not rectangle use square PROBLEM: leads to wrong perimeter ....
+    length=sqrt(area)
   width = area/length
   return {'AREA':area,'PERIMETER':perimeter,'WIDTH':min(width,length), 'LENGTH':max(width,length)}
   
@@ -42,4 +46,3 @@ def width(area='NULL',perimeter='NULL',width='NULL'):
 def length(area='NULL',perimeter='NULL',length='NULL'):
   l_dim=dimensions(area=area,perimeter=perimeter,length=length)
   return l_dim["LENGTH"] 
-

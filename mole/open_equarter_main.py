@@ -688,9 +688,9 @@ class OpenEQuarterMain:
     def handle_estimated_energy_demand(self):
         # ToDo Change to non default-values
         pop_dens = 3927
-        area = 0
-        perimeter = 0
-        building_height = 0
+        area = 'NULL'
+        perimeter = 'NULL'
+        building_height = 'NULL'
         yoc = 1990
         floors = 3
 
@@ -704,6 +704,11 @@ class OpenEQuarterMain:
             att_name = dlg.field_name.text()[:10]
             provider = in_layer.dataProvider()
             out_provider = out_layer.dataProvider()
+
+            #init_dummy = evaluate_building(1000,100)
+            #attributes=[QgsField(i, QVariant.Double) for i in init_dummy.keys()]
+            #layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
+            #name_index = [out_provider.fieldNameIndex(i) for i in init_dummy.keys()]
 
             
             area_fld = dlg.area.currentText()
@@ -719,23 +724,13 @@ class OpenEQuarterMain:
                 # height = feat.attribute(height_fld)
                 yoc = feat.attribute(yoc_fld)
                 floors = feat.attribute(floors_fld)
-                if (not floors or floors == 'NULL') and (not yoc or yoc == 'NULL'):
-                    est_ed = evaluate_building(pop_dens, area, perimeter)
-                elif not yoc or yoc == 'NULL':
-                    est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors)
-                elif not floors or floors == 'NULL':
-                    est_ed = evaluate_building(pop_dens, area, perimeter, year_of_construction=yoc)
-                else:
-                    est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
-
-                
-                for parameter in keys(est_ed):
-                  attribute = [QgsField(parameter, QVariant.Double)]
-                  layer_interaction.add_attributes_if_not_exists(out_layer, attribute)
-                  att_index = out_provider.fieldNameMap()[parameter]
-                  value = {att_index: parameter}
-                  out_provider.changeAttributeValues({feat.id(): value})
-
+                est_ed = evaluate_building(pop_dens, area, perimeter, floors=floors, year_of_construction=yoc)
+                attributes=[QgsField(i, QVariant.Double) for i in est_ed.keys()]
+                layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
+                name_index = [out_provider.fieldNameIndex(i) for i in est_ed.keys()]
+                values =  {name_index[n]: est_ed.values()[n] for n in range(len(name_index))}
+                out_provider.changeAttributeValues({feat.id() : values})
+ 
             return True
         else:
             return False

@@ -11,7 +11,7 @@ def evaluate_building(population_density,
                       perimeter='NULL', 
                       height='NULL', 
                       length='NULL', 
-                      floors=5, 
+                      floors='NULL', 
                       window_ratio='NULL', 
                       year_of_construction=1960, 
                       accumulated_heating_hours=80000,
@@ -20,7 +20,7 @@ def evaluate_building(population_density,
   # in construction esthetics it seems to make sense to use its ratio for width, length and - if necessary - perimeter estimations.
   dimensions=bld_geometry.dimensions(area,perimeter,length)
   if height=='NULL':
-    if floors==0: floors=5
+    if floors=='NULL': floors=5
     building_height=floors*3.3
   else:
     floors=building_height/3.3

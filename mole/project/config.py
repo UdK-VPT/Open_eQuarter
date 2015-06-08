@@ -38,7 +38,7 @@ housing_layer_name = 'Floor plan'
 housing_coordinate_layer_name = 'Building centroids'
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
-color_match_tolerance = 30
+color_match_tolerance = 80
 
 
 ### Default paths

@@ -28,7 +28,8 @@ def evaluate_building(population_density,
   solar_earnings_per_sqm=3000
   average_heat_demand_per_sqm=120
 
-
+  print "AREA"
+  print area
   if isnull(area): 
     return {"FLS_AVG": NULL,
                 "WDT_AVG":NULL,
@@ -77,12 +78,10 @@ def evaluate_building(population_density,
                 }
 
   dimensions=bld_geometry.dimensions(area,perimeter,length)
-  print 'FLOORS'
+  print 'YOC'
+  print year_of_construction
   if isnull(floors):
     floors=5
-    print 'FLOORS NEU'
-    print floors
-  print 'HEIGHT'
   if isnull(height):
     building_height = floors * 3.3
   else:
@@ -122,7 +121,7 @@ def evaluate_building(population_density,
   volume=dimensions["AREA"]*building_height
   envelope1=2*dimensions["AREA"]+dimensions["PERIMETER"]*building_height
   envelope2=  wall_area+base_area+window_area+roof_area
-  living_area=floors * base_area * 0.7
+  living_area=floors * base_area * 0.8
   return {"FLS_AVG": floors,
               "WDT_AVG":dimensions["WIDTH"],
               "LEN_AVG":dimensions["LENGTH"],
@@ -153,19 +152,20 @@ def evaluate_building(population_density,
               "HLP_WALL":wall_loss_pres,
               "HLP_WIND":window_loss_pres,
               "HLP_ROOF":roof_loss_pres,
-              "HLP_TOT":total_loss_contemp,
-              "HLP_ENV1":total_loss_contemp/envelope1,
-              "HLP_ENV2":total_loss_contemp/envelope2,
-              "HLP_LIV":total_loss_contemp/living_area,
+              "HLP_TOT":total_loss_pres,
+              "HLP_ENV1":total_loss_pres/envelope1,
+              "HLP_ENV2":total_loss_pres/envelope2,
+              "HLP_LIV":total_loss_pres/living_area,
               "HLC_BASE":base_loss_contemp,
               "HLC_WALL":wall_loss_contemp,
               "HLC_WIND":window_loss_contemp,
               "HLC_ROOF":roof_loss_contemp,
-              "HLC_TOT":total_loss_pres,
-              "HLC_ENV1":total_loss_pres/envelope1,
-              "HLC_ENV2":total_loss_pres/envelope2,
-              "HLC_LIV":total_loss_pres/living_area,
+              "HLC_TOT":total_loss_contemp,
+              "HLC_ENV1":total_loss_contemp/envelope1,
+              "HLC_ENV2":total_loss_contemp/envelope2,
+              "HLC_LIV":total_loss_contemp/living_area,
               "HD_TOT": average_heat_demand_per_sqm  * living_area,
-              "HE_SOL": solar_earnings_per_sqm * roof_area * ratio_solar_available * ratio_solar_installable
+              "HE_SOL": solar_earnings_per_sqm * roof_area * ratio_solar_available * ratio_solar_installable,
+              "HE_SOL_LIV":solar_earnings_per_sqm * roof_area * ratio_solar_available * ratio_solar_installable/living_area
               }
 

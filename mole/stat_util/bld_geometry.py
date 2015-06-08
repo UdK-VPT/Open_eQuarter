@@ -1,8 +1,7 @@
 from math import sqrt
-from scipy.constants import golden
+from mole.project.config import golden
 def dimensions(area='NULL',perimeter='NULL',length='NULL'):
- # golden_rule_ratio=(1 + 5 ** 0.5) / 2 
-  if (area == 'NULL') & (perimeter == 'NULL'): 
+  if (area == 'NULL') & (perimeter == 'NULL'):
     if length=='NULL': return 'NULL'
     width = perimeter/2-length
     perimeter=2*length*(1+1/golden)

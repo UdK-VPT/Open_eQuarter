@@ -7,6 +7,7 @@ import mole
 
 # Project information
 project_crs = 'EPSG:3857'
+golden = (1 + 5 ** 0.5) / 2
 
 ### Information needed to use external plugins
 # OpenStreetMap plugin

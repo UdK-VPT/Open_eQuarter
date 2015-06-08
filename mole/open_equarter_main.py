@@ -47,6 +47,9 @@ from tests import layer_interaction_test
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
 
+def isnull(value):
+    return type(value) is type(NULL)
+
 class OpenEQuarterMain:
 
     def __init__(self, iface):
@@ -691,9 +694,9 @@ class OpenEQuarterMain:
         area = NULL
         perimeter = NULL
         building_height = NULL
-        yoc = 1948
-        floors = 3
-
+        default_yoc = 1948
+        default_acc_heat_hours=72000
+        
         dlg = EstimatedEnergyDemand_dialog()
         dlg.show()
         start_calc = dlg.exec_()
@@ -710,13 +713,17 @@ class OpenEQuarterMain:
             peri_fld = dlg.perimeter.currentText()
             yoc_fld = dlg.yoc.currentText()
             floors_fld = dlg.floors.currentText()
+            
 
             for feat in provider.getFeatures():
+                bld_yoc=feat.attribute(yoc_fld)
+                if isnull(bld_yoc): bld_yoc=default_yoc
                 est_ed = evaluate_building(population_density=pop_dens,
                 area=feat.attribute("AREA"),
                 perimeter=feat.attribute("PERIMETER"),
                 floors=feat.attribute(floors_fld),
-                year_of_construction=feat.attribute(yoc_fld))
+                year_of_construction=bld_yoc,
+                accumulated_heating_hours=default_acc_heat_hours)
                 attributes=[QgsField(i, QVariant.Double) for i in est_ed.keys()]
                 layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
                 name_index = [out_provider.fieldNameIndex(i) for i in est_ed.keys()]

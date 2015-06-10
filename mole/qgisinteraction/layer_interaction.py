@@ -46,6 +46,7 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
         return None
 
 
+
 def load_layer_from_disk(path_to_layer, name):
     """
     Load a layer from disk

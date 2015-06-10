@@ -50,6 +50,12 @@ from mole.stat_util.building_evaluation import evaluate_building
 def isnull(value):
     return type(value) is type(NULL)
 
+def resolve(name, basepath=None):
+  if not basepath:
+    basepath = os.path.dirname(os.path.realpath(__file__))
+  return os.path.join(basepath, name)
+
+
 class OpenEQuarterMain:
 
     def __init__(self, iface):
@@ -517,21 +523,47 @@ class OpenEQuarterMain:
 
         return True
 
+
     # step 2.0
     def handle_housing_layer_loaded(self):
+       
+        #sorry kim, brauchte diese funktion mal eben quick and dirty
+        def cleanup(layer_name):
+          if layer_interaction.find_layer_by_name(layer_name) is not None:
+            QgsMapLayerRegistry.instance().removeMapLayer( layer_interaction.find_layer_by_name(layer_name).id() )
+          if os.access(os.path.join(self.project_path, layer_name + '.shp'), os.F_OK):
+            os.remove(os.path.join(self.project_path, layer_name + '.shp'))
+            os.remove(os.path.join(self.project_path, layer_name + '.shx'))
+            os.remove(os.path.join(self.project_path, layer_name + '.prj'))
+            os.remove(os.path.join(self.project_path, layer_name + '.qpj'))
+            os.remove(os.path.join(self.project_path, layer_name + '.dbf'))
+
+
         user_dir = os.path.expanduser('~')
         housing_layer = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        intersection_done = False
         if os.path.exists(housing_layer):
-            housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
-            investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-            out_layer = os.path.join(self.project_path, config.housing_layer_name + '.shp')
+          cleanup(config.housing_layer_name)
+          cleanup(config.data_layer_name)
 
-            intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer)
-            if intersection_done:
-                out_layer = layer_interaction.load_layer_from_disk(out_layer, config.housing_layer_name)
-                layer_interaction.add_layer_to_registry(out_layer)
-                layer_interaction.edit_housing_layer_attributes(out_layer)
-            return intersection_done
+          out_layer = os.path.join(self.project_path, config.housing_layer_name + '.shp')
+
+          housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
+            
+          investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+#         QgsMapLayerRegistry.instance().removeMapLayer(housing_layer.id())
+          intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer)
+          if intersection_done:
+            out_layer = layer_interaction.load_layer_from_disk(out_layer, config.housing_layer_name)
+            layer_interaction.add_layer_to_registry(out_layer)
+            layer_interaction.edit_housing_layer_attributes(out_layer)
+            QgsMapLayerRegistry.instance().addMapLayer(out_layer, False)
+
+            data_layer=self.iface.addVectorLayer(out_layer.source(), config.data_layer_name, out_layer.providerType())
+            self.iface.legendInterface().setLayerVisible(data_layer, False)
+            QgsMapLayerRegistry.instance().addMapLayer(data_layer, False)
+            out_layer.loadNamedStyle(resolve('styles/oeq_floor_sw.qml'))
+          return intersection_done
 
     # step 2.1
     def handle_building_coordinates_loaded(self):
@@ -674,7 +706,7 @@ class OpenEQuarterMain:
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)
-        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name('pst_out'), "ogr")
+        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
 
         # in case the plugin was re-started, reload the color-entries
         for layer_name, abbreviation in abbreviations.iteritems():
@@ -687,7 +719,11 @@ class OpenEQuarterMain:
         layer_interaction.add_layer_to_registry(vlayer)
         return True
 
+
+
     #step 4.2
+    
+    
     def handle_estimated_energy_demand(self):
         # ToDo Change to non default-values
         pop_dens = 3927
@@ -702,34 +738,60 @@ class OpenEQuarterMain:
         start_calc = dlg.exec_()
         if start_calc:
             # ToDo It has to be checked, if the in- and out-layer have the same amount of features
-            in_layer = layer_interaction.find_layer_by_name(dlg.input_layer.currentText())
-            out_layer = layer_interaction.find_layer_by_name(dlg.output_layer.currentText())
             att_name = dlg.field_name.text()[:10]
-            provider = in_layer.dataProvider()
+            in_layer = layer_interaction.find_layer_by_name(config.pst_output_layer_name)
+            in_provider = in_layer.dataProvider()
+            out_layer = layer_interaction.find_layer_by_name(config.data_layer_name)
             out_provider = out_layer.dataProvider()
 
-            
+            def join_layers(layer,tgt_layer,idx='BLD_ID',tgt_idx='BLD_ID'):
+              joinObject = QgsVectorJoinInfo()
+              joinObject.joinLayerId = tgt_layer.id()
+              joinObject.joinFieldName = tgt_idx
+              joinObject.targetFieldName = idx
+              joinObject.memoryCache = True
+              joinObject.prefix = 'db_'
+              layer.addJoin(joinObject)
+
+
+            def create_evaluation_layer(layer_name='Evaluation Layer',
+                                        template_layer=layer_interaction.find_layer_by_name(config.housing_layer_name), 
+                                        data_layer=layer_interaction.find_layer_by_name(config.data_layer_name)):
+              new_layer=self.iface.addVectorLayer(template_layer.source(), layer_name, template_layer.providerType())
+              QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+              return new_layer
+              
+              
             area_fld = dlg.area.currentText()
             peri_fld = dlg.perimeter.currentText()
             yoc_fld = dlg.yoc.currentText()
             floors_fld = dlg.floors.currentText()
-            
+            prefetched_attribute_names=evaluate_building(1000).keys()
+            out_provider.deleteAttributes(out_provider.fieldNameIndex(i) for i in prefetched_attribute_names)
+            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss per Living Area')
 
-            for feat in provider.getFeatures():
-                bld_yoc=feat.attribute(yoc_fld)
+            attributes=[QgsField(i, QVariant.Double) for i in prefetched_attribute_names]
+            layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
+            out_layer.startEditing() 
+            for inFeat in in_provider.getFeatures():
+              outFeat=filter(lambda x: x.attribute('BLD_ID')==inFeat.attribute('BLD_ID'), out_provider.getFeatures())
+              if len(outFeat)>0:
+                outFeat=outFeat[0]
+                bld_yoc=inFeat.attribute(yoc_fld)
                 if isnull(bld_yoc): bld_yoc=default_yoc
                 est_ed = evaluate_building(population_density=pop_dens,
-                area=feat.attribute("AREA"),
-                perimeter=feat.attribute("PERIMETER"),
-                floors=feat.attribute(floors_fld),
-                year_of_construction=bld_yoc,
-                accumulated_heating_hours=default_acc_heat_hours)
-                attributes=[QgsField(i, QVariant.Double) for i in est_ed.keys()]
-                layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
-                name_index = [out_provider.fieldNameIndex(i) for i in est_ed.keys()]
-                values =  {name_index[n]: est_ed.values()[n] for n in range(len(name_index))}
-                out_provider.changeAttributeValues({feat.id() : values})
- 
+                       area=inFeat.attribute("AREA"),
+                       perimeter=inFeat.attribute("PERIMETER"),
+                       floors=inFeat.attribute(floors_fld),
+                       year_of_construction=bld_yoc,
+                       accumulated_heating_hours=default_acc_heat_hours)
+                for i in est_ed.keys():
+                  out_layer.changeAttributeValue(outFeat.id(),out_provider.fieldNameIndex(i), est_ed[i])
+                out_layer.updateFields()
+            out_layer.commitChanges()
+            
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(resolve('styles/oeq_epass2.qml'))
             return True
         else:
             return False

@@ -7,7 +7,6 @@ import mole
 
 # Project information
 project_crs = 'EPSG:3857'
-golden = (1 + 5 ** 0.5) / 2
 
 ### Information needed to use external plugins
 # OpenStreetMap plugin
@@ -19,8 +18,8 @@ open_layer_type_id = 4
 
 # Point Sampling Tool
 pst_plugin_name = 'pointsamplingtool'
-pst_output_layer_name = 'pst_out'
-pst_input_layer_name = 'Building centroids'
+pst_output_layer_name = 'PS Results'
+pst_input_layer_name = 'BLD Centroids'
 
 # Realcentroid plugin
 real_centroid_plugin_name = 'realcentroid'
@@ -35,8 +34,11 @@ default_extent_crs = 'EPSG:4326'
 
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'
-housing_layer_name = 'Floor plan'
-housing_coordinate_layer_name = 'Building centroids'
+housing_layer_name = 'BLD Shapes'
+housing_coordinate_layer_name = 'BLD Centroids'
+data_layer_name = 'BLD Data'
+
+
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
 color_match_tolerance = 80

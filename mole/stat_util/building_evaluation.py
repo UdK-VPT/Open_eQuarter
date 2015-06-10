@@ -31,6 +31,7 @@ def evaluate_building(population_density,
   print "AREA"
   print area
   if isnull(area): 
+    print "AAAAAAARRRRREEEEAAAA IIIISSSSS NUUULLLL"
     return {"FLS_AVG": NULL,
                 "WDT_AVG":NULL,
                 "LEN_AVG": NULL,
@@ -74,7 +75,8 @@ def evaluate_building(population_density,
                 "HLC_ENV2": NULL,
                 "HLC_LIV":NULL,
                 "HD_TOT":NULL,
-                "HE_SOL":NULL
+                "HE_SOL":NULL,
+                "HE_SOL_LIV":NULL
                 }
 
   dimensions=bld_geometry.dimensions(area,perimeter,length)

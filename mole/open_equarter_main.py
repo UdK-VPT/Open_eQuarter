@@ -140,6 +140,27 @@ class OpenEQuarterMain:
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
+    def init_progressbar(self,title='Be patient!',message='Background calculations are going on...',timeout=3,maxcount=100):
+      self.iface.messageBar().clearWidgets() 
+      widget = self.iface.messageBar().createMessage(title,message)      
+      #set a new message bar
+      progressbarwidget = QProgressBar()
+      progressbarwidget.setAlignment(Qt.AlignLeft)
+      progressbarwidget.setMaximum(maxcount)           
+      progressbarwidget.setValue(0)
+      widget.layout().addWidget(progressbarwidget)
+      #pass the progress bar to the message Bar
+      self.iface.messageBar().pushWidget(widget)
+      return progressbarwidget
+
+    def push_progressbar(self,progressbarwidget,progress_counter):
+      progress_counter = progress_counter + 1
+      progressbarwidget.setValue(progress_counter)
+      return progress_counter
+
+    def kill_progressbar(self,progressbarwidget):
+      self.iface.messageBar().clearWidgets() 
+              
     def reorder_layers(self):
         """
         Reorder the layers so that they are ordered (from top to bottom) as follows:
@@ -477,6 +498,10 @@ class OpenEQuarterMain:
 
     # step 1.0
     def handle_temp_shapefile_created(self):
+    
+        #remove if necessary
+        layer_interaction.fullRemove(config.investigation_shape_layer_name)
+         
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
                                                                      config.project_crs)
 
@@ -524,45 +549,40 @@ class OpenEQuarterMain:
         return True
 
 
+
+
     # step 2.0
     def handle_housing_layer_loaded(self):
        
-        #sorry kim, brauchte diese funktion mal eben quick and dirty
-        def cleanup(layer_name):
-          if layer_interaction.find_layer_by_name(layer_name) is not None:
-            QgsMapLayerRegistry.instance().removeMapLayer( layer_interaction.find_layer_by_name(layer_name).id() )
-          if os.access(os.path.join(self.project_path, layer_name + '.shp'), os.F_OK):
-            os.remove(os.path.join(self.project_path, layer_name + '.shp'))
-            os.remove(os.path.join(self.project_path, layer_name + '.shx'))
-            os.remove(os.path.join(self.project_path, layer_name + '.prj'))
-            os.remove(os.path.join(self.project_path, layer_name + '.qpj'))
-            os.remove(os.path.join(self.project_path, layer_name + '.dbf'))
-
 
         user_dir = os.path.expanduser('~')
-        housing_layer = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
-        if os.path.exists(housing_layer):
-          cleanup(config.housing_layer_name)
-          cleanup(config.data_layer_name)
+        if os.path.exists(housing_layer_path):
+          layer_interaction.fullRemove(config.housing_layer_name)
+          layer_interaction.fullRemove(config.data_layer_name)
 
-          out_layer = os.path.join(self.project_path, config.housing_layer_name + '.shp')
-
-          housing_layer = layer_interaction.load_layer_from_disk(housing_layer, config.housing_layer_name)
+          out_layer_path = os.path.join(self.project_path, config.housing_layer_name + '.shp')
+          data_layer_path = os.path.join(self.project_path, config.data_layer_name + '.shp')
+          
+          housing_layer = layer_interaction.load_layer_from_disk(housing_layer_path, config.housing_layer_name)
             
           investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-#         QgsMapLayerRegistry.instance().removeMapLayer(housing_layer.id())
-          intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer)
+          intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer_path)
           if intersection_done:
-            out_layer = layer_interaction.load_layer_from_disk(out_layer, config.housing_layer_name)
+            out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
             layer_interaction.add_layer_to_registry(out_layer)
             layer_interaction.edit_housing_layer_attributes(out_layer)
-            QgsMapLayerRegistry.instance().addMapLayer(out_layer, False)
-
-            data_layer=self.iface.addVectorLayer(out_layer.source(), config.data_layer_name, out_layer.providerType())
-            self.iface.legendInterface().setLayerVisible(data_layer, False)
-            QgsMapLayerRegistry.instance().addMapLayer(data_layer, False)
             out_layer.loadNamedStyle(resolve('styles/oeq_floor_sw.qml'))
+            
+            inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
+            layer_interaction.add_layer_to_registry(inter_layer)
+            QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
+            #layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
+            QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id() )
+            data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
+            layer_interaction.add_layer_to_registry(data_layer)
+            self.iface.legendInterface().setLayerVisible(data_layer, False)
           return intersection_done
 
     # step 2.1
@@ -743,14 +763,16 @@ class OpenEQuarterMain:
             in_provider = in_layer.dataProvider()
             out_layer = layer_interaction.find_layer_by_name(config.data_layer_name)
             out_provider = out_layer.dataProvider()
-
-            def join_layers(layer,tgt_layer,idx='BLD_ID',tgt_idx='BLD_ID'):
+            data_layer_path = os.path.join(self.project_path, config.data_layer_name + '.shp')
+          
+            
+            def join_layers(layer,tgt_layer,idx='BLD_ID',tgt_idx='BLD_ID',prefix='db_'):
               joinObject = QgsVectorJoinInfo()
               joinObject.joinLayerId = tgt_layer.id()
               joinObject.joinFieldName = tgt_idx
               joinObject.targetFieldName = idx
               joinObject.memoryCache = True
-              joinObject.prefix = 'db_'
+              joinObject.prefix = prefix
               layer.addJoin(joinObject)
 
 
@@ -758,7 +780,7 @@ class OpenEQuarterMain:
                                         template_layer=layer_interaction.find_layer_by_name(config.housing_layer_name), 
                                         data_layer=layer_interaction.find_layer_by_name(config.data_layer_name)):
               new_layer=self.iface.addVectorLayer(template_layer.source(), layer_name, template_layer.providerType())
-              QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+              layer_interaction.add_layer_to_registry(new_layer)
               return new_layer
               
               
@@ -768,12 +790,17 @@ class OpenEQuarterMain:
             floors_fld = dlg.floors.currentText()
             prefetched_attribute_names=evaluate_building(1000).keys()
             out_provider.deleteAttributes(out_provider.fieldNameIndex(i) for i in prefetched_attribute_names)
-            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss per Living Area')
-
+             
             attributes=[QgsField(i, QVariant.Double) for i in prefetched_attribute_names]
             layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
+            
+           
             out_layer.startEditing() 
+            
+            progressbar=self.init_progressbar(u'Buildings Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount())
+            progress_counter=self.push_progressbar(progressbar,0)
             for inFeat in in_provider.getFeatures():
+              progress_counter=self.push_progressbar(progressbar,progress_counter)
               outFeat=filter(lambda x: x.attribute('BLD_ID')==inFeat.attribute('BLD_ID'), out_provider.getFeatures())
               if len(outFeat)>0:
                 outFeat=outFeat[0]
@@ -786,12 +813,39 @@ class OpenEQuarterMain:
                        year_of_construction=bld_yoc,
                        accumulated_heating_hours=default_acc_heat_hours)
                 for i in est_ed.keys():
-                  out_layer.changeAttributeValue(outFeat.id(),out_provider.fieldNameIndex(i), est_ed[i])
-                out_layer.updateFields()
+                  outFeat[i]=est_ed[i]
+                out_layer.updateFeature(outFeat)
             out_layer.commitChanges()
             
+            QgsVectorFileWriter.writeAsVectorFormat(out_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
+            
+            layer_interaction.fullRemove('Transmission Heat Loss (Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Contemporary)')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(resolve('styles/oeq_epass2.qml'))
+            new_layer.loadNamedStyle(resolve('styles/oeq_epass_HLC.qml'))
+            
+            layer_interaction.fullRemove('Transmission Heat Loss (Present)')
+            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Present)')
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(resolve('styles/oeq_epass_HLP.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            
+            layer_interaction.fullRemove('Wall Quality (U_Value)')
+            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value)')
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(resolve('styles/wall_UVal.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            
+            layer_interaction.fullRemove('Solar Coverage Rate')
+            new_layer=create_evaluation_layer(layer_name='Solar Coverage Rate')
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(resolve('styles/oeq_RT_Sol.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            
+            
+            
+            self.kill_progressbar(progressbar)
+            self.iface.messageBar().clearWidgets() 
             return True
         else:
             return False

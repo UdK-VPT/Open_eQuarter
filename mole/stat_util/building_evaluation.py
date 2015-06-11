@@ -25,13 +25,12 @@ def evaluate_building(population_density,
 
   ratio_solar_available=0.5
   ratio_solar_installable=0.5
-  solar_earnings_per_sqm=3000
+  solar_earnings_per_sqm=300
   average_heat_demand_per_sqm=120
 
   print "AREA"
   print area
   if isnull(area): 
-    print "AAAAAAARRRRREEEEAAAA IIIISSSSS NUUULLLL"
     return {"FLS_AVG": NULL,
                 "WDT_AVG":NULL,
                 "LEN_AVG": NULL,
@@ -76,7 +75,8 @@ def evaluate_building(population_density,
                 "HLC_LIV":NULL,
                 "HD_TOT":NULL,
                 "HE_SOL":NULL,
-                "HE_SOL_LIV":NULL
+                "HE_SOL_LIV":NULL,
+                "RT_SOL":NULL
                 }
 
   dimensions=bld_geometry.dimensions(area,perimeter,length)
@@ -124,6 +124,13 @@ def evaluate_building(population_density,
   envelope1=2*dimensions["AREA"]+dimensions["PERIMETER"]*building_height
   envelope2=  wall_area+base_area+window_area+roof_area
   living_area=floors * base_area * 0.8
+  
+  solar_area=roof_area * ratio_solar_available
+  solar_installable_area=solar_area*ratio_solar_installable
+  solar_earnings=solar_earnings_per_sqm * solar_installable_area
+  total_heat_demand=average_heat_demand_per_sqm  * living_area
+  solar_coverage_rate=solar_earnings/total_heat_demand*100
+  
   return {"FLS_AVG": floors,
               "WDT_AVG":dimensions["WIDTH"],
               "LEN_AVG":dimensions["LENGTH"],
@@ -136,8 +143,8 @@ def evaluate_building(population_density,
               "AR_ENV1":envelope1,
               "AR_ENV2":envelope2,
               "AR_LIV": living_area,
-              "AR_SOL_AVA": roof_area * ratio_solar_available,
-              "AR_SOL_INS": roof_area * ratio_solar_available * ratio_solar_installable,
+              "AR_SOL_AVA": solar_area,
+              "AR_SOL_INS": solar_installable_area,
               "WAL_COM":common_walls,
               "RT_WINWALL":window_ratio,
               "RT_AV1":envelope1/volume,
@@ -166,8 +173,9 @@ def evaluate_building(population_density,
               "HLC_ENV1":total_loss_contemp/envelope1,
               "HLC_ENV2":total_loss_contemp/envelope2,
               "HLC_LIV":total_loss_contemp/living_area,
-              "HD_TOT": average_heat_demand_per_sqm  * living_area,
-              "HE_SOL": solar_earnings_per_sqm * roof_area * ratio_solar_available * ratio_solar_installable,
-              "HE_SOL_LIV":solar_earnings_per_sqm * roof_area * ratio_solar_available * ratio_solar_installable/living_area
+              "HD_TOT": total_heat_demand,
+              "HE_SOL": solar_earnings,
+              "HE_SOL_LIV":solar_earnings/living_area,
+              "RT_SOL":solar_coverage_rate
               }
 

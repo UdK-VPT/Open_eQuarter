@@ -39,11 +39,20 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
 
         # reset appearance of crs-choice dialog to previous settings
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-
+        #QgsMapLayerRegistry.instance().addMapLayer(shape_layer,False) 
         return shape_layer
 
     else:
         return None
+
+#remove a layer including all files
+def fullRemove(layer_name,types=['.shp','.shx','.prj','.qpj','.dbf','.idm','.ind']):
+  project_path=QgsProject.instance().readPath("./")
+  if find_layer_by_name(layer_name) is not None:
+     QgsMapLayerRegistry.instance().removeMapLayer( find_layer_by_name(layer_name).id() )
+  for i in types: 
+     if os.access(os.path.join(project_path, layer_name + i), os.F_OK):
+        os.remove(os.path.join(project_path, layer_name + i))
 
 
 
@@ -59,6 +68,7 @@ def load_layer_from_disk(path_to_layer, name):
     """
     if os.path.exists(path_to_layer):
         disk_layer = QgsVectorLayer(path_to_layer, name, 'ogr')
+        #QgsMapLayerRegistry.instance().addMapLayer(disk_layer,False)           
         return disk_layer
     else:
         return None

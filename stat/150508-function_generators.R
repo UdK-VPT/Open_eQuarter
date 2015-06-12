@@ -519,7 +519,7 @@ setMethodS3("generate_correlation_function_in_python", "OeQ_Inv", function(this,
   }else{
     l.code=paste(l.code,"\n    return ",l.columns[1],".lookup(*xin)",sep="")
   }
-  l.code=paste(l.code,"\n",sep="")
+  l.code=paste(l.code,")\n",sep="")
     if (!is.null(filename)) writeLines(l.code,paste(CORR_PY_EXPORT_PATH,"/",filename,".py",sep=""))
   return(l.code)
 })

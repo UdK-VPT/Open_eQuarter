@@ -62,8 +62,8 @@ build_flat_heating_type_distribution_by_population_density_correlation<-function
 
 FORCERUN=T
 if(FORCERUN==TRUE){
- # build_building_owner_distribution_by_population_density_correlation()
-  #build_flat_owner_distribution_by_population_density_correlation()
+  build_building_owner_distribution_by_population_density_correlation()
+  build_flat_owner_distribution_by_population_density_correlation()
   build_building_heating_type_distribution_by_population_density_correlation()
   build_flat_heating_type_distribution_by_population_density_correlation()
 }

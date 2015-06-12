@@ -6,7 +6,7 @@ from PyQt4.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
 import os
 import time
 from mole.project import config
-
+from mole.oeq_global import *
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -47,12 +47,11 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
 
 #remove a layer including all files
 def fullRemove(layer_name,types=['.shp','.shx','.prj','.qpj','.dbf','.idm','.ind']):
-  project_path=QgsProject.instance().readPath("./")
   if find_layer_by_name(layer_name) is not None:
      QgsMapLayerRegistry.instance().removeMapLayer( find_layer_by_name(layer_name).id() )
   for i in types: 
-     if os.access(os.path.join(project_path, layer_name + i), os.F_OK):
-        os.remove(os.path.join(project_path, layer_name + i))
+     if os.access(os.path.join(OeQ_project_path(), layer_name + i), os.F_OK):
+        os.remove(os.path.join(OeQ_project_path(), layer_name + i))
 
 
 
@@ -411,12 +410,12 @@ def intersect_shapefiles(shape1, shape2, output_path):
     try:
         if shape1.isValid() and shape2.isValid():
             analyser = QgsOverlayAnalyzer()
-            progress = QProgressDialog()
-            info = QLabel('Intersecting floor plan with investigation layer.\nThis may take up to 30 seconds.')
-            progress.setLabel(info)
-            progress.setMinimum(0)
-            progress.setMaximum(100)
-            return analyser.intersection(shape1, shape2, output_path, p=progress)
+            #progress = QProgressDialog()
+            #info = QLabel('Intersecting floor plan with investigation layer.\nThis may take up to 30 seconds.')
+            #progress.setLabel(info)
+            #progress.setMinimum(0)
+            #progress.setMaximum(100)
+            return analyser.intersection(shape1, shape2, output_path) #p=progress)
     except AttributeError, Error:
         return False
         print(Error)

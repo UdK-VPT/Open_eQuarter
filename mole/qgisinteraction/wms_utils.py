@@ -5,6 +5,7 @@ import qgis
 import os
 import time
 
+from mole.oeq_global import *
 from mole.qgisinteraction import raster_layer_interaction
 from mole.qgisinteraction import layer_interaction
 
@@ -19,11 +20,11 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
     current_extent = canvas.extent()
     export_extent = raster_layer_interaction.transform_wms_geo_data(export_wms_layer, current_extent, current_crs)
 
-    info_text = 'The current extent will now be clipped. This may take some time.'
-    QMessageBox.information(iface.mainWindow(), 'Info', info_text)
+    #info_text = 'The current extent will now be clipped. This may take some time.'
+    #QMessageBox.information(iface.mainWindow(), 'Info', info_text)
+    OeQ_init_info(u"The current extent will now be clipped",u"This may take some time.")
 
-    path_to_file = os.path.normpath(QgsProject.instance().readPath('./'))
-    filename = layer_interaction.save_layer_as_image(export_wms_layer, export_extent, path_to_file, max_res)
+    filename = layer_interaction.save_layer_as_image(export_wms_layer, export_extent, OeQ_project_path(), max_res)
 
     if geo_reference_output:
         # wait until the file exists to add geo-references
@@ -40,5 +41,6 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
         else:
             os.remove(filename)
             filename = dest_filename
-
+     
+    OeQ_kill_info() 
     return filename

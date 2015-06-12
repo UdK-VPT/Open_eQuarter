@@ -46,14 +46,12 @@ from qgisinteraction import wms_utils
 from tests import layer_interaction_test
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
+from mole.oeq_global import *
+
 
 def isnull(value):
     return type(value) is type(NULL)
 
-def resolve(name, basepath=None):
-  if not basepath:
-    basepath = os.path.dirname(os.path.realpath(__file__))
-  return os.path.join(basepath, name)
 
 
 class OpenEQuarterMain:
@@ -78,7 +76,12 @@ class OpenEQuarterMain:
 
         ### Project specific settings
         # the project path equals './' as long as the project has not been saved
-        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
+        #global OeQ_project_path 
+        #def OeQ_project_path(self): return os.path.normpath(QgsProject.instance().readPath(''))
+        #the plugin path is the parent directory of this class' file
+       # global OeQ_plugin_path(self)
+        #def OeQ_plugin_path(): return os.path.dirname(os.path.realpath(__file__))
+
         self.oeq_project = ''
 
         # OpenStreetMap-plugin-layer
@@ -86,10 +89,10 @@ class OpenEQuarterMain:
 
         ### Default values
         # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_style = os.path.join(config.plugin_dir, 'project', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
 
     def initGui(self):
-        plugin_icon = QIcon(os.path.join(':/Plugin/icons/OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(os.path.join(':','Plugin','icons','OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         self.main_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.main_action)
@@ -140,27 +143,7 @@ class OpenEQuarterMain:
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
-    def init_progressbar(self,title='Be patient!',message='Background calculations are going on...',timeout=3,maxcount=100):
-      self.iface.messageBar().clearWidgets() 
-      widget = self.iface.messageBar().createMessage(title,message)      
-      #set a new message bar
-      progressbarwidget = QProgressBar()
-      progressbarwidget.setAlignment(Qt.AlignLeft)
-      progressbarwidget.setMaximum(maxcount)           
-      progressbarwidget.setValue(0)
-      widget.layout().addWidget(progressbarwidget)
-      #pass the progress bar to the message Bar
-      self.iface.messageBar().pushWidget(widget)
-      return progressbarwidget
-
-    def push_progressbar(self,progressbarwidget,progress_counter):
-      progress_counter = progress_counter + 1
-      progressbarwidget.setValue(progress_counter)
-      return progress_counter
-
-    def kill_progressbar(self,progressbarwidget):
-      self.iface.messageBar().clearWidgets() 
-              
+          
     def reorder_layers(self):
         """
         Reorder the layers so that they are ordered (from top to bottom) as follows:
@@ -187,8 +170,7 @@ class OpenEQuarterMain:
         self.oeq_project_settings_form.show()
 
     def open_progress(self, doc):
-        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
-        progress = os.path.join(self.project_path, 'oeq_progress.oeq')
+        progress = os.path.join(OeQ_project_path(), 'oeq_progress.oeq')
         if os.path.isfile(progress):
             self.progress_items_model.load_section_models(progress)
             if self.main_process_dock.isVisible():
@@ -206,13 +188,9 @@ class OpenEQuarterMain:
                 self.initGui_process_dock()
 
     def save_progress(self):
-        self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
-
-        while self.project_path == './':
-            self.project_path = os.path.normpath(QgsProject.instance().readPath(''))
+        while OeQ_project_saved():
             iface.actionSaveProject().trigger()
-
-        self.progress_items_model.save_section_models(self.project_path)
+        self.progress_items_model.save_section_models()
 
     def load_wms(self):
         print('Load wms')
@@ -285,7 +263,6 @@ class OpenEQuarterMain:
 
             if yes_to_save:
                 iface.actionSaveProjectAs().trigger()
-                self.project_path = QgsProject.instance().readPath('./')
 
     def osm_layer_is_loaded(self):
         """
@@ -467,13 +444,9 @@ class OpenEQuarterMain:
     def handle_project_created(self):
         # if no project exists, create one first
         self.create_project_ifNotExists()
-        self.project_path = os.path.normpath(QgsProject.instance().readPath('./'))
 
         # if project was created stop execution
-        if self.project_path != './':
-            return True
-        else:
-            return False
+        return OeQ_project_saved()
 
     # step 0.4
     def handle_osm_layer_loaded(self):
@@ -529,7 +502,7 @@ class OpenEQuarterMain:
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         try:
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-            disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(self.project_path, investigation_area.name()))
+            disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(OeQ_project_path(), investigation_area.name()))
         except IOError, Error:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
@@ -553,8 +526,8 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-       
-
+        
+        OeQ_init_info("Intersecting floor plan with investigation layer.","This may take up to 30 seconds...")
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
@@ -562,18 +535,21 @@ class OpenEQuarterMain:
           layer_interaction.fullRemove(config.housing_layer_name)
           layer_interaction.fullRemove(config.data_layer_name)
 
-          out_layer_path = os.path.join(self.project_path, config.housing_layer_name + '.shp')
-          data_layer_path = os.path.join(self.project_path, config.data_layer_name + '.shp')
+          out_layer_path = os.path.join(OeQ_project_path(), config.housing_layer_name + '.shp')
+          data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
           
           housing_layer = layer_interaction.load_layer_from_disk(housing_layer_path, config.housing_layer_name)
             
           investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+          
           intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer_path)
           if intersection_done:
             out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
             layer_interaction.add_layer_to_registry(out_layer)
             layer_interaction.edit_housing_layer_attributes(out_layer)
-            out_layer.loadNamedStyle(resolve('styles/oeq_floor_sw.qml'))
+            print OeQ_plugin_path()
+            print OeQ_project_path()
+            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
             
             inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
             layer_interaction.add_layer_to_registry(inter_layer)
@@ -583,6 +559,7 @@ class OpenEQuarterMain:
             data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
             layer_interaction.add_layer_to_registry(data_layer)
             self.iface.legendInterface().setLayerVisible(data_layer, False)
+          OeQ_kill_info() 
           return intersection_done
 
     # step 2.1
@@ -707,7 +684,7 @@ class OpenEQuarterMain:
     def handle_generate_real_centroids(self):
         rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
         polygon = config.housing_layer_name
-        output = os.path.join(self.project_path, config.pst_input_layer_name + '.shp')
+        output = os.path.join(OeQ_project_path(), config.pst_input_layer_name + '.shp')
         centroid_layer = rci.create_centroids(polygon, output)
 
         if centroid_layer.isValid():
@@ -725,12 +702,12 @@ class OpenEQuarterMain:
         psti = plugin_interaction.PstInteraction(iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
-        pst_output_layer = psti.start_sampling(self.project_path, config.pst_output_layer_name)
+        pst_output_layer = psti.start_sampling(OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
 
         # in case the plugin was re-started, reload the color-entries
         for layer_name, abbreviation in abbreviations.iteritems():
-            in_path = os.path.join(self.project_path, layer_name + '.txt')
+            in_path = os.path.join(OeQ_project_path(), layer_name + '.txt')
             self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
             layer_color_map = self.color_picker_dlg.color_entry_manager.layer_values_map
             color_dict = layer_color_map[layer_name]
@@ -763,7 +740,7 @@ class OpenEQuarterMain:
             in_provider = in_layer.dataProvider()
             out_layer = layer_interaction.find_layer_by_name(config.data_layer_name)
             out_provider = out_layer.dataProvider()
-            data_layer_path = os.path.join(self.project_path, config.data_layer_name + '.shp')
+            data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
           
             
             def join_layers(layer,tgt_layer,idx='BLD_ID',tgt_idx='BLD_ID',prefix='db_'):
@@ -797,10 +774,10 @@ class OpenEQuarterMain:
            
             out_layer.startEditing() 
             
-            progressbar=self.init_progressbar(u'Buildings Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount())
-            progress_counter=self.push_progressbar(progressbar,0)
+            progressbar=OeQ_init_progressbar(u'Building Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount())
+            progress_counter=OeQ_push_progressbar(progressbar,0)
             for inFeat in in_provider.getFeatures():
-              progress_counter=self.push_progressbar(progressbar,progress_counter)
+              progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
               outFeat=filter(lambda x: x.attribute('BLD_ID')==inFeat.attribute('BLD_ID'), out_provider.getFeatures())
               if len(outFeat)>0:
                 outFeat=outFeat[0]
@@ -822,30 +799,29 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Transmission Heat Loss (Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Contemporary)')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(resolve('styles/oeq_epass_HLC.qml'))
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLC.qml'))
             
             layer_interaction.fullRemove('Transmission Heat Loss (Present)')
             new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Present)')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(resolve('styles/oeq_epass_HLP.qml'))
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLP.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             
             layer_interaction.fullRemove('Wall Quality (U_Value)')
             new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value)')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(resolve('styles/wall_UVal.qml'))
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','wall_UVal.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             
             layer_interaction.fullRemove('Solar Coverage Rate')
             new_layer=create_evaluation_layer(layer_name='Solar Coverage Rate')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(resolve('styles/oeq_RT_Sol.qml'))
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_RT_Sol.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             
             
             
-            self.kill_progressbar(progressbar)
-            self.iface.messageBar().clearWidgets() 
+            OeQ_kill_progressbar()
             return True
         else:
             return False

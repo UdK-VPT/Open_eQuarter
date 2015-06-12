@@ -47,8 +47,8 @@ color_match_tolerance = 80
 ### Default paths
 plugin_dir = os.path.dirname(mole.__file__)
 progress_model = os.path.join(plugin_dir, 'project', 'default_progress.oeq')
-investigation_area_style = os.path.join(plugin_dir, 'project', 'oeq_ia_style.qml')
-valid_centroids_style = os.path.join(plugin_dir, 'project', 'oeq_valid_centroid_style.qml')
+investigation_area_style = os.path.join(plugin_dir, 'styles', 'oeq_ia_style.qml')
+valid_centroids_style = os.path.join(plugin_dir, 'styles', 'oeq_valid_centroid_style.qml')
 
 def qgis_prefix_path():
     if system() == 'Windows':

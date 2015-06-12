@@ -7,6 +7,7 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
+from mole.oeq_global import *
 
 
 class ProgressItemsModel:
@@ -55,7 +56,7 @@ class ProgressItemsModel:
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
 
-    def save_section_models(self, path):
+    def save_section_models(self):
         """
         Save the current progress to a folder calles 'oeq_progress' under the given path
         :param path: Directory which will contain the progress
@@ -63,8 +64,10 @@ class ProgressItemsModel:
         :return:
         :rtype:
         """
-        default_progress = os.path.join(config.plugin_dir, 'project', 'default_progress')
-        path = os.path.join(path, 'oeq_progress.oeq')
+        print project_path
+        print plugin_path
+        default_progress = os.path.join(OeQ_plugin_path(), 'project', 'default_progress')
+        path = os.path.join(OeQ_project_path(), 'oeq_progress.oeq')
         if os.path.exists(path):
             os.remove(path)
 

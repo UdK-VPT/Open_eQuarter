@@ -190,7 +190,7 @@ class OpenEQuarterMain:
     def save_progress(self):
         while OeQ_project_saved():
             iface.actionSaveProject().trigger()
-        self.progress_items_model.save_section_models()
+        #self.progress_items_model.save_section_models()
 
     def load_wms(self):
         print('Load wms')
@@ -571,11 +571,15 @@ class OpenEQuarterMain:
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
         raster_layers = []
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'Floors'))
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter', 'YOC'))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'WMS_Floors_RAW'))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter', 'WMS_Year of Construction_RAW'))
+        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012', 'WMS_Population Density_RAW'))
 
         raster_loaded = False
+        progressbar=OeQ_init_progressbar(u"Loading WMS Layer",u"WMS Servers are slow. Be patient...",maxcount=len(raster_layers)+2)
+        progress_counter=OeQ_push_progressbar(progressbar,0)
         for raster in raster_layers:
+            progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
             try:
                 if raster.isValid():
                     layer_interaction.add_layer_to_registry(raster)
@@ -586,7 +590,13 @@ class OpenEQuarterMain:
 
         if not raster_loaded:
             self.iface.actionAddWmsLayer().trigger()
-
+        # Let's wait for the WMS loading
+        time.sleep(3)    
+        progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+        time.sleep(3)    
+        progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+        time.sleep(3)    
+        OeQ_kill_progressbar()
         # returns True, since either the clipped raster was loaded or the add-raster-menu was opened
         return True
 
@@ -603,13 +613,20 @@ class OpenEQuarterMain:
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
                 raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+                
+                progressbar=OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",u"This may take some time...",maxcount=len(raster_layers))
+                progress_counter=OeQ_push_progressbar(progressbar,0)
+                
                 for layer in raster_layers:
                     self.iface.legendInterface().setLayerVisible(layer, False)
 
                 extracted_layers = []
                 for clipping_raster in raster_layers:
+                    progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
                     extracted_layers.append(self.clip_from_raster(clipping_raster))
-
+                    #remove the wms source from the legend
+                    QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id() )
+                OeQ_kill_progressbar()
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
             return False
@@ -619,13 +636,19 @@ class OpenEQuarterMain:
         except AttributeError, NoneTypeError:
             print(self.__module__, NoneTypeError)
 
+        progressbar=OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",u"This may take some time.",maxcount=len(extracted_layers)*3)
+        progress_counter=OeQ_push_progressbar(progressbar,0)
+
         for layer_name in extracted_layers:
+            progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
                 path_geo = layer.publicSource()
-                path_transformed = path_geo.replace('_geo.tif', '_transformed.tif')
-
+                print "GEOPATH"
+                print path_geo
+                path_transformed = path_geo.replace('_RAW.tif', '_transformed.tif')
+                print path_geo
                 no_timeout = 50
                 while not os.path.exists(path_transformed) and no_timeout:
                     time.sleep(0.1)
@@ -640,15 +663,15 @@ class OpenEQuarterMain:
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-                    os.remove(path_geo)
+                    #os.remove(path_geo)
                     self.iface.mapCanvas().refresh()
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
             except (OSError, AttributeError) as Clipping_Error:
                 print(self.__module__, Clipping_Error)
                 pass
-
         time.sleep(1.0)
+        OeQ_kill_progressbar()
         return True
 
     # step 3.2

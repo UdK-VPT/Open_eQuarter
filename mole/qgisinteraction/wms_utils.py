@@ -22,25 +22,28 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
 
     #info_text = 'The current extent will now be clipped. This may take some time.'
     #QMessageBox.information(iface.mainWindow(), 'Info', info_text)
-    OeQ_init_info(u"The current extent will now be clipped",u"This may take some time.")
-
+    if not geo_reference_output:
+      export_wms_layer.setLayerName(export_wms_layer.name().replace("_RAW",""))
+    
     filename = layer_interaction.save_layer_as_image(export_wms_layer, export_extent, OeQ_project_path(), max_res)
 
     if geo_reference_output:
-        # wait until the file exists to add geo-references
+         # wait until the file exists to add geo-references
         no_timeout = 30
         while not os.path.exists(filename) and no_timeout:
             time.sleep(0.1)
             no_timeout -= 1
-
-        dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
+        #dest_filename=os.path.splitext(filename)[0]
+        dest_filename=filename.replace("_RAW","")
+        print filename
+        print dest_filename
+        #dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
         referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, current_crs.authid(), current_extent)
 
         if referencing != 0:
             print 'Error number {} occured, while referencing the output .tif'.format(referencing)
         else:
-            os.remove(filename)
+            #os.remove(filename)
             filename = dest_filename
      
-    OeQ_kill_info() 
     return filename

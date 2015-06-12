@@ -5,6 +5,7 @@ from PyQt4.QtCore import QSettings, QSize, QVariant
 from PyQt4.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
 import os
 import time
+from string import find
 from mole.project import config
 from mole.oeq_global import *
 
@@ -369,9 +370,16 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
         height = max_resolution
 
     # append the resolution to the filename and call the save method
-    resolution_postfix = '-{}_{}'.format(width, height)
-    filename = layer.name() + resolution_postfix
-
+    
+    filename=layer.name()
+    print filename
+    if filename.startswith("WMS_"):
+       filename=filename.replace("WMS_","")
+       print filename
+    else:   
+       resolution_prefix = '{}_{}-'.format(width, height)
+       filename = resolution_prefix + layer.name()
+    print filename
     img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
     color = QColor(187, 187, 187, 0)
     img.fill(color.rgba())
@@ -390,6 +398,7 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
     leonardo.end()
 
     filename += '.{}'.format(image_type)
+    print filename
     out_path = os.path.join(path_to_file, filename)
     if img.save(out_path, image_type):
         return out_path

@@ -2,6 +2,7 @@ import time
 import os
 from qgis.core import QgsProject
 from PyQt4.QtGui import QProgressBar
+from PyQt4.QtCore import Qt
 from qgis.utils import iface
 
 global OeQ_project_path
@@ -13,7 +14,6 @@ global OeQ_project_saved
 def OeQ_project_saved(): return OeQ_project_path() != './' 
 
 def OeQ_init_progressbar(title='Be patient!',message='Background calculations are going on...',timeout=0,maxcount=100):
-  iface.messageBar().clearWidgets() 
   widget = iface.messageBar().createMessage(title,message)      
 
   #set a new message bar
@@ -24,8 +24,11 @@ def OeQ_init_progressbar(title='Be patient!',message='Background calculations ar
   widget.layout().addWidget(progressbarwidget)
 
   #pass the progress bar to the message Bar
-  iface.messageBar().pushWidget(widget)
+  iface.messageBar().pushWidget(widget,iface.messageBar().INFO)
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   time.sleep(0.1)
+  iface.messageBar().update()
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   return progressbarwidget
 
 def OeQ_push_progressbar(progressbarwidget,progress_counter):
@@ -33,12 +36,19 @@ def OeQ_push_progressbar(progressbarwidget,progress_counter):
   progressbarwidget.setValue(progress_counter)
   return progress_counter
 
-def OeQ_kill_progressbar(progressbarwidget):
+def OeQ_kill_progressbar():
   iface.messageBar().clearWidgets() 
 
 def OeQ_init_info(title='Be patient!',message='Background calculations are going on...'):
-  iface.messageBar().pushInfo(title,message)
-	
+  print "INFO"
+  widget = iface.messageBar().createMessage(title,message)
+  #iface.messageBar().pushInfo(title,message)
+  iface.messageBar().pushWidget(widget,iface.messageBar().INFO)
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+  time.sleep(0.1)
+  iface.messageBar().update()
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+
 def OeQ_kill_info():
   iface.messageBar().clearWidgets() 
 

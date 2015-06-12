@@ -149,7 +149,7 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
                              BLD_HEAT_BLOCKTYPE=list(label="Buildings with block-type CHPs",unit="[n]",info="Block-type",title="Buildings w/ housing (block-type CHPs)",description="Buildings with housing heated by block-type combined heat and power plants"),
                              BLD_HEAT_CENTRAL=list(label="Buildings with central heating",unit="[n]",info="Central",title="Buildings w/ housing (central heating)",description="Buildings with housing heated by "),
                              BLD_HEAT_SNGLROOM=list(label="Buildings with single room heating",unit="[n]",info="Single Room",title="Buildings w/ housing (single room heating)",description="Buildings with housing heated by single room heating systems including stoves and night storage heaters"),
-                             BLD_HEAT_NONE=list(label="Buildings without heating ",unit="[n]",info="",title="Buildings w/ housing (no heating)",description="Buildings w/ housing without heating systems")
+                             BLD_HEAT_NONE=list(label="Buildings without heating ",unit="[n]",info="None",title="Buildings w/ housing (no heating)",description="Buildings w/ housing without heating systems")
 ),stringsAsFactors=FALSE)
 
 
@@ -282,7 +282,7 @@ VERBOSE= as.data.frame(rbind(VERBOSE,
                              FLT_HEAT_BLOCKTYPE=list(label="Flats with block-type CHPs",unit="[n]",info="Block-type",title="Flats in buildings w/ housing (block-type CHPs)",description="Flats heated by a block-type combined heat and power plants in buildings with housing"),
                              FLT_HEAT_CENTRAL=list(label="Flats with central heating",unit="[n]",info="Central",title="Flats in buildings w/ housing (central heating)",description="Flats in buildings with housing heated by a centralheating systems"),
                              FLT_HEAT_SNGLROOM=list(label="Flats with single room heating",unit="[n]",info="Single Room",title="Flats in buildings w/ housing (single room heating)",description="Flats in buildings with housing heated by single room heating systems including stoves and night storage heaters"),
-                             FLT_HEAT_NONE=list(label="Flats without heating",unit="[n]",info="",title="Flats in buildings w/ housing (no heating)",description="Flats in buildings w/ housing without heating systems")
+                             FLT_HEAT_NONE=list(label="Flats without heating",unit="[n]",info="None",title="Flats in buildings w/ housing (no heating)",description="Flats in buildings w/ housing without heating systems")
 ),stringsAsFactors=FALSE)
 
 

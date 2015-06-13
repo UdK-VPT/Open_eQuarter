@@ -40,7 +40,7 @@ def OeQ_kill_progressbar():
   iface.messageBar().clearWidgets() 
 
 def OeQ_init_info(title='Be patient!',message='Background calculations are going on...'):
-  print "INFO"
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   widget = iface.messageBar().createMessage(title,message)
   #iface.messageBar().pushInfo(title,message)
   iface.messageBar().pushWidget(widget,iface.messageBar().INFO)

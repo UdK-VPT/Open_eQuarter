@@ -188,7 +188,7 @@ class OpenEQuarterMain:
                 self.initGui_process_dock()
 
     def save_progress(self):
-        while OeQ_project_saved():
+        if not OeQ_project_saved():
             iface.actionSaveProject().trigger()
         #self.progress_items_model.save_section_models()
 
@@ -527,10 +527,10 @@ class OpenEQuarterMain:
     # step 2.0
     def handle_housing_layer_loaded(self):
         
-        OeQ_init_info("Intersecting floor plan with investigation layer.","This may take up to 30 seconds...")
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
+        OeQ_init_info("Intersecting floor plan with investigation layer.","This may take up to 30 seconds...")
         if os.path.exists(housing_layer_path):
           layer_interaction.fullRemove(config.housing_layer_name)
           layer_interaction.fullRemove(config.data_layer_name)

@@ -746,19 +746,27 @@ class OpenEQuarterMain:
     
     def handle_estimated_energy_demand(self):
         # ToDo Change to non default-values
-        pop_dens = 3927
         area = NULL
         perimeter = NULL
         building_height = NULL
-        default_yoc = 1948
-        default_acc_heat_hours=72000
+        floors = NULL #default_
+        pop_dens = 3927 #default
+        yoc = 1948 #default
+        acc_heat_hours=72000 #default
+ 
+        yoc_fld = NULL
+        pdens_fld = NULL
+        area_fld = "AREA"
+        peri_fld = "PERIMETER"
+        floors_fld = NULL
+
         
-        dlg = EstimatedEnergyDemand_dialog()
-        dlg.show()
-        start_calc = dlg.exec_()
+        #dlg = EstimatedEnergyDemand_dialog()
+        #dlg.show()
+        start_calc = True #dlg.exec_()
         if start_calc:
             # ToDo It has to be checked, if the in- and out-layer have the same amount of features
-            att_name = dlg.field_name.text()[:10]
+            #att_name = dlg.field_name.text()[:10]
             in_layer = layer_interaction.find_layer_by_name(config.pst_output_layer_name)
             in_provider = in_layer.dataProvider()
             out_layer = layer_interaction.find_layer_by_name(config.data_layer_name)
@@ -778,23 +786,46 @@ class OpenEQuarterMain:
 
             def create_evaluation_layer(layer_name='Evaluation Layer',
                                         template_layer=layer_interaction.find_layer_by_name(config.housing_layer_name), 
-                                        data_layer=layer_interaction.find_layer_by_name(config.data_layer_name)):
+                                        data_layer=layer_interaction.find_layer_by_name(config.data_layer_name),
+                                        group=NULL,
+                                        subgroup=NULL):
+              root = QgsProject.instance().layerTreeRoot()
               new_layer=self.iface.addVectorLayer(template_layer.source(), layer_name, template_layer.providerType())
-              layer_interaction.add_layer_to_registry(new_layer)
+              node_layer = QgsLayerTreeLayer(new_layer)
+              if not isnull(group):
+                if not isnull(subgroup):
+                  node_group = QgsLayerTreeGroup(subgroup)
+                else:
+                  node_group = QgsLayerTreeGroup(subgroup)
+              else:
+                node_group = root
+              #node_group.insertChildNode(0, node_layer)
               return new_layer
-              
-              
-            area_fld = dlg.area.currentText()
-            peri_fld = dlg.perimeter.currentText()
-            yoc_fld = dlg.yoc.currentText()
-            floors_fld = dlg.floors.currentText()
+ 
+            for attr in in_provider.fields().toList():
+              print attr
+              if attr.name().endswith("Year o_M"): yoc_fld = attr.name()
+              if attr.name().endswith("Popula_M"): pdens_fld = attr.name()
+              if attr.name().endswith("Floors_M"): floors_fld = attr.name()
+            
+            #pdens_fld = dlg.area.currentText()
+            #area_fld = dlg.area.currentText()
+            #peri_fld = dlg.perimeter.currentText()
+            #yoc_fld = dlg.yoc.currentText()
+            #floors_fld = dlg.floors.currentText()
             prefetched_attribute_names=evaluate_building(1000).keys()
             out_provider.deleteAttributes(out_provider.fieldNameIndex(i) for i in prefetched_attribute_names)
-             
-            attributes=[QgsField(i, QVariant.Double) for i in prefetched_attribute_names]
-            layer_interaction.add_attributes_if_not_exists(out_layer, attributes)
+
+            str_attributes=[] 
+            double_attributes=[] 
+            for attrname in prefetched_attribute_names:
+              if attrname in ["HTS_FLT","HTS_BLD","OWN_FLT","OWN_BLD"]: 
+                str_attributes.append(QgsField(attrname, QVariant.String))
+              else:
+                double_attributes.append(QgsField(attrname, QVariant.Double))
+            layer_interaction.add_attributes_if_not_exists(out_layer, str_attributes)
+            layer_interaction.add_attributes_if_not_exists(out_layer, double_attributes)
             
-           
             out_layer.startEditing() 
             
             progressbar=OeQ_init_progressbar(u'Building Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount())
@@ -804,14 +835,34 @@ class OpenEQuarterMain:
               outFeat=filter(lambda x: x.attribute('BLD_ID')==inFeat.attribute('BLD_ID'), out_provider.getFeatures())
               if len(outFeat)>0:
                 outFeat=outFeat[0]
-                bld_yoc=inFeat.attribute(yoc_fld)
-                if isnull(bld_yoc): bld_yoc=default_yoc
+                if not isnull(yoc_fld):
+                  print "YOC NAME"
+                  print yoc_fld
+                  if not isnull(inFeat.attribute(yoc_fld)):
+                    yoc=inFeat.attribute(yoc_fld)
+                if not isnull(floors_fld):
+                  print "FLOORS NAME"
+                  print floors_fld
+                  if not isnull(inFeat.attribute(floors_fld)):
+                    floors=inFeat.attribute(floors_fld)
+                #if not isnull(pdens_fld):
+                  #print "POPDENS NAME"
+                  #print pdens_fld
+                  #if not isnull(inFeat.attribute(pdens_fld)):
+                    #pop_dens=inFeat.attribute(pdens_fld)*0.55 # #Because Berlin has got 45% of green area
+                print "YOC VALUE"
+                print yoc
+                print "FLOORS VALUE"
+                print floors
+                print "POPDENS VALUE"
+                print pop_dens
+
                 est_ed = evaluate_building(population_density=pop_dens,
                        area=inFeat.attribute("AREA"),
                        perimeter=inFeat.attribute("PERIMETER"),
-                       floors=inFeat.attribute(floors_fld),
-                       year_of_construction=bld_yoc,
-                       accumulated_heating_hours=default_acc_heat_hours)
+                       floors=floors,
+                       year_of_construction=yoc,
+                       accumulated_heating_hours=acc_heat_hours)
                 for i in est_ed.keys():
                   outFeat[i]=est_ed[i]
                 out_layer.updateFeature(outFeat)
@@ -819,31 +870,133 @@ class OpenEQuarterMain:
             
             QgsVectorFileWriter.writeAsVectorFormat(out_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
             
-            layer_interaction.fullRemove('Transmission Heat Loss (Contemporary)')
-            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Contemporary)')
-            join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLC.qml'))
+            root = QgsProject.instance().layerTreeRoot()
+            
+            #node_group = root.insertGroup(0, "Transmission Heat Loss")
+            #node_subgroup1 = node_group.addGroup("Present") 
+            #node_subgroup2 = node_group.addGroup("Contemporary") 
             
             layer_interaction.fullRemove('Transmission Heat Loss (Present)')
-            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Present)')
+            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Present)')#,group="Transmission Heat Loss",subgroup="Present")
             join_layers(new_layer,out_layer)
             new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLP.qml'))
-            self.iface.legendInterface().setLayerVisible(new_layer, False)
-            
-            layer_interaction.fullRemove('Wall Quality (U_Value)')
-            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value)')
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Transmission Heat Loss (Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Contemporary)')#,group="Transmission Heat Loss",subgroup="Contemporary")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','wall_UVal.qml'))
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLC.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            #node_group = root.insertGroup(0, "Component Qualities")
+            #node_subgroup1 = node_group.addGroup("Present") 
+            #node_subgroup2 = node_group.addGroup("Contemporary") 
+            
+            layer_interaction.fullRemove('Base Quality (U_Value, Present)')
+            new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Base.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Base Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Base.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Wall Quality (U_Value, Present)')
+            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Wall Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Window Quality (U_Value, Present)')
+            new_layer=create_evaluation_layer(layer_name='Window Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Window.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Window Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Window Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Window.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Roof Quality (U_Value, Present)')
+            new_layer=create_evaluation_layer(layer_name='Roof Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Roof.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Roof Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Roof Quality (U_Value, Contemporary)')
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Roof.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            #node_group = root.insertGroup(0, "Solar Heat")
             
             layer_interaction.fullRemove('Solar Coverage Rate')
-            new_layer=create_evaluation_layer(layer_name='Solar Coverage Rate')
+            new_layer=create_evaluation_layer(layer_name='Solar Coverage Rate')#,group="Solar Heat")
             join_layers(new_layer,out_layer)
             new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_RT_Sol.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
+            layer_interaction.fullRemove('Solar Earning')
+            new_layer=create_evaluation_layer(layer_name='Solar Earning')#,group="Solar Heat")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HE_Sol.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            #node_group = root.insertGroup(0, "Heating System")
             
-            
+            layer_interaction.fullRemove('Heatings System (by Building)')
+            new_layer=create_evaluation_layer(layer_name='Heatings System (by Building)')#,group="Heating System")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HTS_Building.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Heatings System (by Flat)')
+            new_layer=create_evaluation_layer(layer_name='Heatings System (by Flat)')#,group="Heating System")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HTS_Flat.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            #node_group = root.insertGroup(0, "Soft Facts")
+
+            layer_interaction.fullRemove('Owners (by Building)')
+            new_layer=create_evaluation_layer(layer_name='Owners (by Building)')#,group="Soft Facts")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_OWN_Building.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Owners (by Flat)')
+            new_layer=create_evaluation_layer(layer_name='Owners (by Flat)')#,group="Soft Facts")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_OWN_Flat.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
             OeQ_kill_progressbar()
             return True
         else:

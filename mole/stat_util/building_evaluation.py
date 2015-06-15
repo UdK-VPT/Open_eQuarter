@@ -6,9 +6,8 @@ import bld_geometry
 from stat_corr import * 
 
 from qgis.core import *
+from mole.oeq_global import *
 
-def isnull(value):
-  return type(value) is type(NULL)
 
 def evaluate_building(population_density, 
                       area=NULL, 
@@ -31,7 +30,9 @@ def evaluate_building(population_density,
   print "AREA"
   print area
   if isnull(area): 
-    return {"FLS_AVG": NULL,
+    return {"YOC":NULL,
+                "POP_DENS": NULL,
+                "FLS_AVG": NULL,
                 "WDT_AVG":NULL,
                 "LEN_AVG": NULL,
                 "HGT_AVG": NULL,
@@ -76,7 +77,11 @@ def evaluate_building(population_density,
                 "HD_TOT":NULL,
                 "HE_SOL":NULL,
                 "HE_SOL_LIV":NULL,
-                "RT_SOL":NULL
+                "RT_SOL":NULL,
+                "HTS_FLT":NULL,
+                "HTS_BLD":NULL,
+                "OWN_FLT":NULL,
+                "OWN_BLD":NULL
                 }
 
   dimensions=bld_geometry.dimensions(area,perimeter,length)
@@ -94,6 +99,7 @@ def evaluate_building(population_density,
  
   if isnull(common_walls):
     common_walls=common_walls_by_population_density_corr.get(population_density)
+    
   base_area=dimensions["AREA"]
   base_uvalue_pres=present_base_uvalue_AVG_by_building_age_lookup.get(year_of_construction)
   base_uvalue_contemp=contemporary_base_uvalue_by_building_age_lookup.get(year_of_construction)
@@ -131,7 +137,107 @@ def evaluate_building(population_density,
   total_heat_demand=average_heat_demand_per_sqm  * living_area
   solar_coverage_rate=solar_earnings/total_heat_demand*100
   
-  return {"FLS_AVG": floors,
+  bld_owners_rate=building_owner_distribution_by_population_density_correlation.get(population_density)
+  owner_keys=bld_owners_rate.keys()
+  most_bld_owners=owner_keys[0]
+  owner_keys.pop(0)
+  for i in owner_keys:
+    if bld_owners_rate[i] > bld_owners_rate[most_bld_owners]:
+      most_bld_owners=i
+  if most_bld_owners == "BLD_OWNER_ASSOC":
+    most_bld_owners_descr="ASSOC"
+  elif most_bld_owners == "BLD_OWNER_PRIV":
+    most_bld_owners_descr="PRIV"
+  elif most_bld_owners == "BLD_OWNER_BUILDSOC":
+    most_bld_owners_descr="BUILDSOC"
+  elif most_bld_owners == "BLD_OWNER_MUNDWELLCOMP":
+    most_bld_owners_descr="MUNDWELLCOMP"
+  elif most_bld_owners == "BLD_OWNER_PRIVDWELLCOMP":
+    most_bld_owners_descr="PRIVDWELLCOMP"
+  elif most_bld_owners == "BLD_OWNER_OTHERPRIVCOMP":
+    most_bld_owners_descr="OTHERPRIVCOMP"
+  elif most_bld_owners == "BLD_OWNER_GOV":
+    most_bld_owners_descr="GOV"
+  elif most_bld_owners == "BLD_OWNER_ORG":
+    most_bld_owners_descr="ORG"
+  else:
+    most_bld_owners_descr=NULL
+ 
+  flt_owners_rate=flat_owner_distribution_by_population_density_correlation.get(population_density)
+  owner_keys=flt_owners_rate.keys()
+  most_flt_owners=owner_keys[0]
+  owner_keys.pop(0)
+  for i in owner_keys:
+    if flt_owners_rate[i] > flt_owners_rate[most_flt_owners]:
+      most_flt_owners=i
+  if most_flt_owners == "FLT_OWNER_ASSOC":
+    most_flt_owners_descr="ASSOC"
+  elif most_flt_owners == "FLT_OWNER_PRIV":
+    most_flt_owners_descr="PRIV"
+  elif most_flt_owners == "FLT_OWNER_BUILDSOC":
+    most_flt_owners_descr="BUILDSOC"
+  elif most_flt_owners == "FLT_OWNER_MUNDWELLCOMP":
+    most_flt_owners_descr="MUNDWELLCOMP"
+  elif most_flt_owners == "FLT_OWNER_PRIVDWELLCOMP":
+    most_flt_owners_descr="PRIVDWELLCOMP"
+  elif most_flt_owners == "FLT_OWNER_OTHERPRIVCOMP":
+    most_flt_owners_descr="OTHERPRIVCOMP"
+  elif most_flt_owners == "FLT_OWNER_GOV":
+    most_flt_owners_descr="GOV"
+  elif most_flt_owners == "FLT_OWNER_ORG":
+    most_flt_owners_descr="ORG"
+  else:
+    most_flt_owners_descr=NULL
+  
+  bld_heating_rate=building_heating_type_distribution_by_population_density_correlation.get(population_density)
+  heating_keys=bld_heating_rate.keys()
+  most_bld_heating=heating_keys[0]
+  heating_keys.pop(0)
+  for i in heating_keys:
+    if bld_heating_rate[i] > bld_heating_rate[most_bld_heating]:
+      most_bld_heating=i
+  if most_bld_heating == "BLD_HEAT_DISTR":
+    most_bld_heating_descr="DISTR"
+  elif most_bld_heating == "BLD_HEAT_SCDWELL":
+    most_bld_heating_descr="SCDWELL"
+  elif most_bld_heating == "BLD_HEAT_BLOCKTYPE":
+    most_bld_heating_descr="BLOCKTYPE"
+  elif most_bld_heating == "BLD_HEAT_CENTRAL":
+    most_bld_heating_descr="CENTRAL"
+  elif most_bld_heating == "BLD_HEAT_SNGLROOM":
+    most_bld_heating_descr="SNGLROOM"
+  elif most_bld_heating == "BLD_HEAT_NONE":
+    most_bld_heating_descr="NONE"
+  else:
+    most_bld_heating_descr=NULL
+  
+  flt_heating_rate=flat_heating_type_distribution_by_population_density_correlation.get(population_density)
+  heating_keys=flt_heating_rate.keys()
+  most_flt_heating=heating_keys[0]
+  heating_keys.pop(0)
+  for i in heating_keys:
+    if flt_heating_rate[i] > flt_heating_rate[most_flt_heating]:
+      most_flt_heating=i
+  if most_flt_heating == "FLT_HEAT_DISTR":
+    most_flt_heating_descr="DISTR"
+  elif most_flt_heating == "FLT_HEAT_SCDWELL":
+    most_flt_heating_descr="SCDWELL"
+  elif most_flt_heating == "FLT_HEAT_BLOCKTYPE":
+    most_flt_heating_descr="BLOCKTYPE"
+  elif most_flt_heating == "FLT_HEAT_CENTRAL":
+    most_flt_heating_descr="CENTRAL"
+  elif most_flt_heating == "FLT_HEAT_SNGLROOM":
+    most_flt_heating_descr="SNGLROOM"
+  elif most_flt_heating == "FLT_HEAT_NONE":
+    most_flt_heating_descr="NONE"
+  else:
+    most_flt_heating_descr=NULL
+
+  
+  
+  return {"POP_DENS":population_density,
+              "YOC":year_of_construction,
+              "FLS_AVG": floors,
               "WDT_AVG":dimensions["WIDTH"],
               "LEN_AVG":dimensions["LENGTH"],
               "HGT_AVG":building_height,
@@ -176,6 +282,10 @@ def evaluate_building(population_density,
               "HD_TOT": total_heat_demand,
               "HE_SOL": solar_earnings,
               "HE_SOL_LIV":solar_earnings/living_area,
-              "RT_SOL":solar_coverage_rate
+              "RT_SOL":solar_coverage_rate,
+              "HTS_FLT":most_flt_heating_descr,
+              "HTS_BLD":most_bld_heating_descr,
+              "OWN_FLT":most_flt_owners_descr,
+              "OWN_BLD":most_bld_owners_descr
               }
 

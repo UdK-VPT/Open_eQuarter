@@ -194,7 +194,7 @@
       <widgetv2config IsMultiline="0" fieldEditable="0" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="db_UP_WALL" symbollevels="0" type="graduatedSymbol">
+  <renderer-v2 attr="db_UC_ROOF" symbollevels="0" type="graduatedSymbol">
     <ranges>
       <range render="true" symbol="0" lower="0.000000" upper="0.300000" label=" 0.0 - 0.3 "/>
       <range render="true" symbol="1" lower="0.300000" upper="0.600000" label=" 0.3 - 0.6 "/>
@@ -415,7 +415,7 @@
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="db_UP_WALL"/>
+    <property key="labeling/fieldName" value="db_UC_ROOF"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>

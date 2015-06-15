@@ -194,39 +194,20 @@
       <widgetv2config IsMultiline="0" fieldEditable="0" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="db_UP_WALL" symbollevels="0" type="graduatedSymbol">
+  <renderer-v2 attr="db_UC_BASE" symbollevels="0" type="graduatedSymbol">
     <ranges>
-      <range render="true" symbol="0" lower="0.000000" upper="0.300000" label=" 0.0 - 0.3 "/>
-      <range render="true" symbol="1" lower="0.300000" upper="0.600000" label=" 0.3 - 0.6 "/>
-      <range render="true" symbol="2" lower="0.600000" upper="0.900000" label=" 0.6 - 0.9 "/>
-      <range render="true" symbol="3" lower="0.900000" upper="1.100000" label=" 0.9 - 1.1 "/>
-      <range render="true" symbol="4" lower="1.100000" upper="1.300000" label=" 1.1 - 1.3 "/>
-      <range render="true" symbol="5" lower="1.300000" upper="1.500000" label=" 1.3 - 1.5 "/>
-      <range render="true" symbol="6" lower="1.500000" upper="1.700000" label=" 1.5 - 1.7 "/>
-      <range render="true" symbol="7" lower="1.700000" upper="2.500000" label=" 1.7 - 2.5 "/>
-      <range render="true" symbol="8" lower="2.500000" upper="3.000000" label=" 2.5 - 3.0 "/>
-      <range render="true" symbol="9" lower="3.000000" upper="10.000000" label=" 3.0 - 10.0 "/>
+      <range render="true" symbol="0" lower="0.000000" upper="1.095000" label="0.0 - 1.0950"/>
+      <range render="true" symbol="1" lower="1.095000" upper="1.242000" label=" 1.0950 - 1.2420 "/>
+      <range render="true" symbol="2" lower="1.242000" upper="1.389000" label=" 1.2420 - 1.3890 "/>
+      <range render="true" symbol="3" lower="1.389000" upper="1.536000" label=" 1.3890 - 1.5360 "/>
+      <range render="true" symbol="4" lower="1.536000" upper="1.683000" label=" 1.5360 - 1.6830 "/>
+      <range render="true" symbol="5" lower="1.683000" upper="5.000000" label=" 1.6830 - 5.0000"/>
     </ranges>
     <symbols>
       <symbol alpha="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="1,255,39,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" type="fill" name="1">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="57,252,30,255"/>
+          <prop k="color" v="26,150,65,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -238,10 +219,25 @@
           <prop k="style" v="solid"/>
         </layer>
       </symbol>
+      <symbol alpha="1" type="fill" name="1">
+        <layer pass="0" class="SimpleFill" locked="0">
+          <prop k="border_width_map_unit_scale" v="0,0"/>
+          <prop k="color" v="137,203,97,255"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="0,0,0,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.26"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="style" v="solid"/>
+        </layer>
+      </symbol>
       <symbol alpha="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="113,249,22,255"/>
+          <prop k="color" v="219,239,157,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -256,7 +252,7 @@
       <symbol alpha="1" type="fill" name="3">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="170,247,13,255"/>
+          <prop k="color" v="254,222,154,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -271,7 +267,7 @@
       <symbol alpha="1" type="fill" name="4">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="226,244,5,255"/>
+          <prop k="color" v="245,144,83,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -286,67 +282,7 @@
       <symbol alpha="1" type="fill" name="5">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,221,0,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" type="fill" name="6">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,177,0,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" type="fill" name="7">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,133,0,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" type="fill" name="8">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,89,0,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" type="fill" name="9">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,46,0,255"/>
+          <prop k="color" v="215,25,28,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -377,16 +313,16 @@
       </symbol>
     </source-symbol>
     <colorramp type="gradient" name="[source]">
-      <prop k="color1" v="1,255,39,255"/>
-      <prop k="color2" v="255,46,0,255"/>
+      <prop k="color1" v="215,25,28,255"/>
+      <prop k="color2" v="26,150,65,255"/>
       <prop k="discrete" v="0"/>
-      <prop k="stops" v="0.5;255,243,1,255"/>
+      <prop k="stops" v="0.25;253,174,97,255:0.5;255,255,192,255:0.75;166,217,106,255"/>
     </colorramp>
-    <invertedcolorramp value="0"/>
+    <invertedcolorramp value="1"/>
     <mode name="equal"/>
     <rotation/>
     <sizescale scalemethod="area"/>
-    <labelformat format=" %1 - %2 " trimtrailingzeroes="false" decimalplaces="1"/>
+    <labelformat format=" %1 - %2 " trimtrailingzeroes="false" decimalplaces="2"/>
   </renderer-v2>
   <customproperties>
     <property key="labeling" value="pal"/>
@@ -415,7 +351,7 @@
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="db_UP_WALL"/>
+    <property key="labeling/fieldName" value="db_UC_BASE"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>

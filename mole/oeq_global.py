@@ -4,6 +4,7 @@ from qgis.core import QgsProject
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtCore import Qt
 from qgis.utils import iface
+from qgis.core import *
 
 global OeQ_project_path
 def OeQ_project_path(): return os.path.normpath(QgsProject.instance().readPath(''))
@@ -52,6 +53,5 @@ def OeQ_init_info(title='Be patient!',message='Background calculations are going
 def OeQ_kill_info():
   iface.messageBar().clearWidgets() 
 
-#title='Be patient!'
-#message='Background calculations are going on...'
-#OeQ_init_info(title)
+def isnull(value):
+  return type(value) is type(NULL)

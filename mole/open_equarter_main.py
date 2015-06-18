@@ -75,17 +75,18 @@ class OpenEQuarterMain:
         self.main_process_dock = None
 
         ### Project specific settings
-        # the project path equals './' as long as the project has not been saved
-        #global OeQ_project_path 
-        #def OeQ_project_path(self): return os.path.normpath(QgsProject.instance().readPath(''))
-        #the plugin path is the parent directory of this class' file
-       # global OeQ_plugin_path(self)
-        #def OeQ_plugin_path(): return os.path.dirname(os.path.realpath(__file__))
+        #Now in oeq_global
 
         self.oeq_project = ''
 
         # OpenStreetMap-plugin-layer
         self.open_layer = None
+
+        #to work flawlessly on the messagebar it is necessary to initialize the Python console once
+        iface.actionShowPythonDialog().trigger()
+        print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
+        time.sleep(0.3)
+        iface.actionShowPythonDialog().trigger() #in fact it's not show but toggle
 
         ### Default values
         # name of the shapefile which will be created to define the investigation area
@@ -143,7 +144,18 @@ class OpenEQuarterMain:
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
-          
+
+ #   def check_all_plugins(self):
+  #      sections = self.progress_items_model.section_views
+  #      for list_view in sections:
+ #           model=list_view.model()
+  #          model.item(0)
+  #      item_name = item.accessibleText()
+  #          for j in model.item():
+ #               print j.accessibleText()
+
+
+
     def reorder_layers(self):
         """
         Reorder the layers so that they are ordered (from top to bottom) as follows:
@@ -526,7 +538,8 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-        
+
+        self.check_all_plugins()
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
@@ -547,8 +560,6 @@ class OpenEQuarterMain:
             out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
             layer_interaction.add_layer_to_registry(out_layer)
             layer_interaction.edit_housing_layer_attributes(out_layer)
-            print OeQ_plugin_path()
-            print OeQ_project_path()
             out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
             
             inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
@@ -645,8 +656,6 @@ class OpenEQuarterMain:
                 layer = layer_interaction.find_layer_by_name(layer_name)
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
                 path_geo = layer.publicSource()
-                print "GEOPATH"
-                print path_geo
                 path_transformed = path_geo.replace('_RAW.tif', '_transformed.tif')
                 print path_geo
                 no_timeout = 50
@@ -1028,6 +1037,35 @@ class OpenEQuarterMain:
             first_open_item.setCheckState(2)
         else:
             first_open_item.setCheckState(0)
+
+    def check_plugins(self):
+            """
+            Call the appropriate handle-function, depending on the progress-step, that has to be executed next.
+            :return:
+            :rtype:
+            """
+            last_view = self.progress_items_model.section_views[-1]
+
+            i = 0
+            while last_view.model().item(i):
+                i += 1
+
+            last_step_name = last_view.model().item(i-1).accessibleText()
+            first_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
+            first_open_item.setCheckState(1)
+
+            handler = 'handle_{}'.format(first_open_item.accessibleText())
+            next_call = getattr(self, handler)
+            is_done = next_call()
+
+            QgsProject.instance().setDirty(True)
+            # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
+            if is_done:
+                first_open_item.setCheckState(2)
+            else:
+                first_open_item.setCheckState(0)
+
+
 
     def process_button_clicked(self, model_index):
         """

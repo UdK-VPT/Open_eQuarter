@@ -6,6 +6,7 @@ from PyQt4.QtCore import Qt
 from qgis.utils import iface
 from qgis.core import *
 
+
 global OeQ_project_path
 def OeQ_project_path(): return os.path.normpath(QgsProject.instance().readPath(''))
 global OeQ_plugin_path
@@ -27,27 +28,20 @@ def OeQ_init_progressbar(title='Be patient!',message='Background calculations ar
   #pass the progress bar to the message Bar
   iface.messageBar().pushWidget(widget,iface.messageBar().INFO)
   print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
-  time.sleep(0.1)
-  iface.messageBar().update()
-  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   return progressbarwidget
 
 def OeQ_push_progressbar(progressbarwidget,progress_counter):
   progress_counter = progress_counter + 1
   progressbarwidget.setValue(progress_counter)
+  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   return progress_counter
 
 def OeQ_kill_progressbar():
   iface.messageBar().clearWidgets() 
 
 def OeQ_init_info(title='Be patient!',message='Background calculations are going on...'):
-  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
   widget = iface.messageBar().createMessage(title,message)
-  #iface.messageBar().pushInfo(title,message)
   iface.messageBar().pushWidget(widget,iface.messageBar().INFO)
-  print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
-  time.sleep(0.1)
-  iface.messageBar().update()
   print "THIS IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 def OeQ_kill_info():
@@ -55,3 +49,4 @@ def OeQ_kill_info():
 
 def isnull(value):
   return type(value) is type(NULL)
+

@@ -5,10 +5,6 @@ from PyQt4.QtGui import QProgressBar
 from PyQt4.QtCore import Qt
 from qgis.utils import iface
 from qgis.core import *
-<<<<<<< HEAD
-
-=======
->>>>>>> d2c5209d21fc6ab248afd1c74919fb5dc47f5f54
 
 global OeQ_project_path
 def OeQ_project_path(): return os.path.normpath(QgsProject.instance().readPath(''))

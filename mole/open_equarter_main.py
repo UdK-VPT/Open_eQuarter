@@ -539,7 +539,6 @@ class OpenEQuarterMain:
     # step 2.0
     def handle_housing_layer_loaded(self):
 
-        self.check_all_plugins()
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False

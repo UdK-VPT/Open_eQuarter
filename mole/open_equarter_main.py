@@ -906,6 +906,7 @@ class OpenEQuarterMain:
             new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
             join_layers(new_layer,out_layer)
             new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Base.qml'))
+<<<<<<< HEAD
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
@@ -929,6 +930,31 @@ class OpenEQuarterMain:
             new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
+=======
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Base Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Base.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+
+            layer_interaction.fullRemove('Wall Quality (U_Value, Present)')
+            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+            
+            layer_interaction.fullRemove('Wall Quality (U_Value, Contemporary)')
+            new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
+            join_layers(new_layer,out_layer)
+            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
+            self.iface.legendInterface().setLayerVisible(new_layer, False)
+            self.iface.legendInterface().setLayerExpanded(new_layer, False)
+>>>>>>> d2c5209d21fc6ab248afd1c74919fb5dc47f5f54
             
             layer_interaction.fullRemove('Window Quality (U_Value, Present)')
             new_layer=create_evaluation_layer(layer_name='Window Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")

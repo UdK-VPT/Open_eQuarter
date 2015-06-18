@@ -52,7 +52,3 @@ def OeQ_kill_info():
 
 def isnull(value):
   return type(value) is type(NULL)
-<<<<<<< HEAD
-
-=======
->>>>>>> d2c5209d21fc6ab248afd1c74919fb5dc47f5f54

@@ -1,6 +1,6 @@
 {"section_name": "analysis", "description" : "Analysis", "steplist":
 [
-  {"step_name": "information_sampled", "description" : "Use the Point Sampling Tool to extract the information", "state": 0},
-  {"step_name": "building_calculations", "description" : "Use the OEQ-building-calculations plugin to generate basic building information", "state": 0}
+  {"step_name": "information_sampled", "description" : "Collect building data (\"PointSamplingTool\")", "state": 0},
+  {"step_name": "building_calculations", "description" : "Run OEQ building evaluation", "state": 0}
 ]
 }

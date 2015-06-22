@@ -12,7 +12,7 @@ class ProgressItemsModel_test(unittest.TestCase):
     def setUp(self):
         self._sections = ['Project Basics', 'Source Definition', 'Analysis']
         self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'real_centroid_plugin_installed', 'project_created']
-        self._steps1 = ['osm_layer_loaded', 'investigation_area_selected', 'housing_layer_loaded', 'building_coordinates_loaded', 'raster_loaded', 'legend_created']
+        self._steps1 = ['investigation_area_selected', 'housing_layer_loaded', 'building_coordinates_loaded', 'raster_loaded', 'legend_created']
         self._steps2 = ['information_sampled', 'building_calculations']
 
         self.app = QApplication(sys.argv)
@@ -70,6 +70,16 @@ class ProgressItemsModel_test(unittest.TestCase):
         self.set_prerequisites(section_model, 0, 1, 0)
         second_step_third_section_fails_due_to_first = self.pim.check_prerequisites_for(step_name)
         self.assertEqual(second_step_third_section_fails_due_to_first.accessibleText(), self._steps2[0])
+
+    def test_if_completed_progress_is_checked_correctly(self):
+        last_step = self._steps2[-1]
+        model0 = self.pim.section_views[0].model()
+        model1 = self.pim.section_views[1].model()
+        model2 = self.pim.section_views[2].model()
+        self.set_prerequisites(model0, 0, len(self._steps0))
+        self.set_prerequisites(model1, 0, len(self._steps1))
+        self.set_prerequisites(model2, 0, len(self._steps2))
+        self.assertEqual(self.pim.check_prerequisites_for(last_step).accessibleText(), last_step)
 
     def test_if_progress_is_saved_correctly(self):
         section_model0 = self.pim.section_views[0].model()

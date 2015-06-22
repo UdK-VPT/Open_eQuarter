@@ -10,12 +10,10 @@ from mole.model.progress_model import *
 class ProgressItemsModel_test(unittest.TestCase):
 
     def setUp(self):
-        self._sections = ['Project Basics', 'Investigation Area', 'Building Shapes', 'Real Estate Cadaster', 'Sampling Points']
-        self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'real_centroid_plugin_installed', 'project_created', 'osm_layer_loaded']
-        self._steps1 = ['temp_shapefile_created', 'editing_temp_shapefile_started', 'investigation_area_selected', 'editing_temp_shapefile_stopped']
-        self._steps2 = ['housing_layer_loaded', 'building_coordinates_loaded']
-        self._steps3 = ['raster_loaded', 'extent_clipped', 'legend_created']
-        self._steps4 = ['generate_real_centroids', 'information_sampled']
+        self._sections = ['Project Basics', 'Source Definition', 'Analysis']
+        self._steps0 = ['ol_plugin_installed', 'pst_plugin_installed', 'real_centroid_plugin_installed', 'project_created']
+        self._steps1 = ['osm_layer_loaded', 'investigation_area_selected', 'housing_layer_loaded', 'building_coordinates_loaded', 'raster_loaded', 'legend_created']
+        self._steps2 = ['information_sampled', 'building_calculations']
 
         self.app = QApplication(sys.argv)
         self.pim = ProgressItemsModel()
@@ -78,13 +76,12 @@ class ProgressItemsModel_test(unittest.TestCase):
         section_model1 = self.pim.section_views[1].model()
         section_model2 = self.pim.section_views[2].model()
         self.set_prerequisites(section_model0, 0, len(self._steps0))
-        self.set_prerequisites(section_model1, 0, len(self._steps1))
-        self.set_prerequisites(section_model2, 0, 1)
-        self.set_prerequisites(section_model2, 1, 2, 1)
+        self.set_prerequisites(section_model1, 0, 1)
+        self.set_prerequisites(section_model1, 1, 3, 1)
 
         path = os.path.join('.', 'oeq_progress.oeq')
         try:
-            self.pim.save_section_models('.')
+            self.pim.save_section_models()
 
             self.set_prerequisites(section_model0, 0, len(self._steps0), 0)
             self.set_prerequisites(section_model1, 0, len(self._steps1), 0)
@@ -94,13 +91,16 @@ class ProgressItemsModel_test(unittest.TestCase):
         except OSError, FileError:
             print(self.__module__, FileError)
         finally:
-            os.remove(path)
+            try:
+                os.remove(path)
+            except OSError, FileError:
+                print(self.__module__, FileError)
 
         last_step_first_section = self._steps0[-1]
         self.assertEqual(self.pim.check_prerequisites_for(last_step_first_section).accessibleText(), last_step_first_section)
 
-        last_step = self._steps4[-1]
-        last_completed = self._steps2[1]
+        last_step = self._steps2[-1]
+        last_completed = self._steps1[1]
         self.assertEqual(self.pim.check_prerequisites_for(last_step).accessibleText(), last_completed)
 
 

@@ -645,20 +645,24 @@ class OpenEQuarterMain:
         layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0)
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
+        succes = False
 
-        if save_or_abort:
+        while save_or_abort:
             layer = self.iface.activeLayer()
             out_path = os.path.dirname(layer.publicSource())
             out_path = os.path.join(out_path, layer.name() + '.txt')
             self.color_picker_dlg.update_color_values()
-            self.iface.actionPan().trigger()
             entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+                succes = True
                 self.reorder_layers()
-                return 2
+            save_or_abort = self.color_picker_dlg.exec_()
+
+        self.iface.actionPan().trigger()
+        if succes:
+            return 2
         else:
-            self.iface.actionPan().trigger()
             self.reorder_layers()
             return 1
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Tue Jun  9 11:36:34 2015
+# Created: Mon Jun 22 18:13:56 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_color_picker_dialog(object):
     def setupUi(self, color_picker_dialog):
         color_picker_dialog.setObjectName(_fromUtf8("color_picker_dialog"))
-        color_picker_dialog.resize(658, 379)
+        color_picker_dialog.resize(658, 385)
         color_picker_dialog.setStyleSheet(_fromUtf8(""))
         self.verticalLayout = QtGui.QVBoxLayout(color_picker_dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -182,8 +182,10 @@ class Ui_color_picker_dialog(object):
         self.warning_label.setObjectName(_fromUtf8("warning_label"))
         self.verticalLayout.addWidget(self.warning_label)
         self.buttonBox = QtGui.QDialogButtonBox(color_picker_dialog)
+        self.buttonBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Save)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Save)
+        self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout.addWidget(self.buttonBox)
 

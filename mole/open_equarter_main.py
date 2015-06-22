@@ -136,7 +136,7 @@ class OpenEQuarterMain:
         settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
-        tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
+        tools_dropdown_menu.addAction('Color Picker', self.pick_color)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
         tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
         tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
@@ -633,7 +633,9 @@ class OpenEQuarterMain:
                 pass
         time.sleep(1.0)
         OeQ_kill_progressbar()
+        return self.pick_color()
 
+    def pick_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
         self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)

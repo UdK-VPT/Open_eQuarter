@@ -24,7 +24,7 @@ from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
-from oeq_ui_classes import QRemoveEntryButton, QColorizedLineEdit
+from oeq_ui_classes import QRemoveEntryButton, QColorizedLineEdit, QColorTableDelegate, QColorTableModel
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 from ui_project_settings_form import Ui_project_settings_form
@@ -47,16 +47,56 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.row_offset = 1
-        self.row_count = 2
-        self.connect(self.remove_entries_0, QtCore.SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
-        self.parameter_name_0.textChanged.connect(self.check_character_constraint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
 
+        # create the view
+        tv = self.color_table_view
+        # set the table model
+        self.header = ['Color value', 'Parameter Name', 'From', 'To', '']
+        self.color_entry_manager.add_layer('dummy')
+        self.color_entry_manager.add_color_value_quadruple_to_layer(('RGBa(0, 0, 0, 0)', ' ', 0, 0), 'dummy')
+        tm = QColorTableModel(self.color_entry_manager.layer_values_map['dummy'], self.header, self)
+        tv.setModel(tm)
+
+        for i in range(len(self.header)):
+            tv.setItemDelegateForColumn(i, QColorTableDelegate(self))
+
+        tv.setColumnWidth(0, 205)
+        tv.setColumnWidth(1, 205)
+        tv.setColumnWidth(2, 75)
+        tv.setColumnWidth(3, 75)
+        tv.setColumnWidth(4, 15)
+
+        # set horizontal header properties
+        hh = tv.horizontalHeader()
+        hh.setStretchLastSection(True)
+        hh.setStyleSheet('QHeaderView::section { '
+                         ' border: None;'
+                         ' padding: 3px;'
+                         ' font-size: 13px;'
+                         ' font-weight: bold;'
+                         ' margin: 5px;'
+                         ' background-color: rgb(237, 237, 237);'
+                         '}'
+                         )
+
+        # set row height
+        vh = tv.verticalHeader()
+        vh.setDefaultSectionSize(34)
+        vh.setStyleSheet('QHeaderView::section { '
+                         ' border: None;'
+                         ' padding: 3px;'
+                         ' font-size: 13px;'
+                         ' margin: 5px;'
+                         ' margin-right: 12px;'
+                         ' background-color: rgb(237, 237, 237);'
+                         '}'
+                         )
+
     def add_color(self, color):
         """
-        Insert a new color (and the values associated to it, if any), into the color-table. Append a new row, afterwards.
+        Insert a new color (and the values associated to it, if any), into the color-table.
         :param color: The color in RGBa
         :type color: QColor
         :return:
@@ -65,6 +105,9 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         layer = self.layers_dropdown.currentText()
         self.recent_layer = layer
         color_map = self.color_entry_manager.layer_values_map[layer]
+        model = QColorTableModel(color_map, self.header, self)
+        self.color_table_view.setModel(model)
+
         color_key = 'RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha())
         if color_map.has_key(color_key):
             self.warning_label.setText('Attention: Color {} is defined already.'.format(color_key))
@@ -72,18 +115,6 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.warning_label.clear()
             self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, '', 0, 0), layer)
-
-            last_row = self.row_count - self.row_offset
-            color_field = self.color_table.itemAtPosition(last_row, 1).widget()
-            color_field.setText(color_key)
-            color_field.colorize(color.red(), color.green(), color.blue(), color.alpha())
-
-            # Hence each color-pair is likely to describe the same parameter, the name (text) of the above cell is inserted
-            parameter_above = self.color_table.itemAtPosition(last_row-1, 2).widget()
-            parameter_current = self.color_table.itemAtPosition(last_row, 2).widget()
-            parameter_current.setText(parameter_above.text())
-
-            self.add_row()
 
     def restore_color_value_pairs(self, layer):
         try:

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Mon Jun 22 18:13:56 2015
+# Created: Tue Jun 23 15:39:50 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -88,86 +88,10 @@ class Ui_color_picker_dialog(object):
         self.gridLayout.addWidget(self.chose_plugin_info, 1, 0, 1, 1)
         self.verticalLayout.addWidget(self.raster_plugin_dlg)
         self.color_table_view = QtGui.QTableView(color_picker_dialog)
+        self.color_table_view.setStyleSheet(_fromUtf8("border: 0px;\n"
+"background-color: rgb(237, 237, 237);"))
         self.color_table_view.setObjectName(_fromUtf8("color_table_view"))
         self.verticalLayout.addWidget(self.color_table_view)
-        self.color_table = QtGui.QGridLayout()
-        self.color_table.setSizeConstraint(QtGui.QLayout.SetFixedSize)
-        self.color_table.setContentsMargins(0, -1, -1, -1)
-        self.color_table.setObjectName(_fromUtf8("color_table"))
-        self.value_one_0 = QtGui.QLineEdit(color_picker_dialog)
-        self.value_one_0.setMinimumSize(QtCore.QSize(30, 0))
-        self.value_one_0.setObjectName(_fromUtf8("value_one_0"))
-        self.color_table.addWidget(self.value_one_0, 1, 3, 1, 1)
-        self.chosen_color_0 = QColorizedLineEdit(color_picker_dialog)
-        self.chosen_color_0.setEnabled(False)
-        self.chosen_color_0.setMinimumSize(QtCore.QSize(190, 0))
-        self.chosen_color_0.setStyleSheet(_fromUtf8(""))
-        self.chosen_color_0.setText(_fromUtf8(""))
-        self.chosen_color_0.setObjectName(_fromUtf8("chosen_color_0"))
-        self.color_table.addWidget(self.chosen_color_0, 1, 1, 1, 1)
-        self.value_two_0 = QtGui.QLineEdit(color_picker_dialog)
-        self.value_two_0.setMinimumSize(QtCore.QSize(30, 0))
-        self.value_two_0.setObjectName(_fromUtf8("value_two_0"))
-        self.color_table.addWidget(self.value_two_0, 1, 4, 1, 1)
-        self.value_one_label = QtGui.QLabel(color_picker_dialog)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.value_one_label.setFont(font)
-        self.value_one_label.setObjectName(_fromUtf8("value_one_label"))
-        self.color_table.addWidget(self.value_one_label, 0, 3, 1, 1)
-        self.value_two_label = QtGui.QLabel(color_picker_dialog)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.value_two_label.setFont(font)
-        self.value_two_label.setObjectName(_fromUtf8("value_two_label"))
-        self.color_table.addWidget(self.value_two_label, 0, 4, 1, 1)
-        self.chosen_color_label = QtGui.QLabel(color_picker_dialog)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.chosen_color_label.setFont(font)
-        self.chosen_color_label.setObjectName(_fromUtf8("chosen_color_label"))
-        self.color_table.addWidget(self.chosen_color_label, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
-        self.remove_entries_0 = QRemoveEntryButton(color_picker_dialog)
-        self.remove_entries_0.setMinimumSize(QtCore.QSize(18, 0))
-        self.remove_entries_0.setMaximumSize(QtCore.QSize(20, 20))
-        self.remove_entries_0.setStyleSheet(_fromUtf8(":active {\n"
-"    color: rgb(255, 0, 3);\n"
-"    font-weight: bold;\n"
-"    margin-left: -5px;\n"
-"    font-size: 18px;\n"
-"    background-color: rgb(237,237,237);\n"
-"}\n"
-"\n"
-":pressed {\n"
-"    color: rgb(255,0,3);\n"
-"    border: 0px;    \n"
-"    margin-left: -2px;\n"
-"    background-color: rgb(237,237,237);\n"
-"}\n"
-""))
-        self.remove_entries_0.setFlat(True)
-        self.remove_entries_0.setObjectName(_fromUtf8("remove_entries_0"))
-        self.color_table.addWidget(self.remove_entries_0, 1, 5, 1, 1)
-        self.row_number_0 = QtGui.QLabel(color_picker_dialog)
-        self.row_number_0.setMinimumSize(QtCore.QSize(15, 0))
-        self.row_number_0.setObjectName(_fromUtf8("row_number_0"))
-        self.color_table.addWidget(self.row_number_0, 1, 0, 1, 1)
-        self.parameter_name_label = QtGui.QLabel(color_picker_dialog)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        self.parameter_name_label.setFont(font)
-        self.parameter_name_label.setObjectName(_fromUtf8("parameter_name_label"))
-        self.color_table.addWidget(self.parameter_name_label, 0, 2, 1, 1)
-        self.parameter_name_0 = QtGui.QLineEdit(color_picker_dialog)
-        self.parameter_name_0.setMinimumSize(QtCore.QSize(190, 0))
-        self.parameter_name_0.setMaxLength(10)
-        self.parameter_name_0.setObjectName(_fromUtf8("parameter_name_0"))
-        self.color_table.addWidget(self.parameter_name_0, 1, 2, 1, 1)
-        self.verticalLayout.addLayout(self.color_table)
         self.widget = QtGui.QWidget(color_picker_dialog)
         self.widget.setObjectName(_fromUtf8("widget"))
         self.gridLayout_2 = QtGui.QGridLayout(self.widget)
@@ -198,13 +122,5 @@ class Ui_color_picker_dialog(object):
         color_picker_dialog.setWindowTitle(_translate("color_picker_dialog", "Create Color Palette", None))
         self.chose_raster_info.setText(_translate("color_picker_dialog", "Chose clipped raster layers (*tif files only):", None))
         self.chose_plugin_info.setText(_translate("color_picker_dialog", "Chose the corresponding plugin:", None))
-        self.value_one_label.setText(_translate("color_picker_dialog", "From", None))
-        self.value_two_label.setText(_translate("color_picker_dialog", "To", None))
-        self.chosen_color_label.setText(_translate("color_picker_dialog", "Color-value", None))
-        self.remove_entries_0.setToolTip(_translate("color_picker_dialog", "<html><head/><body><p style=\'color: #000000; font-size: 12px; font-weight: normal; margin-left: 5px;\'>Remove entry 1</p></body></html>", None))
-        self.remove_entries_0.setText(_translate("color_picker_dialog", "-", None))
-        self.row_number_0.setText(_translate("color_picker_dialog", "1", None))
-        self.parameter_name_label.setText(_translate("color_picker_dialog", "Parameter Name", None))
 
-from oeq_ui_classes import QColorizedLineEdit, QRemoveEntryButton
 import resources_rc

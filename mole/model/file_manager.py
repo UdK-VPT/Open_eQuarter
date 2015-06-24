@@ -4,6 +4,8 @@ from io import open
 import os
 import json
 import mole
+import qgis.utils
+            
 
 class ColorEntryManager():
     """
@@ -78,6 +80,7 @@ class ColorEntryManager():
         entries = self.layer_values_map[layer]
         del entries[color_entry]
         self.set_color_map_of_layer(entries, layer)
+
 
     def write_color_map_as_qml(self, layer_name, out_path):
 
@@ -155,10 +158,10 @@ class ColorEntryManager():
                     out_ranges=out_ranges + qml_range(cnt,out_dict[entry][1],out_dict[entry][2],None)
                     print rgba
                     out_symbols = out_symbols  + qml_symbol(cnt,rgba[0],rgba[1],rgba[2],rgba[3])
-                    if self.layer_abbreviation_map.has_key(layer_name):
-                        out_properties=out_properties + qml_property("LayAbr", self.layer_abbreviation_map[layer_name])
                     out_properties=out_properties + qml_property("ParName"+ str(cnt), out_dict[entry][0])
                     cnt+=1
+                if self.layer_abbreviation_map.has_key(layer_name):
+                    out_properties=out_properties + qml_property("LayAbr", self.layer_abbreviation_map[layer_name])
 
                 qml_out= qml_header() + out_ranges + qml_inter1() + out_symbols + qml_inter2() + out_properties + qml_footer()
 
@@ -170,6 +173,72 @@ class ColorEntryManager():
                 except IOError, Error:
                     return False
                     print('{}: {}'.format(self.__module__, Error))
+
+
+    def read_color_map_from_qml(self, in_path):
+        file_name = os.path.basename(in_path)
+        layer_name = os.path.splitext(file_name)[0]
+        self.layer_values_map[layer_name] = {}
+
+        result_dict = {}
+        import lxml
+
+        def get_colors(tree):
+            out_col={}
+            symbols=tree.find('renderer-v2/symbols')
+            for i in symbols:
+                layer=i.find('layer')
+                for j in layer:
+                    if j.attrib['k']=='color':
+                        out_col[i.attrib['name']] = 'RGBa( ' + j.attrib['v'].replace(',',' , ') + ')'
+            return out_col
+
+        def get_ranges(tree):
+            out_rng={}
+            ranges=tree.find('renderer-v2/ranges')
+            for i in ranges:
+                out_rng[i.attrib['symbol']]= [i.attrib['lower'],i.attrib['upper']]
+            return out_rng
+
+        def get_parNames(tree):
+            out_par={}
+            props=tree.find('customproperties')
+            for i in props:
+                if i.attrib['key'].startswith('ParName'):
+                    name=i.attrib['key']
+                    name=name.replace("ParName","")
+                    print name
+                    print i.attrib['value']
+                    print i.attrib
+
+                    out_par[name]= i.attrib['value']
+            return out_par
+        def get_abrev(tree):
+            out_par={}
+            props=tree.find('customproperties')
+            for i in props:
+                if i.attrib['key'].startswith('LayAbr'):
+                    out_par['LayAbr'] = i.attrib['value']
+            return out_par
+
+        try:
+            qml_tree=etree.parse(in_path)
+            qml_col=get_colors(qml_tree)
+            qml_par=get_parNames(qml_tree)
+            qml_rng=get_ranges(qml_tree)
+            qml_abr=get_abrev(qml_tree)
+            ID_range=[]
+            for i in qml_col.keys():
+                result_dict[qml_col[i]]= [qml_par[i],qml_rng[i][0],qml_rng[i][1]]
+
+
+            if len(qml_abr)>0:
+                self.layer_abbreviation_map[layer_name] = qml_abr[0]
+
+        except IOError, Error:
+           print('{}: {}'.format(self.__module__, Error))
+
+        self.set_color_map_of_layer(result_dict, layer_name)
 
 
 
@@ -270,5 +339,4 @@ class MunicipalInformationTree():
         except IOError, Error:
             print('{}: {}'.format(self.__module__, Error))
 
-    def write_tree_to_disk(self, tree):
-        pass
+   

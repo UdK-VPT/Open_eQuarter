@@ -34,7 +34,9 @@ default_extent_crs = 'EPSG:4326'
 
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'
+
 housing_layer_name = 'BLD Shapes'
+building_outline_style ='oeq_floor_sw.qml'
 housing_coordinate_layer_name = 'BLD Centroids'
 data_layer_name = 'BLD Data'
 

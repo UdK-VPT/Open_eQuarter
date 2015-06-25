@@ -542,7 +542,16 @@ class OpenEQuarterMain:
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
-        OeQ_init_info("Intersecting floor plan with investigation layer.","This may take up to 30 seconds...")
+        #Check wether IA Layer exists
+        if not layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
+            OeQ_init_error("Unable to get building outlines","Map 'Investigation Area' could not be found...")
+            return intersection_done
+        #Check wether there are polygons  existing on theIA Layer
+        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).Features() < 0:
+            OeQ_init_error("Unable to get building outlines","No areas defined in map 'Investigation Area'...")
+            return intersection_done
+
+        OeQ_init_info("Getting building outlines in the investigation area.","This may take some time...")
         if os.path.exists(housing_layer_path):
           layer_interaction.fullRemove(config.housing_layer_name)
           layer_interaction.fullRemove(config.data_layer_name)
@@ -559,7 +568,7 @@ class OpenEQuarterMain:
             out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
             layer_interaction.add_layer_to_registry(out_layer)
             layer_interaction.edit_housing_layer_attributes(out_layer)
-            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
+            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles',config.building_outline_style))
             
             inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
             layer_interaction.add_layer_to_registry(inter_layer)

@@ -10,7 +10,7 @@ OeQ_project_info = {
     'description': '',
     'location': '',
     'location_postal': 0,
-    'heating_dd': 0.0,
+    'heating_dd': 0.0, 
     'avg_yoc': 0,
     'pop_dens': 0.0
 }

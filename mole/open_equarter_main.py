@@ -182,7 +182,7 @@ class OpenEQuarterMain:
         self.oeq_project_settings_form.show()
 
     def open_progress(self, doc):
-        progress = os.path.join(OeQ_project_path(), 'oeq_progress.oeq')
+        progress = os.path.join(OeQ_project_path(), OeQ_project_name()+'.oeq')
         if os.path.isfile(progress):
             self.progress_items_model.load_section_models(progress)
             if self.main_process_dock.isVisible():
@@ -202,7 +202,7 @@ class OpenEQuarterMain:
     def save_progress(self):
         if not OeQ_project_saved():
             iface.actionSaveProject().trigger()
-        #self.progress_items_model.save_section_models()
+        self.progress_items_model.save_section_models()
 
     def load_wms(self):
         print('Load wms')

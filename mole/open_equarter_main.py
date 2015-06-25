@@ -699,10 +699,10 @@ class OpenEQuarterMain:
         if save_or_abort:
             layer = self.iface.activeLayer()
             out_path = os.path.dirname(layer.publicSource())
-            out_path = os.path.join(out_path, layer.name() + '.txt')
+            out_path = os.path.join(out_path, layer.name() + '.qml')
             self.color_picker_dlg.update_color_values()
             self.iface.actionPan().trigger()
-            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
+            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_qml(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
                 self.reorder_layers()
@@ -738,8 +738,8 @@ class OpenEQuarterMain:
 
         # in case the plugin was re-started, reload the color-entries
         for layer_name, abbreviation in abbreviations.iteritems():
-            in_path = os.path.join(OeQ_project_path(), layer_name + '.txt')
-            self.color_picker_dlg.color_entry_manager.read_color_map_from_disk(in_path)
+            in_path = os.path.join(OeQ_project_path(), layer_name + '.qml')
+            self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(in_path)
             layer_color_map = self.color_picker_dlg.color_entry_manager.layer_values_map
             color_dict = layer_color_map[layer_name]
             layer_interaction.add_parameter_info_to_layer(color_dict, abbreviation, vlayer)

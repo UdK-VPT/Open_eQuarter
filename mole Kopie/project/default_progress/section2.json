@@ -1,0 +1,8 @@
+{"section_name": "investigation_area", "description" : "Investigation Area", "steplist":
+[
+  {"step_name": "temp_shapefile_created", "description" : "Create a new Polygon-Shapefile", "state": 0},
+  {"step_name": "editing_temp_shapefile_started", "description" : "Activate the edit mode", "state": 0},
+  {"step_name": "investigation_area_selected", "description" : "Add new features to cover your investigation area with", "state": 0},
+  {"step_name": "editing_temp_shapefile_stopped", "description" : "Deactivate the edit mode and save your changes", "state": 0}
+]
+}

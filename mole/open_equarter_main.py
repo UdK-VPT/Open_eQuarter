@@ -547,7 +547,7 @@ class OpenEQuarterMain:
             OeQ_init_error("Unable to get building outlines","Map 'Investigation Area' could not be found...")
             return intersection_done
         #Check wether there are polygons  existing on theIA Layer
-        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).Features() < 0:
+        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).featureCount() < 0:
             OeQ_init_error("Unable to get building outlines","No areas defined in map 'Investigation Area'...")
             return intersection_done
 
@@ -711,7 +711,7 @@ class OpenEQuarterMain:
             out_path = os.path.join(out_path, layer.name() + '.qml')
             self.color_picker_dlg.update_color_values()
             self.iface.actionPan().trigger()
-            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_qml(layer.name(), out_path)
+            entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
                 self.reorder_layers()

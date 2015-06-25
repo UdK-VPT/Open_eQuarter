@@ -2,7 +2,7 @@ import os
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtCore import Qt
 from qgis.utils import iface
-from qgis.core import QgsProject
+from qgis.core import QgsProject,NULL
 
 global OeQ_project_info
 OeQ_project_info = {

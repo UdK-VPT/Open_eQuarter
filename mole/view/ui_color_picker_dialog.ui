@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>285</height>
+    <width>658</width>
+    <height>451</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,18 +25,21 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="raster_dlg" native="true">
+    <widget class="QWidget" name="raster_plugin_dlg" native="true">
      <property name="styleSheet">
       <string notr="true"/>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
-      <item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="plugins_dropdown"/>
+      </item>
+      <item row="0" column="0">
        <widget class="QLabel" name="chose_raster_info">
         <property name="styleSheet">
          <string notr="true"/>
@@ -46,10 +49,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QComboBox" name="layers_dropdown"/>
-      </item>
-      <item>
+      <item row="0" column="2">
        <widget class="QPushButton" name="refresh_layers_dropdown">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -93,177 +93,76 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="refresh_plugins_dropdown">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>27</width>
+          <height>27</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">:pressed {
+	background-color: rgb(237, 237, 237);
+}
+</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/icons/refresh.png</normaloff>:/Controls/icons/refresh.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="layers_dropdown"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="chose_plugin_info">
+        <property name="text">
+         <string>Chose the corresponding plugin:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="color_table">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
+    <widget class="QTableView" name="color_table_view">
+     <property name="minimumSize">
+      <size>
+       <width>550</width>
+       <height>150</height>
+      </size>
      </property>
-     <property name="leftMargin">
-      <number>0</number>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;
+background-color: rgb(237, 237, 237);</string>
      </property>
-     <item row="1" column="3">
-      <widget class="QLineEdit" name="value_one_0">
-       <property name="minimumSize">
-        <size>
-         <width>30</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QColorizedLineEdit" name="chosen_color_0">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
-      <widget class="QLineEdit" name="value_two_0">
-       <property name="minimumSize">
-        <size>
-         <width>30</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QLabel" name="value_one_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>From</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="value_two_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>To</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" alignment="Qt::AlignLeft">
-      <widget class="QLabel" name="chosen_color_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Color-value</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="5">
-      <widget class="QRemoveEntryButton" name="remove_entries_0">
-       <property name="minimumSize">
-        <size>
-         <width>18</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style='color: #000000; font-size: 12px; font-weight: normal; margin-left: 5px;'&gt;Remove entry 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">:active {
-	color: rgb(255, 0, 3);
-	font-weight: bold;
-	margin-left: -5px;
-	font-size: 18px;
-	background-color: rgb(237,237,237);
-}
-
-:pressed {
-	color: rgb(255,0,3);
-	border: 0px;	
-	margin-left: -2px;
-	background-color: rgb(237,237,237);
-}
-</string>
-       </property>
-       <property name="text">
-        <string>-</string>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="row_number_0">
-       <property name="minimumSize">
-        <size>
-         <width>15</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>1</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="parameter_name_label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Parameter Name</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QLineEdit" name="parameter_name_0">
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maxLength">
-        <number>10</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="editTriggers">
+      <set>QAbstractItemView::AllEditTriggers</set>
+     </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="cornerButtonEnabled">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QWidget" name="widget" native="true">
@@ -299,28 +198,22 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Save</set>
+     </property>
+     <property name="centerButtons">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QRemoveEntryButton</class>
-   <extends>QPushButton</extends>
-   <header>oeq_ui_classes</header>
-  </customwidget>
-  <customwidget>
-   <class>QColorizedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>oeq_ui_classes</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

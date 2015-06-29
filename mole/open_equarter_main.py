@@ -29,7 +29,7 @@ import os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
-from qgis.gui import QgsMapToolEmitPoint
+from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
 from qgis.utils import iface
 
@@ -121,7 +121,7 @@ class OpenEQuarterMain:
         self.main_process_dock = MainProcess_dock(self.progress_items_model)
 
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
-        self.main_process_dock.process_button_auto.clicked.connect(self.auto_run)
+        self.main_process_dock.process_button_auto.clicked.connect(lambda: self.continue_process(True))
 
         sections = self.progress_items_model.section_views
         for list_view in sections:
@@ -136,25 +136,13 @@ class OpenEQuarterMain:
         settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
-        tools_dropdown_menu.addAction('Color Picker', self.handle_legend_created)
+        tools_dropdown_menu.addAction('Color Picker', self.pick_color)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
         tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
-        tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_estimated_energy_demand)
+        tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
-
-
- #   def check_all_plugins(self):
-  #      sections = self.progress_items_model.section_views
-  #      for list_view in sections:
- #           model=list_view.model()
-  #          model.item(0)
-  #      item_name = item.accessibleText()
-  #          for j in model.item():
- #               print j.accessibleText()
-
-
 
     def reorder_layers(self):
         """
@@ -308,52 +296,6 @@ class OpenEQuarterMain:
         except None, Error:
             print(self.__module__, 'Could not zoom to default extent: {}'.format(Error))
 
-    def confirm_selection_of_investigation_area(self, layer_name):
-        """
-        Select the layer named 'layer_name' from layers list and trigger the ToggleEditing button
-        :param layer_name: Name of the layer whose editing mode shall be triggered
-        :type layer_name: str
-        :return:
-        :rtype:
-        """
-        if layer_name and not layer_name.isspace():
-
-            edit_layer = layer_interaction.find_layer_by_name(layer_name)
-
-            # if the layer was found, prompt the user to confirm the adding-feature-process was finished
-            if edit_layer:
-
-                self.confirm_selection_of_investigation_area_dlg.show()
-                is_confirmed = self.confirm_selection_of_investigation_area_dlg.exec_()
-                return is_confirmed
-
-    # method currently not in use
-    def request_wms_layer_url(self):
-        """
-        Open a dialog and request an url to a wms-server. Check if the given url is valid, by trying to connect to the server.
-        :return:
-        :rtype:
-        """
-        self.request_wms_url_dlg.show()
-        url_confirmed = self.request_wms_url_dlg.exec_()
-
-        # if 'ok' was hit, get the url
-        if url_confirmed:
-            wms_url = self.request_wms_url_dlg.wms_url.text()
-
-            try:
-                if wms_url.startswith("http"):
-                    socket = httplib.HTTPConnection(wms_url[7:])
-                    socket.connect()
-                else:
-                    socket = httplib.HTTPConnection(wms_url)
-                    socket.connect()
-
-            except (httplib.HTTPException, gaierror) as InetException:
-                print(self.__module__, 'Exception {} occured. URL seems to be invalid!'.format(InetException))
-                return
-
-            self.wms_url = wms_url
 
     def set_project_crs(self, crs):
         """
@@ -442,15 +384,22 @@ class OpenEQuarterMain:
 
     # step 0.0
     def handle_ol_plugin_installed(self):
-        return plugin_interaction.get_plugin_ifexists(config.ol_plugin_name) is not None
+        plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
+        if plugin_exists is not None:
+            return 2
+
 
     # step 0.1
     def handle_pst_plugin_installed(self):
-        return plugin_interaction.get_plugin_ifexists(config.pst_plugin_name) is not None
+        plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
+        if plugin_exists is not None:
+            return 2
 
     # step 0.2
     def handle_real_centroid_plugin_installed(self):
-        return plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name) is not None
+        plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
+        if plugin_exists is not None:
+            return 2
 
     # step 0.3
     def handle_project_created(self):
@@ -458,14 +407,12 @@ class OpenEQuarterMain:
         self.create_project_ifNotExists()
 
         # if project was created stop execution
-        return OeQ_project_saved()
+        if OeQ_project_saved():
+            return 2
 
-    # step 0.4
-    def handle_osm_layer_loaded(self):
-        if self.osm_layer_is_loaded():
-            return True
-
-        else:
+    # step 1.0
+    def handle_investigation_area_selected(self):
+        if not self.osm_layer_is_loaded():
             ol_plugin = plugin_interaction.OlInteraction(config.ol_plugin_name)
 
             if ol_plugin.open_osm_layer(config.open_layer_type_id):
@@ -476,41 +423,27 @@ class OpenEQuarterMain:
                         break
 
                 self.zoom_to_default_extent()
-                return True
 
-            else:
-                return False
-
-    # step 1.0
-    def handle_temp_shapefile_created(self):
-    
         #remove if necessary
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
-         
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
-                                                                     config.project_crs)
-
+                                                                      config.project_crs)
         if investigation_area is not None:
             layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
             layer_interaction.add_layer_to_registry(investigation_area)
-            return True
-        else:
-            return False
+            layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
+            widget = iface.messageBar().createMessage('Cover Investigation Area',
+                                                      'Click "Done" once the investigation area is completely covered.')
+            button = QPushButton(widget)
+            button.setText('Done')
+            button.pressed.connect(self.confirm_selection_of_investigation_area)
+            widget.layout().addWidget(button)
+            iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING)
+            return 1
 
-    # step 1.1
-    def handle_editing_temp_shapefile_started(self):
-        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
-        return True
+    def confirm_selection_of_investigation_area(self):
+        OeQ_kill_info()
 
-    # step 1.2
-    def handle_investigation_area_selected(self):
-        self.confirm_selection_of_investigation_area_dlg.set_dialog_text(
-            "Click 'OK' once the investigatoion area is selected.", "Define investigaion area")
-        ia_covered = self.confirm_selection_of_investigation_area(config.investigation_shape_layer_name)
-        return ia_covered
-
-    # step 1.3
-    def handle_editing_temp_shapefile_stopped(self):
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         try:
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
@@ -530,15 +463,19 @@ class OpenEQuarterMain:
                 self.iface.actionZoomToLayer().trigger()
         except AttributeError, NoneTypeError:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', NoneTypeError)
+        try:
+            layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
+        except AttributeError, NoneTypeError:
+            print(self.__module__, NoneTypeError)
 
-        return True
-
-
-
+        source_section = self.progress_items_model.section_views[1]
+        section_model = source_section.model()
+        project_item = section_model.findItems('Define your investigation area')[0]
+        project_item.setCheckState(2)
+        self.continue_process()
 
     # step 2.0
     def handle_housing_layer_loaded(self):
-
         user_dir = os.path.expanduser('~')
         housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
         intersection_done = False
@@ -553,8 +490,8 @@ class OpenEQuarterMain:
 
         OeQ_init_info("Getting building outlines in the investigation area.","This may take some time...")
         if os.path.exists(housing_layer_path):
-          layer_interaction.fullRemove(config.housing_layer_name)
-          layer_interaction.fullRemove(config.data_layer_name)
+            layer_interaction.fullRemove(config.housing_layer_name)
+            layer_interaction.fullRemove(config.data_layer_name)
 
           out_layer_path = os.path.join(OeQ_project_path(), config.housing_layer_name + '.shp')
           data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
@@ -568,7 +505,7 @@ class OpenEQuarterMain:
             out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
             layer_interaction.add_layer_to_registry(out_layer)
             layer_interaction.edit_housing_layer_attributes(out_layer)
-            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles',config.building_outline_style))
+            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
             
             inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
             layer_interaction.add_layer_to_registry(inter_layer)
@@ -581,12 +518,49 @@ class OpenEQuarterMain:
           OeQ_kill_info() 
           return intersection_done
 
+            if intersection_done:
+                out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
+                layer_interaction.add_layer_to_registry(out_layer)
+                layer_interaction.edit_housing_layer_attributes(out_layer)
+                out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
+                inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
+                layer_interaction.add_layer_to_registry(inter_layer)
+                QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
+                #layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
+                QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id())
+                data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
+                layer_interaction.add_layer_to_registry(data_layer)
+                self.iface.legendInterface().setLayerVisible(data_layer, False)
+                OeQ_kill_info()
+                return 2
+
+        return 1
+
     # step 2.1
     def handle_building_coordinates_loaded(self):
-        # ToDo
-        return True
+        window = iface.mainWindow()
+        load_message = "Do you want to load your own set of building coordinates?"
+        reply = QMessageBox.question(window, 'Building Coordinates', load_message, QMessageBox.Yes, QMessageBox.No)
 
-    # step 3.0
+        if reply == QMessageBox.Yes:
+            print('Open file dlg')
+        else:
+            rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
+            polygon = config.housing_layer_name
+            output = os.path.join(OeQ_project_path(), config.pst_input_layer_name + '.shp')
+            centroid_layer = rci.create_centroids(polygon, output)
+
+            if centroid_layer.isValid():
+                layer_interaction.add_layer_to_registry(centroid_layer)
+                polygon = layer_interaction.find_layer_by_name(polygon)
+                rci.calculate_accuracy(polygon, centroid_layer)
+                layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
+                self.reorder_layers()
+                return 2
+            else:
+                return 0
+
+    # step 2.2
     def handle_raster_loaded(self):
         # self.request_wms_layer_url()
         raster_layers = []
@@ -595,10 +569,12 @@ class OpenEQuarterMain:
         raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012', 'WMS_Population Density_RAW'))
 
         raster_loaded = False
-        progressbar=OeQ_init_progressbar(u"Loading WMS Layer",u"WMS Servers are slow. Be patient...",maxcount=len(raster_layers)+2)
-        progress_counter=OeQ_push_progressbar(progressbar,0)
+        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
+                                           u"WMS Servers are slow, this may take a while...",
+                                           maxcount=len(raster_layers) + 2)
+        progress_counter = OeQ_push_progressbar(progressbar, 0)
         for raster in raster_layers:
-            progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 if raster.isValid():
                     layer_interaction.add_layer_to_registry(raster)
@@ -610,17 +586,14 @@ class OpenEQuarterMain:
         if not raster_loaded:
             self.iface.actionAddWmsLayer().trigger()
         # Let's wait for the WMS loading
-        time.sleep(3)    
-        progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
-        time.sleep(3)    
-        progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
-        time.sleep(3)    
+        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
         OeQ_kill_progressbar()
         # returns True, since either the clipped raster was loaded or the add-raster-menu was opened
-        return True
+        return 2
 
-    # step 3.1
-    def handle_extent_clipped(self):
+    # step 2.3
+    def handle_legend_created(self):
         try:
             investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
             # an investigation shape is needed, to trigger the zoom to layer function
@@ -632,34 +605,33 @@ class OpenEQuarterMain:
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
                 raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
-                
-                progressbar=OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",u"This may take some time...",maxcount=len(raster_layers))
-                progress_counter=OeQ_push_progressbar(progressbar,0)
-                
+
+                progressbar = OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
+                                                   u"This may take some time...",
+                                                   maxcount=len(raster_layers))
+                progress_counter = OeQ_push_progressbar(progressbar, 0)
+
                 for layer in raster_layers:
                     self.iface.legendInterface().setLayerVisible(layer, False)
 
                 extracted_layers = []
                 for clipping_raster in raster_layers:
-                    progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+                    progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
                     extracted_layers.append(self.clip_from_raster(clipping_raster))
                     #remove the wms source from the legend
                     QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id() )
                 OeQ_kill_progressbar()
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
-            return False
+            return 0
 
-        try:
-            layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
-        except AttributeError, NoneTypeError:
-            print(self.__module__, NoneTypeError)
-
-        progressbar=OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",u"This may take some time.",maxcount=len(extracted_layers)*3)
-        progress_counter=OeQ_push_progressbar(progressbar,0)
+        progressbar = OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
+                                           u"This may take some time.",
+                                           maxcount=len(extracted_layers)*3)
+        progress_counter = OeQ_push_progressbar(progressbar, 0)
 
         for layer_name in extracted_layers:
-            progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
@@ -689,53 +661,44 @@ class OpenEQuarterMain:
                 pass
         time.sleep(1.0)
         OeQ_kill_progressbar()
-        return True
+        return self.pick_color()
 
-    # step 3.2
-    def handle_legend_created(self):
+    def pick_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
         self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
         self.refresh_layer_list()
 
+        # layers = QgsMapLayerRegistry.instance().mapLayers().values()
+        # visible_layers = filter(lambda l: iface.legendInterface().isLayerVisible(l), layers)
+        # map(lambda l: layer_interaction.hide_or_remove_layer(l, 'hide', self.iface), visible_layers)
+
         dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
         dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
         layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0)
         self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
+        succes = False
 
-        if save_or_abort:
+        while save_or_abort:
             layer = self.iface.activeLayer()
             out_path = os.path.dirname(layer.publicSource())
-            out_path = os.path.join(out_path, layer.name() + '.qml')
+            out_path = os.path.join(out_path, layer.name() + '.txt')
             self.color_picker_dlg.update_color_values()
             self.iface.actionPan().trigger()
-            entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
+            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+                succes = True
                 self.reorder_layers()
-                return True
-        else:
-            self.iface.actionPan().trigger()
-            self.reorder_layers()
+            save_or_abort = self.color_picker_dlg.exec_()
 
-    # step 4.0
-    def handle_generate_real_centroids(self):
-        rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
-        polygon = config.housing_layer_name
-        output = os.path.join(OeQ_project_path(), config.pst_input_layer_name + '.shp')
-        centroid_layer = rci.create_centroids(polygon, output)
-
-        if centroid_layer.isValid():
-            layer_interaction.add_layer_to_registry(centroid_layer)
-            polygon = layer_interaction.find_layer_by_name(polygon)
-            rci.calculate_accuracy(polygon, centroid_layer)
-            layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
-            self.reorder_layers()
-            return True
+        self.iface.actionPan().trigger()
+        if succes:
+            return 2
         else:
-            return False
+            self.reorder_layers()
+            return 1
 
     # step 4.1
     def handle_information_sampled(self):
@@ -754,14 +717,10 @@ class OpenEQuarterMain:
             layer_interaction.add_parameter_info_to_layer(color_dict, abbreviation, vlayer)
 
         layer_interaction.add_layer_to_registry(vlayer)
-        return True
-
-
+        return 2
 
     #step 4.2
-    
-    
-    def handle_estimated_energy_demand(self):
+    def handle_building_calculations(self):
         # ToDo Change to non default-values
         area = NULL
         perimeter = NULL
@@ -1015,11 +974,11 @@ class OpenEQuarterMain:
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             OeQ_kill_progressbar()
-            return True
+            return 2
         else:
-            return False
+            return 0
 
-    def continue_process(self):
+    def continue_process(self, autorun=False):
         """
         Call the appropriate handle-function, depending on the progress-step, that has to be executed next.
         :return:
@@ -1033,47 +992,21 @@ class OpenEQuarterMain:
 
         last_step_name = last_view.model().item(i-1).accessibleText()
         first_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
+        if first_open_item.checkState() == 2:
+            return
         first_open_item.setCheckState(1)
 
         handler = 'handle_{}'.format(first_open_item.accessibleText())
         next_call = getattr(self, handler)
-        is_done = next_call()
+        progress_state = next_call()
 
         QgsProject.instance().setDirty(True)
-        # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
-        if is_done:
-            first_open_item.setCheckState(2)
-        else:
-            first_open_item.setCheckState(0)
+        first_open_item.setCheckState(progress_state)
 
-    def check_plugins(self):
-            """
-            Call the appropriate handle-function, depending on the progress-step, that has to be executed next.
-            :return:
-            :rtype:
-            """
-            last_view = self.progress_items_model.section_views[-1]
-
-            i = 0
-            while last_view.model().item(i):
-                i += 1
-
-            last_step_name = last_view.model().item(i-1).accessibleText()
-            first_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
-            first_open_item.setCheckState(1)
-
-            handler = 'handle_{}'.format(first_open_item.accessibleText())
-            next_call = getattr(self, handler)
-            is_done = next_call()
-
-            QgsProject.instance().setDirty(True)
-            # Set the items state to 2 or 0, since its state is represented by a tristate checkmark
-            if is_done:
-                first_open_item.setCheckState(2)
-            else:
-                first_open_item.setCheckState(0)
-
-
+        global autorun_enabled
+        if progress_state == 2 and (autorun_enabled or autorun):
+            autorun_enabled = True
+            self.continue_process()
 
     def process_button_clicked(self, model_index):
         """
@@ -1102,15 +1035,46 @@ class OpenEQuarterMain:
             else:
                 item.setCheckState(0)
 
+    def check_plugin_availability(self):
+        plugin_section = self.progress_items_model.section_views[0]
+        section_model = plugin_section.model()
+
+        for i in range(0,3):
+            item = section_model.item(i)
+            handler = 'handle_{}'.format(item.accessibleText())
+            method_call = getattr(self, handler)
+            is_done = method_call()
+            if is_done:
+                item.setCheckState(2)
+            else:
+                item.setCheckState(0)
+
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
+        self.check_plugin_availability()
 
-        if self.oeq_project == '':
+        if not OeQ_project_saved() or not OeQ_project_info['name']:
             self.oeq_project_settings_form.show()
-            save_or_abort = self.oeq_project_settings_form.exec_()
+            save = self.oeq_project_settings_form.exec_()
+            if save:
+                OeQ_project_info['name'] = self.oeq_project_settings_form.project_name.text()
+                OeQ_project_info['description'] = self.oeq_project_settings_form.description.text()
+                OeQ_project_info['location'] = self.oeq_project_settings_form.location_city.text()
+                OeQ_project_info['location_postal'] = self.oeq_project_settings_form.location_postal.text()
+                OeQ_project_info['heating_dd'] = self.oeq_project_settings_form.heating_degree_days.text()
+                OeQ_project_info['avg_yoc'] = self.oeq_project_settings_form.average_build_year.text()
+                OeQ_project_info['pop_dens'] = self.oeq_project_settings_form.population_density.text()
 
-        if save_or_abort:
+                self.handle_project_created()
+                plugin_section = self.progress_items_model.section_views[0]
+                section_model = plugin_section.model()
+                project_item = section_model.findItems('Create a new project and save it')[0]
+                if OeQ_project_saved():
+                    project_item.setCheckState(2)
+                else:
+                    project_item.setCheckState(0)
 
+        if OeQ_project_saved() and OeQ_project_info['name']:
             municipal = self.oeq_project_settings_form.municipals[0]
 
             if len(municipal) > 0:
@@ -1127,9 +1091,9 @@ class OpenEQuarterMain:
                     config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
                     print(self.__module__, Error)
-
-            self.check_status()
-            self.auto_run()
+            global autorun_enabled
+            autorun_enabled = True
+            self.continue_process()
 
     def run_tests(self):
         test_class = layer_interaction_test.LayerInteraction_test
@@ -1142,29 +1106,6 @@ class OpenEQuarterMain:
             suite.addTest(test_class(test_method))
 
         unittest.TextTestRunner(sys.stdout).run(suite)
-
-    def check_status(self):
-        """
-        Check the user's current progress and where the process should be continued.
-        :return:
-        :rtype:
-        """
-        self.continue_process() #OL-Plugin
-        self.continue_process() #PST-Plugin
-        self.continue_process() #Proje. saved
-
-        investigation_layer = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-
-        if self.osm_layer_is_loaded() or investigation_layer:
-            self.set_next_step_done(True) # open OL-map
-
-            if investigation_layer:
-                self.set_next_step_done(True) # create shapefile
-
-                if investigation_layer.featureCount() > 0:
-                    self.set_next_step_done(True) # activate edit mode
-                    self.set_next_step_done(True) # confirm selection
-                    self.set_next_step_done(True) # deactivate edit mode
 
     def set_next_step_done(self, is_done):
         """
@@ -1184,24 +1125,3 @@ class OpenEQuarterMain:
         next_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
 
         next_open_item.setCheckState(is_done)
-
-    def auto_run(self):
-        """
-        Iterate through the progress step by step and successively auto-initiate each step,
-        once its prerequisites are given.
-        :return:
-        :rtype:
-        """
-        for view in self.progress_items_model.section_views:
-            model = view.model()
-            no_timeout = 20
-            i = 0
-            while model.item(i) and no_timeout:
-                if model.item(i).checkState() != 2:
-                    self.continue_process()
-
-                i += 1
-                no_timeout -= 1
-
-        # execute continue process to make sure all steps were executed
-        self.continue_process()

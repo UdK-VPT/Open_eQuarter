@@ -1,6 +1,6 @@
-{"section_name": "building_shapes", "description" : "Building Shapes", "steplist":
+{"section_name": "analysis", "description" : "Analysis", "steplist":
 [
-  {"step_name": "housing_layer_loaded", "description" : "Load a floor plan layer (\"Hausumringe\")", "state": 0},
-  {"step_name": "building_coordinates_loaded", "description" : "Load building coordinates", "state": 0}
+  {"step_name": "information_sampled", "description" : "Collect building data (\"PointSamplingTool\")", "state": 0},
+  {"step_name": "building_calculations", "description" : "Run OEQ building evaluation", "state": 0}
 ]
 }

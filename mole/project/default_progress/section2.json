@@ -1,8 +1,9 @@
-{"section_name": "investigation_area", "description" : "Investigation Area", "steplist":
+{"section_name": "source_definition", "description" : "Source Definition", "steplist":
 [
-  {"step_name": "temp_shapefile_created", "description" : "Create a new Polygon-Shapefile", "state": 0},
-  {"step_name": "editing_temp_shapefile_started", "description" : "Activate the edit mode", "state": 0},
-  {"step_name": "investigation_area_selected", "description" : "Add new features to cover your investigation area with", "state": 0},
-  {"step_name": "editing_temp_shapefile_stopped", "description" : "Deactivate the edit mode and save your changes", "state": 0}
+  {"step_name": "investigation_area_selected", "description" : "Define your investigation area", "state": 0},
+  {"step_name": "housing_layer_loaded", "description" : "Load building outlines (\"Hausumringe\")", "state": 0},
+  {"step_name": "building_coordinates_loaded", "description" : "Load building coordinates", "state": 0},
+  {"step_name": "raster_loaded", "description" : "Load WMS source maps", "state": 0},
+  {"step_name": "legend_created", "description" : "Capture WMS maps and create lookup tables", "state": 0}
 ]
 }

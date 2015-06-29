@@ -7,7 +7,7 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-from mole.oeq_global import *
+from mole.oeq_global import OeQ_project_path, OeQ_plugin_path
 
 
 class ProgressItemsModel:
@@ -68,12 +68,12 @@ class ProgressItemsModel:
         print 'Plugins: '+OeQ_plugin_path()
         print 'Project Name: '+ OeQ_project_name()
         default_progress = os.path.join(OeQ_plugin_path(), 'project', 'default_progress')
-
-        path = os.path.join(OeQ_project_path(),  OeQ_project_name()+'.oeq')
+        path = os.path.join(OeQ_project_path(), 'oeq_progress.oeq')
         if os.path.exists(path):
             os.remove(path)
 
-        for i in range(1, 6):
+        end = len(self.section_views) + 1
+        for i in range(1, end):
             model = self.section_views[i-1].model()
             json_file = os.path.join(default_progress, 'section{}.json'.format(i))
             with open(json_file, "r") as jsonFile:

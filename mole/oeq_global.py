@@ -25,12 +25,11 @@ def OeQ_project_path(): return os.path.normpath(QgsProject.instance().readPath('
 global OeQ_plugin_path
 def OeQ_plugin_path(): return os.path.dirname(os.path.realpath(__file__))
 # the project path equals './' as long as the project has not been saved
-
-global OeQ_project_saved
+global OeQ_project_saved 
 def OeQ_project_saved(): return OeQ_project_path() != './' 
 
-def OeQ_init_progressbar(title='Be patient!', message='Background calculations are going on...', timeout=0, maxcount=100):
-  widget = iface.messageBar().createMessage(title, message)
+def OeQ_init_progressbar(title='Be patient!',message='Background calculations are going on...',timeout=0,maxcount=100):
+  widget = iface.messageBar().createMessage(title,message)      
 
   #set a new message bar
   progressbarwidget = QProgressBar()

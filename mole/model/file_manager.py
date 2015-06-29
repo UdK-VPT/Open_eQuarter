@@ -1,12 +1,12 @@
 # coding = utf-8
-
-from io import open
 import os
 import json
 from lxml import etree
 import mole
 import qgis.utils
             
+
+from io import open
 
 class ColorEntryManager():
     """

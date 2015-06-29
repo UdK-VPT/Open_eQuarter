@@ -1,5 +1,7 @@
-from PyQt4.QtGui import QLabel, QPushButton, QLineEdit, QItemDelegate, QIcon
-from PyQt4.QtCore import SIGNAL, QSize, QPoint, QRect, Qt
+import operator
+
+from PyQt4.QtGui import QLabel, QPushButton, QLineEdit, QItemDelegate, QIcon, QFont, QColor, QStyle
+from PyQt4.QtCore import SIGNAL, QSize, QPoint, QRect, Qt, QAbstractTableModel
 from PyQt4 import QtCore
 
 try:
@@ -7,6 +9,195 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
+
+
+class QColorTableDelegate(QItemDelegate):
+    def __init__(self, parent):
+        QItemDelegate.__init__(self, parent)
+
+    def paint(self, painter, option, index):
+        """
+        Method paints the models item and icon
+        :param painter:
+        :type painter: QPainter
+        :param option:
+        :type option: QStyleOptionViewItem
+        :param index:
+        :type index: QModelIndex
+        :return:
+        :rtype:
+        """
+        if option.state == QStyle.State_Editing:
+            print('Edit')
+
+        if index.column() == 4:
+            painter.save()
+            painter.setPen(Qt.red)
+            painter.setFont(QFont('Lucida Grande', 17, weight=QFont.Bold))
+            painter.drawText(option.rect, Qt.AlignLeft | Qt.AlignVCenter, ' -')
+            painter.restore()
+
+        else:
+            model = index.model()
+            text = model.in_data[index.row()][index.column()]
+            margin = 3
+            x, y, width, height = option.rect.getCoords()
+            painter.setBrush(Qt.white)
+            painter.setFont(QFont('Lucida Grande', 13))
+
+            if 2 <= index.column() <= 3:
+                painter.setPen(QColor(155, 155, 155))
+                painter.drawRect(x+margin, y+margin, width-2*margin-x, height-y-2*margin)
+                painter.setPen(Qt.black)
+                rect = QRect(x, y+margin, width-x, height-y-2*margin)
+                painter.drawText(rect, Qt.AlignHCenter | Qt.AlignVCenter, str(text))
+            else:
+                painter.setPen(QColor(208, 208, 208))
+                painter.drawRect(x+margin, y+margin, width-2*margin-x, height-y-2*margin)
+                painter.setPen(Qt.black)
+
+                if index.column() == 0:
+                    color_array = str.split(str(text)[5:-1], ', ')
+                    r, g, b, a = map(int, color_array)
+                    color = QColor(r, g, b, a)
+                    painter.setBrush(color)
+                    color_box_size = 15
+                    offset = (height - color_box_size - y) / 2
+                    painter.drawRect(x+offset, y+offset, color_box_size, color_box_size)
+                    painter.drawText(QRect(x+color_box_size+offset+offset,
+                                           y+offset,
+                                           width - (color_box_size+2*offset),
+                                           height),
+                                     Qt.AlignLeft, text)
+                else:
+                    painter.drawText(QRect(x+10, y+margin,
+                                           width-10-x, height-y-2*margin),
+                                     Qt.AlignLeft | Qt.AlignVCenter, text)
+
+
+class QColorTableModel(QAbstractTableModel):
+    def __init__(self, in_data_map, header_data, parent=None, *args):
+        """
+        :param in_data_map: A dictionary containing color-keys and triple-values
+        :type in_data_map: dict
+        :param header_data: A list of strings
+        :type header_data: list
+        :param parent: Parent Window
+        :type parent: QWidget
+        :param args:
+        :type args:
+        :return:
+        :rtype:
+        """
+        QAbstractTableModel.__init__(self, parent, *args)
+
+        items = []
+        for key, triple in in_data_map.iteritems():
+            temp = [key]
+            temp += triple
+            items.append(temp)
+
+        self.in_data = items
+        self.header_data = header_data
+
+    def rowCount(self, parent):
+        try:
+            return len(self.in_data)
+        except IndexError as IOB_Error:
+            print(self.__module__, IOB_Error)
+            return 1
+
+    def columnCount(self, parent):
+        try:
+            return len(self.in_data[0]) + 1
+        except IndexError as IOB_Error:
+            print(self.__module__, IOB_Error)
+            return len(self.header_data)
+
+    def data(self, index, role):
+        '''
+
+        :param index:
+        :type index: QModelIndex
+        :param role:
+        :type role:
+        :return:
+        :rtype:
+        '''
+        if not index.isValid():
+            return None
+        elif role == Qt.EditRole:
+            return self.in_data[index.row()][index.column()]
+        elif role != Qt.DisplayRole:
+            return None
+        else:
+            if index.column() == 0:
+                return self.in_data[index.row()][index.column()]
+            elif index.column() == len(self.in_data[0]):
+                return '-'
+            else:
+                return self.in_data[index.row()][index.column()]
+
+    def setData(self, index, data, display_role=None):
+        '''
+        Change the model according to the changes on the UI-component.
+        :param index:
+        :type index: QModelIndex
+        :param variant:
+        :type variant: QVariant
+        :param display_role:
+        :type display_role:
+        :return: True, if the data was changed successfully
+        :rtype: bool
+        '''
+        if display_role == Qt.EditRole:
+            row = index.row()
+            col = index.column()
+            self.in_data[row][col] = str(data)
+            self.dataChanged.emit(index, index)
+            return True
+        else:
+            return False
+
+    def flags(self, model_index):
+        between_second_and_last = len(self.in_data[0])-2 <= model_index.column() < len(self.in_data[0])
+        if between_second_and_last:
+            return Qt.ItemIsEditable | Qt.ItemIsEnabled
+        else:
+            return Qt.ItemIsEnabled
+
+    def headerData(self, section, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self.header_data[section]
+        elif orientation == Qt.Vertical and role == Qt.DisplayRole:
+            return section
+        elif orientation == Qt.Horizontal and role == Qt.SizeHintRole:
+            return QAbstractTableModel.headerData(self, section, orientation, role)
+        elif orientation == Qt.Vertical and role == Qt.SizeHintRole:
+            return QAbstractTableModel.headerData(self, section, orientation, role)
+        else:
+            return ''
+
+    def sort(self, column, order):
+        """
+        Sort the data stored in a column
+        :param column: Column that will be sorted
+        :type column: int
+        :param order: Descending or Ascending
+        :type order: SortOrder
+        :return:
+        :rtype:
+        """
+        self.emit(SIGNAL("layoutAboutToBeChanged()"))
+        try:
+            self.in_data = sorted(self.in_data, key=operator.itemgetter(column))
+            if order == Qt.DescendingOrder:
+                self.in_data.reverse()
+        except IndexError as OutOfRangeError:
+            if column != len(self.in_data[0]):
+                print(self.__module__, OutOfRangeError)
+
+        self.emit(SIGNAL("layoutChanged()"))
 
 
 class QProcessViewDelegate(QItemDelegate):

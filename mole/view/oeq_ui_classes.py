@@ -49,7 +49,8 @@ class QColorTableDelegate(QItemDelegate):
                 painter.setPen(QColor(155, 155, 155))
                 painter.drawRect(x+margin, y+margin, width-2*margin-x, height-y-2*margin)
                 painter.setPen(Qt.black)
-                painter.drawText(QRect(x, y+margin, width-x, height-y-2*margin), Qt.AlignHCenter | Qt.AlignVCenter, text)
+                rect = QRect(x, y+margin, width-x, height-y-2*margin)
+                painter.drawText(rect, Qt.AlignHCenter | Qt.AlignVCenter, str(text))
             else:
                 painter.setPen(QColor(208, 208, 208))
                 painter.drawRect(x+margin, y+margin, width-2*margin-x, height-y-2*margin)
@@ -100,10 +101,18 @@ class QColorTableModel(QAbstractTableModel):
         self.header_data = header_data
 
     def rowCount(self, parent):
-        return len(self.in_data)
+        try:
+            return len(self.in_data)
+        except IndexError as IOB_Error:
+            print(self.__module__, IOB_Error)
+            return 1
 
     def columnCount(self, parent):
-        return len(self.in_data[0]) + 1
+        try:
+            return len(self.in_data[0]) + 1
+        except IndexError as IOB_Error:
+            print(self.__module__, IOB_Error)
+            return len(self.header_data)
 
     def data(self, index, role):
         '''
@@ -116,11 +125,11 @@ class QColorTableModel(QAbstractTableModel):
         :rtype:
         '''
         if not index.isValid():
-            return ''
+            return None
         elif role == Qt.EditRole:
             return self.in_data[index.row()][index.column()]
         elif role != Qt.DisplayRole:
-            return ''
+            return None
         else:
             if index.column() == 0:
                 return self.in_data[index.row()][index.column()]
@@ -129,7 +138,7 @@ class QColorTableModel(QAbstractTableModel):
             else:
                 return self.in_data[index.row()][index.column()]
 
-    def setData(self, index, variant, display_role=None):
+    def setData(self, index, data, display_role=None):
         '''
         Change the model according to the changes on the UI-component.
         :param index:
@@ -144,8 +153,7 @@ class QColorTableModel(QAbstractTableModel):
         if display_role == Qt.EditRole:
             row = index.row()
             col = index.column()
-            data = variant.toString()
-            self.in_data[row][col] = data
+            self.in_data[row][col] = str(data)
             self.dataChanged.emit(index, index)
             return True
         else:
@@ -163,6 +171,10 @@ class QColorTableModel(QAbstractTableModel):
             return self.header_data[section]
         elif orientation == Qt.Vertical and role == Qt.DisplayRole:
             return section
+        elif orientation == Qt.Horizontal and role == Qt.SizeHintRole:
+            return QAbstractTableModel.headerData(self, section, orientation, role)
+        elif orientation == Qt.Vertical and role == Qt.SizeHintRole:
+            return QAbstractTableModel.headerData(self, section, orientation, role)
         else:
             return ''
 

@@ -1,9 +1,9 @@
 # coding = utf-8
-
-from io import open
 import os
 import json
 import mole
+
+from io import open
 
 class ColorEntryManager():
     """

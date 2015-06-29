@@ -35,43 +35,49 @@ from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
 
-
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
         QtGui.QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
+        self.layers_dropdown.currentIndexChanged.connect(self.update_color_values)
 
-        # create the view
-        tv = self.color_table_view
         # set the table model
         self.header = ['Color value', 'Parameter Name', 'From', 'To', '']
         self.color_entry_manager.add_layer('dummy')
         self.color_entry_manager.add_color_value_quadruple_to_layer(('RGBa(0, 0, 0, 0)', ' ', 0, 0), 'dummy')
-        tm = QColorTableModel(self.color_entry_manager.layer_values_map['dummy'], self.header, self)
-        tv.setModel(tm)
+        self.dummy_model = QColorTableModel(self.color_entry_manager.layer_values_map['dummy'], self.header, self)
+        self.color_table_view.setModel(self.dummy_model)
+        self.setup_table()
 
+        # connect the signals
+        self.color_table_view.clicked.connect(self.remove_entry)
+
+    def setup_table(self):
+        """
+        Set the basic attributes for the color-table view
+        :return:
+        :rtype:
+        """
         for i in range(len(self.header)):
-            tv.setItemDelegateForColumn(i, QColorTableDelegate(self))
+            self.color_table_view.setItemDelegateForColumn(i, QColorTableDelegate(self))
 
-        tv.setColumnWidth(0, 205)
-        tv.setColumnWidth(1, 205)
-        tv.setColumnWidth(2, 75)
-        tv.setColumnWidth(3, 75)
-        tv.setColumnWidth(4, 15)
+        self.color_table_view.setColumnWidth(0, 205)
+        self.color_table_view.setColumnWidth(1, 205)
+        self.color_table_view.setColumnWidth(2, 75)
+        self.color_table_view.setColumnWidth(3, 75)
+        self.color_table_view.setColumnWidth(4, 35)
+        self.color_table_view.setShowGrid(False)
+        self.color_table_view.setSortingEnabled(True)
+        self.color_table_view.sortByColumn(2)
 
         # set horizontal header properties
-        hh = tv.horizontalHeader()
-        hh.setStretchLastSection(True)
-        hh.setStyleSheet('QHeaderView::section { '
+        hor_header = self.color_table_view.horizontalHeader()
+        hor_header.setStretchLastSection(True)
+        hor_header.setStyleSheet('QHeaderView::section { '
                          ' border: None;'
                          ' padding: 3px;'
                          ' font-size: 13px;'
@@ -80,11 +86,12 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
                          ' background-color: rgb(237, 237, 237);'
                          '}'
                          )
+        self.color_table_view.setHorizontalHeader(hor_header)
 
         # set row height
-        vh = tv.verticalHeader()
-        vh.setDefaultSectionSize(34)
-        vh.setStyleSheet('QHeaderView::section { '
+        ver_header = self.color_table_view.verticalHeader()
+        ver_header.setDefaultSectionSize(34)
+        ver_header.setStyleSheet('QHeaderView::section { '
                          ' border: None;'
                          ' padding: 3px;'
                          ' font-size: 13px;'
@@ -93,6 +100,28 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
                          ' background-color: rgb(237, 237, 237);'
                          '}'
                          )
+        self.color_table_view.setVerticalHeader(ver_header)
+
+    def remove_entry(self, model_index):
+        """
+        Remove the entry from the color-entry-manager
+        :param model_index: The QModelIndex of the clicked element
+        :type model_index: QModelIndex
+        :return:
+        :rtype:
+        """
+        column = model_index.column()
+        if column == 4:
+            row = model_index.row()
+            model = model_index.model()
+            color_entry = model.in_data[row][0]
+            layer = self.layers_dropdown.currentText()
+            self.color_entry_manager.remove_color_entry_from_layer(color_entry, layer)
+            color_map = self.color_entry_manager.layer_values_map[layer]
+            if not color_map:
+                color_map = self.color_entry_manager.layer_values_map['dummy']
+            tm = QColorTableModel(color_map, self.header, self)
+            self.color_table_view.setModel(tm)
 
     def add_color(self, color):
         """
@@ -115,87 +144,25 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.warning_label.clear()
             self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, '', 0, 0), layer)
-
-    def restore_color_value_pairs(self, layer):
-        try:
             color_map = self.color_entry_manager.layer_values_map[layer]
-            row = self.row_offset
-            for color, values in color_map.iteritems():
-                color_field = self.color_table.itemAtPosition(row, 1).widget()
-                parameter_name = self.color_table.itemAtPosition(row, 2).widget()
-                value_field_one = self.color_table.itemAtPosition(row, 3).widget()
-                value_field_two = self.color_table.itemAtPosition(row, 4).widget()
-                row += 1
-                color_field.setText(color)
-                color = color[5:-1]
-                colors = color.split(',')
-                color_field.colorize(colors[0], colors[1], colors[2], colors[3])
-                parameter_name.setText(str(values[0]))
-                value_field_one.setText(str(values[1]))
-                value_field_two.setText(str(values[2]))
-                self.add_row()
-
-        except KeyError, Error:
-            print(Error)
+            model = QColorTableModel(color_map, self.header, self)
+            self.color_table_view.setModel(model)
 
     def update_color_values(self):
-        grid = self.color_table
-        removal = []
-        for i in range(0, self.row_count-2):
-            row = i + self.row_offset
-            color = grid.itemAtPosition(row, 1).widget().text()
-            para_name = grid.itemAtPosition(row, 2).widget().text()
-            value1 = grid.itemAtPosition(row, 3).widget().text()
-            value2 = grid.itemAtPosition(row, 4).widget().text()
-            removal.append(grid.itemAtPosition(row, 5).widget())
-            self.color_entry_manager.add_color_value_quadruple_to_layer((color, para_name, value1, value2), self.recent_layer)
-
-        for remove_button in removal:
-            self.remove_widget_and_entry(remove_button, False)
-
-        layer = self.layers_dropdown.currentText()
-        self.restore_color_value_pairs(layer)
-        self.recent_layer = layer
-
-    def add_row(self):
         """
-        Add a new row consisting of number, color, value1, value2 and remove-button to the
-        color-picker-table and keep track of the row-number and update the currently empty row.
+        Change the color-table view to display the color-map of the currently selected layer.
         :return:
         :rtype:
         """
-        entry_number = self.row_count - self.row_offset + 1
-        current_row = self.row_count
-        row_number = QtGui.QLabel(self)
-        row_number.setObjectName('row_number_{}'.format(current_row - 1))
-        row_number.setText(str(entry_number))
-        self.color_table.addWidget(row_number, current_row, 0, 1, 1)
-
-        chosen_color = QColorizedLineEdit(self)
-        chosen_color.setEnabled(False)
-        chosen_color.setObjectName('chosen_color_{}'.format(current_row - 1))
-        self.color_table.addWidget(chosen_color, current_row, 1, 1, 1)
-
-        parameter_name = QtGui.QLineEdit(self)
-        parameter_name.setObjectName('parameter_name_{}'.format(current_row - 1))
-        parameter_name.setMaxLength(10)
-        parameter_name.textChanged.connect(self.check_character_constraint)
-        self.color_table.addWidget(parameter_name, current_row, 2, 1, 1)
-
-        value_one = QtGui.QLineEdit(self)
-        value_one.setObjectName('value_one_{}'.format(current_row - 1))
-        self.color_table.addWidget(value_one, current_row, 3, 1, 1)
-
-        value_two = QtGui.QLineEdit(self)
-        value_two.setObjectName('value_two_{}'.format(current_row - 1))
-        self.color_table.addWidget(value_two, current_row, 4, 1, 1)
-
-        remove_entries = QRemoveEntryButton(self)
-        remove_entries.setObjectName('remove_entries_{}'.format(current_row - 1))
-        remove_entries.stylize()
-        self.connect(remove_entries, QtCore.SIGNAL('remove_widget_and_entry'), self.remove_widget_and_entry)
-        self.color_table.addWidget(remove_entries, current_row, 5, 1, 1)
-        self.row_count += 1
+        layer = self.layers_dropdown.currentText()
+        color_map = {}
+        if layer in self.color_entry_manager.layer_values_map:
+            color_map = self.color_entry_manager.layer_values_map[layer]
+            table_model = QColorTableModel(color_map, self.header, self)
+        if not color_map:
+            table_model = self.dummy_model
+        self.color_table_view.setModel(table_model)
+        self.recent_layer = layer
 
     def check_character_constraint(self, parameter_name):
         """
@@ -210,91 +177,6 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             self.warning_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
         else:
             self.warning_label.clear()
-
-    def remove_widget_and_entry(self, button, remove_entry=True):
-        """
-        Remove a row consisting of number, color, value1, value2 and remove-button from the
-        color-picker-table. The row-number is identified by the characters in the invoking buttons name,
-        following the last underscore.
-        :param button: The button-object which invoked the remove-call
-        :type button: QRemoveEntryButton
-        :return:
-        :rtype:
-        """
-        row_number = str(button.objectName())
-        underscore = button.objectName().rfind('_')
-        row_number = int(row_number[underscore+1:])
-        row_number += self.row_offset
-        last_row = self.row_count - 1
-
-        number_field = self.color_table.itemAtPosition(row_number, 0).widget()
-        color_field = self.color_table.itemAtPosition(row_number, 1).widget()
-        parameter_name = self.color_table.itemAtPosition(row_number, 2).widget()
-        value_one = self.color_table.itemAtPosition(row_number, 3).widget()
-        value_two = self.color_table.itemAtPosition(row_number, 4).widget()
-        remove_button = self.color_table.itemAtPosition(row_number, 5).widget()
-
-        color_entry = color_field.text()
-        if not color_entry:
-            return
-
-        if remove_entry:
-            layer_key = self.layers_dropdown.currentText()
-            self.color_entry_manager.remove_color_entry_from_layer(color_entry, layer_key)
-
-        if row_number == last_row:
-            color_field.clear()
-            value_one.clear()
-            value_two.clear()
-
-        else:
-            self.color_table.removeWidget(number_field)
-            self.color_table.removeWidget(color_field)
-            self.color_table.removeWidget(parameter_name)
-            self.color_table.removeWidget(value_one)
-            self.color_table.removeWidget(value_two)
-            self.color_table.removeWidget(remove_button)
-
-            number_field.deleteLater()
-            color_field.deleteLater()
-            parameter_name.deleteLater()
-            value_one.deleteLater()
-            value_two.deleteLater()
-            remove_button.deleteLater()
-            self.row_count -= 1
-            self.renumber(row_number)
-
-    def renumber(self, empty_row):
-
-        for i in range(empty_row, self.row_count):
-            number_field = self.color_table.itemAtPosition(i+1, 0).widget()
-            color_field = self.color_table.itemAtPosition(i+1, 1).widget()
-            parameter_name = self.color_table.itemAtPosition(i+1, 2).widget()
-            value_one = self.color_table.itemAtPosition(i+1, 3).widget()
-            value_two = self.color_table.itemAtPosition(i+1, 4).widget()
-            remove_button = self.color_table.itemAtPosition(i+1, 5).widget()
-
-            self.color_table.removeWidget(number_field)
-            self.color_table.removeWidget(color_field)
-            self.color_table.removeWidget(parameter_name)
-            self.color_table.removeWidget(value_one)
-            self.color_table.removeWidget(value_two)
-            self.color_table.removeWidget(remove_button)
-
-            number_field.setObjectName('row_number_{}'.format(i - self.row_offset))
-            color_field.setObjectName('chosen_color_{}'.format(i - self.row_offset))
-            parameter_name.setObjectName('parameter_name_{}'.format(i - self.row_offset))
-            value_one.setObjectName('value_one_{}'.format(i - self.row_offset))
-            value_two.setObjectName('value_two_{}'.format(i - self.row_offset))
-            remove_button.setObjectName('remove_entries_{}'.format(i - self.row_offset))
-            number_field.setText(str(i - self.row_offset + 1))
-
-            self.color_table.addWidget(number_field, i, 0)
-            self.color_table.addWidget(color_field, i, 1)
-            self.color_table.addWidget(parameter_name, i, 2)
-            self.color_table.addWidget(value_one, i, 3)
-            self.color_table.addWidget(value_two, i, 4)
-            self.color_table.addWidget(remove_button, i, 5)
 
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
@@ -453,8 +335,6 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.average_build_year.setText(avg_yoc)
         except KeyError as Error:
             print(self.__module__, Error)
-
-
 
     def combobox_city_layout(self):
         location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')

@@ -641,8 +641,11 @@ class OpenEQuarterMain:
         self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
         self.refresh_layer_list()
 
+        # layers = QgsMapLayerRegistry.instance().mapLayers().values()
+        # visible_layers = filter(lambda l: iface.legendInterface().isLayerVisible(l), layers)
+        # map(lambda l: layer_interaction.hide_or_remove_layer(l, 'hide', self.iface), visible_layers)
+
         dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.currentIndexChanged.connect(self.color_picker_dlg.update_color_values)
         dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
         layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0)
         self.color_picker_dlg.show()
@@ -653,7 +656,6 @@ class OpenEQuarterMain:
             layer = self.iface.activeLayer()
             out_path = os.path.dirname(layer.publicSource())
             out_path = os.path.join(out_path, layer.name() + '.txt')
-            self.color_picker_dlg.update_color_values()
             entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))

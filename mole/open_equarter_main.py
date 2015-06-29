@@ -493,30 +493,14 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove(config.housing_layer_name)
             layer_interaction.fullRemove(config.data_layer_name)
 
-          out_layer_path = os.path.join(OeQ_project_path(), config.housing_layer_name + '.shp')
-          data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
+            out_layer_path = os.path.join(OeQ_project_path(), config.housing_layer_name + '.shp')
+            data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
           
-          housing_layer = layer_interaction.load_layer_from_disk(housing_layer_path, config.housing_layer_name)
+            housing_layer = layer_interaction.load_layer_from_disk(housing_layer_path, config.housing_layer_name)
             
-          investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
           
-          intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer_path)
-          if intersection_done:
-            out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
-            layer_interaction.add_layer_to_registry(out_layer)
-            layer_interaction.edit_housing_layer_attributes(out_layer)
-            out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
-            
-            inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
-            layer_interaction.add_layer_to_registry(inter_layer)
-            QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
-            #layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
-            QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id() )
-            data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
-            layer_interaction.add_layer_to_registry(data_layer)
-            self.iface.legendInterface().setLayerVisible(data_layer, False)
-          OeQ_kill_info() 
-          return intersection_done
+            intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer_path)
 
             if intersection_done:
                 out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
@@ -533,7 +517,6 @@ class OpenEQuarterMain:
                 self.iface.legendInterface().setLayerVisible(data_layer, False)
                 OeQ_kill_info()
                 return 2
-
         return 1
 
     # step 2.1

@@ -14,5 +14,5 @@ rm -rf $MOLEQGIS
 echo "Step 2: Creating the plugin directory $MOLEQGIS"
 mkdir $MOLEQGIS
 echo "Step 3: Copying the plugin from $MOLE to $MOLEQGIS"
-cp -R $MOLE $MOLEQGISPATH  
+cp -R $MOLE $MOLEQGISPATH
 echo "Done!"

@@ -20,12 +20,9 @@
  ***************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from socket import gaierror
 import sys
-import httplib
 import unittest
 import time
-import os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
@@ -38,12 +35,12 @@ from view.oeq_dialogs import (
     Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
     ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog,
     EstimatedEnergyDemand_dialog)
-from qgisinteraction import plugin_interaction
-from qgisinteraction import layer_interaction
-from qgisinteraction import raster_layer_interaction
-from qgisinteraction import project_interaction
-from qgisinteraction import wms_utils
-from tests import layer_interaction_test
+from qgisinteraction import (
+    plugin_interaction,
+    layer_interaction,
+    raster_layer_interaction,
+    project_interaction,
+    wms_utils)
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
 from mole.oeq_global import *
@@ -51,7 +48,6 @@ from mole.oeq_global import *
 
 def isnull(value):
     return type(value) is type(NULL)
-
 
 
 class OpenEQuarterMain:
@@ -666,10 +662,10 @@ class OpenEQuarterMain:
         while save_or_abort:
             layer = self.iface.activeLayer()
             out_path = os.path.dirname(layer.publicSource())
-            out_path = os.path.join(out_path, layer.name() + '.txt')
+            out_path = os.path.join(out_path, layer.name() + '.qml')
             self.color_picker_dlg.update_color_values()
             self.iface.actionPan().trigger()
-            entry_written = self.color_picker_dlg.color_entry_manager.write_map_to_disk(layer.name(), out_path)
+            entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
             if entry_written:
                 QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
                 succes = True
@@ -1077,18 +1073,6 @@ class OpenEQuarterMain:
             global autorun_enabled
             autorun_enabled = True
             self.continue_process()
-
-    def run_tests(self):
-        test_class = layer_interaction_test.LayerInteraction_test
-        test_loader = unittest.TestLoader()
-        test_names = test_loader.getTestCaseNames(test_class)
-
-        print(test_names)
-        suite = unittest.TestSuite()
-        for test_method in test_names:
-            suite.addTest(test_class(test_method))
-
-        unittest.TextTestRunner(sys.stdout).run(suite)
 
     def set_next_step_done(self, is_done):
         """

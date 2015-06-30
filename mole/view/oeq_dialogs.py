@@ -114,9 +114,9 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         if column == 4:
             row = model_index.row()
             model = model_index.model()
-            color_entry = model.in_data[row][0]
+            color_key = model.in_data.keys()[row]
             layer = self.layers_dropdown.currentText()
-            self.color_entry_manager.remove_color_entry_from_layer(color_entry, layer)
+            self.color_entry_manager.remove_color_entry_from_layer(color_key, layer)
             color_map = self.color_entry_manager.layer_values_map[layer]
             if not color_map:
                 color_map = self.color_entry_manager.layer_values_map['dummy']
@@ -143,7 +143,9 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
         else:
             self.warning_label.clear()
-            self.color_entry_manager.add_color_value_quadruple_to_layer((color_key, '', 0, 0), layer)
+            #ToDo change to use the correct para-name instead
+            parameter_name = str(self.layers_dropdown.currentText())[:10]
+            self.color_entry_manager.add_color_value_quadruple_to_layer([color_key, parameter_name, 0, 0], layer)
             color_map = self.color_entry_manager.layer_values_map[layer]
             model = QColorTableModel(color_map, self.header, self)
             self.color_table_view.setModel(model)

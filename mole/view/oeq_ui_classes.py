@@ -39,7 +39,7 @@ class QColorTableDelegate(QItemDelegate):
 
         else:
             model = index.model()
-            text = model.in_data[index.row()][index.column()]
+            text = model.data(index, Qt.DisplayRole)
             margin = 3
             x, y, width, height = option.rect.getCoords()
             painter.setBrush(Qt.white)
@@ -90,28 +90,21 @@ class QColorTableModel(QAbstractTableModel):
         :rtype:
         """
         QAbstractTableModel.__init__(self, parent, *args)
-
-        items = []
-        for key, triple in in_data_map.iteritems():
-            temp = [key]
-            temp += triple
-            items.append(temp)
-
-        self.in_data = items
+        self.in_data = in_data_map
         self.header_data = header_data
 
-    def rowCount(self, parent):
+    def rowCount(self, model_index):
         try:
             return len(self.in_data)
-        except IndexError as IOB_Error:
-            print(self.__module__, IOB_Error)
-            return 1
+        except IndexError as IndexOutOfBounds_Err:
+            print(self.__module__, IndexOutOfBounds_Err)
+            return 2
 
-    def columnCount(self, parent):
+    def columnCount(self, mode_index):
         try:
-            return len(self.in_data[0]) + 1
-        except IndexError as IOB_Error:
-            print(self.__module__, IOB_Error)
+            return len(self.in_data.values()[0]) + 2
+        except IndexError as IndexOutOfBounds_Err:
+            print(self.__module__, IndexOutOfBounds_Err)
             return len(self.header_data)
 
     def data(self, index, role):
@@ -127,16 +120,27 @@ class QColorTableModel(QAbstractTableModel):
         if not index.isValid():
             return None
         elif role == Qt.EditRole:
-            return self.in_data[index.row()][index.column()]
-        elif role != Qt.DisplayRole:
-            return None
-        else:
+            color_key = self.in_data.keys()[index.row()]
             if index.column() == 0:
-                return self.in_data[index.row()][index.column()]
-            elif index.column() == len(self.in_data[0]):
+                return color_key
+            elif index.column() == self.columnCount(index):
                 return '-'
             else:
-                return self.in_data[index.row()][index.column()]
+                value_triple = self.in_data[color_key]
+                return value_triple[index.column()-1]
+        elif role == Qt.DisplayRole:
+            color_key = self.in_data.keys()[index.row()]
+            if index.column() == 0:
+                return color_key
+
+            if 0 < index.column() < self.columnCount(index):
+                value_triple = self.in_data[color_key]
+                return value_triple[index.column()-1]
+            else:
+                return '-'
+
+        else:
+            return None
 
     def setData(self, index, data, display_role=None):
         '''
@@ -153,14 +157,16 @@ class QColorTableModel(QAbstractTableModel):
         if display_role == Qt.EditRole:
             row = index.row()
             col = index.column()
-            self.in_data[row][col] = str(data)
+            key = self.in_data.keys()[row]
+            print(key, self.in_data[key], index.column())
+            self.in_data[key][col-1] = data
             self.dataChanged.emit(index, index)
             return True
         else:
             return False
 
     def flags(self, model_index):
-        between_second_and_last = len(self.in_data[0])-2 <= model_index.column() < len(self.in_data[0])
+        between_second_and_last = 2 <= model_index.column() < 4
         if between_second_and_last:
             return Qt.ItemIsEditable | Qt.ItemIsEnabled
         else:
@@ -171,12 +177,8 @@ class QColorTableModel(QAbstractTableModel):
             return self.header_data[section]
         elif orientation == Qt.Vertical and role == Qt.DisplayRole:
             return section
-        elif orientation == Qt.Horizontal and role == Qt.SizeHintRole:
-            return QAbstractTableModel.headerData(self, section, orientation, role)
-        elif orientation == Qt.Vertical and role == Qt.SizeHintRole:
-            return QAbstractTableModel.headerData(self, section, orientation, role)
         else:
-            return ''
+            return None
 
     def sort(self, column, order):
         """
@@ -190,12 +192,28 @@ class QColorTableModel(QAbstractTableModel):
         """
         self.emit(SIGNAL("layoutAboutToBeChanged()"))
         try:
-            self.in_data = sorted(self.in_data, key=operator.itemgetter(column))
+            items = []
+            for key, triple in self.in_data.iteritems():
+                temp = [key]
+                temp += triple
+                items.append(temp)
+            # print('Items:')
+            # print(items)
+            sorted_values = sorted(items, key=lambda value: value[column])
+            # print('Sorted by {}:'.format(column))
+            # print(sorted_values)
             if order == Qt.DescendingOrder:
-                self.in_data.reverse()
+                sorted_values.reverse()
+            # print(sorted_values)
+
+            self.in_data.clear()
+            for quadruple in sorted_values:
+                key = quadruple[0]
+                values = quadruple[1:]
+                self.in_data[key] = values
+                # print('Data:\t', self.in_data)
         except IndexError as OutOfRangeError:
-            if column != len(self.in_data[0]):
-                print(self.__module__, OutOfRangeError)
+            print(self.__module__, OutOfRangeError)
 
         self.emit(SIGNAL("layoutChanged()"))
 

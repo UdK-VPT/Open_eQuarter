@@ -1,12 +1,13 @@
 # coding = utf-8
 import os
 import json
-from lxml import etree
 import mole
 import qgis.utils
-            
 
+
+from lxml import etree
 from io import open
+from collections import OrderedDict
 
 class ColorEntryManager():
     """
@@ -19,7 +20,7 @@ class ColorEntryManager():
 
     def add_layer(self, layer_name):
         if not self.layer_values_map.has_key(layer_name):
-            self.layer_values_map[layer_name] = {}
+            self.layer_values_map[layer_name] = OrderedDict()
 
     def set_layer_abbreviation(self, layer_name, abbreviation):
         self.layer_abbreviation_map[layer_name] = abbreviation

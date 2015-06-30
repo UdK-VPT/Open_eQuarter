@@ -11,7 +11,7 @@ echo
 echo "Step 1: Removing the old plugin $MOLEQGIS"
 #Cleanup temp & git
 rm -rf $MOLEQGIS
-echo "Step 2: Making plugin directory $MOLEQGIS"
+echo "Step 2: Creating the plugin directory $MOLEQGIS"
 mkdir $MOLEQGIS
 echo "Step 3: Copying the plugin from $MOLE to $MOLEQGIS"
 cp -R $MOLE $MOLEQGISPATH  

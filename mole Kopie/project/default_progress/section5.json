@@ -1,6 +1,0 @@
-{"section_name": "sampling_points", "description" : "Sampling Points", "steplist":
-[
-  {"step_name": "generate_real_centroids", "description" : "Use the realcentroid-plugin to generate the building coordinates", "state": 0},
-  {"step_name": "information_sampled", "description" : "Use the Point Sampling Tool to extract the information", "state": 0}
-]
-}

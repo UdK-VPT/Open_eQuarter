@@ -5,7 +5,8 @@ import mole
 import qgis.utils
 
 
-from lxml import etree
+#from lxml import etree
+import xml.etree.ElementTree as etree
 from io import open
 from collections import OrderedDict
 

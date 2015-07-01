@@ -12,7 +12,7 @@
 name=Open eQuarter
 qgisMinimumVersion=2.0
 description=The plugin automates the setup for investigating an area.
-version=0.3B
+version=0.4
 author=Kim Gülle / Open eQuarter Team UdK-Berlin
 email=firstdayofjune@users.noreply.github.com
 

@@ -7,7 +7,7 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-from mole.oeq_global import OeQ_project_path, OeQ_plugin_path
+from mole.oeq_global import * #Import all globals available by calling them without moduleprefix
 
 
 class ProgressItemsModel:

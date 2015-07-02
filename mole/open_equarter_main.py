@@ -568,7 +568,6 @@ class OpenEQuarterMain:
             self.iface.actionAddWmsLayer().trigger()
         # Let's wait for the WMS loading
         progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
         OeQ_kill_progressbar()
         # returns True, since either the clipped raster was loaded or the add-raster-menu was opened
         return 2
@@ -589,7 +588,7 @@ class OpenEQuarterMain:
 
                 progressbar = OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
                                                    u"This may take some time...",
-                                                   maxcount=len(raster_layers))
+                                                   maxcount=len(raster_layers)+1)
                 progress_counter = OeQ_push_progressbar(progressbar, 0)
 
                 for layer in raster_layers:
@@ -608,7 +607,7 @@ class OpenEQuarterMain:
 
         progressbar = OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
                                            u"This may take some time.",
-                                           maxcount=len(extracted_layers)*3)
+                                           maxcount=len(extracted_layers)+1)
         progress_counter = OeQ_push_progressbar(progressbar, 0)
 
         for layer_name in extracted_layers:
@@ -785,7 +784,7 @@ class OpenEQuarterMain:
             
             out_layer.startEditing() 
             
-            progressbar=OeQ_init_progressbar(u'Building Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount())
+            progressbar=OeQ_init_progressbar(u'Building Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount()+1)
             progress_counter=OeQ_push_progressbar(progressbar,0)
             for inFeat in in_provider.getFeatures():
               progress_counter=OeQ_push_progressbar(progressbar,progress_counter)

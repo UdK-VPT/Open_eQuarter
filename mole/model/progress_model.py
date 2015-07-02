@@ -68,7 +68,7 @@ class ProgressItemsModel:
         print 'Plugins: '+OeQ_plugin_path()
         print 'Project Name: '+ OeQ_project_name()
         default_progress = os.path.join(OeQ_plugin_path(), 'project', 'default_progress')
-        path = os.path.join(OeQ_project_path(), 'oeq_progress.oeq')
+        path = os.path.join(OeQ_project_path(), OeQ_project_name()+'.oeq')
         if os.path.exists(path):
             os.remove(path)
 

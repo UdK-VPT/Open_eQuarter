@@ -588,7 +588,7 @@ class OpenEQuarterMain:
 
                 progressbar = OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
                                                    u"This may take some time...",
-                                                   maxcount=len(raster_layers)+1)
+                                                   maxcount=len(raster_layers)+2)
                 progress_counter = OeQ_push_progressbar(progressbar, 0)
 
                 for layer in raster_layers:
@@ -607,7 +607,7 @@ class OpenEQuarterMain:
 
         progressbar = OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
                                            u"This may take some time.",
-                                           maxcount=len(extracted_layers)+1)
+                                           maxcount=len(extracted_layers)+2)
         progress_counter = OeQ_push_progressbar(progressbar, 0)
 
         for layer_name in extracted_layers:

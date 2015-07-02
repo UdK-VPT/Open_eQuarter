@@ -503,6 +503,7 @@ class OpenEQuarterMain:
                 layer_interaction.add_layer_to_registry(out_layer)
                 layer_interaction.edit_housing_layer_attributes(out_layer)
                 out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
+                layer_interaction.trigger_edit_mode(self.iface, out_layer.name(), 'off')
                 inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
                 layer_interaction.add_layer_to_registry(inter_layer)
                 QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
@@ -510,6 +511,7 @@ class OpenEQuarterMain:
                 QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id())
                 data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
                 layer_interaction.add_layer_to_registry(data_layer)
+                layer_interaction.trigger_edit_mode(self.iface, data_layer.name(), 'off')
                 self.iface.legendInterface().setLayerVisible(data_layer, False)
                 OeQ_kill_info()
                 return 2

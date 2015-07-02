@@ -561,6 +561,8 @@ class OpenEQuarterMain:
                     layer_interaction.add_layer_to_registry(raster)
                     self.iface.setActiveLayer(raster)
                     raster_loaded = True
+                    wms_utils.show_wms_legendgif_in_browser(raster)
+
             except AttributeError as NoneTypeError:
                 print(self.__module__, NoneTypeError)
 
@@ -597,7 +599,9 @@ class OpenEQuarterMain:
                 extracted_layers = []
                 for clipping_raster in raster_layers:
                     progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-                    extracted_layers.append(self.clip_from_raster(clipping_raster))
+                    clipped_layer=self.clip_from_raster(clipping_raster)
+                    clipped_layer.meta
+                    extracted_layers.append(clipped_layer)
                     #remove the wms source from the legend
                     QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id() )
                 OeQ_kill_progressbar()

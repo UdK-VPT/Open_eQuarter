@@ -1,4 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+/****************************************************************************************
 
+ Project:               Open eQuarter / Mole
+ Module:                webinteraction.googlemaps
+ Description:           Georeferenced information mining
+ Mandatory:             QGIS installation
+
+ Responsibility:        Werner Kaul
+                        werner.kaul@udk-berlin.de
+
+ Creation Date:         2015-07-03
+
+                               -------------------
+
+ Development:           University of Arts Berlin
+                        Institut für Architektur und Städtebau (IAS)
+                        Fachgebiet Versorgungsplanung und Versorgungstechnik (VPT)
+                        Einsteinufer 43
+                        10587 Berlin
+                        Germany
+
+ Team:                  Christoph Nytsch-Geusen
+                        nytsch@udk-berlin.de
+
+                        Werner Kaul
+                        werner.kaul@udk-berlin.de
+
+                        Kim Gülle
+                        kimonline@posteo.de
+
+                               -------------------
+
+ Copyright:             (c)2014-2015 University of Arts Berlin
+                        Institut für Architektur und Städtebau (IAS)
+                        Fachgebiet Versorgungsplanung und Versorgungstechnik (VPT)
+
+ ****************************************************************************************/
+
+/*****************************************************************************************
+
+ This program is free software; you can redistribute it and/or modify it under the terms
+ of the GNU General Public License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+
+ All our software is developed to the best of our knowledge and belief. But we do not
+ become liable for any damage or disadvantage caused by it's usage, outcomes or sideeffect
+ in any way.
+
+ *****************************************************************************************/
+"""
+# Import the PyQt and QGIS libraries
 from qgisinteraction import layer_interaction
 from mole.project import config
 from qgis.core import QgsCoordinateReferenceSystem
@@ -6,7 +58,16 @@ import urllib
 import urllib2
 import json
 
+
+# Get the postal adress for the specified coordinates
 def getAddressByCoordinates(latitude,longitude,crs=None):
+
+    # In: Latitude
+    #     Longitude
+    #     Corresponding Coordinate Reference System as EPSG Code
+
+    # Out: dict of all informations delivered by googlemaps
+
     if crs:
         sourceCRS=QgsCoordinateReferenceSystem(crs)
         googleMapsCRS=QgsCoordinateReferenceSystem(4326)
@@ -29,7 +90,14 @@ def getAddressByCoordinates(latitude,longitude,crs=None):
     except:
         return None
 
+# Get the coordinates for the specified adress
 def getCoordinatesByAddress(address,crs=None):
+
+    # In: Country, City, Postal Address or Parts of it
+    #     Target Coordinate Reference System as EPSG Code
+
+    # Out: dict of all informations delivered by googlemaps
+
     urlParams = {
                 'address': address,
                 'sensor': 'false',
@@ -60,7 +128,15 @@ def getCoordinatesByAddress(address,crs=None):
 
 
 
+# Get the postal adress for the specified BLD_ID
+# (QeQ Specific Building Identifier thoughout all tables)
 def getAdressByBLD_ID(building_id):
+
+    # In: BLD_ID
+    #     Target Coordinate Reference System as EPSG Code
+
+    # Out: dict of all informations delivered by googlemaps
+
     layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
     if not layer: return None
     layerEPSG=int(layer.crs().authid()[5:])

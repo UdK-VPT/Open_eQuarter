@@ -36,7 +36,7 @@ from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-
+from mole.oeq_global import OeQ_project_info
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
@@ -316,6 +316,12 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
+
+    def show(self):
+        for key in OeQ_project_info:
+            field = getattr(self, key)
+            field.setText(str(OeQ_project_info[key]))
+        QtGui.QDialog.show(self)
 
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:

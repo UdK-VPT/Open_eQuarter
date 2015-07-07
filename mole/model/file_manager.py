@@ -182,6 +182,7 @@ class ColorEntryManager:
         self.layer_values_map[layer_name] = {}
 
         result_dict = {}
+        import lxml
 
         def get_colors(tree):
             out_col={}
@@ -231,6 +232,7 @@ class ColorEntryManager:
             ID_range=[]
             for i in qml_col.keys():
                 result_dict[qml_col[i]]= [qml_par[i],qml_rng[i][0],qml_rng[i][1]]
+
 
             if len(qml_abr)>0:
                 self.layer_abbreviation_map[layer_name] = qml_abr[0]

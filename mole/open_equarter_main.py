@@ -81,7 +81,6 @@ class OpenEQuarterMain:
         #to work flawlessly on the messagebar it is necessary to initialize the Python console once
         iface.actionShowPythonDialog().trigger()
         print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
-        time.sleep(0.3)
         iface.actionShowPythonDialog().trigger() #in fact it's not show but toggle
 
         ### Default values
@@ -109,7 +108,7 @@ class OpenEQuarterMain:
 
         self.iface.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
         self.iface.connect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
-        self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.save_progress)
+        self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.progress_items_model.save_oeq_project)
 
         self.initGui_process_dock()
 
@@ -126,9 +125,7 @@ class OpenEQuarterMain:
         settings_dropdown_menu = QMenu()
         config_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'config.png'))
         open_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'open.png'))
-        save_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'save_active.png'))
         settings_dropdown_menu.addAction(config_icon, 'Project configuration..', self.open_settings)
-        settings_dropdown_menu.addAction(save_icon, 'Save current progress', self.save_progress)
         settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
@@ -169,24 +166,13 @@ class OpenEQuarterMain:
         progress = os.path.join(OeQ_project_path(), OeQ_project_name()+'.oeq')
         if os.path.isfile(progress):
             self.progress_items_model.load_section_models(progress)
-            if self.main_process_dock.isVisible():
-                self.main_process_dock.setVisible(False)
-                self.initGui_process_dock()
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
-
         else:
             self.progress_items_model.load_section_models(config.progress_model)
-            if self.main_process_dock.isVisible():
-                self.main_process_dock.setVisible(False)
-                self.initGui_process_dock()
-                self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
-            else:
-                self.initGui_process_dock()
 
-    def save_progress(self):
-        if not OeQ_project_saved():
-            iface.actionSaveProject().trigger()
-        self.progress_items_model.save_section_models()
+        if self.main_process_dock.isVisible():
+            self.main_process_dock.setVisible(False)
+        self.initGui_process_dock()
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
 
     def load_wms(self):
         print('Load wms')
@@ -1035,17 +1021,17 @@ class OpenEQuarterMain:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
 
-        if not OeQ_project_saved() or not OeQ_project_info['name']:
+        if not OeQ_project_saved() or OeQ_project_info['project_name'] == 'MyProject':
             self.oeq_project_settings_form.show()
             save = self.oeq_project_settings_form.exec_()
             if save:
-                OeQ_project_info['name'] = self.oeq_project_settings_form.project_name.text()
+                OeQ_project_info['project_name'] = self.oeq_project_settings_form.project_name.text()
                 OeQ_project_info['description'] = self.oeq_project_settings_form.description.text()
-                OeQ_project_info['location'] = self.oeq_project_settings_form.location_city.text()
+                OeQ_project_info['location_city'] = self.oeq_project_settings_form.location_city.text()
                 OeQ_project_info['location_postal'] = self.oeq_project_settings_form.location_postal.text()
-                OeQ_project_info['heating_dd'] = self.oeq_project_settings_form.heating_degree_days.text()
-                OeQ_project_info['avg_yoc'] = self.oeq_project_settings_form.average_build_year.text()
-                OeQ_project_info['pop_dens'] = self.oeq_project_settings_form.population_density.text()
+                OeQ_project_info['heating_degree_days'] = self.oeq_project_settings_form.heating_degree_days.text()
+                OeQ_project_info['average_build_year'] = self.oeq_project_settings_form.average_build_year.text()
+                OeQ_project_info['population_density'] = self.oeq_project_settings_form.population_density.text()
 
                 self.handle_project_created()
                 plugin_section = self.progress_items_model.section_views[0]
@@ -1056,7 +1042,7 @@ class OpenEQuarterMain:
                 else:
                     project_item.setCheckState(0)
 
-        if OeQ_project_saved() and OeQ_project_info['name']:
+        if OeQ_project_saved() and OeQ_project_info['project_name']:
             municipal = self.oeq_project_settings_form.municipals[0]
 
             if len(municipal) > 0:

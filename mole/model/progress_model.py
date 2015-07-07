@@ -7,7 +7,7 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-from mole.oeq_global import * #Import all globals available by calling them without moduleprefix
+from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
 
 
 class ProgressItemsModel:
@@ -18,17 +18,18 @@ class ProgressItemsModel:
 
     def load_section_models(self, path):
         """
-        Open every sectionX.json-file in the given directory and build the QStandardItemModel-Classes accordingly
-        :param path: Directory which contains the .json-files
+        Open every section<Number>.json-file in the given zipfile and build the QStandardItemModel-Classes accordingly
+        Open the project_info.json if available and restore the project info
+        :param path: Zipfile which contains the .json-files
         :type path: str
         :return:
         :rtype:
         """
         try:
             dir_entries = ZipFile(path).namelist()
-            files = filter(lambda entry: entry.startswith('section') and entry.endswith('.json'), dir_entries)
+            section_files = filter(lambda entry: entry.startswith('section') and entry.endswith('.json'), dir_entries)
             views = []
-            for json_section in files:
+            for json_section in section_files:
                 with ZipFile(path, 'r') as oeq_zip:
                     data = oeq_zip.read(json_section)
                     json_data = json.loads(data)
@@ -53,25 +54,37 @@ class ProgressItemsModel:
                 views.append(step_items)
 
             self.section_views = views
+
+            if 'project_info.json' in dir_entries:
+                with ZipFile(path, 'r') as oeq_zip:
+                    data = oeq_zip.read('project_info.json')
+                    json_data = json.loads(data)
+
+                for key in OeQ_project_info.keys():
+                    OeQ_project_info[key] = json_data[key]
+
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
 
-    def save_section_models(self):
+    def save_oeq_project(self):
         """
-        Save the current progress to a folder calles 'oeq_progress' under the given path
+        Save the current progress and the project info to a zip-file called <project_name>.oeq under the given path
         :param path: Directory which will contain the progress
         :type path: str
         :return:
         :rtype:
         """
-        print 'Project: '+OeQ_project_path()
-        print 'Plugins: '+OeQ_plugin_path()
-        print 'Project Name: '+ OeQ_project_name()
-        default_progress = os.path.join(OeQ_plugin_path(), 'project', 'default_progress')
-        path = os.path.join(OeQ_project_path(), OeQ_project_name()+'.oeq')
-        if os.path.exists(path):
-            os.remove(path)
+        print('TRY TO SAVE')
+        plugin_path = OeQ_plugin_path()
+        project_path = OeQ_project_path()
+        project_name = OeQ_project_name()
 
+        default_progress = os.path.join(plugin_path, 'project', 'default_progress')
+        project_file = os.path.join(project_path, project_name + '.oeq')
+        if os.path.exists(project_file):
+            os.remove(project_file)
+
+        # write section views
         end = len(self.section_views) + 1
         for i in range(1, end):
             model = self.section_views[i-1].model()
@@ -82,8 +95,12 @@ class ProgressItemsModel:
             for j, step in enumerate(json_data['steplist']):
                     step['state'] = model.item(j).checkState()
 
-            with ZipFile(path, 'a') as oeq_zip:
+            with ZipFile(project_file, 'a') as oeq_zip:
                 oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))
+
+        # write project info
+        with ZipFile(project_file, 'a') as oeq_zip:
+            oeq_zip.writestr('project_info.json', json.dumps(OeQ_project_info))
 
     def check_prerequisites_for(self, step_name):
         """

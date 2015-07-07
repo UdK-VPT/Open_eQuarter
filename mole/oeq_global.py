@@ -17,7 +17,10 @@ OeQ_project_info = {
 
 global OeQ_project_name
 def OeQ_project_name():
-    return os.path.basename(QgsProject.instance().fileName()).split(".")[0]
+    path_to_project = QgsProject.instance().fileName()
+    filename = os.path.basename(path_to_project)
+    project_name = filename.split('.')[0]
+    return project_name
 
 
 global OeQ_project_path

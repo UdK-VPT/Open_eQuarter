@@ -610,7 +610,7 @@ class OpenEQuarterMain:
             return 0
 
         progressbar = OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
-                                           u"This may take some time.",
+                                            u"This may take some time.",
                                            maxcount=len(extracted_layers)+2)
         progress_counter = OeQ_push_progressbar(progressbar, 0)
 
@@ -664,18 +664,21 @@ class OpenEQuarterMain:
         save_or_abort = self.color_picker_dlg.exec_()
         succes = False
 
-        while save_or_abort:
-            layer = self.iface.activeLayer()
-            out_path = os.path.dirname(layer.publicSource())
-            out_path = os.path.join(out_path, layer.name() + '.qml')
-            self.color_picker_dlg.update_color_values()
-            self.iface.actionPan().trigger()
-            entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
-            if entry_written:
-                QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
-                succes = True
-                self.reorder_layers()
-            save_or_abort = self.color_picker_dlg.exec_()
+        for layer in self.color_picker_dlg.layers_dropdown.children():
+            print layer
+
+        # while save_or_abort:
+        #     layer = self.iface.activeLayer()
+        #     out_path = os.path.dirname(layer.publicSource())
+        #     out_path = os.path.join(out_path, layer.name() + '.qml')
+        #     self.color_picker_dlg.update_color_values()
+        #     self.iface.actionPan().trigger()
+        #     entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
+        #     if entry_written:
+        #         QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+        #         succes = True
+        #         self.reorder_layers()
+        #     save_or_abort = self.color_picker_dlg.exec_()
 
         self.iface.actionPan().trigger()
         if succes:
@@ -987,11 +990,6 @@ class OpenEQuarterMain:
         QgsProject.instance().setDirty(True)
         first_open_item.setCheckState(progress_state)
 
-        global autorun_enabled
-        if progress_state == 2 and (autorun_enabled or autorun):
-            autorun_enabled = True
-            self.continue_process()
-
     def process_button_clicked(self, model_index):
         """
         Call the appropriate handle-function, depending on the QStandardItem which triggered the function call.
@@ -1075,8 +1073,6 @@ class OpenEQuarterMain:
                     config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
                     print(self.__module__, Error)
-            global autorun_enabled
-            autorun_enabled = True
             self.continue_process()
 
     def set_next_step_done(self, is_done):

@@ -14,7 +14,6 @@ OeQ_project_info = {
     'avg_yoc': 0,
     'pop_dens': 0.0
 }
-global autorun_enabled
 
 global OeQ_project_name
 def OeQ_project_name(): return os.path.basename(QgsProject.instance().fileName()).split(".")[0]

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Tue Jun 23 15:39:50 2015
+# Created: Mon Jul  6 17:04:29 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,8 +26,9 @@ except AttributeError:
 class Ui_color_picker_dialog(object):
     def setupUi(self, color_picker_dialog):
         color_picker_dialog.setObjectName(_fromUtf8("color_picker_dialog"))
-        color_picker_dialog.resize(658, 385)
+        color_picker_dialog.resize(658, 451)
         color_picker_dialog.setStyleSheet(_fromUtf8(""))
+        color_picker_dialog.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
         self.verticalLayout = QtGui.QVBoxLayout(color_picker_dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.line = QtGui.QFrame(color_picker_dialog)
@@ -88,8 +89,13 @@ class Ui_color_picker_dialog(object):
         self.gridLayout.addWidget(self.chose_plugin_info, 1, 0, 1, 1)
         self.verticalLayout.addWidget(self.raster_plugin_dlg)
         self.color_table_view = QtGui.QTableView(color_picker_dialog)
+        self.color_table_view.setMinimumSize(QtCore.QSize(550, 150))
         self.color_table_view.setStyleSheet(_fromUtf8("border: 0px;\n"
 "background-color: rgb(237, 237, 237);"))
+        self.color_table_view.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+        self.color_table_view.setShowGrid(False)
+        self.color_table_view.setSortingEnabled(True)
+        self.color_table_view.setCornerButtonEnabled(False)
         self.color_table_view.setObjectName(_fromUtf8("color_table_view"))
         self.verticalLayout.addWidget(self.color_table_view)
         self.widget = QtGui.QWidget(color_picker_dialog)
@@ -108,7 +114,7 @@ class Ui_color_picker_dialog(object):
         self.buttonBox = QtGui.QDialogButtonBox(color_picker_dialog)
         self.buttonBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Save)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
         self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout.addWidget(self.buttonBox)

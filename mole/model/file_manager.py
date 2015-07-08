@@ -9,7 +9,7 @@ import xml.etree.ElementTree as etree
 from io import open
 from collections import OrderedDict
 
-class ColorEntryManager():
+class ColorEntryManager:
     """
     Model for the color picker, which keeps track of the colors which are related to a layer
     and can save/read these information to/from disk.
@@ -176,7 +176,6 @@ class ColorEntryManager():
                     return False
                     print('{}: {}'.format(self.__module__, Error))
 
-
     def read_color_map_from_qml(self, in_path):
         file_name = os.path.basename(in_path)
         layer_name = os.path.splitext(file_name)[0]
@@ -215,6 +214,7 @@ class ColorEntryManager():
 
                     out_par[name]= i.attrib['value']
             return out_par
+
         def get_abrev(tree):
             out_par={}
             props=tree.find('customproperties')
@@ -244,7 +244,7 @@ class ColorEntryManager():
 
 
 
-class MunicipalInformationParser():
+class MunicipalInformationParser:
     """
     A parser-class to scan a .json file for all municipals with a given postcode.
     """
@@ -278,7 +278,7 @@ class MunicipalInformationParser():
             print('{}: {}'.format(self.__module__, Error))
 
 
-class MunicipalInformationTree():
+class MunicipalInformationTree:
     """
     A model which stores all municipal information ordered by postal-code in a tree-like array-structure.
     """
@@ -337,8 +337,5 @@ class MunicipalInformationTree():
 
                             self.tree[l0_key][l1_key][l2_key].append(entry)
 
-
         except IOError, Error:
             print('{}: {}'.format(self.__module__, Error))
-
-   

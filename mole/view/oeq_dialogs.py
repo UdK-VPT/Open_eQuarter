@@ -18,13 +18,15 @@
  *                                                                         *
  ***************************************************************************/
 '''
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+import os
+
+from PyQt4 import QtGui, QtCore
 from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
+from qgis.utils import iface
 
 from ui_color_picker_dialog import Ui_color_picker_dialog
-from oeq_ui_classes import QRemoveEntryButton, QColorizedLineEdit, QColorTableDelegate, QColorTableModel
+from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 from ui_project_settings_form import Ui_project_settings_form
@@ -34,7 +36,7 @@ from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-
+from mole.oeq_global import OeQ_project_info
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
@@ -55,6 +57,12 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
         # connect the signals
         self.color_table_view.clicked.connect(self.remove_entry)
+
+        role = QtGui.QDialogButtonBox.ActionRole
+        load_button = self.buttonBox.addButton('Load legend...', role)
+        load_button.clicked.connect(self.load_color_map)
+        save_button = self.buttonBox.addButton('Save legend', role)
+        save_button.clicked.connect(self.save_color_map)
 
     def setup_table(self):
         """
@@ -180,6 +188,28 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.warning_label.clear()
 
+    def load_color_map(self):
+        self.hide()
+        filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption='Chose a .qml-legend file', filter='*.qml')
+        self.show()
+        self.color_entry_manager.read_color_map_from_qml(filename)
+        self.update_color_values()
+
+    def save_color_map(self):
+        layer = iface.activeLayer()
+        selected_layer = self.layers_dropdown.currentText()
+        if layer.name() != selected_layer:
+            layer = layer_interaction.find_layer_by_name(selected_layer)
+
+        out_path = os.path.dirname(layer.publicSource())
+        out_path = os.path.join(out_path, layer.name() + '.qml')
+        self.update_color_values()
+        entry_written = self.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
+        if entry_written:
+            QtGui.QMessageBox.information(iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+        else:
+            QtGui.QErrorMessage.information(iface.mainWindow(), 'Failure', 'Could not write legend to to "{}".'.format(out_path))
+
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
@@ -286,6 +316,12 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
+
+    def show(self):
+        for key in OeQ_project_info:
+            field = getattr(self, key)
+            field.setText(str(OeQ_project_info[key]))
+        QtGui.QDialog.show(self)
 
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
@@ -427,7 +463,6 @@ class EstimatedEnergyDemand_dialog(QtGui.QDialog, Ui_EstimatedEnergyDemand_dialo
         self.input_layer.currentIndexChanged.connect(self.update_field_dropdowns)
 
     def update_field_dropdowns(self, index):
-        print(index)
         layer = layer_interaction.find_layer_by_name(self.input_layer.currentText())
         provider = layer.dataProvider()
         fields = provider.fieldNameMap().keys()

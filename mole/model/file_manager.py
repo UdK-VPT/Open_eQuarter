@@ -182,7 +182,6 @@ class ColorEntryManager:
         self.layer_values_map[layer_name] = {}
 
         result_dict = {}
-        import lxml
 
         def get_colors(tree):
             out_col={}

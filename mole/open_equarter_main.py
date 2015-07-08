@@ -44,6 +44,7 @@ from qgisinteraction import (
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
 from mole.oeq_global import *
+from mole.webinteraction import googlemaps
 
 
 def isnull(value):
@@ -1051,8 +1052,18 @@ class OpenEQuarterMain:
 
         if OeQ_project_saved() and OeQ_project_info['project_name']:
             municipal = self.oeq_project_settings_form.municipals[0]
+            print OeQ_project_info['location_postal']+' '+OeQ_project_info['location_city']
+            locationInfo=googlemaps.getCoordinatesByAddress(OeQ_project_info['location_postal']+' '+OeQ_project_info['location_city'],crs=4326)
+            print locationInfo
+            x=locationInfo['longitude']
+            y=locationInfo['latitude']
+            scale = 0.05
+            extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
+            config.default_extent = extent
+            config.default_extent_crs = 'EPSG:4326'
 
-            if len(municipal) > 0:
+
+            '''if len(municipal) > 0:
                 index = 0
                 if isinstance(self.oeq_project_settings_form.location_city, QComboBox):
                     index = self.oeq_project_settings_form.location_city.currentIndex()
@@ -1065,7 +1076,7 @@ class OpenEQuarterMain:
                     config.default_extent = extent
                     config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
-                    print(self.__module__, Error)
+                    print(self.__module__, Error)'''
             self.continue_process()
 
     def set_next_step_done(self, is_done):

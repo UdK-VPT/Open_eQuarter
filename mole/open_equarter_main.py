@@ -561,7 +561,6 @@ class OpenEQuarterMain:
                     layer_interaction.add_layer_to_registry(raster)
                     self.iface.setActiveLayer(raster)
                     raster_loaded = True
-                    wms_utils.show_wms_legendgif_in_browser(raster)
 
             except AttributeError as NoneTypeError:
                 print(self.__module__, NoneTypeError)
@@ -600,8 +599,11 @@ class OpenEQuarterMain:
                 for clipping_raster in raster_layers:
                     progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
                     clipped_layer=self.clip_from_raster(clipping_raster)
-                    clipped_layer.meta
                     extracted_layers.append(clipped_layer)
+
+                    cLay=layer_interaction.find_layer_by_name(clipped_layer)
+                    lUrl=wms_utils.getWmsLegendUrl(clipping_raster)
+                    cLay.setLegendUrl(lUrl)
                     #remove the wms source from the legend
                     QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id() )
                 OeQ_kill_progressbar()
@@ -618,6 +620,8 @@ class OpenEQuarterMain:
             progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
+                #save legendUrl from source
+                legUrl=layer.legendUrl()
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_RAW.tif', '_transformed.tif')
@@ -635,11 +639,14 @@ class OpenEQuarterMain:
                     layer_interaction.hide_or_remove_layer(layer_name, 'remove', self.iface)
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
+                    #write legendUrl to the converted layer
+                    rlayer.setLegendUrl(legUrl)
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
                     #os.remove(path_geo)
                     self.iface.mapCanvas().refresh()
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
+                    print rlayer.legendUrl()
             except (OSError, AttributeError) as Clipping_Error:
                 print(self.__module__, Clipping_Error)
                 pass

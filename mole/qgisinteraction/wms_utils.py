@@ -50,7 +50,7 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
      
     return filename
 
-def show_wms_legendgif_in_browser(layer): #Very quick and very dirty
+def getWmsLegendUrl(layer): #Very quick and very dirty
     m=layer.metadata()
     m=m.split('LegendURLs')
     for i in m:
@@ -62,4 +62,5 @@ def show_wms_legendgif_in_browser(layer): #Very quick and very dirty
     k=k[1].split("http")
     if (type(k) is not type([])) | (len(k) < 2): return None
     url='http'+k[1].split('<')[0]
-    open_url(url,new=2) #2 means Open in a new TAB if possible
+    return url
+    #open_url(url,new=2) #2 means Open in a new TAB if possible

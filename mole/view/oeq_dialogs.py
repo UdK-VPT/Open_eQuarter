@@ -25,6 +25,10 @@ from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
+from mole.qgisinteraction import layer_interaction
+from mole.oeq_global import OeQ_project_info
+from mole.webinteraction import googlemaps
 from ui_color_picker_dialog import Ui_color_picker_dialog
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
@@ -34,9 +38,7 @@ from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
-from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info
+
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
@@ -317,6 +319,10 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
 
+        self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
+        self.lookup_by_address.clicked.connect(self.location_by_address)
+
+
     def show(self):
         for key in OeQ_project_info:
             field = getattr(self, key)
@@ -326,6 +332,53 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
+
+    def location_by_address(self):
+        postal = self.location_postal.text()
+        city_street = self.location_city.text()
+
+        if isinstance(city_street, unicode):
+            city_street = city_street.encode('utf-8')
+            address = '{} {}'.format(postal, city_street)
+            address = address.decode('utf-8')
+        else:
+            address = '{} {}'.format(postal, city_street)
+
+        location_info = googlemaps.getCoordinatesByAddress(address, crs=4326)
+
+        try:
+            street = location_info['route']
+            city = location_info['locality']
+            country = location_info['country']
+            postal = location_info['postal_code']
+            lon = location_info['longitude']
+            lat = location_info['latitude']
+
+            loc_city = u'{}, {}, {}'.format(street, city, country)
+            self.location_city.setText(loc_city)
+            self.location_postal.setText(postal)
+            self.location_lon.setText(str(lon))
+            self.location_lat.setText(str(lat))
+            self.location_crs.setText('EPSG:4326')
+        except (KeyError, TypeError) as AddressNotFound:
+            print(self.__module__, AddressNotFound)
+
+    def location_by_coordinates(self):
+        lat = float(self.location_lat.text())
+        lon = float(self.location_lon.text())
+        crs = self.location_crs.text()
+        location_info = googlemaps.getAddressByCoordinates(lat, lon, crs)
+
+        street = location_info['route']
+        city = location_info['locality']
+        country = location_info['country']
+        postal = location_info['postal_code']
+
+        loc_city = u'{}, {}, {}'.format(street, city, country)
+        self.location_city.setText(loc_city)
+        self.location_postal.setText(postal)
+        if crs == 'CRS':
+            self.location_crs.setText('EPSG:4326')
 
     def find_municipal_information(self):
         postcode = self.location_postal.text()

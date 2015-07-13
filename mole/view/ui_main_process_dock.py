@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Mon Jul 13 12:14:32 2015
+# Created: Mon Jul 13 12:51:15 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -282,7 +282,7 @@ class Ui_MainProcess_dock(object):
         self.information_sampled_chckBox.setText(_translate("MainProcess_dock", "Use the point-sampling-tool to extract\n"
 "the information", None))
         self.pushButton.setText(_translate("MainProcess_dock", "Cancel", None))
-        self.process_button_next.setText(_translate("MainProcess_dock", "Next ", None))
+        self.process_button_next.setText(_translate("MainProcess_dock", "Next step", None))
 
 from oeq_ui_classes import QClickableLabel, QProcessButton
 import resources_rc

@@ -97,6 +97,8 @@ def getCoordinatesByAddress(address,crs=None):
     #     Target Coordinate Reference System as EPSG Code
 
     # Out: dict of all informations delivered by googlemaps
+    if isinstance(address, unicode):
+        address = address.encode('utf-8')
 
     urlParams = {
                 'address': address,

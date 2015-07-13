@@ -219,10 +219,8 @@ class OpenEQuarterMain:
         """
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
         self.iface.removePluginMenu(u"&OpenEQuarter", self.clipping_action)
-        self.iface.removePluginMenu(u"&OpenEQuarter", self.testing_action)
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
-        self.iface.removeToolBarIcon(self.testing_action)
         self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
         self.main_process_dock.disconnect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
 

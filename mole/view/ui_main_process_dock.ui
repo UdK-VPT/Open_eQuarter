@@ -481,7 +481,7 @@ the information</string>
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>Next </string>
+         <string>Next step</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">

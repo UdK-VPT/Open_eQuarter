@@ -74,7 +74,7 @@ class ProgressItemsModel:
         :return:
         :rtype:
         """
-        print('TRY TO SAVE')
+        print('Saving the OeQ-project instance')
         plugin_path = OeQ_plugin_path()
         project_path = OeQ_project_path()
         project_name = OeQ_project_name()

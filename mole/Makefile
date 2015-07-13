@@ -34,7 +34,7 @@ PLUGINNAME = Open eQuarter
 
 PY_FILES = open_equarter_main.py __init__.py
 
-EXTRAS = icons/gearwheel.png icons/info.png icons/OeQ_plugin_icon.png icons/OeQ_logo_footer.png icons/checkmark.png icons/openmark.png icons/arrow_left.png icons/arrow_right.png icons/autorun.png icons/lightbulb.png icons/scissor.png metadata.txt
+EXTRAS = icons/magnifying_glass.png icons/gearwheel.png icons/OeQ_plugin_icon.png icons/OeQ_logo_footer.png icons/checkmark.png icons/semiopenmark.png icons/openmark.png icons/arrow_right.png icons/scissor.png metadata.txt
 
 PACKAGE_PREFIX = view/
 

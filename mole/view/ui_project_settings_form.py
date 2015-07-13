@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_settings_form.ui'
 #
-# Created: Mon Jul 13 12:14:32 2015
+# Created: Mon Jul 13 12:51:16 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_project_settings_form(object):
     def setupUi(self, project_settings_form):
         project_settings_form.setObjectName(_fromUtf8("project_settings_form"))
-        project_settings_form.resize(374, 516)
+        project_settings_form.resize(409, 516)
         project_settings_form.setStyleSheet(_fromUtf8("#form QLineEdit {\n"
 "    color: rgb(151, 151, 151,95);\n"
 "}\n"
@@ -90,6 +90,15 @@ class Ui_project_settings_form(object):
         self.location_postal.setMaximumSize(QtCore.QSize(100, 16777215))
         self.location_postal.setObjectName(_fromUtf8("location_postal"))
         self.location_layout.addWidget(self.location_postal)
+        self.lookup_by_address = QtGui.QPushButton(self.form)
+        self.lookup_by_address.setMinimumSize(QtCore.QSize(32, 32))
+        self.lookup_by_address.setText(_fromUtf8(""))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/magnifying_glass.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.lookup_by_address.setIcon(icon)
+        self.lookup_by_address.setFlat(True)
+        self.lookup_by_address.setObjectName(_fromUtf8("lookup_by_address"))
+        self.location_layout.addWidget(self.lookup_by_address)
         self.gridLayout.addLayout(self.location_layout, 5, 0, 1, 1)
         self.climate_zone_layout = QtGui.QHBoxLayout()
         self.climate_zone_layout.setSpacing(0)
@@ -99,6 +108,25 @@ class Ui_project_settings_form(object):
         self.heating_degree_days_label.setObjectName(_fromUtf8("heating_degree_days_label"))
         self.climate_zone_layout.addWidget(self.heating_degree_days_label)
         self.gridLayout.addLayout(self.climate_zone_layout, 8, 0, 1, 1)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.location_lon = QtGui.QLineEdit(self.form)
+        self.location_lon.setObjectName(_fromUtf8("location_lon"))
+        self.horizontalLayout.addWidget(self.location_lon)
+        self.location_lat = QtGui.QLineEdit(self.form)
+        self.location_lat.setObjectName(_fromUtf8("location_lat"))
+        self.horizontalLayout.addWidget(self.location_lat)
+        self.location_crs = QtGui.QLineEdit(self.form)
+        self.location_crs.setObjectName(_fromUtf8("location_crs"))
+        self.horizontalLayout.addWidget(self.location_crs)
+        self.lookup_by_coords = QtGui.QPushButton(self.form)
+        self.lookup_by_coords.setMinimumSize(QtCore.QSize(32, 32))
+        self.lookup_by_coords.setText(_fromUtf8(""))
+        self.lookup_by_coords.setIcon(icon)
+        self.lookup_by_coords.setFlat(True)
+        self.lookup_by_coords.setObjectName(_fromUtf8("lookup_by_coords"))
+        self.horizontalLayout.addWidget(self.lookup_by_coords)
+        self.gridLayout.addLayout(self.horizontalLayout, 6, 0, 1, 1)
         self.verticalLayout.addWidget(self.form)
 
         self.retranslateUi(project_settings_form)
@@ -123,8 +151,13 @@ class Ui_project_settings_form(object):
         self.population_density_label.setToolTip(_translate("project_settings_form", "Population density of the investigation area (inhabitants per square kilometre)", None))
         self.population_density_label.setText(_translate("project_settings_form", "Population Density:", None))
         self.population_density.setText(_translate("project_settings_form", "3.859", None))
-        self.location_city.setText(_translate("project_settings_form", "City", None))
+        self.location_city.setText(_translate("project_settings_form", "City or street", None))
         self.location_postal.setText(_translate("project_settings_form", "Postal", None))
+        self.lookup_by_address.setToolTip(_translate("project_settings_form", "Lookup address", None))
         self.heating_degree_days_label.setText(_translate("project_settings_form", "Heating degree days:", None))
+        self.location_lon.setText(_translate("project_settings_form", "Lon", None))
+        self.location_lat.setText(_translate("project_settings_form", "Lat", None))
+        self.location_crs.setText(_translate("project_settings_form", "CRS", None))
+        self.lookup_by_coords.setToolTip(_translate("project_settings_form", "Lookup coordinates", None))
 
 import resources_rc

@@ -8,8 +8,11 @@ global OeQ_project_info
 OeQ_project_info = {
     'project_name': 'MyProject',
     'description': 'The aim of this project, is to analyse a quarter.',
-    'location_city': 'City',
+    'location_city': 'City or street',
     'location_postal': 'Postal',
+    'location_lon': 'Lon',
+    'location_lat': 'Lat',
+    'location_crs': 'CRS',
     'heating_degree_days': 390.06,
     'average_build_year': 1917,
     'population_density': 3.859

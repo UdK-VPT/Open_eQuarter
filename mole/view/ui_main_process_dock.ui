@@ -476,31 +476,6 @@ the information</string>
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="process_button_auto">
-        <property name="toolTip">
-         <string>Click this button to autorun the process</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/Controls/icons/autorun.png</normaloff>:/Controls/icons/autorun.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="process_button_prev">
-        <property name="text">
-         <string>Previous</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/Controls/icons/arrow_left.png</normaloff>:/Controls/icons/arrow_left.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="process_button_next">
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>

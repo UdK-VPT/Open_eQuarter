@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_project_does_not_exist_dialog.ui'
 #
-# Created: Mon Jul  6 17:04:28 2015
+# Created: Mon Jul 13 12:14:31 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!

@@ -101,12 +101,6 @@ class OpenEQuarterMain:
         self.iface.addToolBarIcon(self.clipping_action)
         self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
 
-        testing_icon = QIcon(os.path.join(':','Plugin', 'icons', 'lightbulb.png'))
-        self.testing_action = QAction(testing_icon, u"Run all unit-tests", self.iface.mainWindow())
-        self.testing_action.triggered.connect(lambda: self.run_tests())
-        self.iface.addToolBarIcon(self.testing_action)
-        self.iface.addPluginToMenu(u"&OpenEQuarter", self.testing_action)
-
         self.iface.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
         self.iface.connect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
         self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.progress_items_model.save_oeq_project)
@@ -117,7 +111,6 @@ class OpenEQuarterMain:
         self.main_process_dock = MainProcess_dock(self.progress_items_model)
 
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
-        self.main_process_dock.process_button_auto.clicked.connect(lambda: self.continue_process(True))
 
         sections = self.progress_items_model.section_views
         for list_view in sections:
@@ -1095,5 +1088,4 @@ class OpenEQuarterMain:
 
         last_step_name = last_view.model().item(i-1).accessibleText()
         next_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
-
         next_open_item.setCheckState(is_done)

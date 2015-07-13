@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_main_process_dock.ui'
 #
-# Created: Mon Jul  6 17:04:29 2015
+# Created: Mon Jul 13 12:14:32 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -223,24 +223,11 @@ class Ui_MainProcess_dock(object):
         self.button_layout.addWidget(self.pushButton)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.button_layout.addItem(spacerItem7)
-        self.process_button_auto = QtGui.QPushButton(self.dockWidgetContents)
-        self.process_button_auto.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/autorun.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_auto.setIcon(icon2)
-        self.process_button_auto.setObjectName(_fromUtf8("process_button_auto"))
-        self.button_layout.addWidget(self.process_button_auto)
-        self.process_button_prev = QtGui.QPushButton(self.dockWidgetContents)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/arrow_left.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_prev.setIcon(icon3)
-        self.process_button_prev.setObjectName(_fromUtf8("process_button_prev"))
-        self.button_layout.addWidget(self.process_button_prev)
         self.process_button_next = QtGui.QPushButton(self.dockWidgetContents)
         self.process_button_next.setLayoutDirection(QtCore.Qt.RightToLeft)
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/arrow_right.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.process_button_next.setIcon(icon4)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/Controls/icons/arrow_right.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.process_button_next.setIcon(icon2)
         self.process_button_next.setIconSize(QtCore.QSize(16, 16))
         self.process_button_next.setObjectName(_fromUtf8("process_button_next"))
         self.button_layout.addWidget(self.process_button_next)
@@ -295,8 +282,6 @@ class Ui_MainProcess_dock(object):
         self.information_sampled_chckBox.setText(_translate("MainProcess_dock", "Use the point-sampling-tool to extract\n"
 "the information", None))
         self.pushButton.setText(_translate("MainProcess_dock", "Cancel", None))
-        self.process_button_auto.setToolTip(_translate("MainProcess_dock", "Click this button to autorun the process", None))
-        self.process_button_prev.setText(_translate("MainProcess_dock", "Previous", None))
         self.process_button_next.setText(_translate("MainProcess_dock", "Next ", None))
 
 from oeq_ui_classes import QClickableLabel, QProcessButton

@@ -123,7 +123,7 @@ class OpenEQuarterMain:
         settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
 
         tools_dropdown_menu = QMenu()
-        tools_dropdown_menu.addAction('Color Picker', self.pick_color)
+        tools_dropdown_menu.addAction('Color Picker', self.prepare_color_picker)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
         tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
         tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
@@ -630,12 +630,16 @@ class OpenEQuarterMain:
                 pass
         time.sleep(1.0)
         OeQ_kill_progressbar()
-        return self.pick_color()
+        return self.prepare_color_picker()
 
     def pick_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
+
+    def prepare_color_picker(self):
+        self.pick_color()
         self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
+        self.color_picker_dlg.start_colorpicking.clicked.connect(self.pick_color)
         self.refresh_layer_list()
 
         # layers = QgsMapLayerRegistry.instance().mapLayers().values()
@@ -1024,13 +1028,9 @@ class OpenEQuarterMain:
             self.oeq_project_settings_form.show()
             save = self.oeq_project_settings_form.exec_()
             if save:
-                OeQ_project_info['project_name'] = self.oeq_project_settings_form.project_name.text()
-                OeQ_project_info['description'] = self.oeq_project_settings_form.description.text()
-                OeQ_project_info['location_city'] = self.oeq_project_settings_form.location_city.text()
-                OeQ_project_info['location_postal'] = self.oeq_project_settings_form.location_postal.text()
-                OeQ_project_info['heating_degree_days'] = self.oeq_project_settings_form.heating_degree_days.text()
-                OeQ_project_info['average_build_year'] = self.oeq_project_settings_form.average_build_year.text()
-                OeQ_project_info['population_density'] = self.oeq_project_settings_form.population_density.text()
+                for key in OeQ_project_info:
+                    field = getattr(self.oeq_project_settings_form, key)
+                    OeQ_project_info[key] = field.text()
 
                 self.handle_project_created()
                 plugin_section = self.progress_items_model.section_views[0]
@@ -1043,11 +1043,8 @@ class OpenEQuarterMain:
 
         if OeQ_project_saved() and OeQ_project_info['project_name']:
             municipal = self.oeq_project_settings_form.municipals[0]
-            print OeQ_project_info['location_postal']+' '+OeQ_project_info['location_city']
-            locationInfo=googlemaps.getCoordinatesByAddress(OeQ_project_info['location_postal']+' '+OeQ_project_info['location_city'],crs=4326)
-            print locationInfo
-            x=locationInfo['longitude']
-            y=locationInfo['latitude']
+            x = float(OeQ_project_info['location_lon'])
+            y = float(OeQ_project_info['location_lat'])
             scale = 0.05
             extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
             config.default_extent = extent

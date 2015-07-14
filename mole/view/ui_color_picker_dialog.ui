@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>658</width>
-    <height>451</height>
+    <width>648</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -146,7 +146,7 @@
      <property name="minimumSize">
       <size>
        <width>550</width>
-       <height>150</height>
+       <height>250</height>
       </size>
      </property>
      <property name="styleSheet">
@@ -164,6 +164,15 @@ background-color: rgb(237, 237, 237);</string>
      </property>
      <property name="cornerButtonEnabled">
       <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWebView" name="legend_view">
+     <property name="url">
+      <url>
+       <string>about:blank</string>
+      </url>
      </property>
     </widget>
    </item>
@@ -252,6 +261,13 @@ background-color: rgb(237, 237, 237);</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebView</class>
+   <extends>QWidget</extends>
+   <header>QtWebKit/QWebView</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

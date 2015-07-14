@@ -51,7 +51,7 @@
  *****************************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from qgisinteraction import layer_interaction
+from mole.qgisinteraction import layer_interaction
 from mole.project import config
 from qgis.core import *
 import urllib

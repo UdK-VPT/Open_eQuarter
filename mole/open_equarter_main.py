@@ -1043,13 +1043,17 @@ class OpenEQuarterMain:
 
         if OeQ_project_saved() and OeQ_project_info['project_name']:
             municipal = self.oeq_project_settings_form.municipals[0]
-            x = float(OeQ_project_info['location_lon'])
-            y = float(OeQ_project_info['location_lat'])
-            scale = 0.05
-            extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-            config.default_extent = extent
-            config.default_extent_crs = 'EPSG:4326'
-
+            try:
+                x = float(OeQ_project_info['location_lon'])
+                y = float(OeQ_project_info['location_lat'])
+                scale = 0.05
+                extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
+                config.default_extent = extent
+                config.default_extent_crs = 'EPSG:4326'
+                self.continue_process()
+            except ValueError:
+                OeQ_init_info('Coordinates not defined',
+                              'Zoom to your investigation area automatically, by setting lon and lat.')
 
             '''if len(municipal) > 0:
                 index = 0
@@ -1065,7 +1069,6 @@ class OpenEQuarterMain:
                     config.default_extent_crs = 'EPSG:4326'
                 except (IndexError, KeyError), Error:
                     print(self.__module__, Error)'''
-            self.continue_process()
 
     def set_next_step_done(self, is_done):
         """

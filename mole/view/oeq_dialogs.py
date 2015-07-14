@@ -176,6 +176,13 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.color_table_view.setModel(table_model)
         self.recent_layer = layer
 
+        try:
+            wms_layer = layer_interaction.find_layer_by_name(layer)
+            url = wms_layer.legendUrl()
+            self.legend_view.load(QtCore.QUrl(url))
+        except TypeError as NoneTypeError:
+            pass
+
     def check_character_constraint(self, parameter_name):
         """
         Check if the parameter-name has a length of ten characters at most,

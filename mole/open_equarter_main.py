@@ -493,6 +493,7 @@ class OpenEQuarterMain:
                 self.iface.legendInterface().setLayerVisible(data_layer, False)
                 OeQ_kill_info()
                 return 2
+        OeQ_kill_info()
         return 1
 
     # step 2.1

@@ -7,7 +7,8 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
+# from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
+from mole.oeq_global import *  # Import only by wildcard, otherwise you have to call the global funcs vie the module name
 
 
 class ProgressItemsModel:
@@ -78,12 +79,14 @@ class ProgressItemsModel:
         plugin_path = OeQ_plugin_path()
         project_path = OeQ_project_path()
         project_name = OeQ_project_name()
+        print 'P1'
 
         default_progress = os.path.join(plugin_path, 'project', 'default_progress')
+        print 'P2'
         project_file = os.path.join(project_path, project_name + '.oeq')
         if os.path.exists(project_file):
             os.remove(project_file)
-
+        print 'P3'
         # write section views
         end = len(self.section_views) + 1
         for i in range(1, end):

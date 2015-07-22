@@ -6,19 +6,19 @@ from qgis.core import QgsProject, NULL
 
 global OeQ_project_info
 OeQ_project_info = {
-    'project_name': 'MyProject',
-    'description': 'The aim of this project, is to analyse a quarter.',
-    'location_city': 'City or street',
-    'location_postal': 'Postal',
-    'location_lon': 'Lon',
-    'location_lat': 'Lat',
-    'location_crs': 'CRS',
+    'project_name': u'MyProject',
+    'description': u'The aim of this project, is to analyse a quarter.',
+    'location_city': u'City or street',
+    'location_postal': u'Postal',
+    'location_lon': u'Lon',
+    'location_lat': u'Lat',
+    'location_crs': u'CRS',
     'heating_degree_days': 390.06,
     'average_build_year': 1917,
     'population_density': 3.859
 }
 
-global OeQ_project_name
+# global OeQ_project_name
 def OeQ_project_name():
     path_to_project = QgsProject.instance().fileName()
     filename = os.path.basename(path_to_project)
@@ -26,22 +26,23 @@ def OeQ_project_name():
     return project_name
 
 
-global OeQ_project_path
+#global OeQ_project_path
 def OeQ_project_path():
     qgis_path = QgsProject.instance().readPath('')
     normed_path = os.path.normpath(qgis_path)
     return normed_path
 
 
-global OeQ_plugin_path
+#global OeQ_plugin_path
 def OeQ_plugin_path():
     file_location = os.path.realpath(__file__)
     directory = os.path.dirname(file_location)
+    print directory
     return directory
 
 
 # the project path equals './' as long as the project has not been saved
-global OeQ_project_saved
+#global OeQ_project_saved
 def OeQ_project_saved():
     return OeQ_project_path() != './'
 

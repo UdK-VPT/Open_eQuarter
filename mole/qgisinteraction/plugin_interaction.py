@@ -262,23 +262,25 @@ class RealCentroidInteraction(object):
 
         while (poly_iterator.nextFeature(poly_feature) and
                point_iterator.nextFeature(point_feature)):
-            try:
-                poly_point = poly_feature.geometry().asPolygon()[0]
-                centroid = point_feature.geometry().asPoint()
-            except IndexError:
-                continue
-            distances = {}
-            for i, point in enumerate(poly_point):
-                end = poly_point[(i+1) % len(poly_point)]
+            geom= poly_feature.geometry()
+            if geom is not None:
                 try:
-                    intersect = self.intersect_point_to_line(centroid, point, end)
-                    if intersect != centroid:
-                        dist = distance_area.measureLine(centroid, intersect)
-                        distances[intersect] = dist
-                except ZeroDivisionError as InvalidMath:
+                        poly_point = geom.asPolygon()[0]
+                        centroid = geom.asPoint()
+                except IndexError:
                     continue
-            values = {field_index: min(distances.values())}
-            point_provider.changeAttributeValues({point_feature.id(): values})
+                distances = {}
+                for i, point in enumerate(poly_point):
+                    end = poly_point[(i+1) % len(poly_point)]
+                    try:
+                        intersect = self.intersect_point_to_line(centroid, point, end)
+                        if intersect != centroid:
+                            dist = distance_area.measureLine(centroid, intersect)
+                            distances[intersect] = dist
+                    except ZeroDivisionError as InvalidMath:
+                        continue
+                values = {field_index: min(distances.values())}
+                point_provider.changeAttributeValues({point_feature.id(): values})
 
 
 

@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 from zipfile import ZipFile
 from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
@@ -79,14 +80,10 @@ class ProgressItemsModel:
         plugin_path = OeQ_plugin_path()
         project_path = OeQ_project_path()
         project_name = OeQ_project_name()
-        print 'P1'
-
         default_progress = os.path.join(plugin_path, 'project', 'default_progress')
-        print 'P2'
         project_file = os.path.join(project_path, project_name + '.oeq')
         if os.path.exists(project_file):
             os.remove(project_file)
-        print 'P3'
         # write section views
         end = len(self.section_views) + 1
         for i in range(1, end):

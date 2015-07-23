@@ -333,6 +333,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
     def show(self):
         for key in OeQ_project_info:
             field = getattr(self, key)
+            print str(OeQ_project_info[key])
             field.setText(str(OeQ_project_info[key]))
         QtGui.QDialog.show(self)
 
@@ -342,7 +343,9 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
     def location_by_address(self):
         postal = self.location_postal.text()
+        if postal == "Postal": postal = ""
         city_street = self.location_city.text()
+        if city_street == "City or street": city_street = ""
 
         if isinstance(city_street, unicode):
             city_street = city_street.encode('utf-8')
@@ -350,7 +353,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             address = address.decode('utf-8')
         else:
             address = '{} {}'.format(postal, city_street)
-
+        print address
         location_info = googlemaps.getCoordinatesByAddress(address, crs=4326)
 
         try:

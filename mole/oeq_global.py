@@ -35,6 +35,7 @@ def OeQ_project_path():
 
 #global OeQ_plugin_path
 def OeQ_plugin_path():
+    if os.path.realpath(__file__) is None: time.sleep(1)
     file_location = os.path.realpath(__file__)
     directory = os.path.dirname(file_location)
     print directory

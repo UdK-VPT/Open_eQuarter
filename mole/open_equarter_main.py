@@ -33,8 +33,7 @@ from qgis.utils import iface
 from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import (
     Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
-    ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog,
-    EstimatedEnergyDemand_dialog)
+    ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog, InformationSource_dialog)
 from qgisinteraction import (
     plugin_interaction,
     layer_interaction,
@@ -64,6 +63,7 @@ class OpenEQuarterMain:
         # Create the dialogues (after translation) and keep references
         self.oeq_project_settings_form = ProjectSettings_form()
         self.color_picker_dlg = ColorPicker_dialog()
+        self.information_source_dlg = InformationSource_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
         self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
@@ -72,8 +72,6 @@ class OpenEQuarterMain:
         self.main_process_dock = None
 
         ### Project specific settings
-        #Now in oeq_global
-
         self.oeq_project = ''
 
         # OpenStreetMap-plugin-layer
@@ -119,14 +117,17 @@ class OpenEQuarterMain:
         settings_dropdown_menu = QMenu()
         config_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'config.png'))
         open_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'open.png'))
+        sources_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'sources.png'))
         settings_dropdown_menu.addAction(config_icon, 'Project configuration..', self.open_settings)
         settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
+        settings_dropdown_menu.addAction(sources_icon, 'Open source configuration..', self.information_source_dlg.exec_)
 
         tools_dropdown_menu = QMenu()
         tools_dropdown_menu.addAction('Color Picker', self.prepare_color_picker)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
         tools_dropdown_menu.addAction('Save extent as image', lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
         tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
+
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)

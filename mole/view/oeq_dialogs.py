@@ -27,7 +27,7 @@ from qgis.utils import iface
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info
+from mole.oeq_global import OeQ_project_info, OeQ_default_information_source
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -38,6 +38,77 @@ from ui_modular_info_dialog import Ui_ModularInfo_dialog
 from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
+from ui_information_source_dialog import Ui_InformationSource_dialog
+
+
+class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
+
+    def __init__(self):
+        QtGui.QDialog.__init__(self)
+        self.setupUi(self)
+
+        self.placeholder = '<Select information type>'
+        self.extension_dropdown.addItem(self.placeholder)
+        for key in OeQ_default_information_source:
+            self.extension_dropdown.addItem(key)
+        self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
+
+        role = QtGui.QDialogButtonBox.ActionRole
+        next_button = self.buttonBox.addButton('Next source..', role)
+        next_button.clicked.connect(self.store_information)
+        role = QtGui.QDialogButtonBox.AcceptRole
+        self.buttonBox.addButton('Done', role)
+
+        self.open_geotiff_btn.clicked.connect(lambda: self.load_source_from_disk(self.geotiff))
+        self.open_shapefile_btn.clicked.connect(lambda: self.load_source_from_disk(self.shapefile))
+        self.open_csv_btn.clicked.connect(lambda: self.load_source_from_disk(self.csv))
+        self.open_dxf_btn.clicked.connect(lambda: self.load_source_from_disk(self.dxf))
+
+    def complete_information(self):
+        """
+        Check if the selected extension has some defaults and if so insert the default info in the text fields.
+        :return:
+        :rtype:
+        """
+        # clear all line-edits first
+        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        for line_edit in line_edits:
+            line_edit.clear()
+
+        extension = self.extension_dropdown.currentText()
+        if extension in OeQ_default_information_source:
+            information_triple = OeQ_default_information_source[extension]
+            self.layer_name.setText(information_triple[0])
+            field = getattr(self, information_triple[1])
+            field.setText(information_triple[2])
+
+    def store_information(self):
+        pass
+
+    def load_source_from_disk(self, field):
+        """
+        Load a source-file according to the field which was passed.
+        :param field:
+        :type field:
+        :return:
+        :rtype:
+        """
+        source = self.extension_dropdown.currentText()
+        if source != self.placeholder:
+            file_extension = ''
+            if field == self.geotiff:
+                file_extension = '.tif'
+            elif field == self.shapefile:
+                file_extension = '.shp'
+            elif field == self.csv:
+                file_extension = '.csv'
+            elif field == self.dxf:
+                file_extension = '.dxf'
+
+            caption = 'Chose a {} file for the "{}" source...'.format(file_extension, source)
+            ext_filter = '*' + file_extension
+            filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter=ext_filter)
+            field.setText(filename)
 
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 

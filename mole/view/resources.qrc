@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="Controls">
+    <file>../icons/sources.png</file>
     <file>../icons/crosshair.png</file>
     <file>../icons/magnifying_glass.png</file>
     <file>../icons/semiopenmark.png</file>

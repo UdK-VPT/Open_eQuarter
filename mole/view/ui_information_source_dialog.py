@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_information_source_dialog.ui'
 #
-# Created: Mon Aug  3 17:16:50 2015
+# Created: Mon Aug  3 17:56:38 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,14 +23,14 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(457, 421)
-        Dialog.setStyleSheet(_fromUtf8(""))
-        self.verticalLayout = QtGui.QVBoxLayout(Dialog)
+class Ui_InformationSource_dialog(object):
+    def setupUi(self, InformationSource_dialog):
+        InformationSource_dialog.setObjectName(_fromUtf8("InformationSource_dialog"))
+        InformationSource_dialog.resize(457, 421)
+        InformationSource_dialog.setStyleSheet(_fromUtf8(""))
+        self.verticalLayout = QtGui.QVBoxLayout(InformationSource_dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.gridWidget = QtGui.QWidget(Dialog)
+        self.gridWidget = QtGui.QWidget(InformationSource_dialog)
         self.gridWidget.setStyleSheet(_fromUtf8("QPushButton {\n"
 "    margin-bottom: 3px;\n"
 "}\n"
@@ -195,33 +195,33 @@ class Ui_Dialog(object):
         self.blind3.setObjectName(_fromUtf8("blind3"))
         self.grid.addWidget(self.blind3, 8, 2, 1, 1)
         self.verticalLayout.addWidget(self.gridWidget)
-        self.buttonBox = QtGui.QDialogButtonBox(Dialog)
+        self.buttonBox = QtGui.QDialogButtonBox(InformationSource_dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.NoButton)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout.addWidget(self.buttonBox)
 
-        self.retranslateUi(Dialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), Dialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), Dialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(InformationSource_dialog)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), InformationSource_dialog.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), InformationSource_dialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(InformationSource_dialog)
 
-    def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog", None))
-        self.open_dxf_btn.setText(_translate("Dialog", "...", None))
-        self.label_7.setText(_translate("Dialog", "SHP", None))
-        self.label_6.setText(_translate("Dialog", "GeoTiff", None))
-        self.label_8.setText(_translate("Dialog", "WFS", None))
-        self.open_geotiff_btn.setText(_translate("Dialog", "...", None))
-        self.open_shapefile_btn.setText(_translate("Dialog", "...", None))
-        self.label_2.setText(_translate("Dialog", "Raster", None))
-        self.label_4.setText(_translate("Dialog", "Table", None))
-        self.open_csv_btn.setText(_translate("Dialog", "...", None))
-        self.label_9.setText(_translate("Dialog", "DXF", None))
-        self.label_3.setText(_translate("Dialog", "Vector", None))
-        self.label.setText(_translate("Dialog", "Information type:", None))
-        self.label_5.setText(_translate("Dialog", "WMS", None))
-        self.label_11.setText(_translate("Dialog", "Layer name:", None))
-        self.label_10.setText(_translate("Dialog", "CSV", None))
-        self.label_12.setText(_translate("Dialog", "Load information source", None))
+    def retranslateUi(self, InformationSource_dialog):
+        InformationSource_dialog.setWindowTitle(_translate("InformationSource_dialog", "Dialog", None))
+        self.open_dxf_btn.setText(_translate("InformationSource_dialog", "...", None))
+        self.label_7.setText(_translate("InformationSource_dialog", "SHP", None))
+        self.label_6.setText(_translate("InformationSource_dialog", "GeoTiff", None))
+        self.label_8.setText(_translate("InformationSource_dialog", "WFS", None))
+        self.open_geotiff_btn.setText(_translate("InformationSource_dialog", "...", None))
+        self.open_shapefile_btn.setText(_translate("InformationSource_dialog", "...", None))
+        self.label_2.setText(_translate("InformationSource_dialog", "Raster", None))
+        self.label_4.setText(_translate("InformationSource_dialog", "Table", None))
+        self.open_csv_btn.setText(_translate("InformationSource_dialog", "...", None))
+        self.label_9.setText(_translate("InformationSource_dialog", "DXF", None))
+        self.label_3.setText(_translate("InformationSource_dialog", "Vector", None))
+        self.label.setText(_translate("InformationSource_dialog", "Information type:", None))
+        self.label_5.setText(_translate("InformationSource_dialog", "WMS", None))
+        self.label_11.setText(_translate("InformationSource_dialog", "Layer name:", None))
+        self.label_10.setText(_translate("InformationSource_dialog", "CSV", None))
+        self.label_12.setText(_translate("InformationSource_dialog", "Load information source", None))
 

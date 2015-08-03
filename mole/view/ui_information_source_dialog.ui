@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>InformationSource_dialog</class>
+ <widget class="QDialog" name="InformationSource_dialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -372,7 +372,7 @@ QLabel {
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::NoButton</set>
      </property>
     </widget>
    </item>
@@ -383,7 +383,7 @@ QLabel {
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>InformationSource_dialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -399,7 +399,7 @@ QLabel {
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>InformationSource_dialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

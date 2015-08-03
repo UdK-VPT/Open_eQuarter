@@ -545,6 +545,7 @@ class OpenEQuarterMain:
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
                 raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+                raster_layers = filter(lambda wms_layer: not wms_layer.source().endswith('.tif'), raster_layers)
 
                 progressbar = OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
                                                    u"This may take some time...",

@@ -29,8 +29,8 @@ from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
 from mole.oeq_global import OeQ_project_info
 from mole.webinteraction import googlemaps
-from ui_color_picker_dialog import Ui_color_picker_dialog
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
+from ui_color_picker_dialog import Ui_color_picker_dialog
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
 from ui_project_does_not_exist_dialog import Ui_ProjectDoesNotExist_dialog
 from ui_project_settings_form import Ui_project_settings_form
@@ -59,6 +59,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
         # connect the signals
         self.color_table_view.clicked.connect(self.remove_entry)
+        self.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
+        self.layers_dropdown.currentIndexChanged.connect(self.hide_and_reorder_layers)
 
         role = QtGui.QDialogButtonBox.ActionRole
         load_button = self.buttonBox.addButton('Load legend...', role)
@@ -181,7 +183,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             wms_layer = layer_interaction.find_layer_by_name(layer)
             url = wms_layer.legendUrl()
             self.legend_view.load(QtCore.QUrl(url))
-        except TypeError as NoneTypeError:
+        except (TypeError, AttributeError) as NoneTypeError:
             pass
 
     def check_character_constraint(self, parameter_name):
@@ -222,6 +224,64 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.message_label.setStyleSheet(_fromUtf8("color: red;"))
             self.message_label.setText('Failure - Could not write legend to to \n\t"{}".'.format(out_path))
+
+    def refresh_layer_list(self):
+        """
+        Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
+        :return:
+        :rtype:
+        """
+        dropdown = self.layers_dropdown
+        dropdown.clear()
+        wms_list = layer_interaction.get_wms_layer_list(iface, visibility='visible')
+
+        layer = None
+        for layer in wms_list:
+            source = layer.publicSource()
+            if os.path.basename(source).endswith('.tif'):
+                dropdown.addItem(layer.name())
+                self.color_entry_manager.add_layer(layer.name())
+
+        layer_interaction.move_layer_to_position(iface, layer, 0)
+
+    def hide_and_reorder_layers(self):
+        """
+        Hide all .tif-layers except for the one which is currently selected and put that layer on top of the layer tree.
+        :return:
+        :rtype:
+        """
+        for i in range(self.layers_dropdown.count()):
+            layer_name = self.layers_dropdown.itemText(i)
+            layer_interaction.unhide_or_remove_layer(layer_name, 'hide', iface)
+
+        current_layer = self.layers_dropdown.currentText()
+        layer_interaction.move_layer_to_position(iface, current_layer, 0)
+        layer_interaction.unhide_or_remove_layer(current_layer, 'unhide', iface)
+
+    def show(self):
+        """
+        Update the dropdown menu and hide all .tif-layers except for the one which is currently selected.
+        :return:
+        :rtype:
+        """
+        self.refresh_layer_list()
+        self.hide_and_reorder_layers()
+        QtGui.QDialog.show(self)
+
+    def exec_(self):
+        """
+        Call the super exec_ method and make the .tif-layers visible again,
+        which were hidden during the color-picking-process.
+        :return:
+        :rtype:
+        """
+        self.show()
+        QtGui.QDialog.exec_(self)
+
+        for i in range(self.layers_dropdown.count()):
+            layer_name = self.layers_dropdown.itemText(i)
+            layer_interaction.unhide_or_remove_layer(layer_name, 'unhide', iface)
+
 
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):

@@ -118,7 +118,7 @@ def find_layer_by_name(layer_name):
             return None
 
 
-def hide_or_remove_layer(layer_name, mode='hide', iface = None):
+def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
     """
     Hide or remove the given layer from the MapLayerRegistry, depending on the mode.
     :param layer_name: Name of the layer to remove/hide
@@ -134,6 +134,9 @@ def hide_or_remove_layer(layer_name, mode='hide', iface = None):
 
     if layer and mode == 'hide' and iface:
         iface.legendInterface().setLayerVisible(layer, False)
+
+    if layer and mode == 'unhide' and iface:
+        iface.legendInterface().setLayerVisible(layer, True)
 
 #ToDo Try to use the currently recommended way to save the layer
 def write_vector_layer_to_disk(vlayer, full_path):

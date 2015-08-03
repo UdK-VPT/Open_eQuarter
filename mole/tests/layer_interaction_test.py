@@ -130,10 +130,14 @@ class LayerInteraction_test(unittest.TestCase):
         self.layer_list.append(v1_name)
         self.assertEqual(reg.mapLayersByName(v1_name)[0].name(), v1_name, 'Layer was not added.')
 
-        layer_interaction.hide_or_remove_layer(v1_name, 'hide', iface)
-        self.assertFalse(iface.legendInterface().isLayerVisible(layer_interaction.find_layer_by_name(v1_name)))
+        layer_interaction.unhide_or_remove_layer(v1_name, 'hide', iface)
+        v1_layer = layer_interaction.find_layer_by_name(v1_name)
+        self.assertFalse(iface.legendInterface().isLayerVisible(v1_layer))
 
-        layer_interaction.hide_or_remove_layer(v1_name, 'remove')
+        layer_interaction.unhide_or_remove_layer(v1_name, 'unhide', iface)
+        self.assertTrue(iface.legendInterface().isLayerVisible(v1_layer))
+
+        layer_interaction.unhide_or_remove_layer(v1_name, 'remove')
         self.assertEqual(reg.mapLayersByName(v1_name), [], 'Layer was not removed.')
 
     def test_write_vector_layer_to_disk(self):

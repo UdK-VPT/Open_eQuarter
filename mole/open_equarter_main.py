@@ -171,26 +171,6 @@ class OpenEQuarterMain:
     def load_wms(self):
         print('Load wms')
 
-    # ToDo Check if this has to be put in a separate method
-    def refresh_layer_list(self):
-        """
-        Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
-        :return:
-        :rtype:
-        """
-        dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.clear()
-        wms_list = layer_interaction.get_wms_layer_list(self.iface, visibility='visible')
-
-        layer = None
-        for layer in wms_list:
-            source = layer.publicSource()
-            if os.path.basename(source).endswith('.tif'):
-                dropdown.addItem(layer.name())
-                self.color_picker_dlg.color_entry_manager.add_layer(layer.name())
-
-        layer_interaction.move_layer_to_position(self.iface, layer, 0)
-
     def handle_canvas_click(self, point, button):
         """
         Handle a user's click on the map-canvas.
@@ -426,7 +406,7 @@ class OpenEQuarterMain:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
             if disk_layer.isValid():
-                layer_interaction.hide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
+                layer_interaction.unhide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
                 layer_interaction.add_layer_to_registry(disk_layer)
                 layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, disk_layer)
                 # trigger the edit-mode, to have the style displayed.
@@ -438,7 +418,7 @@ class OpenEQuarterMain:
         except AttributeError, NoneTypeError:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', NoneTypeError)
         try:
-            layer_interaction.hide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
+            layer_interaction.unhide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
         except AttributeError, NoneTypeError:
             print(self.__module__, NoneTypeError)
 
@@ -615,7 +595,7 @@ class OpenEQuarterMain:
                     old_validation = str(QSettings().value('/Projections/defaultBehaviour', 'useProject'))
                     QSettings().setValue('/Projections/defaultBehaviour', 'useProject')
 
-                    layer_interaction.hide_or_remove_layer(layer_name, 'remove', self.iface)
+                    layer_interaction.unhide_or_remove_layer(layer_name, 'remove', self.iface)
                     rlayer = QgsRasterLayer(path_transformed, layer_name)
                     rlayer.setCrs(QgsCoordinateReferenceSystem(config.project_crs))
                     #write legendUrl to the converted layer
@@ -639,39 +619,12 @@ class OpenEQuarterMain:
 
     def prepare_color_picker(self):
         self.pick_color()
-        self.color_picker_dlg.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
         self.color_picker_dlg.start_colorpicking.clicked.connect(self.pick_color)
-        self.refresh_layer_list()
-
-        # layers = QgsMapLayerRegistry.instance().mapLayers().values()
-        # visible_layers = filter(lambda l: iface.legendInterface().isLayerVisible(l), layers)
-        # map(lambda l: layer_interaction.hide_or_remove_layer(l, 'hide', self.iface), visible_layers)
-
-        dropdown = self.color_picker_dlg.layers_dropdown
-        dropdown.currentIndexChanged.connect(lambda: layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0))
-        layer_interaction.move_layer_to_position(self.iface, dropdown.currentText(), 0)
-        self.color_picker_dlg.show()
         save_or_abort = self.color_picker_dlg.exec_()
-        succes = False
-
-        for layer in self.color_picker_dlg.layers_dropdown.children():
-            print layer
-
-        # while save_or_abort:
-        #     layer = self.iface.activeLayer()
-        #     out_path = os.path.dirname(layer.publicSource())
-        #     out_path = os.path.join(out_path, layer.name() + '.qml')
-        #     self.color_picker_dlg.update_color_values()
-        #     self.iface.actionPan().trigger()
-        #     entry_written = self.color_picker_dlg.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
-        #     if entry_written:
-        #         QMessageBox.information(self.iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
-        #         succes = True
-        #         self.reorder_layers()
-        #     save_or_abort = self.color_picker_dlg.exec_()
+        success = False
 
         self.iface.actionPan().trigger()
-        if succes:
+        if success:
             return 2
         else:
             self.reorder_layers()

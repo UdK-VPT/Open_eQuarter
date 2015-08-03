@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_color_picker_dialog.ui'
 #
-# Created: Tue Jul 14 13:00:48 2015
+# Created: Mon Aug  3 11:34:56 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -110,11 +110,11 @@ class Ui_color_picker_dialog(object):
         self.verticalLayout.addWidget(self.widget)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
-        self.warning_label = QtGui.QLabel(color_picker_dialog)
-        self.warning_label.setStyleSheet(_fromUtf8("color: red;"))
-        self.warning_label.setText(_fromUtf8(""))
-        self.warning_label.setObjectName(_fromUtf8("warning_label"))
-        self.verticalLayout.addWidget(self.warning_label)
+        self.message_label = QtGui.QLabel(color_picker_dialog)
+        self.message_label.setStyleSheet(_fromUtf8("color: red;"))
+        self.message_label.setText(_fromUtf8(""))
+        self.message_label.setObjectName(_fromUtf8("message_label"))
+        self.verticalLayout.addWidget(self.message_label)
         self.start_colorpicking = QtGui.QPushButton(color_picker_dialog)
         self.start_colorpicking.setMinimumSize(QtCore.QSize(20, 20))
         self.start_colorpicking.setMaximumSize(QtCore.QSize(27, 27))

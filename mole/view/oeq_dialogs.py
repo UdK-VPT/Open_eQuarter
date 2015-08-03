@@ -149,10 +149,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
         color_key = 'RGBa({}, {}, {}, {})'.format(color.red(), color.green(), color.blue(), color.alpha())
         if color_map.has_key(color_key):
-            self.warning_label.setText('Attention: Color {} is defined already.'.format(color_key))
+            self.message_label.setStyleSheet(_fromUtf8("color: red;"))
+            self.message_label.setText('Attention: Color {} is defined already.'.format(color_key))
 
         else:
-            self.warning_label.clear()
+            self.message_label.clear()
             #ToDo change to use the correct para-name instead
             parameter_name = str(self.layers_dropdown.currentText())[:10]
             self.color_entry_manager.add_color_value_quadruple_to_layer([color_key, parameter_name, 0, 0], layer)
@@ -193,9 +194,10 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         if len(parameter_name) == 10 and parameter_name != 'Parameter ':
-            self.warning_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
+            self.message_label.setStyleSheet(_fromUtf8("color: red;"))
+            self.message_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
         else:
-            self.warning_label.clear()
+            self.message_label.clear()
 
     def load_color_map(self):
         self.hide()
@@ -215,9 +217,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.update_color_values()
         entry_written = self.color_entry_manager.write_color_map_as_qml(layer.name(), out_path)
         if entry_written:
-            QtGui.QMessageBox.information(iface.mainWindow(), 'Success', 'Legend was successfully written to "{}".'.format(out_path))
+            self.message_label.setStyleSheet(_fromUtf8("color: green;"))
+            self.message_label.setText('Success - Legend was successfully written to \n\t"{}".'.format(out_path))
         else:
-            QtGui.QErrorMessage.information(iface.mainWindow(), 'Failure', 'Could not write legend to to "{}".'.format(out_path))
+            self.message_label.setStyleSheet(_fromUtf8("color: red;"))
+            self.message_label.setText('Failure - Could not write legend to to \n\t"{}".'.format(out_path))
 
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):

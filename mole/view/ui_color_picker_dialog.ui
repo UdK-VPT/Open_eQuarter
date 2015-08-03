@@ -199,7 +199,7 @@ background-color: rgb(237, 237, 237);</string>
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="warning_label">
+    <widget class="QLabel" name="message_label">
      <property name="styleSheet">
       <string notr="true">color: red;</string>
      </property>

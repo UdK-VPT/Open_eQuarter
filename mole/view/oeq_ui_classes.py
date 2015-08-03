@@ -158,7 +158,6 @@ class QColorTableModel(QAbstractTableModel):
             row = index.row()
             col = index.column()
             key = self.in_data.keys()[row]
-            print(key, self.in_data[key], index.column())
             self.in_data[key][col-1] = data
             self.dataChanged.emit(index, index)
             return True

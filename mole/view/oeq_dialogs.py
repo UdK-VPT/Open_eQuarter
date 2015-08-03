@@ -44,7 +44,6 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
         self.layers_dropdown.currentIndexChanged.connect(self.update_color_values)
@@ -162,6 +161,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             color_map = self.color_entry_manager.layer_values_map[layer]
             model = QColorTableModel(color_map, self.header, self)
             self.color_table_view.setModel(model)
+        self.raise_()
 
     def update_color_values(self):
         """
@@ -202,13 +202,23 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             self.message_label.clear()
 
     def load_color_map(self):
-        self.hide()
-        filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption='Chose a .qml-legend file', filter='*.qml')
-        self.show()
+        """
+        Load a color-map for the currently opened layer.
+        :return:
+        :rtype:
+        """
+        layer = self.layers_dropdown.currentText()
+        caption = 'Chose a .qml-legend file for the "{}"-layer...'.format(layer)
+        filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
         self.color_entry_manager.read_color_map_from_qml(filename)
         self.update_color_values()
 
     def save_color_map(self):
+        """
+        Save the currently open color-map as a qml-file into the project folder.
+        :return:
+        :rtype:
+        """
         layer = iface.activeLayer()
         selected_layer = self.layers_dropdown.currentText()
         if layer.name() != selected_layer:
@@ -277,11 +287,9 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         """
         self.show()
         QtGui.QDialog.exec_(self)
-
         for i in range(self.layers_dropdown.count()):
             layer_name = self.layers_dropdown.itemText(i)
             layer_interaction.unhide_or_remove_layer(layer_name, 'unhide', iface)
-
 
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):

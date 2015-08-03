@@ -4,16 +4,17 @@ import json
 import mole
 import qgis.utils
 
-
 import xml.etree.ElementTree as etree
 from io import open
 from collections import OrderedDict
+
 
 class ColorEntryManager:
     """
     Model for the color picker, which keeps track of the colors which are related to a layer
     and can save/read these information to/from disk.
     """
+
     def __init__(self):
         self.layer_values_map = {}
         self.layer_abbreviation_map = {}
@@ -83,50 +84,52 @@ class ColorEntryManager:
         del entries[color_entry]
         self.set_color_map_of_layer(entries, layer)
 
-
     def write_color_map_as_qml(self, layer_name, out_path):
 
         def qml_header():
-            return('<!DOCTYPE qgis PUBLIC \'http://mrcc.com/qgis.dtd\' \'SYSTEM\'>\n'
+            return ('<!DOCTYPE qgis PUBLIC \'http://mrcc.com/qgis.dtd\' \'SYSTEM\'>\n'
                     '<qgis version="' + qgis.utils.QGis.QGIS_VERSION + '">\n'
-                    '   <edittypes></edittypes>\n'
-                    '   <renderer-v2 symbollevels="0" type="graduatedSymbol">\n'
-                    '       <ranges>\n')
-        def qml_range(id,lower,upper,label=None):
-            if label == None: label= str(round(float(lower),1)) + ' - ' + str(round(float(upper),1))
-            return '            <range render="true" symbol="'+ str(id) + '" lower="' + str(lower) + '" upper="' + str(upper) + '" label="' + label + '"/>\n'
+                                                                       '   <edittypes></edittypes>\n'
+                                                                       '   <renderer-v2 symbollevels="0" type="graduatedSymbol">\n'
+                                                                       '       <ranges>\n')
+
+        def qml_range(id, lower, upper, label=None):
+            if label == None: label = str(round(float(lower), 1)) + ' - ' + str(round(float(upper), 1))
+            return '            <range render="true" symbol="' + str(id) + '" lower="' + str(lower) + '" upper="' + str(
+                upper) + '" label="' + label + '"/>\n'
 
         def qml_inter1():
-            return('        </ranges>\n'
-                   '        <symbols>\n')
+            return ('        </ranges>\n'
+                    '        <symbols>\n')
 
-        def qml_symbol(id,R,G,B,alpha):
-            return('            <symbol alpha="1" type="fill" name="' + str(id) + '">\n'
-                    '               <layer pass="0" class="SimpleFill" locked="0">\n'
-                    '                   <prop k="border_width_map_unit_scale" v="0,0"/>\n'
-                    '                   <prop k="color" v="'+ str(R) + ',' + str(G) + ',' + str(B) + ',' + str(alpha) + '"/>\n'
-                    '                   <prop k="joinstyle" v="bevel"/>\n'
-                    '                   <prop k="offset" v="0,0"/>\n'
-                    '                   <prop k="offset_map_unit_scale" v="0,0"/>\n'
-                    '                   <prop k="offset_unit" v="MM"/>\n'
-                    '                   <prop k="outline_color" v="0,0,0,255"/>\n'
-                    '                   <prop k="outline_style" v="solid"/>\n'
-                    '                   <prop k="outline_width" v="0.66"/>\n'
-                    '                   <prop k="outline_width_unit" v="MM"/>\n'
-                    '                   <prop k="style" v="solid"/>\n'
-                    '               </layer>\n'
-                    '           </symbol>\n')
+        def qml_symbol(id, R, G, B, alpha):
+            return ('            <symbol alpha="1" type="fill" name="' + str(id) + '">\n'
+                                                                                   '               <layer pass="0" class="SimpleFill" locked="0">\n'
+                                                                                   '                   <prop k="border_width_map_unit_scale" v="0,0"/>\n'
+                                                                                   '                   <prop k="color" v="' + str(
+                R) + ',' + str(G) + ',' + str(B) + ',' + str(alpha) + '"/>\n'
+                                                                      '                   <prop k="joinstyle" v="bevel"/>\n'
+                                                                      '                   <prop k="offset" v="0,0"/>\n'
+                                                                      '                   <prop k="offset_map_unit_scale" v="0,0"/>\n'
+                                                                      '                   <prop k="offset_unit" v="MM"/>\n'
+                                                                      '                   <prop k="outline_color" v="0,0,0,255"/>\n'
+                                                                      '                   <prop k="outline_style" v="solid"/>\n'
+                                                                      '                   <prop k="outline_width" v="0.66"/>\n'
+                                                                      '                   <prop k="outline_width_unit" v="MM"/>\n'
+                                                                      '                   <prop k="style" v="solid"/>\n'
+                                                                      '               </layer>\n'
+                                                                      '           </symbol>\n')
 
         def qml_inter2():
-            return('        </symbols>\n'
+            return ('        </symbols>\n'
                     '   </renderer-v2>\n'
                     '   <customproperties>\n')
 
-        def qml_property(key,value):
-            return('        <property key="'+ str(key) + '" value="' + str(value) + '"/>\n')
+        def qml_property(key, value):
+            return ('        <property key="' + str(key) + '" value="' + str(value) + '"/>\n')
 
         def qml_footer():
-            return('    </customproperties>\n'
+            return ('    </customproperties>\n'
                     '   <blendMode>0</blendMode>\n'
                     '   <featureBlendMode>0</featureBlendMode>\n'
                     '   <layerTransparency>0</layerTransparency>\n'
@@ -143,29 +146,27 @@ class ColorEntryManager:
                     '   <attributeactions/>\n'
                     '</qgis>')
 
-
         if self.layer_values_map.has_key(layer_name):
             out_dict = self.layer_values_map[layer_name]
             if out_dict:
-                qml=qml_header()
-                cnt=0
-                out_ranges=""
-                out_symbols=""
-                out_properties=""
+                cnt = 0
+                out_ranges = ""
+                out_symbols = ""
+                out_properties = ""
                 for entry in out_dict.keys():
-                    rgba=entry.replace(" ","").replace("RGBa(","").replace(")","").split(",")
-                    #["Id"]=entry[1]
-                    #["lowLim"]=entry[2]
-                    #["highLim"]=entry[3]
-                    out_ranges=out_ranges + qml_range(cnt,out_dict[entry][1],out_dict[entry][2],None)
+                    rgba = entry.replace(" ", "").replace("RGBa(", "").replace(")", "").split(",")
+                    # ["Id"]=entry[1]
+                    # ["lowLim"]=entry[2]
+                    # ["highLim"]=entry[3]
+                    out_ranges += qml_range(cnt, out_dict[entry][1], out_dict[entry][2], None)
                     print rgba
-                    out_symbols = out_symbols  + qml_symbol(cnt,rgba[0],rgba[1],rgba[2],rgba[3])
-                    out_properties=out_properties + qml_property("ParName"+ str(cnt), out_dict[entry][0])
-                    cnt+=1
+                    out_symbols += qml_symbol(cnt, rgba[0], rgba[1], rgba[2], rgba[3])
+                    out_properties += qml_property("ParName" + str(cnt), out_dict[entry][0])
+                    cnt += 1
                 if self.layer_abbreviation_map.has_key(layer_name):
-                    out_properties=out_properties + qml_property("LayAbr", self.layer_abbreviation_map[layer_name])
+                    out_properties += qml_property("LayAbr", self.layer_abbreviation_map[layer_name])
 
-                qml_out= qml_header() + out_ranges + qml_inter1() + out_symbols + qml_inter2() + out_properties + qml_footer()
+                qml_out = qml_header() + out_ranges + qml_inter1() + out_symbols + qml_inter2() + out_properties + qml_footer()
 
                 try:
                     with open(out_path, 'w', encoding='utf-8') as qml_file:
@@ -184,69 +185,63 @@ class ColorEntryManager:
         result_dict = {}
 
         def get_colors(tree):
-            out_col={}
-            symbols=tree.find('renderer-v2/symbols')
+            out_col = {}
+            symbols = tree.find('renderer-v2/symbols')
             for i in symbols:
-                layer=i.find('layer')
+                layer = i.find('layer')
                 for j in layer:
-                    if j.attrib['k']=='color':
-                        out_col[i.attrib['name']] = 'RGBa( ' + j.attrib['v'].replace(',',' , ') + ')'
+                    if j.attrib['k'] == 'color':
+                        out_col[i.attrib['name']] = 'RGBa(' + j.attrib['v'].replace(',', ', ') + ')'
             return out_col
 
         def get_ranges(tree):
-            out_rng={}
-            ranges=tree.find('renderer-v2/ranges')
+            out_rng = {}
+            ranges = tree.find('renderer-v2/ranges')
             for i in ranges:
-                out_rng[i.attrib['symbol']]= [i.attrib['lower'],i.attrib['upper']]
+                out_rng[i.attrib['symbol']] = [i.attrib['lower'], i.attrib['upper']]
             return out_rng
 
         def get_parNames(tree):
-            out_par={}
-            props=tree.find('customproperties')
+            out_par = {}
+            props = tree.find('customproperties')
             for i in props:
                 if i.attrib['key'].startswith('ParName'):
-                    name=i.attrib['key']
-                    name=name.replace("ParName","")
-                    print name
-                    print i.attrib['value']
-                    print i.attrib
-
-                    out_par[name]= i.attrib['value']
+                    name = i.attrib['key']
+                    name = name.replace("ParName", "")
+                    out_par[name] = i.attrib['value']
             return out_par
 
         def get_abrev(tree):
-            out_par={}
-            props=tree.find('customproperties')
+            out_par = {}
+            props = tree.find('customproperties')
             for i in props:
                 if i.attrib['key'].startswith('LayAbr'):
                     out_par['LayAbr'] = i.attrib['value']
             return out_par
 
         try:
-            qml_tree=etree.parse(in_path)
-            qml_col=get_colors(qml_tree)
-            qml_par=get_parNames(qml_tree)
-            qml_rng=get_ranges(qml_tree)
-            qml_abr=get_abrev(qml_tree)
-            ID_range=[]
+            qml_tree = etree.parse(in_path)
+            qml_col = get_colors(qml_tree)
+            qml_par = get_parNames(qml_tree)
+            qml_rng = get_ranges(qml_tree)
+            qml_abr = get_abrev(qml_tree)
             for i in qml_col.keys():
-                result_dict[qml_col[i]]= [qml_par[i],qml_rng[i][0],qml_rng[i][1]]
+                result_dict[qml_col[i]] = [qml_par[i], qml_rng[i][0], qml_rng[i][1]]
 
-
-            if len(qml_abr)>0:
+            if len(qml_abr) > 0:
                 self.layer_abbreviation_map[layer_name] = qml_abr[0]
 
         except IOError, Error:
-           print('{}: {}'.format(self.__module__, Error))
+            print('{}: {}'.format(self.__module__, Error))
 
         self.set_color_map_of_layer(result_dict, layer_name)
-
 
 
 class MunicipalInformationParser:
     """
     A parser-class to scan a .json file for all municipals with a given postcode.
     """
+
     def __init__(self):
         self.municipal = []
 
@@ -281,6 +276,7 @@ class MunicipalInformationTree:
     """
     A model which stores all municipal information ordered by postal-code in a tree-like array-structure.
     """
+
     def __init__(self):
         self.tree = {}
         mole_path = mole.__file__

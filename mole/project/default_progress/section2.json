@@ -1,9 +1,10 @@
 {"section_name": "source_definition", "description" : "Source Definition", "steplist":
 [
   {"step_name": "investigation_area_selected", "description" : "Define your investigation area", "state": 0},
-  {"step_name": "housing_layer_loaded", "description" : "Load building outlines (\"Hausumringe\")", "state": 0},
+  {"step_name": "source_layers_loaded", "description" : "Load source maps", "state": 0},
+  {"step_name": "housing_layer_loaded", "description" : "Intersect building outlines (\"Hausumringe\") with your investigation area", "state": 0},
   {"step_name": "building_coordinates_loaded", "description" : "Load building coordinates", "state": 0},
-  {"step_name": "raster_loaded", "description" : "Load WMS source maps", "state": 0},
-  {"step_name": "legend_created", "description" : "Capture WMS maps and create lookup tables", "state": 0}
+  {"step_name": "raster_loaded", "description" : "Capture WMS maps", "state": 0},
+  {"step_name": "legend_created", "description" : "Create lookup tables", "state": 0}
 ]
 }

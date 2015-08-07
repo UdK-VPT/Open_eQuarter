@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'view/ui_information_source_dialog.ui'
 #
-# Created: Mon Aug  3 17:56:38 2015
+# Created: Fri Aug 07 15:50:35 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -91,7 +91,7 @@ class Ui_InformationSource_dialog(object):
         self.label_2.setMinimumSize(QtCore.QSize(0, 25))
         self.label_2.setMaximumSize(QtCore.QSize(16777215, 35))
         font = QtGui.QFont()
-        font.setPointSize(13)
+        font.setPointSize(8)
         font.setBold(True)
         font.setItalic(False)
         font.setUnderline(False)
@@ -163,7 +163,7 @@ class Ui_InformationSource_dialog(object):
         self.label_12 = QtGui.QLabel(self.gridWidget)
         self.label_12.setMaximumSize(QtCore.QSize(16777215, 20))
         font = QtGui.QFont()
-        font.setPointSize(13)
+        font.setPointSize(10)
         font.setBold(True)
         font.setUnderline(False)
         font.setWeight(75)

@@ -77,30 +77,34 @@ class ProgressItemsModel:
         :rtype:
         """
         print('Saving the OeQ-project instance')
-        plugin_path = OeQ_plugin_path()
-        project_path = OeQ_project_path()
-        project_name = OeQ_project_name()
-        default_progress = os.path.join(plugin_path, 'project', 'default_progress')
-        project_file = os.path.join(project_path, project_name + '.oeq')
-        if os.path.exists(project_file):
-            os.remove(project_file)
-        # write section views
-        end = len(self.section_views) + 1
-        for i in range(1, end):
-            model = self.section_views[i-1].model()
-            json_file = os.path.join(default_progress, 'section{}.json'.format(i))
-            with open(json_file, "r") as jsonFile:
-                json_data = json.load(jsonFile)
+        try:
+            plugin_path = OeQ_plugin_path()
+            project_path = OeQ_project_path()
+            project_name = OeQ_project_name()
 
-            for j, step in enumerate(json_data['steplist']):
-                    step['state'] = model.item(j).checkState()
+            default_progress = os.path.join(plugin_path, 'project', 'default_progress')
+            project_file = os.path.join(project_path, project_name + '.oeq')
+            if os.path.exists(project_file):
+                os.remove(project_file)
+            # write section views
+            end = len(self.section_views) + 1
+            for i in range(1, end):
+                model = self.section_views[i-1].model()
+                json_file = os.path.join(default_progress, 'section{}.json'.format(i))
+                with open(json_file, "r") as jsonFile:
+                    json_data = json.load(jsonFile)
 
+                for j, step in enumerate(json_data['steplist']):
+                        step['state'] = model.item(j).checkState()
+
+                with ZipFile(project_file, 'a') as oeq_zip:
+                    oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))
+
+            # write project info
             with ZipFile(project_file, 'a') as oeq_zip:
-                oeq_zip.writestr('section{}.json'.format(i), json.dumps(json_data))
-
-        # write project info
-        with ZipFile(project_file, 'a') as oeq_zip:
-            oeq_zip.writestr('project_info.json', json.dumps(OeQ_project_info))
+                oeq_zip.writestr('project_info.json', json.dumps(OeQ_project_info))
+        except (TypeError, AttributeError) as AccessOeqGlobalError:
+            print(self.__module__, AccessOeqGlobalError)
 
     def check_prerequisites_for(self, step_name):
         """

@@ -430,40 +430,99 @@ class OpenEQuarterMain:
         self.continue_process()
 
     # step 2.0
+    def handle_source_layers_loaded(self):
+        done = self.information_source_dlg.exec_()
+        if done:
+            shape_sources = OeQ_information_source['shapefile']
+            for shape in shape_sources:
+                if shape[0].startswith('Building outlines'):
+                    done = 2
+                    break
+
+            self.load_raster_maps()
+
+        return done
+
+    def load_raster_maps(self):
+        """
+        Load the wms-maps that were defined in the source-dialog
+        :return:
+        :rtype:
+        """
+        raster_layers = []
+
+        for raster_triple in OeQ_information_source['wms']:
+            name = raster_triple[1]
+            url = raster_triple[2]
+            raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
+            raster_layers.append(raster_layer)
+
+        raster_loaded = False
+        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
+                                           u"WMS Servers are slow, this may take a while...",
+                                           maxcount=len(raster_layers) + 2)
+        progress_counter = OeQ_push_progressbar(progressbar, 0)
+        for raster in raster_layers:
+            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+            try:
+                if raster.isValid():
+                    layer_interaction.add_layer_to_registry(raster)
+                    self.iface.setActiveLayer(raster)
+                    raster_loaded = True
+
+            except AttributeError as NoneTypeError:
+                print(self.__module__, NoneTypeError)
+
+        if not raster_loaded:
+            self.iface.actionAddWmsLayer().trigger()
+        # Let's wait for the WMS loading
+        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+        OeQ_kill_progressbar()
+
+    # step 2.1
     def handle_housing_layer_loaded(self):
-        user_dir = os.path.expanduser('~')
-        housing_layer_path = os.path.join(user_dir, 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')
+        shape_sources = OeQ_information_source['shapefile']
+        shape_name = ''
+        shape_path = ''
+
+        for shape in shape_sources:
+            if shape[0].startswith('Building outlines'):
+                shape_name = shape[1]
+                shape_path = shape[2]
+                break
+
+        building_outlines_path = os.path.normpath(shape_path)
         intersection_done = False
-        #Check wether IA Layer exists
+
+        #Check wether IA Layer exists and has polygons defined
         if not layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
-            OeQ_init_error("Unable to get building outlines","Map 'Investigation Area' could not be found...")
+            OeQ_init_error("Unable to create building outlines", "Map 'Investigation Area' could not be found...")
             return intersection_done
-        #Check wether there are polygons  existing on theIA Layer
         if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).featureCount() < 0:
-            OeQ_init_error("Unable to get building outlines","No areas defined in map 'Investigation Area'...")
+            OeQ_init_error("Unable to create building outlines", "No areas defined in map 'Investigation Area'...")
             return intersection_done
 
-        OeQ_init_info("Getting building outlines in the investigation area.","This may take some time...")
-        if os.path.exists(housing_layer_path):
-            layer_interaction.fullRemove(config.housing_layer_name)
+        OeQ_init_info("Getting building outlines in the investigation area.", "This may take some time...")
+        if os.path.exists(building_outlines_path):
+            layer_interaction.fullRemove(shape_name)
             layer_interaction.fullRemove(config.data_layer_name)
 
-            out_layer_path = os.path.join(OeQ_project_path(), config.housing_layer_name + '.shp')
+            intersection_layer_path = os.path.join(OeQ_project_path(), shape_name + '.shp')
             data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
-          
-            housing_layer = layer_interaction.load_layer_from_disk(housing_layer_path, config.housing_layer_name)
-            
+
+            housing_layer = layer_interaction.load_layer_from_disk(building_outlines_path, shape_name)
+
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-          
-            intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, out_layer_path)
+
+            intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area, intersection_layer_path)
 
             if intersection_done:
-                out_layer = layer_interaction.load_layer_from_disk(out_layer_path, config.housing_layer_name)
+                out_layer = layer_interaction.load_layer_from_disk(intersection_layer_path, shape_name)
                 layer_interaction.add_layer_to_registry(out_layer)
                 layer_interaction.edit_housing_layer_attributes(out_layer)
-                out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_floor_sw.qml'))
+                out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(), 'styles', 'oeq_floor_sw.qml'))
                 layer_interaction.trigger_edit_mode(self.iface, out_layer.name(), 'off')
-                inter_layer=self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
+                inter_layer = self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
                 layer_interaction.add_layer_to_registry(inter_layer)
                 QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
                 #layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
@@ -477,7 +536,7 @@ class OpenEQuarterMain:
         OeQ_kill_info()
         return 1
 
-    # step 2.1
+    # step 2.2
     def handle_building_coordinates_loaded(self):
         window = iface.mainWindow()
         load_message = "Do you want to load your own set of building coordinates?"
@@ -501,40 +560,8 @@ class OpenEQuarterMain:
             else:
                 return 0
 
-    # step 2.2
-    def handle_raster_loaded(self):
-        # self.request_wms_layer_url()
-        raster_layers = []
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude', 'WMS_Floors_RAW'))
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter', 'WMS_Year of Construction_RAW'))
-        raster_layers.append(layer_interaction.open_wms_as_raster(self.iface, 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012', 'WMS_Population Density_RAW'))
-
-        raster_loaded = False
-        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
-                                           u"WMS Servers are slow, this may take a while...",
-                                           maxcount=len(raster_layers) + 2)
-        progress_counter = OeQ_push_progressbar(progressbar, 0)
-        for raster in raster_layers:
-            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-            try:
-                if raster.isValid():
-                    layer_interaction.add_layer_to_registry(raster)
-                    self.iface.setActiveLayer(raster)
-                    raster_loaded = True
-
-            except AttributeError as NoneTypeError:
-                print(self.__module__, NoneTypeError)
-
-        if not raster_loaded:
-            self.iface.actionAddWmsLayer().trigger()
-        # Let's wait for the WMS loading
-        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-        OeQ_kill_progressbar()
-        # returns True, since either the clipped raster was loaded or the add-raster-menu was opened
-        return 2
-
     # step 2.3
-    def handle_legend_created(self):
+    def handle_raster_loaded(self):
         try:
             investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
             # an investigation shape is needed, to trigger the zoom to layer function
@@ -613,6 +640,9 @@ class OpenEQuarterMain:
                 pass
         time.sleep(1.0)
         OeQ_kill_progressbar()
+        return 2
+
+    def handle_legend_created(self):
         return self.prepare_color_picker()
 
     def pick_color(self):

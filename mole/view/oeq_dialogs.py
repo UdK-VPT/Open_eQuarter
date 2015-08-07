@@ -27,7 +27,7 @@ from qgis.utils import iface
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info, OeQ_default_information_source
+from mole.oeq_global import OeQ_project_info, OeQ_default_information_source, OeQ_information_source
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -53,11 +53,11 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             self.extension_dropdown.addItem(key)
         self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
 
-        role = QtGui.QDialogButtonBox.ActionRole
-        next_button = self.buttonBox.addButton('Next source..', role)
-        next_button.clicked.connect(self.store_information)
         role = QtGui.QDialogButtonBox.AcceptRole
         self.buttonBox.addButton('Done', role)
+        role = QtGui.QDialogButtonBox.ActionRole
+        next_button = self.buttonBox.addButton('Save source...', role)
+        next_button.clicked.connect(self.store_information)
 
         self.open_geotiff_btn.clicked.connect(lambda: self.load_source_from_disk(self.geotiff))
         self.open_shapefile_btn.clicked.connect(lambda: self.load_source_from_disk(self.shapefile))
@@ -83,7 +83,25 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             field.setText(information_triple[2])
 
     def store_information(self):
-        pass
+        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        if self.extension_dropdown.currentText() is not self.placeholder:
+            source_type = self.extension_dropdown.currentText()
+            layer_name = self.layer_name.text()
+            source_path = ''
+            key = ''
+
+            line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+            for line_edit in line_edits:
+                if line_edit is not self.layer_name and line_edit.text():
+                    key = line_edit.objectName()
+                    source_path = line_edit.text()
+                    break
+
+            info_triple = (source_type, layer_name, source_path)
+            OeQ_information_source[key].append(info_triple)
+
+            for line_edit in line_edits:
+                line_edit.clear()
 
     def load_source_from_disk(self, field):
         """

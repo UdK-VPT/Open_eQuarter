@@ -15,6 +15,16 @@ OeQ_default_information_source = {
     'Building outlines ("Hausumringe")': (config.housing_layer_name, 'shapefile', os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')),
 }
 
+global OeQ_information_source
+OeQ_information_source = {
+    'wms': [],
+    'geotiff': [],
+    'shapefile': [],
+    'wfs': [],
+    'dxf': [],
+    'csv': [],
+}
+
 global OeQ_project_info
 OeQ_project_info = {
     'project_name': u'MyProject',

@@ -1,6 +1,5 @@
 import os
 import json
-import time
 
 from zipfile import ZipFile
 from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
@@ -8,8 +7,7 @@ from PyQt4.QtCore import QSize
 
 from mole.project import config
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-# from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
-from mole.oeq_global import *  # Import only by wildcard, otherwise you have to call the global funcs vie the module name
+from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
 
 
 class ProgressItemsModel:
@@ -76,7 +74,6 @@ class ProgressItemsModel:
         :return:
         :rtype:
         """
-        print('Saving the OeQ-project instance')
         try:
             plugin_path = OeQ_plugin_path()
             project_path = OeQ_project_path()

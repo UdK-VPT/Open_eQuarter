@@ -1,4 +1,5 @@
 import os
+import time
 
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtCore import Qt
@@ -56,11 +57,15 @@ def OeQ_project_path():
 
 #global OeQ_plugin_path
 def OeQ_plugin_path():
-    if os.path.realpath(__file__) is None: time.sleep(1)
+    no_timeout = 50
     file_location = os.path.realpath(__file__)
-    directory = os.path.dirname(file_location)
-    print directory
-    return directory
+    while not os.path.exists(file_location) and no_timeout:
+        time.sleep(0.1)
+        file_location = os.path.realpath(__file__)
+        no_timeout -= 1
+
+    plugin_dir = os.path.dirname(file_location)
+    return plugin_dir
 
 
 # the project path equals './' as long as the project has not been saved

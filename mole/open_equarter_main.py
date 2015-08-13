@@ -1046,21 +1046,6 @@ class OpenEQuarterMain:
                 OeQ_init_info('Coordinates not defined',
                               'Zoom to your investigation area automatically, by setting lon and lat.')
 
-            '''if len(municipal) > 0:
-                index = 0
-                if isinstance(self.oeq_project_settings_form.location_city, QComboBox):
-                    index = self.oeq_project_settings_form.location_city.currentIndex()
-                try:
-                    municipal = self.oeq_project_settings_form.municipals[index]
-                    x = municipal['GEO_L']
-                    y = municipal['GEO_W']
-                    scale = 0.05
-                    extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-                    config.default_extent = extent
-                    config.default_extent_crs = 'EPSG:4326'
-                except (IndexError, KeyError), Error:
-                    print(self.__module__, Error)'''
-
     def set_next_step_done(self, is_done):
         """
         Find the next step in the progress model and change its status to is_done

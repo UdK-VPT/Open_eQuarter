@@ -653,7 +653,12 @@ class OpenEQuarterMain:
         self.pick_color()
         self.color_picker_dlg.start_colorpicking.clicked.connect(self.pick_color)
         save_or_abort = self.color_picker_dlg.exec_()
-        success = False
+
+        success = True
+        lvm = self.color_picker_dlg.color_entry_manager.layer_values_map
+        for legend in lvm.values():
+            legend_available = legend is not None
+            success = success and legend_available
 
         self.iface.actionPan().trigger()
         if success:

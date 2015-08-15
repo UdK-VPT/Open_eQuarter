@@ -19,7 +19,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-# Import the PyQt and QGIS libraries
 import sys
 import unittest
 import time
@@ -433,9 +432,10 @@ class OpenEQuarterMain:
     def handle_source_layers_loaded(self):
         done = self.information_source_dlg.exec_()
         if done:
-            shape_sources = OeQ_information_source['shapefile']
+            shape_sources = filter(lambda source: source.type == 'shapefile', OeQ_information_source)
             for shape in shape_sources:
-                if shape[0].startswith('Building outlines'):
+                extension = shape.extension
+                if extension.startswith('Building outlines'):
                     done = 2
                     break
 
@@ -451,9 +451,10 @@ class OpenEQuarterMain:
         """
         raster_layers = []
 
-        for raster_triple in OeQ_information_source['wms']:
-            name = raster_triple[1]
-            url = raster_triple[2]
+        wms_sources = filter(lambda source: source.type == 'wms', OeQ_information_source)
+        for info_source in wms_sources:
+            name = info_source.layer_name
+            url = info_source.source
             raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
             raster_layers.append(raster_layer)
 
@@ -481,14 +482,15 @@ class OpenEQuarterMain:
 
     # step 2.1
     def handle_housing_layer_loaded(self):
-        shape_sources = OeQ_information_source['shapefile']
+        shape_sources = filter(lambda source: source.type == 'shapefile', OeQ_information_source)
         shape_name = ''
         shape_path = ''
 
         for shape in shape_sources:
-            if shape[0].startswith('Building outlines'):
-                shape_name = shape[1]
-                shape_path = shape[2]
+            extension = shape.extension
+            if extension.startswith('Building outlines'):
+                shape_name = shape.layer_name
+                shape_path = shape.source
                 break
 
         building_outlines_path = os.path.normpath(shape_path)

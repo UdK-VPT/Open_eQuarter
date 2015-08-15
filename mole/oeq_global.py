@@ -7,24 +7,20 @@ from qgis.utils import iface
 from qgis.core import QgsProject, NULL
 
 from project import config
+from mole.model.file_manager import InformationSource
 
-global OeQ_default_information_source
-OeQ_default_information_source = {
-    'Floors': ('WMS_Floors_RAW', 'wms', 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude'),
-    'Year of Construction': ('WMS_Year of Construction_RAW', 'wms', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter'),
-    'Population Density': ('WMS_Population Density_RAW', 'wms', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012'),
-    'Building outlines ("Hausumringe")': (config.housing_layer_name, 'shapefile', os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp')),
-}
+
+global OeQ_information_defaults
+OeQ_information_defaults = [
+    InformationSource('Floors', 'wms', '', 'WMS_Floors_RAW', 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude'),
+    InformationSource('Year of Construction', 'wms', '', 'WMS_Year of Construction_RAW', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter'),
+    InformationSource('Population Density', 'wms', '', 'WMS_Population Density_RAW', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012'),
+    InformationSource('Building outlines ("Hausumringe")', 'shapefile', '', config.housing_layer_name, os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp'))
+]
+
 
 global OeQ_information_source
-OeQ_information_source = {
-    'wms': [],
-    'geotiff': [],
-    'shapefile': [],
-    'wfs': [],
-    'dxf': [],
-    'csv': [],
-}
+OeQ_information_source = []
 
 global OeQ_project_info
 OeQ_project_info = {

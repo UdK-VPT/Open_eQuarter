@@ -334,3 +334,13 @@ class MunicipalInformationTree:
 
         except IOError, Error:
             print('{}: {}'.format(self.__module__, Error))
+
+
+class InformationSource:
+
+    def __init__(self, extension, type, field_id, layer_name, source):
+        self.extension = extension
+        self.type = type
+        self.field_id = field_id
+        self.layer_name = layer_name
+        self.source = source

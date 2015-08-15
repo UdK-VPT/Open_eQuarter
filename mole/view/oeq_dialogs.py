@@ -25,9 +25,9 @@ from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree, InformationSource
 from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info, OeQ_default_information_source, OeQ_information_source
+from mole.oeq_global import OeQ_project_info, OeQ_information_source, OeQ_information_defaults
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -49,8 +49,8 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
         self.placeholder = '<Select information type>'
         self.extension_dropdown.addItem(self.placeholder)
-        for key in OeQ_default_information_source:
-            self.extension_dropdown.addItem(key)
+        for info_source in OeQ_information_defaults:
+            self.extension_dropdown.addItem(info_source.extension)
         self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
 
         role = QtGui.QDialogButtonBox.AcceptRole
@@ -76,29 +76,29 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             line_edit.clear()
 
         extension = self.extension_dropdown.currentText()
-        if extension in OeQ_default_information_source:
-            information_triple = OeQ_default_information_source[extension]
-            self.layer_name.setText(information_triple[0])
-            field = getattr(self, information_triple[1])
-            field.setText(information_triple[2])
+        for info_source in OeQ_information_defaults:
+            if extension == info_source.extension:
+                self.layer_name.setText(info_source.layer_name)
+                field = getattr(self, info_source.type)
+                field.setText(info_source.source)
 
     def store_information(self):
-        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
         if self.extension_dropdown.currentText() is not self.placeholder:
-            source_type = self.extension_dropdown.currentText()
+            extension = self.extension_dropdown.currentText()
             layer_name = self.layer_name.text()
+            field_id = self.field_id.text()
             source_path = ''
-            key = ''
+            type = ''
 
             line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
             for line_edit in line_edits:
                 if line_edit is not self.layer_name and line_edit.text():
-                    key = line_edit.objectName()
+                    type = line_edit.objectName()
                     source_path = line_edit.text()
                     break
 
-            info_triple = (source_type, layer_name, source_path)
-            OeQ_information_source[key].append(info_triple)
+            info_source = InformationSource(extension, type, field_id, layer_name, source_path)
+            OeQ_information_source.append(info_source)
 
             for line_edit in line_edits:
                 line_edit.clear()

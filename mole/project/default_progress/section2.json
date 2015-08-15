@@ -4,7 +4,7 @@
   {"step_name": "source_layers_loaded", "description" : "Load source maps", "state": 0},
   {"step_name": "housing_layer_loaded", "description" : "Intersect building outlines (\"Hausumringe\") with your investigation area", "state": 0},
   {"step_name": "building_coordinates_loaded", "description" : "Load building coordinates", "state": 0},
-  {"step_name": "raster_loaded", "description" : "Capture WMS maps", "state": 0},
-  {"step_name": "legend_created", "description" : "Create lookup tables", "state": 0}
+  {"step_name": "load_raster_maps", "description" : "Load WMS maps", "state": 0},
+  {"step_name": "raster_loaded", "description" : "Capture WMS maps", "state": 0}
 ]
 }

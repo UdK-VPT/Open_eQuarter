@@ -19,15 +19,12 @@
  *                                                                         *
  ***************************************************************************/
 """
-import sys
-import unittest
 import time
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
 from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
-from qgis.utils import iface
 
 from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import (
@@ -439,46 +436,7 @@ class OpenEQuarterMain:
                     done = 2
                     break
 
-            self.load_raster_maps()
-
         return done
-
-    def load_raster_maps(self):
-        """
-        Load the wms-maps that were defined in the source-dialog
-        :return:
-        :rtype:
-        """
-        raster_layers = []
-
-        wms_sources = filter(lambda source: source.type == 'wms', OeQ_information_source)
-        for info_source in wms_sources:
-            name = info_source.layer_name
-            url = info_source.source
-            raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
-            raster_layers.append(raster_layer)
-
-        raster_loaded = False
-        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
-                                           u"WMS Servers are slow, this may take a while...",
-                                           maxcount=len(raster_layers) + 2)
-        progress_counter = OeQ_push_progressbar(progressbar, 0)
-        for raster in raster_layers:
-            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-            try:
-                if raster.isValid():
-                    layer_interaction.add_layer_to_registry(raster)
-                    self.iface.setActiveLayer(raster)
-                    raster_loaded = True
-
-            except AttributeError as NoneTypeError:
-                print(self.__module__, NoneTypeError)
-
-        if not raster_loaded:
-            self.iface.actionAddWmsLayer().trigger()
-        # Let's wait for the WMS loading
-        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-        OeQ_kill_progressbar()
 
     # step 2.1
     def handle_housing_layer_loaded(self):
@@ -561,6 +519,51 @@ class OpenEQuarterMain:
                 return 2
             else:
                 return 0
+
+    def handle_load_raster_maps(self):
+        """
+        Load the wms-maps that were defined in the source-dialog
+        :return:
+        :rtype:
+        """
+        raster_layers = []
+
+        wms_sources = filter(lambda source: source.type == 'wms', OeQ_information_source)
+        for info_source in wms_sources:
+            name = info_source.layer_name
+            url = info_source.source
+            raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
+            raster_layers.append(raster_layer)
+
+        raster_loaded = False
+        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
+                                           u"WMS Servers are slow, this may take a while...",
+                                           maxcount=len(raster_layers) + 2)
+        progress_counter = OeQ_push_progressbar(progressbar, 0)
+        for raster in raster_layers:
+            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+            try:
+                if raster.isValid():
+                    layer_interaction.add_layer_to_registry(raster)
+                    self.iface.setActiveLayer(raster)
+                    raster_loaded = True
+
+            except AttributeError as NoneTypeError:
+                print(self.__module__, NoneTypeError)
+
+        if not raster_loaded:
+            self.iface.actionAddWmsLayer().trigger()
+        # Let's wait for the WMS loading
+        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+        OeQ_kill_progressbar()
+
+        loaded_layers = QgsMapLayerRegistry.instance().mapLayers()
+        for layer in loaded_layers.values():
+            print(layer.name(), layer.type() == QgsMapLayer.RasterLayer, layer.source())
+            if layer.type() == QgsMapLayer.RasterLayer and 'http' in layer.source():
+                return 2
+
+        return 1
 
     # step 2.3
     def handle_raster_loaded(self):

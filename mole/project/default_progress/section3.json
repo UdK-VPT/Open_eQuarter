@@ -1,5 +1,6 @@
 {"section_name": "analysis", "description" : "Analysis", "steplist":
 [
+  {"step_name": "legend_created", "description" : "Create lookup tables", "state": 0},
   {"step_name": "information_sampled", "description" : "Collect building data (\"PointSamplingTool\")", "state": 0},
   {"step_name": "building_calculations", "description" : "Run OEQ building evaluation", "state": 0}
 ]

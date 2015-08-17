@@ -79,6 +79,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         for info_source in OeQ_information_defaults:
             if extension == info_source.extension:
                 self.layer_name.setText(info_source.layer_name)
+                self.field_id.setText(info_source.field_id)
                 field = getattr(self, info_source.type)
                 field.setText(info_source.source)
 

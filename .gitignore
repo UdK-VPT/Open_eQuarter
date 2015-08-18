@@ -104,5 +104,6 @@ docs/_build/
 # PyBuilder
 target/
 
-
 .Rproj.user
+.DS_Store
+*.brackets*

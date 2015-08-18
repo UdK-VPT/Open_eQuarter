@@ -132,7 +132,10 @@ var displayFeatureInfo = function(pixel) {
 
     var propertiesSheet = document.getElementById('dataSheet');
     if (feature) {
-        propertiesSheet.innerHTML = feature.getId() + ': ' + feature.get('name');
+
+        propertiesSheet.innerHTML = 'BLD_ID:' + feature.get('BLD_ID') + '<br>' +
+                                    'AREA: ' + feature.get('AREA') + '<br>' +
+                                    'PERIMETER: ' + feature.get('PERIMETER');
     } else {
         propertiesSheet.innerHTML = '&nbsp;';
     }

@@ -132,12 +132,21 @@ var displayFeatureInfo = function(pixel) {
 
     var propertiesSheet = document.getElementById('dataSheet');
     if (feature) {
-
-        propertiesSheet.innerHTML = 'BLD_ID:' + feature.get('BLD_ID') + '<br>' +
-                                    'AREA: ' + feature.get('AREA') + '<br>' +
-                                    'PERIMETER: ' + feature.get('PERIMETER');
+        var table = '<style type="text/css">.propSheet {border-collapse: separate; border-spacing: 2px 0;}'+
+                    '.propSheet td, .propSheet th { padding: 0 5px; } '+
+                    '</style>'+
+                    '<table class="propSheet">'+
+                    '<tr><th>Property</th><th>Value</th></tr>';        
+        var keys = feature.getKeys();
+        for (var i=0; i < keys.length; i++){
+            var key = keys[i];
+            table += '<tr><td>' + key + '</td><td>' + feature.get(key) + '</td></tr>';
+        }
+        table += '</table>';
+        
+        propertiesSheet.innerHTML = table;
     } else {
-        propertiesSheet.innerHTML = '&nbsp;';
+        propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
     }
 
   if (feature !== highlight) {

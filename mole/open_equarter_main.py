@@ -25,7 +25,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
 from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
-
+import extensions
 from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import (
     Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
@@ -300,7 +300,7 @@ class OpenEQuarterMain:
         :rtype:
         """
         try:
-            # set the rasterlayer as active, since only the active layer will be clipped and start the export
+            # set the rasterlayer as active, since only the active layer will be clipped and start the exp
             self.iface.setActiveLayer(raster_layer)
             geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
             pyramids_built = raster_layer_interaction.gdal_addo_layerfile(geo_export_path, 'gauss', 6)

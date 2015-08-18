@@ -501,7 +501,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
     def show(self):
         for key in OeQ_project_info:
             field = getattr(self, key)
-            print str(OeQ_project_info[key])
+            # print str(OeQ_project_info[key])
             field.setText(str(OeQ_project_info[key]))
         QtGui.QDialog.show(self)
 

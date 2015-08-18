@@ -7,10 +7,16 @@ from qgis.utils import iface
 from qgis.core import QgsProject, NULL
 
 from project import config
-from mole.model.file_manager import InformationSource
+from model.file_manager import InformationSource
+
+OeQ_ImportExtensionRegistry = []
+
+OeQ_ExportExtensionRegistry = []
+
+OeQ_EvaluationExtensionRegistry = []
 
 
-global OeQ_information_defaults
+# global OeQ_information_defaults
 OeQ_information_defaults = [
     InformationSource('Floors', 'wms', '', 'WMS_Floors_RAW', 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude'),
     InformationSource('Year of Construction', 'wms', '', 'WMS_Year of Construction_RAW', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter'),
@@ -19,7 +25,7 @@ OeQ_information_defaults = [
 ]
 
 
-global OeQ_information_source
+#global OeQ_information_source
 OeQ_information_source = []
 
 global OeQ_project_info

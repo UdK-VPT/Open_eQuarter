@@ -98,6 +98,12 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
                     source_path = line_edit.text()
                     break
 
+            if type == 'wms':
+                if not layer_name.startswith('WMS_'):
+                    layer_name = 'WMS_' + str(layer_name)
+                if not layer_name.endswith('_RAW'):
+                    layer_name = str(layer_name) + '_RAW'
+
             info_source = InformationSource(extension, type, field_id, layer_name, source_path)
             OeQ_information_source.append(info_source)
 

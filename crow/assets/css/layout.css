@@ -1,0 +1,50 @@
+body { overflow: hidden; }
+
+.navbar-offset { margin-top: 50px; }
+#map { position: absolute; top: 50px; bottom: 0px; left: 0px; right: 0px; }
+#map .ol-zoom { font-size: 1.2em; }
+
+.zoom-top-opened-sidebar { margin-top: 5px; }
+.zoom-top-collapsed { margin-top: 45px; }
+
+.mini-submenu{
+    display:none;  
+    background-color: rgba(255, 255, 255, 0.46);
+    border: 1px solid rgba(0, 0, 0, 0.9);
+    border-radius: 4px;
+    padding: 9px;  
+    /*position: relative;*/
+    width: 42px;
+    text-align: center;
+}
+
+.mini-submenu-left {
+    position: absolute;
+    top: 60px;
+    left: .5em;
+    z-index: 40;
+}
+.mini-submenu-right {
+    position: absolute;
+    top: 60px;
+    right: .5em;
+    z-index: 40;
+}
+
+#map { z-index: 35; }
+
+.sidebar { z-index: 45; }
+
+.main-row { position: relative; top: 0; }
+
+.mini-submenu:hover{
+    cursor: pointer;
+}
+
+.slide-submenu{
+    background: rgba(0, 0, 0, 0.45);
+    display: inline-block;
+    padding: 0 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}

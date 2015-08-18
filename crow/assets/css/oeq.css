@@ -4,3 +4,17 @@
    padding: 5px;
    margin: 0 5px;
  }
+
+
+
+a.list-group-item.active {
+  color: RGB(53, 68, 88);
+  background-color: RGB(233, 224, 214);
+  border-color: RGB(203, 204, 194); 
+}
+
+a.list-group-item.active:hover {
+  color: RGB(53, 68, 88);
+  background-color: RGB(233, 224, 214);
+  border-color: RGB(203, 204, 194); 
+}

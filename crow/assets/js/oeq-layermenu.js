@@ -24,17 +24,22 @@ function updateLayerList () {
     
     var layers = map.getLayers();
     var numberOfLayers = layers.getLength();
-    
     var layersMenu = document.getElementById("layersMenu");
     layersMenu.innerHTML = "<i class='fa fa-list-alt'></i> Layers (" + numberOfLayers + ")";
     
-    var layerList = document.getElementById("layerList");
-    finalList = ""
-    
-    for ( var i=0; i < numberOfLayers; i++ ) {
-        var layer = layers.item(i);
-        finalList += "<a href='#' class='list-group-item'><i class='fa fa-globe'></i> " + layer.get('name') + "</a>";
-    }
-    
-    layerList.innerHTML = finalList;
+    for (var i = 0; i < numberOfLayers; i++) {
+                    layer = layers.item(i);
+                    $('div.layerStack').prepend(
+                        '<a class="list-group-item active">'+
+                        '<button class="btn btn-xs btn-warning pull-left">'+
+                            '<i class="glyphicon glyphicon-remove"> </i></button>' +
+                        layer.get('name') +
+                        '<span class="pull-right">' +
+                        '<button class="btn btn-xs btn-warning">'+
+                            '<i class="glyphicon glyphicon-arrow-up"></i></button>' +
+                        '<button class="btn btn-xs btn-warning">' +
+                            '<i class="glyphicon glyphicon-arrow-down"></i></button>' +
+                        '</span>'+
+                        '</a>');
+                }
 }

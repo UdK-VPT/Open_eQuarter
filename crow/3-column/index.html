@@ -7,146 +7,16 @@
     <title>Map Viewer (3-column layout)</title>
     <link rel="stylesheet" href="../assets/css/ol.css" />
     <link rel="stylesheet" href="../assets/css/oeq.css" />
+    <link rel="stylesheet" href="../assets/css/layout.css" />
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
-    <style type="text/css">
-      body { overflow: hidden; }
-
-      .navbar-offset { margin-top: 50px; }
-      #map { position: absolute; top: 50px; bottom: 0px; left: 0px; right: 0px; }
-      #map .ol-zoom { font-size: 1.2em; }
-
-      .zoom-top-opened-sidebar { margin-top: 5px; }
-      .zoom-top-collapsed { margin-top: 45px; }
-
-      .mini-submenu{
-        display:none;  
-        background-color: rgba(255, 255, 255, 0.46);
-        border: 1px solid rgba(0, 0, 0, 0.9);
-        border-radius: 4px;
-        padding: 9px;  
-        /*position: relative;*/
-        width: 42px;
-        text-align: center;
-      }
-
-      .mini-submenu-left {
-        position: absolute;
-        top: 60px;
-        left: .5em;
-        z-index: 40;
-      }
-      .mini-submenu-right {
-        position: absolute;
-        top: 60px;
-        right: .5em;
-        z-index: 40;
-      }
-
-      #map { z-index: 35; }
-
-      .sidebar { z-index: 45; }
-
-      .main-row { position: relative; top: 0; }
-
-      .mini-submenu:hover{
-        cursor: pointer;
-      }
-
-      .slide-submenu{
-        background: rgba(0, 0, 0, 0.45);
-        display: inline-block;
-        padding: 0 8px;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-    </style>
     <!--<script type="text/javascript" src="../assets/js/ol.js"></script>-->
     <script src='../../v3.7.0/build/ol.js'></script>  
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="../assets/js/oeq-layermenu.js" defer></script>  
     <script type="text/javascript" src="../assets/js/init.js" defer></script>
+    <script type="text/javascript" src="../assets/js/layout.js"></script>
     <script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript">
-
-      function applyMargins() {
-        var leftToggler = $(".mini-submenu-left");
-        var rightToggler = $(".mini-submenu-right");
-        if (leftToggler.is(":visible")) {
-          $("#map .ol-zoom")
-            .css("margin-left", 0)
-            .removeClass("zoom-top-opened-sidebar")
-            .addClass("zoom-top-collapsed");
-        } else {
-          $("#map .ol-zoom")
-            .css("margin-left", $(".sidebar-left").width())
-            .removeClass("zoom-top-opened-sidebar")
-            .removeClass("zoom-top-collapsed");
-        }
-        if (rightToggler.is(":visible")) {
-          $("#map .ol-rotate")
-            .css("margin-right", 0)
-            .removeClass("zoom-top-opened-sidebar")
-            .addClass("zoom-top-collapsed");
-        } else {
-          $("#map .ol-rotate")
-            .css("margin-right", $(".sidebar-right").width())
-            .removeClass("zoom-top-opened-sidebar")
-            .removeClass("zoom-top-collapsed");
-        }
-      }
-
-      function isConstrained() {
-        return $("div.mid").width() == $(window).width();
-      }
-
-      function applyInitialUIState() {
-        if (isConstrained()) {
-          $(".sidebar-left .sidebar-body").fadeOut('slide');
-          $(".sidebar-right .sidebar-body").fadeOut('slide');
-          $('.mini-submenu-left').fadeIn();
-          $('.mini-submenu-right').fadeIn();
-        }
-      }
-
-      $(function(){
-        $('.sidebar-left .slide-submenu').on('click',function() {
-          var thisEl = $(this);
-          thisEl.closest('.sidebar-body').fadeOut('slide',function(){
-            $('.mini-submenu-left').fadeIn();
-            applyMargins();
-          });
-        });
-
-        $('.mini-submenu-left').on('click',function() {
-          var thisEl = $(this);
-          $('.sidebar-left .sidebar-body').toggle('slide');
-          thisEl.hide();
-          applyMargins();
-        });
-
-        $('.sidebar-right .slide-submenu').on('click',function() {
-          var thisEl = $(this);
-          thisEl.closest('.sidebar-body').fadeOut('slide',function(){
-            $('.mini-submenu-right').fadeIn();
-            applyMargins();
-          });
-        });
-
-        $('.mini-submenu-right').on('click',function() {
-          var thisEl = $(this);
-          $('.sidebar-right .sidebar-body').toggle('slide');
-          thisEl.hide();
-          applyMargins();
-        });
-
-        $(window).on("resize", applyMargins);
-
-        applyInitialUIState();
-        applyMargins();
-      });
-    </script>
   </head>
   <body onload="oeq_init()">
     <div class="container">
@@ -188,16 +58,6 @@
             </form>
             <ul class="nav navbar-nav navbar-right">
               <li><a href="#">Link</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li><a href="#">Separated link</a></li>
-                </ul>
-              </li>
             </ul>
             </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
@@ -222,8 +82,8 @@
                   </span>
                 </h4>
               </div>
-              <div id="layers" class="panel-collapse collapse in">
-                <div id="layerList" class="panel-body list-group">
+              <div class="panel-collapse collapse in">
+                <div class="panel-body list-group layerStack" role="group">
                 </div>
               </div>
             </div>

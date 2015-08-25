@@ -86,7 +86,9 @@ function oeq_init () {
     map.addLayer(shapes);
     //map.addLayer(invArea);
     updateLayerList();
+    map.getLayers().on('change', updateLayerList);
     map.getLayers().on('add', updateLayerList);
+    map.getLayers().on('remove', updateLayerList);
 }
 
 

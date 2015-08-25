@@ -32,37 +32,42 @@ function updateLayerList () {
     for (var i = 0; i < numberOfLayers; i++) {
                     layer = layers.item(i);
                     name = layer.get('name')
-                    layer.set('id', i)
-                    anchor = '<a class="list-group-item active" \
-                            id="{0}" \
-                            onclick="toggleVisibility(\'{1}\');" >';
-                    anchor = String.format(anchor, i, name);
+                    layer.set('id', i);
+                    anchor = '<a class="list-group-item" id="{0}">';
+                    anchor = String.format(anchor, i);
                     removeBtn = '<button class="btn btn-xs btn-warning pull-left">\
                                     <i class="glyphicon glyphicon-remove"></i></button>'; 
                     span = '<span class="pull-right">';
                     upBtn = '<button class="btn btn-xs btn-warning">\
                                 <i class="glyphicon glyphicon-arrow-up"></i></button>';            
                     downBtn = '<button class="btn btn-xs btn-warning">\
-                                        <i class="glyphicon glyphicon-arrow-down"></i></button>';
+                                <i class="glyphicon glyphicon-arrow-down"></i></button>';                    
                     layerBtn = anchor + removeBtn + ' ' + name + span + upBtn + downBtn + '</span></a>';
                     layerStack.prepend(layerBtn);
-    }
+                    
+                    if( layer.getVisible() )
+                        $('div.layerStack a:first').addClass('active');
+                    $('div.layerStack a:first').unbind('click');
+                    $('div.layerStack a:first').click({layerName: name}, function( event ) {
+                        layerCtlListener(event, event.data.layerName);
+                });
+    }   
 }
 
-/**
- * Finds a layers given a 'name' attribute.
- * @param {type} name
- * @returns {unresolved}
- */
-function findByName(name) {
-    var layers = map.getLayers();
-    var length = layers.getLength();
-    for (var i = 0; i < length; i++) {
-        if (name === layers.item(i).get('name')) {
-            return layers.item(i);
-        }
+function layerCtlListener( event, layerName ) {
+    var classes = event.target.classList;
+    if ( classes.contains("list-group-item") ) {
+        toggleVisibility(layerName);
+    } else if ( classes == "glyphicon glyphicon-arrow-up" ) {
+        raiseLayer(layerName);
+    } else if ( classes == "glyphicon glyphicon-arrow-down" ) {
+        lowerLayer(layerName);
+    } else if ( classes.contains("btn-warning") ) {
+        target = $( event.target );
+        target.children().click();
+    } else if ( classes == "glyphicon glyphicon-remove" ) {
+        removeLayer(layerName);
     }
-    return null;
 }
 
 
@@ -77,101 +82,41 @@ function toggleVisibility(layerName) {
            layer.setVisible(true);
             $('a#' + layer.get('id')).addClass('active');
         }
-        
-        
     }
 }
 
-/**
- * Initialize the stack control with the layers in the map.
- */
-function initializeStack() {
-    var layers = map.getLayers();
-    var length = layers.getLength(), l;
-    for (var i = 0; i < length; i++) {
-        l = layers.item(i);
-        $('div.layerStack').prepend('<li data-layerid="' + l.get('name') + '">' + l.get('name') + '</li>');
-    }
-
-    // Change style when select a layer
-    $('ul.layerstack li').on('click', function() {
-        $('ul.layerstack li').removeClass('selected');
-        $(this).addClass('selected');
-    });
-}
-
-/**
- * Returns the index of the layer within the collection.
- * @param {type} layers
- * @param {type} layer
- * @returns {Number}
- */
-function indexOf(layers, layer) {
-    var length = layers.getLength();
-    for (var i = 0; i < length; i++) {
-        if (layer === layers.item(i)) {
+function inLayerList( layer, list ) {
+    for ( var i = 0; i < list.getLength(); i++ ) {
+        if ( layer === list.item(i) ) 
             return i;
-        }
     }
     return -1;
 }
 
-
-/**
- * Raise a layer one place.
- * @param {type} layer
- * @returns {undefined}
- */
-function raiseLayer(layer) {
+function raiseLayer(layerName) {
+    var layer = findByName(layerName);
     var layers = map.getLayers();
-    var index = indexOf(layers, layer);
-    if (index < layers.getLength() - 1) {
-        var next = layers.item(index + 1);
-        layers.setAt(index + 1, layer);
-        layers.setAt(index, next);
-
-        // Moves li element up
-        var elem = $('ul.layerstack li[data-layerid="' + layer.get('name') + '"]');
-        elem.prev().before(elem);
+    var index = inLayerList(layer, layers);
+    
+    if ( index >= 0 && index < layers.getLength() - 1 ) {
+        former = layers.removeAt(index);
+        layers.insertAt(index + 1, former);
     }
 }
 
-/**
- * Lowers a layer once place.
- * @param {type} layer
- * @returns {undefined}
- */
-function lowerLayer(layer) {
+function lowerLayer(layerName) {
+    var layer = findByName(layerName);
     var layers = map.getLayers();
-    var index = indexOf(layers, layer);
-    if (index > 0) {
-        var prev = layers.item(index - 1);
-        layers.setAt(index - 1, layer);
-        layers.setAt(index, prev);
+    var index = inLayerList(layer, layers);
 
-        // Moves li element down
-        var elem = $('ul.layerstack li[data-layerid="' + layer.get('name') + '"]');
-        elem.next().after(elem);
+    if ( index > 0 ) {
+        former = layers.removeAt(index);
+        layers.insertAt(index - 1, former);
     }
 }
 
-$(document).ready(function() {
-
-    initializeStack();
-
-    $('#raise').on('click', function() {
-        var layerid = $('ul.layerstack li.selected').data('layerid');
-        if (layerid) {
-            var layer = findByName(layerid);
-            raiseLayer(layer);
-        }
-    });
-
-    $('#lower').on('click', function() {
-        var layerid = $('ul.layerstack li.selected').data('layerid');
-        if (layerid) {
-            var layer = findByName(layerid);
-            lowerLayer(layer);
-        }
-    });
-});
+function removeLayer(layerName) {
+    var layer = findByName(layerName);
+    var layers = map.getLayers();
+    layers.remove(layer);
+}

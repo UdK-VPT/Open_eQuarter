@@ -13,3 +13,19 @@ String.format = function() {
     
     return theString;
 }
+
+/**
+ * Finds a layers given a 'name' attribute.
+ * @param {type} name
+ * @returns {unresolved}
+ */
+function findByName(name) {
+    var layers = map.getLayers();
+    var length = layers.getLength();
+    for (var i = 0; i < length; i++) {
+        if (name === layers.item(i).get('name')) {
+            return layers.item(i);
+        }
+    }
+    return null;
+}

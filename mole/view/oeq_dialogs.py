@@ -25,9 +25,9 @@ from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree, InformationSource
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info, OeQ_information_source, OeQ_information_defaults
+from mole.oeq_global import *
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -41,28 +41,36 @@ from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from ui_information_source_dialog import Ui_InformationSource_dialog
 
 
+# import mole.extensions as extensions
+
 class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
     def __init__(self):
+        import mole.extensions as extensions
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
-
-        self.placeholder = '<Select information type>'
-        self.extension_dropdown.addItem(self.placeholder)
-        for info_source in OeQ_information_defaults:
-            self.extension_dropdown.addItem(info_source.extension)
+        #self.refresh_dropdown()
         self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
-
         role = QtGui.QDialogButtonBox.AcceptRole
         self.buttonBox.addButton('Done', role)
         role = QtGui.QDialogButtonBox.ActionRole
         next_button = self.buttonBox.addButton('Save source...', role)
-        next_button.clicked.connect(self.store_information)
-
+        next_button.clicked.connect(self.register_information)
         self.open_geotiff_btn.clicked.connect(lambda: self.load_source_from_disk(self.geotiff))
         self.open_shapefile_btn.clicked.connect(lambda: self.load_source_from_disk(self.shapefile))
         self.open_csv_btn.clicked.connect(lambda: self.load_source_from_disk(self.csv))
         self.open_dxf_btn.clicked.connect(lambda: self.load_source_from_disk(self.dxf))
+        self.stateBox.clicked.connect(self.toggle_state)
+
+    def refresh_dropdown(self):
+        import mole.extensions as extensions
+        self.extension_dropdown.clear()
+        self.placeholder = '<Select information type>'
+        self.extension_dropdown.addItem(self.placeholder)
+        for importextension in extensions.by_category('import'):
+            self.extension_dropdown.addItem(importextension.extension_name)
+
+
 
     def complete_information(self):
         """
@@ -71,44 +79,78 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         :rtype:
         """
         # clear all line-edits first
+        import mole.extensions as extensions
         line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
         for line_edit in line_edits:
             line_edit.clear()
 
         extension = self.extension_dropdown.currentText()
-        for info_source in OeQ_information_defaults:
-            if extension == info_source.extension:
-                self.layer_name.setText(info_source.layer_name)
-                self.field_id.setText(info_source.field_id)
-                field = getattr(self, info_source.type)
-                field.setText(info_source.source)
+        for importextension in extensions.by_category('import'):
+            if extension == importextension.extension_name:
+                self.layer_name.setText(importextension.layer_name)
+                self.field_id.setText(importextension.field_id)
+                field = getattr(self, importextension.source_type)
+                field.setText(importextension.source)
+                self.stateBox.setChecked(importextension.active)
 
-    def store_information(self):
-        if self.extension_dropdown.currentText() is not self.placeholder:
-            extension = self.extension_dropdown.currentText()
-            layer_name = self.layer_name.text()
-            field_id = self.field_id.text()
-            source_path = ''
-            type = ''
+    def toggle_state(self):
+        import mole.extensions as extensions
+        extension_name = self.extension_dropdown.currentText()
+        if extension_name in [i.extension_name for i in extensions.by_category('import')]:
+            extension = extensions.by_name(self.extension_dropdown.currentText())[0]
+            extension.active = not extension.active
+            self.stateBox.setChecked(extension.active)
 
-            line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
-            for line_edit in line_edits:
-                if line_edit is not self.layer_name and line_edit.text():
-                    type = line_edit.objectName()
-                    source_path = line_edit.text()
-                    break
+    def register_information(self):
+        import mole.extensions as extensions
+        extension_name = self.extension_dropdown.currentText()
+        layer_name = self.layer_name.text()
+        field_id = self.field_id.text()
+        source_path = ''
+        type = ''
+        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        for line_edit in line_edits:
+            if line_edit is not self.layer_name and line_edit.text():
+                type = line_edit.objectName()
+                source_path = line_edit.text()
+                break
+        print "register information"
 
-            if type == 'wms':
-                if not layer_name.startswith('WMS_'):
-                    layer_name = 'WMS_' + str(layer_name)
-                if not layer_name.endswith('_RAW'):
-                    layer_name = str(layer_name) + '_RAW'
+        if extension_name != self.placeholder:
+            print "update information"
+            if extension_name in [i.extension_name for i in extensions.by_category('import')]:
+                print "found"
+                extensions.by_name(extension_name)[0].update(
+                    field_id=field_id,
+                    source_type=type,
+                    layer_name=layer_name,
+                    source=source_path,
+                    active=self.stateBox.isChecked())
 
-            info_source = InformationSource(extension, type, field_id, layer_name, source_path)
-            OeQ_information_source.append(info_source)
+        else:
+            print "new information"
+            extension = extensions.OeQExtension(
+                category='import',
+                field_id=field_id,
+                source_type=type,
+                layer_name=layer_name,
+                description=u'Generic extension for ' + layer_name,
+                source=source_path,
+                active=self.stateBox.isChecked())
+            extension.registerExtension()
+        self.refresh_dropdown()
 
-            for line_edit in line_edits:
-                line_edit.clear()
+        # if type == 'wms':
+        #     if not layer_name.startswith('WMS_'):
+        #         layer_name = 'WMS_' + str(layer_name)
+        #    if not layer_name.endswith('_RAW'):
+        #         layer_name = str(layer_name) + '_RAW'
+
+        # info_source = InformationSource(extension, type, field_id, layer_name, source_path)
+        #  OeQ_information_source.append(info_source)
+
+        # for line_edit in line_edits:
+        #    line_edit.clear()
 
     def load_source_from_disk(self, field):
         """
@@ -134,6 +176,20 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             ext_filter = '*' + file_extension
             filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter=ext_filter)
             field.setText(filename)
+
+    def exec_(self):
+        """
+        Call the super exec_ method
+        :return:
+        :rtype:
+        """
+        self.refresh_dropdown()
+        QtGui.QDialog.exec_(self)
+        self.refresh_dropdown()
+
+
+
+
 
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
@@ -347,6 +403,10 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             if os.path.basename(source).endswith('.tif'):
                 dropdown.addItem(layer.name())
                 self.color_entry_manager.add_layer(layer.name())
+                ltu_file = os.path.dirname(layer.publicSource())
+                ltu_file = os.path.join(ltu_file, layer.name() + '.qml')
+                if os.path.isfile(ltu_file):
+                    self.color_entry_manager.read_color_map_from_qml(ltu_file)
 
         layer_interaction.move_layer_to_position(iface, layer, 0)
 
@@ -363,6 +423,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         current_layer = self.layers_dropdown.currentText()
         layer_interaction.move_layer_to_position(iface, current_layer, 0)
         layer_interaction.unhide_or_remove_layer(current_layer, 'unhide', iface)
+        self.update_color_values()
 
     def show(self):
         """
@@ -373,6 +434,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.refresh_layer_list()
         self.hide_and_reorder_layers()
         QtGui.QDialog.show(self)
+        self.update_color_values()
 
     def exec_(self):
         """

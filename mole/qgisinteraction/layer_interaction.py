@@ -7,7 +7,7 @@ import os
 import time
 from string import find
 from mole.project import config
-from mole.oeq_global import *
+from mole import oeq_global
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -47,12 +47,18 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
         return None
 
 #remove a layer including all files
-def fullRemove(layer_name,types=['.shp','.shx','.prj','.qpj','.dbf','.idm','.ind']):
-  if find_layer_by_name(layer_name) is not None:
-     QgsMapLayerRegistry.instance().removeMapLayer( find_layer_by_name(layer_name).id() )
-  for i in types: 
-     if os.access(os.path.join(OeQ_project_path(), layer_name + i), os.F_OK):
-        os.remove(os.path.join(OeQ_project_path(), layer_name + i))
+def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.qpj', '.dbf', '.idm', '.ind']):
+    if layer_id is None:
+        thelayer = find_layer_by_name(layer_name)
+    else:
+        thelayer = find_layer_by_id(layer_id)
+    if thelayer is not None:
+        layer_name = thelayer.name()
+        QgsMapLayerRegistry.instance().removeMapLayer(thelayer.id())
+        for i in types:
+            if os.access(os.path.join(oeq_global.OeQ_project_path(), layer_name + i), os.F_OK):
+                os.remove(os.path.join(oeq_global.OeQ_project_path(), layer_name + i))
+    time.sleep(0.1)
 
 
 
@@ -116,6 +122,21 @@ def find_layer_by_name(layer_name):
             return found_layers[0]
         else:
             return None
+
+
+def find_layer_by_id(layer_id):
+    """
+    Iterate over all layers and return the layer with the id layer_id, if found
+    :param layer_name: Name of the layer that shall be looked for
+    :type layer_name: str
+    :return:
+    :rtype:
+    """
+    try:
+        found_layer = QgsMapLayerRegistry.instance().mapLayers()[layer_id]
+    except:
+        return None
+    return found_layer
 
 
 def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
@@ -458,7 +479,7 @@ def edit_housing_layer_attributes(housing_layer):
         building_id = 0
 
         for feature in provider.getFeatures():
-            if isnull(feature.attribute('FID')):
+            if oeq_global.isnull(feature.attribute('FID')):
                 # if feature.attribute('BLD_ID') == 0:
                 geometry = feature.geometry()
                 values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
@@ -487,42 +508,49 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     :return:
     :rtype:
     """
-    provider = None
-    try:
-        provider = layer.dataProvider()
-    except AttributeError, NoneTypeError:
-        print(__name__, NoneTypeError)
-        return
 
-    for color_key in color_dict.keys():
-        color_quadriple = color_key[5:-1].split(',')
-        color_quadriple = map(int,  color_quadriple)
+    import mole.extensions as extensions
+    print layer.name()
+    print layer.id()
+    extension = extensions.by_layerid(layer.id(), 'import')
+    print extension
+    print '--------------'
+    if extension != []:
+        extension = extension[0]
+        try:
+            provider = layer.dataProvider()
+        except AttributeError, NoneTypeError:
+            print(__name__, NoneTypeError)
+            return
 
-        for feat in provider.getFeatures():
-            if colors_match_feature(color_quadriple, feat, field_name):
-                parameter_name = field_name + '_P'
-                parameter_low = field_name + '_L'
-                parameter_high = field_name + '_H'
-                parameter_average = field_name + '_M'
-                attributes = [QgsField(parameter_name, QVariant.String),
-                              QgsField(parameter_low, QVariant.Double),
-                              QgsField(parameter_average, QVariant.Double),
-                              QgsField(parameter_high, QVariant.Double),
-                              ]
-                add_attributes_if_not_exists(layer, attributes)
+        for color_key in color_dict.keys():
+            color_quadriple = color_key[5:-1].split(',')
+            color_quadriple = map(int, color_quadriple)
 
-                name_index = provider.fieldNameIndex(parameter_name)
-                low_index = provider.fieldNameIndex(parameter_low)
-                average_index = provider.fieldNameIndex(parameter_average)
-                high_index = provider.fieldNameIndex(parameter_high)
+            for feat in provider.getFeatures():
+                if colors_match_feature(color_quadriple, feat, field_name):
+                    par_descr = extension.field_id + '_P'
+                    par_1_name = extension.par_in[0]
+                    par_1_lookop = color_dict[color_key][1]
+                    par_2_name = extension.par_in[1]
+                    par_2_lookop = color_dict[color_key][2]
+                    result = {extension.field_id + '_P': {'type': QVariant.String,
+                                                          'value': color_dict[color_key][0]},
+                              extension.par_in[0]: {'type': QVariant.Double,
+                                                    'value': color_dict[color_key][1]},
+                              extension.par_in[1]: {'type': QVariant.Double,
+                                                    'value': color_dict[color_key][2]}}
 
-                name_value = color_dict[color_key][0]
-                low_value = color_dict[color_key][1]
-                average_value = (float(color_dict[color_key][1])+float(color_dict[color_key][2]))/2
-                high_value = color_dict[color_key][2]
+                    result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],
+                                                      extension.par_in[1]: color_dict[color_key][2]}))
+                    attributes = []
+                    attributevalues = {}
+                    for i in result.keys():
+                        attributes.append(QgsField(i, result[i]['type']))
+                        attributevalues.update(provider.fieldNameIndex(i), result[i]['value'])
 
-                values = {name_index: name_value, low_index: low_value, average_index: average_value, high_index: high_value}
-                provider.changeAttributeValues({feat.id(): values})
+                    add_attributes_if_not_exists(layer, attributes)
+                    provider.changeAttributeValues({feat.id(): attributevalues})
 
 
 def colors_match_feature(color_quadriple, feature, field_name):

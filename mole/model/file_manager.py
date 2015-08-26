@@ -3,7 +3,7 @@ import os
 import json
 import mole
 import qgis.utils
-
+from mole import extensions
 import xml.etree.ElementTree as etree
 from io import open
 from collections import OrderedDict
@@ -22,6 +22,10 @@ class ColorEntryManager:
     def add_layer(self, layer_name):
         if not self.layer_values_map.has_key(layer_name):
             self.layer_values_map[layer_name] = OrderedDict()
+        ext = extensions.by_layername(layer_name)
+        if ext != []:
+            if ext[0].colortable != None:
+                self.read_color_map_from_qml(ext[0].colortable)
 
     def set_layer_abbreviation(self, layer_name, abbreviation):
         self.layer_abbreviation_map[layer_name] = abbreviation
@@ -336,11 +340,4 @@ class MunicipalInformationTree:
             print('{}: {}'.format(self.__module__, Error))
 
 
-class InformationSource:
 
-    def __init__(self, extension, type, field_id, layer_name, source):
-        self.extension = extension
-        self.type = type
-        self.field_id = field_id
-        self.layer_name = layer_name
-        self.source = source

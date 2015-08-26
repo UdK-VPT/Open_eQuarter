@@ -3,7 +3,6 @@ from qgis.core import QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsMapL
 from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint
 from qgis import utils
 from os import path
-
 import sys
 
 from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
@@ -61,6 +60,8 @@ class PstInteraction(object):
         :return plugin: Return the plugin if it was found or None otherwise
         :rtype: plugin instance
         """
+        import mole.extensions as extensions
+
         sample_list = self.pst_dialog.inData
         table = self.pst_dialog.fieldsTable
         number_of_samples = len(sample_list)
@@ -108,7 +109,10 @@ class PstInteraction(object):
                     RGBa_index = 0
                     print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
 
-                export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+                if extensions.by_layername(layer_name, 'import') == []:
+                    export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+                else:
+                    export_name = extensions.by_layername(layer_name, 'import')[0].field_id + '_' + rgba
 
                 replacement_map[layer_name] = export_name[:-2]
                 # Change the text in the table, so the pst can manage its model accordingly/appropriately

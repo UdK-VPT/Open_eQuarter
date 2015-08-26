@@ -7,28 +7,13 @@ from qgis.utils import iface
 from qgis.core import QgsProject, NULL
 
 from project import config
-from model.file_manager import InformationSource
 
-OeQ_ImportExtensionRegistry = []
+OeQ_ExtensionRegistry = []
+OeQ_ExtensionDefaultRegistry = []
 
-OeQ_ExportExtensionRegistry = []
+OeQ_ExtensionsLoaded = False
 
-OeQ_EvaluationExtensionRegistry = []
-
-
-# global OeQ_information_defaults
-OeQ_information_defaults = [
-    InformationSource('Floors', 'wms', '', 'WMS_Floors_RAW', 'crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude'),
-    InformationSource('Year of Construction', 'wms', '', 'WMS_Year of Construction_RAW', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter'),
-    InformationSource('Population Density', 'wms', '', 'WMS_Population Density_RAW', 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012'),
-    InformationSource('Building outlines ("Hausumringe")', 'shapefile', '', config.housing_layer_name, os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp'))
-]
-
-
-#global OeQ_information_source
-OeQ_information_source = []
-
-global OeQ_project_info
+# global OeQ_project_info
 OeQ_project_info = {
     'project_name': u'MyProject',
     'description': u'The aim of this project, is to analyse a quarter.',
@@ -38,7 +23,7 @@ OeQ_project_info = {
     'location_lat': u'Lat',
     'location_crs': u'CRS',
     'heating_degree_days': 390.06,
-    'average_build_year': 1917,
+    'average_build_year': 1970,
     'population_density': 3.859
 }
 

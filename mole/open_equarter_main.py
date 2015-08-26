@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 """
-import time
+import time, os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
 from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
-import extensions
+from mole import extensions
 from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import (
     Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
@@ -38,7 +38,7 @@ from qgisinteraction import (
     wms_utils)
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
-from mole.oeq_global import *
+from mole import oeq_global
 from mole.webinteraction import googlemaps
 
 
@@ -74,16 +74,16 @@ class OpenEQuarterMain:
         self.open_layer = None
 
         #to work flawlessly on the messagebar it is necessary to initialize the Python console once
-        iface.actionShowPythonDialog().trigger()
+        self.iface.actionShowPythonDialog().trigger()
         print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
-        iface.actionShowPythonDialog().trigger() #in fact it's not show but toggle
+        self.iface.actionShowPythonDialog().trigger()  # in fact it's not show but toggle
 
         ### Default values
         # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_style = os.path.join(OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
+        self.investigation_shape_layer_style = os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
 
     def initGui(self):
-        plugin_icon = QIcon(os.path.join(':','Plugin','icons','OeQ_plugin_icon.png'))
+        plugin_icon = QIcon(os.path.join(':', 'Plugin', 'icons', 'oeq_global.OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         self.main_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.main_action)
@@ -154,7 +154,7 @@ class OpenEQuarterMain:
         self.oeq_project_settings_form.show()
 
     def open_progress(self, doc):
-        progress = os.path.join(OeQ_project_path(), OeQ_project_name()+'.oeq')
+        progress = os.path.join(oeq_global.OeQ_project_path(), oeq_global.OeQ_project_name() + '.oeq')
         if os.path.isfile(progress):
             self.progress_items_model.load_section_models(progress)
         else:
@@ -213,7 +213,7 @@ class OpenEQuarterMain:
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
-                iface.actionSaveProjectAs().trigger()
+                self.iface.actionSaveProjectAs().trigger()
 
     def osm_layer_is_loaded(self):
         """
@@ -286,7 +286,7 @@ class OpenEQuarterMain:
         :rtype: QgsCoordinateReferenceSystem
         """
 
-        canvas = iface.mapCanvas()
+        canvas = self.iface.mapCanvas()
         crs = canvas.mapSettings().destinationCrs()
 
         return crs
@@ -358,7 +358,7 @@ class OpenEQuarterMain:
         self.create_project_ifNotExists()
 
         # if project was created stop execution
-        if OeQ_project_saved():
+        if oeq_global.OeQ_project_saved():
             return 2
 
     # step 1.0
@@ -383,22 +383,24 @@ class OpenEQuarterMain:
             layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
             layer_interaction.add_layer_to_registry(investigation_area)
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
-            widget = iface.messageBar().createMessage('Cover Investigation Area',
+            widget = self.iface.messageBar().createMessage('Cover Investigation Area',
                                                       'Click "Done" once the investigation area is completely covered.')
             button = QPushButton(widget)
             button.setText('Done')
             button.pressed.connect(self.confirm_selection_of_investigation_area)
             widget.layout().addWidget(button)
-            iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING)
+            self.iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING)
             return 1
 
     def confirm_selection_of_investigation_area(self):
-        OeQ_kill_info()
+        oeq_global.OeQ_kill_info()
 
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         try:
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-            disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area, os.path.join(OeQ_project_path(), investigation_area.name()))
+            disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area,
+                                                                      os.path.join(oeq_global.OeQ_project_path(),
+                                                                                   investigation_area.name()))
         except IOError, Error:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
@@ -429,10 +431,11 @@ class OpenEQuarterMain:
     def handle_source_layers_loaded(self):
         done = self.information_source_dlg.exec_()
         if done:
-            shape_sources = filter(lambda source: source.type == 'shapefile', OeQ_information_source)
+            shape_sources = extensions.by_type('shp', 'import', True)
+            #shape_sources = filter(lambda source: source.type == 'shp', oeq_global.OeQ_information_source)
             for shape in shape_sources:
-                extension = shape.extension
-                if extension.startswith('Building outlines'):
+                # extension =
+                if shape.layer_name.startswith(config.housing_layer_name):
                     done = 2
                     break
 
@@ -440,15 +443,15 @@ class OpenEQuarterMain:
 
     # step 2.1
     def handle_housing_layer_loaded(self):
-        shape_sources = filter(lambda source: source.type == 'shapefile', OeQ_information_source)
+        # shape_sources = filter(lambda ext: ( ext.source_type == 'shapefile' ) & ext.active, oeq_global.OeQ_ImportExtensionRegistry)
+        shape_sources = extensions.by_type('shp', 'import', True)
         shape_name = ''
         shape_path = ''
 
-        for shape in shape_sources:
-            extension = shape.extension
-            if extension.startswith('Building outlines'):
-                shape_name = shape.layer_name
-                shape_path = shape.source
+        for importextension in shape_sources:
+            if importextension.layer_name.startswith(config.housing_layer_name):
+                shape_name = importextension.layer_name
+                shape_path = importextension.source
                 break
 
         building_outlines_path = os.path.normpath(shape_path)
@@ -456,19 +459,21 @@ class OpenEQuarterMain:
 
         #Check wether IA Layer exists and has polygons defined
         if not layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
-            OeQ_init_error("Unable to create building outlines", "Map 'Investigation Area' could not be found...")
+            oeq_global.OeQ_init_error("Unable to create building outlines",
+                                      "Map 'Investigation Area' could not be found...")
             return intersection_done
         if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).featureCount() < 0:
-            OeQ_init_error("Unable to create building outlines", "No areas defined in map 'Investigation Area'...")
+            oeq_global.OeQ_init_error("Unable to create building outlines",
+                                      "No areas defined in map 'Investigation Area'...")
             return intersection_done
 
-        OeQ_init_info("Getting building outlines in the investigation area.", "This may take some time...")
+        oeq_global.OeQ_init_info("Getting building outlines in the investigation area.", "This may take some time...")
         if os.path.exists(building_outlines_path):
             layer_interaction.fullRemove(shape_name)
             layer_interaction.fullRemove(config.data_layer_name)
 
-            intersection_layer_path = os.path.join(OeQ_project_path(), shape_name + '.shp')
-            data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
+            intersection_layer_path = os.path.join(oeq_global.OeQ_project_path(), shape_name + '.shp')
+            data_layer_path = os.path.join(oeq_global.OeQ_project_path(), config.data_layer_name + '.shp')
 
             housing_layer = layer_interaction.load_layer_from_disk(building_outlines_path, shape_name)
 
@@ -480,7 +485,7 @@ class OpenEQuarterMain:
                 out_layer = layer_interaction.load_layer_from_disk(intersection_layer_path, shape_name)
                 layer_interaction.add_layer_to_registry(out_layer)
                 layer_interaction.edit_housing_layer_attributes(out_layer)
-                out_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(), 'styles', 'oeq_floor_sw.qml'))
+                out_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_floor_sw.qml'))
                 layer_interaction.trigger_edit_mode(self.iface, out_layer.name(), 'off')
                 inter_layer = self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
                 layer_interaction.add_layer_to_registry(inter_layer)
@@ -491,14 +496,14 @@ class OpenEQuarterMain:
                 layer_interaction.add_layer_to_registry(data_layer)
                 layer_interaction.trigger_edit_mode(self.iface, data_layer.name(), 'off')
                 self.iface.legendInterface().setLayerVisible(data_layer, False)
-                OeQ_kill_info()
+                oeq_global.OeQ_kill_info()
                 return 2
-        OeQ_kill_info()
+        oeq_global.OeQ_kill_info()
         return 1
 
     # step 2.2
     def handle_building_coordinates_loaded(self):
-        window = iface.mainWindow()
+        window = self.iface.mainWindow()
         load_message = "Do you want to load your own set of building coordinates?"
         reply = QMessageBox.question(window, 'Building Coordinates', load_message, QMessageBox.Yes, QMessageBox.No)
 
@@ -507,7 +512,7 @@ class OpenEQuarterMain:
         else:
             rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
             polygon = config.housing_layer_name
-            output = os.path.join(OeQ_project_path(), config.pst_input_layer_name + '.shp')
+            output = os.path.join(oeq_global.OeQ_project_path(), config.pst_input_layer_name + '.shp')
             centroid_layer = rci.create_centroids(polygon, output)
 
             if centroid_layer.isValid():
@@ -528,20 +533,42 @@ class OpenEQuarterMain:
         """
         raster_layers = []
 
-        wms_sources = filter(lambda source: source.type == 'wms', OeQ_information_source)
-        for info_source in wms_sources:
-            name = info_source.layer_name
-            url = info_source.source
+        gtiff_sources = extensions.by_type('gtiff', 'import', True)
+        for info_source in gtiff_sources:
+            pass
+        shp_sources = extensions.by_type('shp', 'import', True)
+        for info_source in shp_sources:
+            pass
+        wfs_sources = extensions.by_type('wfs', 'import', True)
+        for info_source in wfs_sources:
+            pass
+        dxf_sources = extensions.by_type('dxf', 'import', True)
+        for info_source in dxf_sources:
+            pass
+        csv_sources = extensions.by_type('csv', 'import', True)
+        for info_source in csv_sources:
+            pass
+        wms_sources = extensions.by_type('wms', 'import', True)
+        print [i.layer_name for i in wms_sources]
+        print [i.layer_id for i in wms_sources]
+        # print [layer_interaction.find_by_id(i.layer_id) for i in wms_sources]
+
+        for importextension in wms_sources:
+            layer_interaction.fullRemove(layer_id=importextension.layer_id)
+            name = 'WMS_' + importextension.layer_name + '_RAW'
+            url = importextension.source
             raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
-            raster_layers.append(raster_layer)
+            if raster_layer is not None:
+                importextension.layer_id = raster_layer.id()
+                raster_layers.append(raster_layer)
 
         raster_loaded = False
-        progressbar = OeQ_init_progressbar(u"Loading WMS Layer",
+        progressbar = oeq_global.OeQ_init_progressbar(u"Loading WMS Layer",
                                            u"WMS Servers are slow, this may take a while...",
                                            maxcount=len(raster_layers) + 2)
-        progress_counter = OeQ_push_progressbar(progressbar, 0)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
         for raster in raster_layers:
-            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 if raster.isValid():
                     layer_interaction.add_layer_to_registry(raster)
@@ -554,8 +581,8 @@ class OpenEQuarterMain:
         if not raster_loaded:
             self.iface.actionAddWmsLayer().trigger()
         # Let's wait for the WMS loading
-        progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
-        OeQ_kill_progressbar()
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        oeq_global.OeQ_kill_progressbar()
 
         loaded_layers = QgsMapLayerRegistry.instance().mapLayers()
         for layer in loaded_layers.values():
@@ -580,45 +607,55 @@ class OpenEQuarterMain:
                 raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
                 raster_layers = filter(lambda wms_layer: not wms_layer.source().endswith('.tif'), raster_layers)
 
-                progressbar = OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
+                progressbar = oeq_global.OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
                                                    u"This may take some time...",
-                                                   maxcount=len(raster_layers)+2)
-                progress_counter = OeQ_push_progressbar(progressbar, 0)
+                                                   maxcount=len(raster_layers) + 2)
+                progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
 
                 for layer in raster_layers:
                     self.iface.legendInterface().setLayerVisible(layer, False)
 
                 extracted_layers = []
                 for clipping_raster in raster_layers:
-                    progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+                    progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
                     clipped_layer=self.clip_from_raster(clipping_raster)
                     extracted_layers.append(clipped_layer)
 
                     cLay=layer_interaction.find_layer_by_name(clipped_layer)
                     lUrl=wms_utils.getWmsLegendUrl(clipping_raster)
                     cLay.setLegendUrl(lUrl)
+
+                    # set new layer id in extension if available
+                    # print 'OLD '+ clipping_raster.id()
+                    # print 'NEW '+ cLay.id()
+                    extension = extensions.by_layerid(clipping_raster.id())
+                    if extension is not None:
+                        extension[0].layer_id = cLay.id()
+
                     #remove the wms source from the legend
-                    QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id() )
-                OeQ_kill_progressbar()
+                    QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id())
+
+                oeq_global.OeQ_kill_progressbar()
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
             return 0
 
-        progressbar = OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
+        progressbar = oeq_global.OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
                                             u"This may take some time.",
-                                           maxcount=len(extracted_layers)+2)
-        progress_counter = OeQ_push_progressbar(progressbar, 0)
+                                           maxcount=len(extracted_layers) + 2)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
 
         for layer_name in extracted_layers:
-            progress_counter = OeQ_push_progressbar(progressbar, progress_counter)
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
+                former_layer_id = layer.id()  #for id update in the appropriate extension
                 #save legendUrl from source
                 legUrl=layer.legendUrl()
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
                 path_geo = layer.publicSource()
                 path_transformed = path_geo.replace('_RAW.tif', '_transformed.tif')
-                print path_geo
+                #print path_geo
                 no_timeout = 50
                 while not os.path.exists(path_transformed) and no_timeout:
                     time.sleep(0.1)
@@ -635,16 +672,21 @@ class OpenEQuarterMain:
                     #write legendUrl to the converted layer
                     rlayer.setLegendUrl(legUrl)
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+
+                    # set new layer id in appropriate extension if available
+                    extension = extensions.by_layerid(former_layer_id)
+                    if extension is not None:
+                        extension[0].layer_id = rlayer.id()
                     #os.remove(path_geo)
                     self.iface.mapCanvas().refresh()
                     # restore former settings
                     QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-                    print rlayer.legendUrl()
+                    #print rlayer.legendUrl()
             except (OSError, AttributeError) as Clipping_Error:
                 print(self.__module__, Clipping_Error)
                 pass
         time.sleep(1.0)
-        OeQ_kill_progressbar()
+        oeq_global.OeQ_kill_progressbar()
         return 2
 
     def handle_legend_created(self):
@@ -673,22 +715,105 @@ class OpenEQuarterMain:
             return 1
 
     # step 4.1
-    def handle_information_sampled(self):
-        psti = plugin_interaction.PstInteraction(iface, config.pst_plugin_name)
+    def handle_information_sampled2(self):
+        layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
+        psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
-        pst_output_layer = psti.start_sampling(OeQ_project_path(), config.pst_output_layer_name)
+        pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
 
         # in case the plugin was re-started, reload the color-entries
         for layer_name, abbreviation in abbreviations.iteritems():
-            in_path = os.path.join(OeQ_project_path(), layer_name + '.qml')
+            print layer_name
+            ext = extensions.by_layername(layer_name, 'import')
+            print ext
+            if ext != []:
+                if ext[0].colortable != None:
+                    in_path = ext[0].colortable
+            print in_path
+            #in_path = os.path.join(oeq_global.OeQ_project_path(), layer_name + '.qml')
             self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(in_path)
             layer_color_map = self.color_picker_dlg.color_entry_manager.layer_values_map
             color_dict = layer_color_map[layer_name]
             layer_interaction.add_parameter_info_to_layer(color_dict, abbreviation, vlayer)
-
         layer_interaction.add_layer_to_registry(vlayer)
+        return 2
+
+    def handle_information_sampled(self):
+        layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
+        time.sleep(0.5)
+        psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
+        psti.set_input_layer(config.pst_input_layer_name)
+        abbreviations = psti.select_and_rename_files_for_sampling()
+        pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
+        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
+        layer_interaction.add_layer_to_registry(vlayer)
+
+        # in case the plugin was re-started, reload the color-entries
+        for extension in extensions.by_state(True, 'import'):
+            print extension.layer_name
+            if extension.source_type == 'wms':
+                if extension.colortable != None:
+                    self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(extension.colortable)
+                    color_dict = self.color_picker_dlg.color_entry_manager.layer_values_map[extension.layer_name]
+                    try:
+                        provider = vlayer.dataProvider()
+                    except AttributeError, NoneTypeError:
+                        print(__name__, NoneTypeError)
+                        return
+
+                    for color_key in color_dict.keys():
+                        color_quadriple = color_key[5:-1].split(',')
+                        color_quadriple = map(int, color_quadriple)
+
+                        for feat in provider.getFeatures():
+
+                            if layer_interaction.colors_match_feature(color_quadriple, feat, extension.field_id):
+                                result = {extension.field_id + '_P': {'type': QVariant.String,
+                                                                      'value': color_dict[color_key][0]},
+                                          extension.par_in[0]: {'type': QVariant.Double,
+                                                                'value': color_dict[color_key][1]},
+                                          extension.par_in[1]: {'type': QVariant.Double,
+                                                                'value': color_dict[color_key][2]}}
+
+                                result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],
+                                                                  extension.par_in[1]: color_dict[color_key][2]}))
+                                attributes = []
+                                attributevalues = {}
+                                for i in result.keys():
+                                    attributes.append(QgsField(i, result[i]['type']))
+                                    attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
+
+                                layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
+                                provider.changeAttributeValues({feat.id(): attributevalues})
+            elif extension.source_type == 'none':
+                for feat in provider.getFeatures():
+                    result = {extension.field_id + '_P': {'type': QVariant.String,
+                                                          'value': color_dict[color_key][0]}}
+                    par_in_data = {}
+                    attributes = feat.attributes()
+                    for i in extension.par_in:
+                        print i
+                        print vlayer.fieldNameIndex(i)
+                        try:
+                            par_in_value = attributes[provider.fieldNameIndex(i)]
+                        except:
+                            par_in_value = NULL
+                        par_in_data.update({i: par_in_value})
+                        result.update({i: {'type': QVariant.Double,
+                                           'value': par_in_value}})
+
+                    result.update(extension.evaluate(par_in_data))
+                    attributes = []
+                    attributevalues = {}
+                    for i in result.keys():
+                        attributes.append(QgsField(i, result[i]['type']))
+                        attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
+
+                    layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
+                    provider.changeAttributeValues({feat.id(): attributevalues})
+
         return 2
 
     #step 4.2
@@ -719,7 +844,7 @@ class OpenEQuarterMain:
             in_provider = in_layer.dataProvider()
             out_layer = layer_interaction.find_layer_by_name(config.data_layer_name)
             out_provider = out_layer.dataProvider()
-            data_layer_path = os.path.join(OeQ_project_path(), config.data_layer_name + '.shp')
+            data_layer_path = os.path.join(oeq_global.OeQ_project_path(), config.data_layer_name + '.shp')
           
             
             def join_layers(layer,tgt_layer,idx='BLD_ID',tgt_idx='BLD_ID',prefix='db_'):
@@ -752,9 +877,9 @@ class OpenEQuarterMain:
  
             for attr in in_provider.fields().toList():
               print attr
-              if attr.name().endswith("Year o_M"): yoc_fld = attr.name()
-              if attr.name().endswith("Popula_M"): pdens_fld = attr.name()
-              if attr.name().endswith("Floors_M"): floors_fld = attr.name()
+              if attr.name().endswith("YOC"): yoc_fld = attr.name()
+              if attr.name().endswith("PDENS_M"): pdens_fld = attr.name()
+              if attr.name().endswith("FLOORS"): floors_fld = attr.name()
             
             #pdens_fld = dlg.area.currentText()
             #area_fld = dlg.area.currentText()
@@ -774,12 +899,13 @@ class OpenEQuarterMain:
             layer_interaction.add_attributes_if_not_exists(out_layer, str_attributes)
             layer_interaction.add_attributes_if_not_exists(out_layer, double_attributes)
             
-            out_layer.startEditing() 
-            
-            progressbar=OeQ_init_progressbar(u'Building Evaluation!',u'This might take 30 seconds...',maxcount=in_layer.featureCount()+1)
-            progress_counter=OeQ_push_progressbar(progressbar,0)
+            out_layer.startEditing()
+
+            progressbar = oeq_global.OeQ_init_progressbar(u'Building Evaluation!', u'This might take 30 seconds...',
+                                                          maxcount=in_layer.featureCount() + 1)
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar,0)
             for inFeat in in_provider.getFeatures():
-              progress_counter=OeQ_push_progressbar(progressbar,progress_counter)
+                progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
               outFeat=filter(lambda x: x.attribute('BLD_ID')==inFeat.attribute('BLD_ID'), out_provider.getFeatures())
               if len(outFeat)>0:
                 outFeat=outFeat[0]
@@ -827,13 +953,13 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Transmission Heat Loss (Present)')
             new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Present)')#,group="Transmission Heat Loss",subgroup="Present")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLP.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_epass_HLP.qml'))
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             layer_interaction.fullRemove('Transmission Heat Loss (Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Transmission Heat Loss (Contemporary)')#,group="Transmission Heat Loss",subgroup="Contemporary")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_epass_HLC.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_epass_HLC.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
@@ -844,56 +970,56 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Base Quality (U_Value, Present)')
             new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Base.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UP_Base.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             layer_interaction.fullRemove('Base Quality (U_Value, Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Base Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Base.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UC_Base.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             layer_interaction.fullRemove('Wall Quality (U_Value, Present)')
             new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Wall.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UP_Wall.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Wall Quality (U_Value, Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Wall Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Wall.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UC_Wall.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Window Quality (U_Value, Present)')
             new_layer=create_evaluation_layer(layer_name='Window Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Window.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UP_Window.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Window Quality (U_Value, Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Window Quality (U_Value, Contemporary)')#,group="Component Qualities",subgroup="Contemporary")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Window.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UC_Window.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Roof Quality (U_Value, Present)')
             new_layer=create_evaluation_layer(layer_name='Roof Quality (U_Value, Present)')#,group="Component Qualities",subgroup="Present")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UP_Roof.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UP_Roof.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Roof Quality (U_Value, Contemporary)')
             new_layer=create_evaluation_layer(layer_name='Roof Quality (U_Value, Contemporary)')
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_UC_Roof.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_UC_Roof.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
@@ -902,14 +1028,14 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Solar Coverage Rate')
             new_layer=create_evaluation_layer(layer_name='Solar Coverage Rate')#,group="Solar Heat")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_RT_Sol.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_RT_Sol.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
             
             layer_interaction.fullRemove('Solar Earning')
             new_layer=create_evaluation_layer(layer_name='Solar Earning')#,group="Solar Heat")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HE_Sol.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_HE_Sol.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
@@ -918,14 +1044,14 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Heatings System (by Building)')
             new_layer=create_evaluation_layer(layer_name='Heatings System (by Building)')#,group="Heating System")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HTS_Building.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_HTS_Building.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             layer_interaction.fullRemove('Heatings System (by Flat)')
             new_layer=create_evaluation_layer(layer_name='Heatings System (by Flat)')#,group="Heating System")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_HTS_Flat.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_HTS_Flat.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
@@ -934,18 +1060,18 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove('Owners (by Building)')
             new_layer=create_evaluation_layer(layer_name='Owners (by Building)')#,group="Soft Facts")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_OWN_Building.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_OWN_Building.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
             layer_interaction.fullRemove('Owners (by Flat)')
             new_layer=create_evaluation_layer(layer_name='Owners (by Flat)')#,group="Soft Facts")
             join_layers(new_layer,out_layer)
-            new_layer.loadNamedStyle(os.path.join(OeQ_plugin_path(),'styles','oeq_OWN_Flat.qml'))
+            new_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_OWN_Flat.qml'))
             self.iface.legendInterface().setLayerVisible(new_layer, False)
             self.iface.legendInterface().setLayerExpanded(new_layer, False)
 
-            OeQ_kill_progressbar()
+            oeq_global.OeQ_kill_progressbar()
             return 2
         else:
             return 0
@@ -1020,35 +1146,35 @@ class OpenEQuarterMain:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
 
-        if not OeQ_project_saved() or OeQ_project_info['project_name'] == 'MyProject':
+        if not oeq_global.OeQ_project_saved() or oeq_global.OeQ_project_info['project_name'] == 'MyProject':
             self.oeq_project_settings_form.show()
             save = self.oeq_project_settings_form.exec_()
             if save:
-                for key in OeQ_project_info:
+                for key in oeq_global.OeQ_project_info:
                     field = getattr(self.oeq_project_settings_form, key)
-                    OeQ_project_info[key] = field.text()
+                    oeq_global.OeQ_project_info[key] = field.text()
 
                 self.handle_project_created()
                 plugin_section = self.progress_items_model.section_views[0]
                 section_model = plugin_section.model()
                 project_item = section_model.findItems('Create a new project and save it')[0]
-                if OeQ_project_saved():
+                if oeq_global.OeQ_project_saved():
                     project_item.setCheckState(2)
                 else:
                     project_item.setCheckState(0)
 
-        if OeQ_project_saved() and OeQ_project_info['project_name']:
+        if oeq_global.OeQ_project_saved() and oeq_global.OeQ_project_info['project_name']:
             municipal = self.oeq_project_settings_form.municipals[0]
             try:
-                x = float(OeQ_project_info['location_lon'])
-                y = float(OeQ_project_info['location_lat'])
+                x = float(oeq_global.OeQ_project_info['location_lon'])
+                y = float(oeq_global.OeQ_project_info['location_lat'])
                 scale = 0.05
                 extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
                 config.default_extent = extent
                 config.default_extent_crs = 'EPSG:4326'
                 self.continue_process()
             except ValueError:
-                OeQ_init_info('Coordinates not defined',
+                oeq_global.OeQ_init_info('Coordinates not defined',
                               'Zoom to your investigation area automatically, by setting lon and lat.')
 
     def set_next_step_done(self, is_done):

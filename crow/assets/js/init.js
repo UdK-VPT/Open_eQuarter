@@ -84,6 +84,7 @@ var map = new ol.Map({
 function oeq_init () {
 
     map.addLayer(shapes);
+    map.addLayer(bldData);
     //map.addLayer(invArea);
     updateLayerList();
     map.getLayers().on('change', updateLayerList);
@@ -93,6 +94,7 @@ function oeq_init () {
 
 
 var highlightStyleCache = {};
+var clickStyleCache = {};
 
 var featureOverlay = new ol.layer.Vector({
   source: new ol.source.Vector(),
@@ -106,7 +108,7 @@ var featureOverlay = new ol.layer.Vector({
           width: 1
         }),
         fill: new ol.style.Fill({
-          color: 'rgba(255,0,0,0.1)'
+          color: 'rgba(255,0,0,0.3)'
         }),
         text: new ol.style.Text({
           font: '12px Calibri,sans-serif',
@@ -124,53 +126,99 @@ var featureOverlay = new ol.layer.Vector({
     return highlightStyleCache[text];
   }
 });
+var featureClick = new ol.layer.Vector({
+  source: new ol.source.Vector(),
+  map: map,
+  style: function(feature, resolution) {
+    var text = resolution < 5000 ? feature.get('name') : '';
+    if (!clickStyleCache[text]) {
+      clickStyleCache[text] = [new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#f00',
+          width: 1
+        }),
+        fill: new ol.style.Fill({
+          color: 'rgba(255,0,0,0.1)'
+        }),
+        text: new ol.style.Text({
+          font: '12px Calibri,sans-serif',
+          text: text,
+          fill: new ol.style.Fill({
+            color: '#000'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#f00',
+            width: 4
+          })
+        })
+      })];
+    }
+    return clickStyleCache[text];
+  }
+});
+var clickedFeature;
 
 var highlight;
-var displayFeatureInfo = function(pixel) {
-
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-    return feature;
-  });
-
-    var propertiesSheet = document.getElementById('dataSheet');
-    if (feature) {
-        var table = '<style type="text/css">.propSheet {border-collapse: separate; border-spacing: 2px 0;}'+
-                    '.propSheet td, .propSheet th { padding: 0 5px; } '+
-                    '</style>'+
-                    '<table class="propSheet">'+
-                    '<tr><th>Property</th><th>Value</th></tr>';        
-        var keys = feature.getKeys();
-        for (var i=0; i < keys.length; i++){
-            var key = keys[i];
-            table += '<tr><td>' + key + '</td><td>' + feature.get(key) + '</td></tr>';
+var displayFeatureInfo = function(feature) {
+    propertiesSheet = document.getElementById('dataSheet');
+    var table = '<style type="text/css">.propSheet {border-collapse: separate; border-spacing: 2px 0;}'+
+                '.propSheet td, .propSheet th { padding: 0 5px; } '+
+                '</style>'+
+                '<table class="propSheet">'+
+                '<tr><th>Property</th><th>Value</th></tr>';        
+    var keys = feature.getKeys();
+    for (var i=0; i < keys.length; i++){
+        var key = keys[i];
+        table += '<tr><td>' + key + '</td><td>' + feature.get(key) + '</td></tr>';
+    }
+    table += '</table>';
+    propertiesSheet.innerHTML = table;
+};
+var highlightFeature = function(feature) {
+    if (feature !== highlight) {
+        if (highlight) {
+            featureOverlay.getSource().removeFeature(highlight);
         }
-        table += '</table>';
-        
-        propertiesSheet.innerHTML = table;
-    } else {
-        propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
-    }
-
-  if (feature !== highlight) {
-    if (highlight) {
-      featureOverlay.getSource().removeFeature(highlight);
-    }
     if (feature) {
-      featureOverlay.getSource().addFeature(feature);
+        featureOverlay.getSource().addFeature(feature);
     }
     highlight = feature;
-  }
-
+    }
 };
 
 map.on('pointermove', function(evt) {
-  if (evt.dragging) {
-    return;
-  }
-  var pixel = map.getEventPixel(evt.originalEvent);
-  displayFeatureInfo(pixel);
+    if (evt.dragging) {
+        return;
+    }
+    pixel = map.getEventPixel(evt.originalEvent);
+    feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+        return feature;
+    });
+    if (feature) {
+        displayFeatureInfo(feature);
+        highlightFeature(feature);
+    } else if (clickedFeature) {
+        displayFeatureInfo(clickedFeature);
+        highlightFeature(feature);
+    } else {
+        propertiesSheet = document.getElementById('dataSheet');
+        propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
+    }
 });
 
 map.on('click', function(evt) {
-  displayFeatureInfo(evt.pixel);
+    pixel = evt.pixel;
+    feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+        return feature;
+    });
+    if (feature) {
+        if (clickedFeature)
+            featureClick.getSource().removeFeature(clickedFeature);
+        clickedFeature = feature;
+        displayFeatureInfo(feature);
+        featureClick.getSource().addFeature(feature);
+    } else {
+        propertiesSheet = document.getElementById('dataSheet');
+        propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
+    }
 });

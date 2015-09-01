@@ -160,8 +160,9 @@ var clickedFeature;
 
 var highlight;
 var displayFeatureInfo = function(feature) {
+    limitProperties();
     propertiesSheet = document.getElementById('dataSheet');
-    var table = '<style type="text/css">.propSheet {border-collapse: separate; border-spacing: 2px 0;}'+
+    var table = '<style type="text/css">.propSheet {border-collapse: separate; overflow: auto; border-spacing: 2px 0;}'+
                 '.propSheet td, .propSheet th { padding: 0 5px; } '+
                 '</style>'+
                 '<table class="propSheet">'+

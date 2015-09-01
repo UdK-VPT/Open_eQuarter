@@ -120,3 +120,12 @@ function removeLayer(layerName) {
     var layers = map.getLayers();
     layers.remove(layer);
 }
+
+var limitProperties = function() {
+    doc_height = $(document).height();
+    max = doc_height - $('#properties').offset().top - doc_height * 0.05;
+    $('#properties').css('max-height', max);
+}
+
+$(document).ready(limitProperties);
+$(window).resize(limitProperties);

@@ -1,4 +1,8 @@
- button.code {
+html, body {
+    height: 100%;
+} 
+
+button.code {
    font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
    font-size: 12px;
    padding: 5px;
@@ -17,4 +21,10 @@ a.list-group-item.active:hover {
   color: RGB(53, 68, 88);
   background-color: RGB(233, 224, 214);
   border-color: RGB(203, 204, 194); 
+}
+
+#properties {
+    display: block;
+    max-height: 200px;
+    overflow: auto;
 }

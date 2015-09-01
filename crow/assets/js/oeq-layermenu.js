@@ -142,7 +142,7 @@ function lookupAddress() {
                 sensor: "false"
             },
             success: function(data) {
-                if( data.results[0] ){
+                if( data && data.results[0] ){
                     $('#addressLookup input:first:text').css('color', 'rgb(0, 0, 0)');
                     addr = data.results[0];
                     $('#addressLookup input:first').val('');

@@ -142,14 +142,19 @@ function lookupAddress() {
                 sensor: "false"
             },
             success: function(data) {
-                addr = data.results[0];
-                $('#addressLookup input:first').val('');
-                geo_loc = addr.geometry.location;
-                lat = geo_loc.lat;
-                lon = geo_loc.lng;
-                extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
-                extent = ol.extent.applyTransform(extent, ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
-                map.getView().fit(extent, map.getSize());
+                if( data.results[0] ){
+                    $('#addressLookup input:first:text').css('color', 'rgb(0, 0, 0)');
+                    addr = data.results[0];
+                    $('#addressLookup input:first').val('');
+                    geo_loc = addr.geometry.location;
+                    lat = geo_loc.lat;
+                    lon = geo_loc.lng;
+                    extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
+                    extent = ol.extent.applyTransform(extent, ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+                    map.getView().fit(extent, map.getSize());
+                } else {
+                    $('#addressLookup input:first:text').css('color', 'rgb(255, 0, 0)');
+                }
             },
             error : function() {
                 alert("Error.");

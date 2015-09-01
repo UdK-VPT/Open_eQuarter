@@ -224,6 +224,6 @@ map.on('click', function(evt) {
             featureClick.getSource().removeFeature(clickedFeature);
         clickedFeature = null;
         propertiesSheet = document.getElementById('dataSheet');
-        propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
+        propertiesSheet.innerHTML = '<p>Click a feature to display its properties.</p>';
     }
 });

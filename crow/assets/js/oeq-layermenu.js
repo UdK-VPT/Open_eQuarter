@@ -25,7 +25,7 @@ function updateLayerList () {
     var layers = map.getLayers();
     var numberOfLayers = layers.getLength();
     var layersMenu = document.getElementById("layersMenu");
-    var layerStack = $('div.layerStack');
+    var layerStack = $('#layerStack');
     layersMenu.innerHTML = String.format('<i class="fa fa-list-alt"></i> Layers ({0})', numberOfLayers);
     layerStack.text('');
     
@@ -46,9 +46,9 @@ function updateLayerList () {
                     layerStack.prepend(layerBtn);
                     
                     if( layer.getVisible() )
-                        $('div.layerStack a:first').addClass('active');
-                    $('div.layerStack a:first').unbind('click');
-                    $('div.layerStack a:first').click({layerName: name}, function( event ) {
+                        $('#layerStack a:first').addClass('active');
+                    $('#layerStack a:first').unbind('click');
+                    $('#layerStack a:first').click({layerName: name}, function( event ) {
                         layerCtlListener(event, event.data.layerName);
                 });
     }   
@@ -129,3 +129,30 @@ var limitProperties = function() {
 
 $(document).ready(limitProperties);
 $(window).resize(limitProperties);
+
+function lookupAddress() {
+    address = $('#addressLookup input:first').val();
+    $.ajax(
+        {
+            type : "GET",
+            url: "http://maps.google.com/maps/api/geocode/json",
+            dataType: "json",
+            data: {
+                address: address,
+                sensor: "false"
+            },
+            success: function(data) {
+                addr = data.results[0];
+                $('#addressLookup input:first').val('');
+                geo_loc = addr.geometry.location;
+                lat = geo_loc.lat;
+                lon = geo_loc.lng;
+                extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
+                extent = ol.extent.applyTransform(extent, ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+                map.getView().fit(extent, map.getSize());
+            },
+            error : function() {
+                alert("Error.");
+            }
+        });
+    }

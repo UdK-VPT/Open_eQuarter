@@ -1,15 +1,9 @@
-html, body {
-    height: 100%;
-} 
-
 button.code {
    font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
    font-size: 12px;
    padding: 5px;
    margin: 0 5px;
  }
-
-
 
 a.list-group-item.active {
   color: RGB(53, 68, 88);

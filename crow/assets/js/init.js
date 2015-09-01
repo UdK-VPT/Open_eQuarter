@@ -201,6 +201,7 @@ map.on('pointermove', function(evt) {
         displayFeatureInfo(clickedFeature);
         highlightFeature(feature);
     } else {
+        highlightFeature(feature);
         propertiesSheet = document.getElementById('dataSheet');
         propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
     }
@@ -218,6 +219,9 @@ map.on('click', function(evt) {
         displayFeatureInfo(feature);
         featureClick.getSource().addFeature(feature);
     } else {
+        if (clickedFeature)
+            featureClick.getSource().removeFeature(clickedFeature);
+        clickedFeature = null;
         propertiesSheet = document.getElementById('dataSheet');
         propertiesSheet.innerHTML = '<p>Hover a feature to display its properties.</p>';
     }

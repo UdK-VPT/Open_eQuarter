@@ -1,6 +1,28 @@
 # -*- coding: utf-8 -*-
 
 
+from mole import oeq_global
+from PyQt4.QtCore import QVariant
+from qgis.core import NULL
+from mole.project import config
+
+
+def calculation(self=None, parameters={}):
+    # print parameters
+    # print parameters.values()
+    result = {self.field_id + '_P': {'type': QVariant.String,
+                                     'value': self.layer_name},
+              'PDENS': {'type': QVariant.Double,
+                        'value': oeq_global.OeQ_project_info['population_density']}}
+    if parameters != {}:
+        # print sum(float(parameters.values()))/len(parameters)
+        try:
+            result['PDENS']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
+        except:
+            pass
+
+    return result
+
 import os
 from mole.extensions import OeQExtension
 
@@ -14,6 +36,7 @@ extension = OeQExtension(
     active=True,
     description=u'',
     colortable=os.path.join(__file__[:-3] + '.qml'),
-    source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012')
+    source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',
+    evaluation_method=calculation)
 
 extension.registerExtension(default=True)

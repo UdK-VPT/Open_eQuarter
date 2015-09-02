@@ -35,16 +35,49 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
             QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
 
         # create a new shape-file called layer_name, of the type layer_type, with system encoding and crs according to crs_name
-        shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory', False)
+        shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory')
         shape_layer.setProviderEncoding('System')
 
         # reset appearance of crs-choice dialog to previous settings
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-        #QgsMapLayerRegistry.instance().addMapLayer(shape_layer,False) 
+        # QgsMapLayerRegistry.instance().addMapLayer(shape_layer,True)
         return shape_layer
 
     else:
         return None
+
+
+def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=True):
+    import os
+    from qgis.utils import iface
+    from mole import oeq_global
+    print vlayer.providerType()
+    if oeq_global.OeQ_project_name() == '':
+        iface.actionSaveProjectAs().trigger()
+    layer_name = vlayer.name()
+    layer_crs = vlayer.crs()
+    path = os.path.join(oeq_global.OeQ_project_path(), layer_name + '.shp')
+    error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, path, "System", layer_crs, 'ESRI Shapefile')
+    if error == QgsVectorFileWriter.NoError:
+        if replace_in_legend:
+            QgsMapLayerRegistry.instance().removeMapLayer(vlayer.id())
+            print path
+            print "'" + oeq_global.OeQ_project_path() + "'"
+            print "'" + oeq_global.OeQ_project_name() + "'"
+            rewritten_layer = iface.addVectorLayer(path, layer_name, "ogr")
+            if not rewritten_layer.isValid():
+                oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+                return vlayer
+            print rewritten_layer.name()
+            if style != None:
+                add_style_to_layer(style, rewritten_layer)
+                rewritten_layer.startEditing()
+                time.sleep(0.2)
+                rewritten_layer.commitChanges()
+            return rewritten_layer
+        else:
+            oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+            return vlayer
 
 #remove a layer including all files
 def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.qpj', '.dbf', '.idm', '.ind']):
@@ -159,6 +192,7 @@ def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
     if layer and mode == 'unhide' and iface:
         iface.legendInterface().setLayerVisible(layer, True)
 
+
 #ToDo Try to use the currently recommended way to save the layer
 def write_vector_layer_to_disk(vlayer, full_path):
     """
@@ -174,7 +208,7 @@ def write_vector_layer_to_disk(vlayer, full_path):
 
     if out_name.upper().endswith('.SHP'):
         out_name = out_name[:-4]
-
+    print type(vlayer)
     if vlayer is not None and vlayer.isValid() and os.path.exists(out_path):
 
         if os.path.exists(os.path.join(out_path, out_name + '.shp')):
@@ -192,8 +226,9 @@ def write_vector_layer_to_disk(vlayer, full_path):
         provider = vlayer.dataProvider()
         encoding = provider.encoding()
         crs = provider.crs()
-        write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
 
+        write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
+        #QgsVectorFileWriter()
         if write_error == QgsVectorFileWriter.WriterError:
             raise IOError('Can\'t create the file: {0}'.format(full_path))
             return None
@@ -204,21 +239,19 @@ def write_vector_layer_to_disk(vlayer, full_path):
             while not os.path.exists(full_path) and timeout:
                 time.sleep(0.1)
                 timeout -= 1
+                # disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
 
-            disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
-            
-            if disk_layer.isValid():
-                old_features = provider.getFeatures()
-                new_provider = disk_layer.dataProvider()
-                feature_list = []
-                for feature in old_features:
-                    feature_list.append(feature)
+                # if disk_layer.isValid():
+                #    old_features = provider.getFeatures()
+                #    new_provider = disk_layer.dataProvider()
+                #    feature_list = []
+                #    for feature in old_features:
+                #        feature_list.append(feature)
 
-                new_provider.addFeatures(feature_list)
-                return disk_layer
-            else:
-                return None
-
+                #    new_provider.addFeatures(feature_list)
+                #    return disk_layer
+                # else:
+                #    return None
     else:
         return None
 
@@ -475,21 +508,26 @@ def edit_housing_layer_attributes(housing_layer):
         area_index = name_to_index['AREA']
         perimeter_index = name_to_index['PERIMETER']
         building_index = name_to_index['BLD_ID']
-        fid_index = name_to_index['FID']
+        try:
+            fid_index = name_to_index['FID']
+        except:
+            pass
+
         building_id = 0
 
         for feature in provider.getFeatures():
-            if oeq_global.isnull(feature.attribute('FID')):
+            #if oeq_global.isnull(feature.attribute('FID')):
                 # if feature.attribute('BLD_ID') == 0:
                 geometry = feature.geometry()
+            print geometry
                 values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
                 provider.changeAttributeValues({feature.id() : values})
                 building_id += 1
-            else:
+            #else:
                 # These features are most likely to be duplicates of those that have an FID-entry
-                provider.deleteFeatures([feature.id()])
+            #    provider.deleteFeatures([feature.id()])
 
-        provider.deleteAttributes([fid_index])
+        #provider.deleteAttributes([fid_index])
         return housing_layer.commitChanges()
     except AttributeError, Error:
         print(__name__, Error)

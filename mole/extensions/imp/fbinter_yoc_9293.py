@@ -1,10 +1,34 @@
 # -*- coding: utf-8 -*-
 
+from mole import oeq_global
+from PyQt4.QtCore import QVariant
+from qgis.core import NULL
+from mole.project import config
+
 def calculation(self=None, parameters={}):
+    # print parameters
+    # print parameters.values()
+    result = {self.field_id + '_P': {'type': QVariant.String,
+                                     'value': self.layer_name},
+              'YOC': {'type': QVariant.Double,
+                      'value': oeq_global.OeQ_project_info['average_build_year']}}
+    if parameters != {}:
+        # print sum(float(parameters.values()))/len(parameters)
+        try:
+            result['YOC']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
+        except:
+            pass
+
+    return result
+
+
+def calculation_OLD(self=None, parameters={}):
     from PyQt4.QtCore import QVariant
     from mole import oeq_global
-    print parameters
-    print parameters.values()
+
+    # print "YOC"
+    #print parameters
+
     if parameters != {}:
         # print sum(float(parameters.values()))/len(parameters)
         if oeq_global.isnull(parameters[self.par_in[0]]) or oeq_global.isnull(parameters[self.par_in[1]]):

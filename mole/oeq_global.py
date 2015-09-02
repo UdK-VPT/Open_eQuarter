@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import time
 
@@ -23,9 +25,10 @@ OeQ_project_info = {
     'location_lat': u'Lat',
     'location_crs': u'CRS',
     'heating_degree_days': 390.06,
-    'average_build_year': 1970,
-    'population_density': 3.859
+    'average_build_year': 1950,
+    'population_density': 14000
 }
+
 
 # global OeQ_project_name
 def OeQ_project_name():
@@ -54,6 +57,10 @@ def OeQ_plugin_path():
     plugin_dir = os.path.dirname(file_location)
     return plugin_dir
 
+
+# global OeQ_style_path
+def OeQ_style_path():
+    return os.path.join(OeQ_plugin_path() + 'styles')
 
 # the project path equals './' as long as the project has not been saved
 #global OeQ_project_saved

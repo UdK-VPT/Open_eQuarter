@@ -27,7 +27,7 @@ from qgis.utils import iface
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import *
+from mole import oeq_global
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -147,7 +147,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         #         layer_name = str(layer_name) + '_RAW'
 
         # info_source = InformationSource(extension, type, field_id, layer_name, source_path)
-        #  OeQ_information_source.append(info_source)
+        #  oeq_global.OeQ_information_source.append(info_source)
 
         # for line_edit in line_edits:
         #    line_edit.clear()
@@ -561,11 +561,17 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
 
     def show(self):
-        for key in OeQ_project_info:
+        print oeq_global.OeQ_project_info
+        for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
-            # print str(OeQ_project_info[key])
-            field.setText(str(OeQ_project_info[key]))
+            field.setText(unicode(oeq_global.OeQ_project_info[key]))
         QtGui.QDialog.show(self)
+
+    def reset(self):
+        for key in oeq_global.OeQ_project_info:
+            field = getattr(self, key)
+            field.setText(unicode(u''))
+        print 'resetted'
 
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
@@ -576,16 +582,10 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         if postal == "Postal": postal = ""
         city_street = self.location_city.text()
         if city_street == "City or street": city_street = ""
-
-        if isinstance(city_street, unicode):
-            city_street = city_street.encode('utf-8')
-            address = '{} {}'.format(postal, city_street)
-            address = address.decode('utf-8')
-        else:
-            address = '{} {}'.format(postal, city_street)
+        address = u'{} {}'.format(postal, city_street)
         print address
         location_info = googlemaps.getCoordinatesByAddress(address, crs=4326)
-
+        print location_info
         try:
             street = location_info['route']
             city = location_info['locality']
@@ -621,7 +621,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.location_crs.setText('EPSG:4326')
 
     def find_municipal_information(self):
-        postcode = self.location_postal.text()
+        postcode = (self.location_postal.text() + "00000")[:5]
 
         if postcode:
             try:

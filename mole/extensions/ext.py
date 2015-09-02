@@ -1,12 +1,30 @@
 import os
 import pickle
 from mole import oeq_global
-
+from mole.project import config
 
 def average(self=None, parameters={}):
-    from PyQt4.QtCore import QVariant
     print parameters
-    print parameters.values()
+    from PyQt4.QtCore import QVariant
+    from qgis.core import NULL
+    result = {self.field_id + '_P': {'type': QVariant.String,
+                                     'value': self.layer_name},
+              self.field_id + '_M': {'type': QVariant.Double,
+                                     'value': NULL}}
+    if parameters != {}:
+        # print sum(float(parameters.values()))/len(parameters)
+        try:
+            result[self.field_id + '_M']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
+        except:
+            pass
+
+    return result
+
+
+def average_old(self=None, parameters={}):
+    from PyQt4.QtCore import QVariant
+    # print parameters
+    # print parameters.values()
     if parameters != {}:
         # print sum(float(parameters.values()))/len(parameters)
         return {self.field_id + '_P': {'type': QVariant.String,
@@ -32,7 +50,9 @@ class OeQExtension:
                  active=False,
                  source=None,
                  par_in=None,
+                 layer_in=None,
                  par_out=None,
+                 layer_out=None,
                  colortable=None,
                  evaluation_method=None):
         self.field_id = field_id
@@ -60,10 +80,18 @@ class OeQExtension:
             self.par_in = [field_id + '_L', field_id + '_H']
         else:
             self.par_in = par_in
+        if layer_in is None:
+            self.layer_in = config.pst_output_layer_name
+        else:
+            self.layer_in = layer_in
         if par_out is None:
             self.par_out = self.get_par_out()
         else:
             self.par_out = par_out
+        if layer_out is None:
+            self.layer_out = config.data_layer_name
+        else:
+            self.layer_out = layer_out
         if colortable is None:
             colortable = os.path.join(__file__[:-3] + '.qml')
             print colortable
@@ -83,7 +111,9 @@ class OeQExtension:
                active=False,
                source=None,
                par_in=None,
+               layer_in=None,
                par_out=None,
+               layer_out=None,
                colortable=None,
                evaluation_method=None):
         if category != None: self.category = category
@@ -97,7 +127,9 @@ class OeQExtension:
         if active != None: self.active = active
         if source != None: self.source = source
         if par_in != None: self.par_in = par_in
+        if layer_in != None: self.layer_in = layer_in
         if par_out != None: self.par_out = par_out
+        if layer_out != None: self.layer_out = layer_out
         if colortable != None: self.colortable = colortable
         if evaluation_method != None: self.evaluator = evaluation_method
 
@@ -120,14 +152,32 @@ class OeQExtension:
         else:
             OeQ_ExtensionRegistry.append(self)
 
+
     def evaluate(self, parameter):
+        if self.evaluator is None:
+            return {}
         return self.evaluator(self, parameter)
+
 
     def dummy_par(self):
         return dict(zip(self.par_in, [1 for i in self.par_in]))
 
     def get_par_out(self):
+        print self.par_in
+        print [1 for i in self.par_in]
+
+        if self.par_in is None:
+            return {}
         return self.evaluate(dict(zip(self.par_in, [1 for i in self.par_in]))).keys()
+
+    def par_out_as_attributes(self):
+        from qgis.core import QgsField
+        eval_out = self.evaluate(dict(zip(self.par_in, [1 for i in self.par_in])))
+        print self.get_par_out()
+        attributes = []
+        for i in eval_out.keys():
+            attributes.append(QgsField(i, eval_out[i]['type']))
+        return attributes
 
     def default_colortable(self):
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
@@ -157,6 +207,87 @@ class OeQExtension:
             print ct_project
         print ct_default
         print self.colortable
+
+    # extensions.by_category('import')[1].decode_color_table()
+    def decode_color_table(self):
+        from qgis import utils
+        from qgis.core import QgsField
+        from PyQt4.QtCore import QVariant
+        from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
+            add_attributes_if_not_exists, \
+            colors_match_feature
+        oeqMain = utils.plugins['mole']
+        source_layer = find_layer_by_name(self.layer_in)
+        source_provider = source_layer.dataProvider()
+        print self.layer_in
+        print self.layer_out
+        if self.source_type == 'wms':
+            if self.colortable != None:
+                oeqMain.color_picker_dlg.color_entry_manager.read_color_map_from_qml(self.colortable)
+                color_dict = oeqMain.color_picker_dlg.color_entry_manager.layer_values_map[self.layer_name]
+
+                for color_key in color_dict.keys():
+                    color_quadriple = color_key[5:-1].split(',')
+                    color_quadriple = map(int, color_quadriple)
+
+                    attributes = [QgsField(self.field_id + '_P', QVariant.String),
+                                  QgsField(self.par_in[0], QVariant.Double),
+                                  QgsField(self.par_in[1], QVariant.Double)]
+
+                    add_attributes_if_not_exists(source_layer, attributes)
+
+                    for feat in source_provider.getFeatures():
+                        # progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+                        if colors_match_feature(color_quadriple, feat, self.field_id):
+                            result = {self.field_id + '_P': {'type': QVariant.String,
+                                                             'value': color_dict[color_key][0]},
+                                      self.par_in[0]: {'type': QVariant.Double,
+                                                       'value': color_dict[color_key][1]},
+                                      self.par_in[1]: {'type': QVariant.Double,
+                                                       'value': color_dict[color_key][2]}}
+
+                            attributevalues = {}
+                            for i in result.keys():
+                                attributevalues.update({source_provider.fieldNameIndex(i): result[i]['value']})
+                            source_provider.changeAttributeValues({feat.id(): attributevalues})
+
+    # extensions.by_category('import')[1].calculate()
+    def calculate(self):
+        from qgis import utils
+        from qgis.core import QgsField
+        from PyQt4.QtCore import QVariant
+        from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
+            add_attributes_if_not_exists
+
+        source_layer = find_layer_by_name(self.layer_in)
+        target_layer = find_layer_by_name(self.layer_out)
+        target_provider = target_layer.dataProvider()
+        add_attributes_if_not_exists(target_layer, self.par_out_as_attributes())
+        print self.layer_in
+        print self.layer_out
+        for srcFeat in source_layer.getFeatures():
+            par_in_data = {}
+            print self.par_in
+            for par in self.par_in:
+                print par
+                print source_layer.fieldNameIndex(par)
+                value = srcFeat.attributes()[source_layer.fieldNameIndex(par)]
+                print value
+                par_in_data.update({par: value})
+            print 'DATA'
+            print par_in_data
+            result = self.evaluate(par_in_data)
+            print result
+            attributevalues = {}
+            for i in result.keys():
+                attributevalues.update({target_provider.fieldNameIndex(i): result[i]['value']})
+
+            tgtFeat = filter(lambda x: x.attribute('BLD_ID') == srcFeat.attribute('BLD_ID'),
+                             target_provider.getFeatures())
+            if len(tgtFeat) > 0:
+                tgtFeat = tgtFeat[0]
+            target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
+
 
 
 def by_category(category=None, registry=None):

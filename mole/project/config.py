@@ -28,7 +28,7 @@ real_centroid_plugin_name = 'realcentroid'
 # default extent is set, after the OSM-layer was loaded (currently: extent of Germany)
 x = 10.447683
 y = 51.163375
-scale = 4
+scale = 2
 default_extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
 default_extent_crs = 'EPSG:4326'
 
@@ -57,3 +57,18 @@ def qgis_prefix_path():
         return 'D:/OSGEO4~1/apps/qgis'
     else:
         return '/Applications/QGIS.app/Contents/MacOS'
+
+
+# default_projectinfo
+pinfo_default = {
+    'project_name': u'MyProject',
+    'description': u'The aim of this project, is to analyse a quarter.',
+    'location_city': u'City or street',
+    'location_postal': u'Postal',
+    'location_lon': u'Lon',
+    'location_lat': u'Lat',
+    'location_crs': u'CRS',
+    'heating_degree_days': 390.06,
+    'average_build_year': 1970,
+    'population_density': 3.859
+}

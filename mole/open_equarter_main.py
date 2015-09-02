@@ -51,7 +51,7 @@ class OpenEQuarterMain:
     def __init__(self, iface):
         # Save reference to the QGIS interface
         self.iface = iface
-
+        print 'Hallo 1'
         ### Monitor the users progress
         self.progress_items_model = ProgressItemsModel()
 
@@ -82,8 +82,18 @@ class OpenEQuarterMain:
         # name of the shapefile which will be created to define the investigation area
         self.investigation_shape_layer_style = os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
 
+    def new_project(self):
+        self.progress_items_model.__init__()
+        import copy
+
+        oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
+        print "ALLES NEU 1111"
+        # self.oeq_project_settings_form.reset()
+        # self.oeq_project_settings_form
+
     def initGui(self):
-        plugin_icon = QIcon(os.path.join(':', 'Plugin', 'icons', 'oeq_global.OeQ_plugin_icon.png'))
+        print 'Hallo 3'
+        plugin_icon = QIcon(os.path.join(':', oeq_global.OeQ_plugin_path(), 'icons', 'OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         self.main_action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.main_action)
@@ -97,12 +107,14 @@ class OpenEQuarterMain:
 
         self.iface.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
         self.iface.connect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
+        self.iface.connect(self.iface, SIGNAL("newProjectCreated()"), self.new_project)
         self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.progress_items_model.save_oeq_project)
 
         self.initGui_process_dock()
 
     def initGui_process_dock(self):
         self.main_process_dock = MainProcess_dock(self.progress_items_model)
+        print 'Hallo 2'
 
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
 
@@ -363,6 +375,12 @@ class OpenEQuarterMain:
 
     # step 1.0
     def handle_investigation_area_selected(self):
+        try:
+            from PyQt4.QtCore import QString
+        except ImportError:
+            # we are using Python3 so QString is not defined
+            QString = type("")
+
         if not self.osm_layer_is_loaded():
             ol_plugin = plugin_interaction.OlInteraction(config.ol_plugin_name)
 
@@ -377,6 +395,14 @@ class OpenEQuarterMain:
 
         #remove if necessary
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
+        p_path = os.path.join(oeq_global.OeQ_project_path(), config.investigation_shape_layer_name + '.shp').decode(
+            'utf-8')
+        # print QStrp_path
+        fields = QgsFields()
+        fields.append(QgsField("first", QVariant.Int))
+        fields.append(QgsField("second", QVariant.String))
+        # investigation_area = QgsVectorFileWriter(QString(config.investigation_shape_layer_name+'.shp'), "CP1250", fields, QGis.WKBPolygon, config.project_crs, "ESRI Shapefile")
+        # print investigation_area
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
                                                                       config.project_crs)
         if investigation_area is not None:
@@ -394,10 +420,27 @@ class OpenEQuarterMain:
 
     def confirm_selection_of_investigation_area(self):
         oeq_global.OeQ_kill_info()
+        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
+        investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+        investigation_area = layer_interaction.write_temporary_vector_layer_to_disk(investigation_area,
+                                                                                    config.investigation_area_style)
+        layer_interaction.unhide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
+        self.iface.setActiveLayer(investigation_area)
+        self.iface.actionZoomToLayer().trigger()
+        source_section = self.progress_items_model.section_views[1]
+        section_model = source_section.model()
+        project_item = section_model.findItems('Define your investigation area')[0]
+        project_item.setCheckState(2)
+        self.continue_process()
+
+    def confirm_selection_of_investigation_area_old(self):
+        oeq_global.OeQ_kill_info()
 
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
+
         try:
             investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            print type(investigation_area)
             disk_layer = layer_interaction.write_vector_layer_to_disk(investigation_area,
                                                                       os.path.join(oeq_global.OeQ_project_path(),
                                                                                    investigation_area.name()))
@@ -405,7 +448,7 @@ class OpenEQuarterMain:
             print(self.__module__, 'The "Investigation Area"-layer could not be saved to disk: ', Error)
         try:
             if disk_layer.isValid():
-                layer_interaction.unhide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
+                #layer_interaction.unhide_or_remove_layer(config.investigation_shape_layer_name, 'remove')
                 layer_interaction.add_layer_to_registry(disk_layer)
                 layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, disk_layer)
                 # trigger the edit-mode, to have the style displayed.
@@ -421,6 +464,12 @@ class OpenEQuarterMain:
         except AttributeError, NoneTypeError:
             print(self.__module__, NoneTypeError)
 
+        # clean up necessary, reason unknown
+        dp = investigation_area.dataProvider()
+        for feat in dp.getFeatures():
+            print "FEAT ID "
+            print feat.id()
+
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
@@ -430,6 +479,7 @@ class OpenEQuarterMain:
     # step 2.0
     def handle_source_layers_loaded(self):
         done = self.information_source_dlg.exec_()
+        print done
         if done:
             shape_sources = extensions.by_type('shp', 'import', True)
             #shape_sources = filter(lambda source: source.type == 'shp', oeq_global.OeQ_information_source)
@@ -715,7 +765,7 @@ class OpenEQuarterMain:
             return 1
 
     # step 4.1
-    def handle_information_sampled2(self):
+    def handle_information_sampled_old(self):
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
@@ -741,34 +791,66 @@ class OpenEQuarterMain:
         return 2
 
     def handle_information_sampled(self):
+
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
-        time.sleep(0.5)
+        time.sleep(2)  #wait until Layer is removed
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
         layer_interaction.add_layer_to_registry(vlayer)
+        progressbar = oeq_global.OeQ_init_progressbar(u"Sampling Data from Information Layers",
+                                                      u"Be patient...",
+                                                      maxcount=len(extensions.by_state(True, 'import')))
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+        for extension in extensions.by_state(True, 'import'):
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+            print extension.source_type
+            if extension.source_type == 'wms':
+                extension.decode_color_table()
+            extension.calculate()
+        oeq_global.OeQ_kill_progressbar()
+        return 2
 
+    '''
+        try:
+            provider = vlayer.dataProvider()
+        except AttributeError, NoneTypeError:
+            print(__name__, NoneTypeError)
+            return 0
         # in case the plugin was re-started, reload the color-entries
+        progressbar = oeq_global.OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
+                                                      u"This may take some time.",
+                                                      maxcount=len(extensions.by_state(True,
+                                                                                       'import')) * provider.featureCount() * 10)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
         for extension in extensions.by_state(True, 'import'):
             print extension.layer_name
             if extension.source_type == 'wms':
                 if extension.colortable != None:
                     self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(extension.colortable)
                     color_dict = self.color_picker_dlg.color_entry_manager.layer_values_map[extension.layer_name]
-                    try:
-                        provider = vlayer.dataProvider()
-                    except AttributeError, NoneTypeError:
-                        print(__name__, NoneTypeError)
-                        return
+
 
                     for color_key in color_dict.keys():
                         color_quadriple = color_key[5:-1].split(',')
                         color_quadriple = map(int, color_quadriple)
 
-                        for feat in provider.getFeatures():
+                        attributes = [QgsField(extension.field_id + '_P', QVariant.String),
+                                      QgsField(extension.par_in[0], QVariant.Double),
+                                      QgsField(extension.par_in[1], QVariant.Double)]
 
+                        layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
+                        layer_interaction.add_attributes_if_not_exists(vlayer, extension.par_out_as_attributes())
+
+                        for feat in provider.getFeatures():
+                            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+                            #print feat
+
+                            # KOLLEKTOR MUSS AUCH DIE NULL WERTE LIEFERN!
+                            # AREA UND PERI WERDEN NICHT VOLLSTÄNDIG GESAMMELT!
+                            #if 1 == 1 :
                             if layer_interaction.colors_match_feature(color_quadriple, feat, extension.field_id):
                                 result = {extension.field_id + '_P': {'type': QVariant.String,
                                                                       'value': color_dict[color_key][0]},
@@ -779,14 +861,23 @@ class OpenEQuarterMain:
 
                                 result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],
                                                                   extension.par_in[1]: color_dict[color_key][2]}))
-                                attributes = []
-                                attributevalues = {}
-                                for i in result.keys():
-                                    attributes.append(QgsField(i, result[i]['type']))
-                                    attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
+                            else:
+                                result = {extension.field_id + '_P': {'type': QVariant.String,
+                                                                      'value': NULL},
+                                          extension.par_in[0]: {'type': QVariant.Double,
+                                                                'value': NULL},
+                                          extension.par_in[1]: {'type': QVariant.Double,
+                                                                'value': NULL}}
 
-                                layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
-                                provider.changeAttributeValues({feat.id(): attributevalues})
+                                result.update(extension.evaluate({extension.par_in[0]: NULL,
+                                                                  extension.par_in[1]: NULL}))
+
+                            attributevalues = {}
+                            for i in result.keys():
+                                attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
+                            provider.changeAttributeValues({feat.id(): attributevalues})
+
+
             elif extension.source_type == 'none':
                 for feat in provider.getFeatures():
                     result = {extension.field_id + '_P': {'type': QVariant.String,
@@ -813,8 +904,9 @@ class OpenEQuarterMain:
 
                     layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
                     provider.changeAttributeValues({feat.id(): attributevalues})
-
+        oeq_global.OeQ_kill_progressbar()
         return 2
+    '''
 
     #step 4.2
     def handle_building_calculations(self):
@@ -1152,6 +1244,8 @@ class OpenEQuarterMain:
             if save:
                 for key in oeq_global.OeQ_project_info:
                     field = getattr(self.oeq_project_settings_form, key)
+                    print 'Der Typ hier ist '
+                    print type(field.text())
                     oeq_global.OeQ_project_info[key] = field.text()
 
                 self.handle_project_created()

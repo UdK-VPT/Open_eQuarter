@@ -28,6 +28,7 @@ from qgis.utils import iface
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction
 from mole import oeq_global
+from mole import extensions
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -61,6 +62,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         self.open_csv_btn.clicked.connect(lambda: self.load_source_from_disk(self.csv))
         self.open_dxf_btn.clicked.connect(lambda: self.load_source_from_disk(self.dxf))
         self.stateBox.clicked.connect(self.toggle_state)
+        self.complete_information()
 
     def refresh_dropdown(self):
         import mole.extensions as extensions
@@ -364,6 +366,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
         self.color_entry_manager.read_color_map_from_qml(filename)
         self.update_color_values()
+        activeextensions = extensions.by_name(layer)
+        try:
+            activeextensions[0].colortable = filename
+        except:
+            pass
 
     def save_color_map(self):
         """
@@ -386,8 +393,14 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.message_label.setStyleSheet(_fromUtf8("color: red;"))
             self.message_label.setText('Failure - Could not write legend to to \n\t"{}".'.format(out_path))
+        activeextensions = extensions.by_layername(layer.name())
+        try:
+            activeextensions[0].colortable = out_path
+        except:
+            pass
 
     def refresh_layer_list(self):
+        from mole import extensions
         """
         Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
         :return:
@@ -395,19 +408,22 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         """
         dropdown = self.layers_dropdown
         dropdown.clear()
-        wms_list = layer_interaction.get_wms_layer_list(iface, visibility='visible')
+        raster_list = layer_interaction.get_raster_layer_list(iface, visibility='visible')
 
         layer = None
-        for layer in wms_list:
+        for layer in raster_list:
             source = layer.publicSource()
-            if os.path.basename(source).endswith('.tif'):
-                dropdown.addItem(layer.name())
-                self.color_entry_manager.add_layer(layer.name())
+            dropdown.addItem(layer.name())
+            self.color_entry_manager.add_layer(layer.name())
+            ext = extensions.by_layername(layer.name())
+            if ext == []:
                 ltu_file = os.path.dirname(layer.publicSource())
                 ltu_file = os.path.join(ltu_file, layer.name() + '.qml')
-                if os.path.isfile(ltu_file):
-                    self.color_entry_manager.read_color_map_from_qml(ltu_file)
-
+            else:
+                ext = ext[0]
+                ltu_file = ext.colortable
+            if os.path.isfile(ltu_file):
+                self.color_entry_manager.read_color_map_from_qml(ltu_file)
         layer_interaction.move_layer_to_position(iface, layer, 0)
 
     def hide_and_reorder_layers(self):

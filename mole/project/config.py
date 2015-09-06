@@ -70,5 +70,5 @@ pinfo_default = {
     'location_crs': u'CRS',
     'heating_degree_days': 390.06,
     'average_build_year': 1970,
-    'population_density': 3.859
+    'population_density': 10000
 }

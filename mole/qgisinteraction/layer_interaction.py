@@ -281,7 +281,7 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
                 edit_layer.commitChanges()
 
 
-def get_wms_layer_list(iface, visibility='all'):
+def get_raster_layer_list(iface, visibility='all'):
     """
     Iterate over all layers and return a list of the currently visible WMS-files.
     :param iface: The Qgis-interface that will be accessed
@@ -289,30 +289,30 @@ def get_wms_layer_list(iface, visibility='all'):
     :return: A list containing raster layers with the given visibility-value
     :rtype: list
     """
-    active_wms_layers = []
+    active_raster_layers = []
     layer_list = QgsMapLayerRegistry.instance().mapLayers()
     interface = iface.legendInterface()
 
     if visibility == 'visible':
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and interface.isLayerVisible(layer):
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
     elif visibility == 'invisible':
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and not interface.isLayerVisible(layer):
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
     else:
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer:
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
 
 def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
@@ -550,7 +550,7 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     import mole.extensions as extensions
     print layer.name()
     print layer.id()
-    extension = extensions.by_layerid(layer.id(), 'import')
+    extension = extensions.by_layername(layer.name(), 'import')
     print extension
     print '--------------'
     if extension != []:
@@ -629,5 +629,5 @@ def add_attributes_if_not_exists(layer, attribute):
     for att in attribute:
         if att.name() not in name_map:
             provider.addAttributes([att])
-
+    layer.updateFields()
     layer.commitChanges()

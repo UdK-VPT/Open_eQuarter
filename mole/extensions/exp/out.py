@@ -9,7 +9,7 @@ def calculation(self=None, parameters={}):
     from mole.stat_util import bld_geometry
     from mole import oeq_global
     dims = bld_geometry.dimensions(parameters['AREA'], parameters['PERIMETER'], parameters['LENGTH'])
-    height = parameters['HEIGTH']
+    height = parameters['HEIGHT']
     floors = parameters['FLOORS']
     if oeq_global.isnull(floors):
         if oeq_global.isnull(height):
@@ -26,7 +26,7 @@ def calculation(self=None, parameters={}):
         result.update({i: {'type': QVariant.Double,
                            'value': dims[i]}})
 
-    result.update({'HEIGTH': {'type': QVariant.Double,
+    result.update({'HEIGHT': {'type': QVariant.Double,
                               'value': height}})
     result.update({'FLOORS': {'type': QVariant.Double,
                               'value': floors}})
@@ -35,13 +35,12 @@ def calculation(self=None, parameters={}):
 
 extension = OeQExtension(
     extension_id=__name__,
-
     category='evaluation',
     extension_name='Dimensions',
     field_id='DIM',
     source_type='none',
-    par_in=['AREA', 'PERIMETER', 'LENGTH', 'HEIGTH', 'FLOORS'],
-    active=True,
+    par_in=['AREA', 'PERIMETER', 'LENGTH', 'HEIGHT', 'FLOORS'],
+    active=False,
     description=u'',
     evaluation_method=calculation)
 

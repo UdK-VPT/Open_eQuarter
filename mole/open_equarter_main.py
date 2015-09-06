@@ -85,7 +85,6 @@ class OpenEQuarterMain:
     def new_project(self):
         self.progress_items_model.__init__()
         import copy
-
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
         print "ALLES NEU 1111"
         # self.oeq_project_settings_form.reset()
@@ -654,7 +653,7 @@ class OpenEQuarterMain:
 
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
-                raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+                raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'visible')
                 raster_layers = filter(lambda wms_layer: not wms_layer.source().endswith('.tif'), raster_layers)
 
                 progressbar = oeq_global.OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
@@ -699,7 +698,6 @@ class OpenEQuarterMain:
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
             try:
                 layer = layer_interaction.find_layer_by_name(layer_name)
-                former_layer_id = layer.id()  #for id update in the appropriate extension
                 #save legendUrl from source
                 legUrl=layer.legendUrl()
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
@@ -724,7 +722,7 @@ class OpenEQuarterMain:
                     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
 
                     # set new layer id in appropriate extension if available
-                    extension = extensions.by_layerid(former_layer_id)
+                    extension = extensions.by_layername(layer_name)
                     if extension is not None:
                         extension[0].layer_id = rlayer.id()
                     #os.remove(path_geo)
@@ -801,20 +799,9 @@ class OpenEQuarterMain:
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name), "ogr")
         layer_interaction.add_layer_to_registry(vlayer)
         extensions.run_active_extensions('import')
+        extensions.run_active_extensions('evaluation')
         return 2
 
-        progressbar = oeq_global.OeQ_init_progressbar(u"Sampling Data from Information Layers",
-                                                      u"Be patient...",
-                                                      maxcount=len(extensions.by_state(True, 'import')))
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
-        for extension in extensions.by_state(True, 'import'):
-            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-            print extension.source_type
-            if extension.source_type == 'wms':
-                extension.decode_color_table()
-            extension.calculate()
-        oeq_global.OeQ_kill_progressbar()
-        return 2
 
     '''
         try:

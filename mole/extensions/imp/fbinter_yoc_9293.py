@@ -3,7 +3,7 @@
 from mole import oeq_global
 from PyQt4.QtCore import QVariant
 from qgis.core import NULL
-from mole.project import config
+
 
 def calculation(self=None, parameters={}):
     # print parameters
@@ -53,6 +53,7 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
+    colortable=os.path.join(__file__[:-3] + '.qml'),
     category='import',
     field_id='YOC',
     source_type='wms',
@@ -62,7 +63,6 @@ extension = OeQExtension(
                 + u'aus der Veroeffentlichung: Staedtebauliche Entwicklung Berlins seit 1650 in Karten',
     source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
     active=True,
-    colortable=os.path.join(__file__[:-3] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

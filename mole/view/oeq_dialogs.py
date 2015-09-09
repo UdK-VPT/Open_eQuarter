@@ -19,9 +19,9 @@
  ***************************************************************************/
 '''
 import os
+from functools import partial
 
 from PyQt4 import QtGui, QtCore
-from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
@@ -40,14 +40,17 @@ from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from ui_information_source_dialog import Ui_InformationSource_dialog
+from mole.extensionActive.ui_extensions_active import Ui_Dialog
+
 
 
 # import mole.extensions as extensions
 
+
+
 class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
     def __init__(self):
-        import mole.extensions as extensions
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
         #self.refresh_dropdown()

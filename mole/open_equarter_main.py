@@ -83,7 +83,7 @@ class OpenEQuarterMain:
         self.investigation_shape_layer_style = os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
 
     def new_project(self):
-        self.progress_items_model.__init__()
+        self.progress_items_model = ProgressItemsModel()
         import copy
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
         print "ALLES NEU 1111"
@@ -160,6 +160,18 @@ class OpenEQuarterMain:
         if layer_interaction.find_layer_by_name(config.housing_layer_name):
             position += 1
             layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, position)
+
+            # def move_layers(self,layer_name,target_group=None,target_position=None):
+            #    def find_child(parent)
+            #    root = QgsProject.instance().layerTreeRoot()
+            #    mygroup = root.findGroup("group1")
+            #    parentGroup = mygroup.parent()
+            #    groupIndex=-1
+            #   for child in parentGroup.children():
+            #        groupIndex+=1
+            #        if mygroup == child:
+            #           break
+
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -633,13 +645,14 @@ class OpenEQuarterMain:
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         oeq_global.OeQ_kill_progressbar()
 
-        loaded_layers = QgsMapLayerRegistry.instance().mapLayers()
-        for layer in loaded_layers.values():
-            print(layer.name(), layer.type() == QgsMapLayer.RasterLayer, layer.source())
-            if layer.type() == QgsMapLayer.RasterLayer and 'http' in layer.source():
-                return 2
+        # loaded_layers = QgsMapLayerRegistry.instance().mapLayers()
+        # for layer in loaded_layers.values():
+        #    print(layer.name(), layer.type() == QgsMapLayer.RasterLayer, layer.source())
+        #    if layer.type() == QgsMapLayer.RasterLayer and 'http' in layer.source():
+        #        return 2
 
-        return 1
+        # return 1
+        self.continue_process(True)
 
     # step 2.3
     def handle_raster_loaded(self):
@@ -802,101 +815,6 @@ class OpenEQuarterMain:
         extensions.run_active_extensions('evaluation')
         return 2
 
-
-    '''
-        try:
-            provider = vlayer.dataProvider()
-        except AttributeError, NoneTypeError:
-            print(__name__, NoneTypeError)
-            return 0
-        # in case the plugin was re-started, reload the color-entries
-        progressbar = oeq_global.OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
-                                                      u"This may take some time.",
-                                                      maxcount=len(extensions.by_state(True,
-                                                                                       'import')) * provider.featureCount() * 10)
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
-        for extension in extensions.by_state(True, 'import'):
-            print extension.layer_name
-            if extension.source_type == 'wms':
-                if extension.colortable != None:
-                    self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(extension.colortable)
-                    color_dict = self.color_picker_dlg.color_entry_manager.layer_values_map[extension.layer_name]
-
-
-                    for color_key in color_dict.keys():
-                        color_quadriple = color_key[5:-1].split(',')
-                        color_quadriple = map(int, color_quadriple)
-
-                        attributes = [QgsField(extension.field_id + '_P', QVariant.String),
-                                      QgsField(extension.par_in[0], QVariant.Double),
-                                      QgsField(extension.par_in[1], QVariant.Double)]
-
-                        layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
-                        layer_interaction.add_attributes_if_not_exists(vlayer, extension.par_out_as_attributes())
-
-                        for feat in provider.getFeatures():
-                            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-                            #print feat
-
-                            # KOLLEKTOR MUSS AUCH DIE NULL WERTE LIEFERN!
-                            # AREA UND PERI WERDEN NICHT VOLLSTÄNDIG GESAMMELT!
-                            #if 1 == 1 :
-                            if layer_interaction.colors_match_feature(color_quadriple, feat, extension.field_id):
-                                result = {extension.field_id + '_P': {'type': QVariant.String,
-                                                                      'value': color_dict[color_key][0]},
-                                          extension.par_in[0]: {'type': QVariant.Double,
-                                                                'value': color_dict[color_key][1]},
-                                          extension.par_in[1]: {'type': QVariant.Double,
-                                                                'value': color_dict[color_key][2]}}
-
-                                result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],
-                                                                  extension.par_in[1]: color_dict[color_key][2]}))
-                            else:
-                                result = {extension.field_id + '_P': {'type': QVariant.String,
-                                                                      'value': NULL},
-                                          extension.par_in[0]: {'type': QVariant.Double,
-                                                                'value': NULL},
-                                          extension.par_in[1]: {'type': QVariant.Double,
-                                                                'value': NULL}}
-
-                                result.update(extension.evaluate({extension.par_in[0]: NULL,
-                                                                  extension.par_in[1]: NULL}))
-
-                            attributevalues = {}
-                            for i in result.keys():
-                                attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
-                            provider.changeAttributeValues({feat.id(): attributevalues})
-
-
-            elif extension.source_type == 'none':
-                for feat in provider.getFeatures():
-                    result = {extension.field_id + '_P': {'type': QVariant.String,
-                                                          'value': color_dict[color_key][0]}}
-                    par_in_data = {}
-                    attributes = feat.attributes()
-                    for i in extension.par_in:
-                        print i
-                        print vlayer.fieldNameIndex(i)
-                        try:
-                            par_in_value = attributes[provider.fieldNameIndex(i)]
-                        except:
-                            par_in_value = NULL
-                        par_in_data.update({i: par_in_value})
-                        result.update({i: {'type': QVariant.Double,
-                                           'value': par_in_value}})
-
-                    result.update(extension.evaluate(par_in_data))
-                    attributes = []
-                    attributevalues = {}
-                    for i in result.keys():
-                        attributes.append(QgsField(i, result[i]['type']))
-                        attributevalues.update({provider.fieldNameIndex(i): result[i]['value']})
-
-                    layer_interaction.add_attributes_if_not_exists(vlayer, attributes)
-                    provider.changeAttributeValues({feat.id(): attributevalues})
-        oeq_global.OeQ_kill_progressbar()
-        return 2
-    '''
 
     #step 4.2
     def handle_building_calculations(self):
@@ -1228,15 +1146,15 @@ class OpenEQuarterMain:
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
 
-        if not oeq_global.OeQ_project_saved() or oeq_global.OeQ_project_info['project_name'] == 'MyProject':
+        if not oeq_global.OeQ_project_saved():
             self.oeq_project_settings_form.show()
             save = self.oeq_project_settings_form.exec_()
             if save:
-                for key in oeq_global.OeQ_project_info:
-                    field = getattr(self.oeq_project_settings_form, key)
-                    print 'Der Typ hier ist '
-                    print type(field.text())
-                    oeq_global.OeQ_project_info[key] = field.text()
+                # for key in oeq_global.OeQ_project_info:
+                #     field = getattr(self.oeq_project_settings_form, key)
+                #    print 'Der Typ hier ist '
+                #    print type(field.text())
+                #    oeq_global.OeQ_project_info[key] = field.text()
 
                 self.handle_project_created()
                 plugin_section = self.progress_items_model.section_views[0]
@@ -1252,7 +1170,7 @@ class OpenEQuarterMain:
             try:
                 x = float(oeq_global.OeQ_project_info['location_lon'])
                 y = float(oeq_global.OeQ_project_info['location_lat'])
-                scale = 0.05
+                scale = 0.02
                 extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
                 config.default_extent = extent
                 config.default_extent_crs = 'EPSG:4326'

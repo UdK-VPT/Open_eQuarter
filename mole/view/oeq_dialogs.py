@@ -570,17 +570,31 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
         for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
+
             field.textChanged.connect(partial(self.text_changed, field))
 
+        self.location_city.editingFinished.connect(self.location_by_address)
         self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
         self.lookup_by_address.clicked.connect(self.location_by_address)
+        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
 
+    def apply(self):
+        for key in oeq_global.OeQ_project_info:
+            field = getattr(self, key)
+            if key == 'description':
+                oeq_global.OeQ_project_info[key] = field.toPlainText()
+            else:
+                oeq_global.OeQ_project_info[key] = field.text()
+            print "Action"
 
     def show(self):
         print oeq_global.OeQ_project_info
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
-            field.setText(unicode(oeq_global.OeQ_project_info[key]))
+            if key == 'description':
+                field.setPlainText(unicode(oeq_global.OeQ_project_info[key]))
+            else:
+                field.setText(unicode(oeq_global.OeQ_project_info[key]))
         QtGui.QDialog.show(self)
 
     def reset(self):
@@ -592,6 +606,8 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
+            # print self.location_by_address()
+
 
     def location_by_address(self):
         postal = self.location_postal.text()

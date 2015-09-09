@@ -107,7 +107,7 @@ def load_layer_from_disk(path_to_layer, name):
     """
     if os.path.exists(path_to_layer):
         disk_layer = QgsVectorLayer(path_to_layer, name, 'ogr')
-        #QgsMapLayerRegistry.instance().addMapLayer(disk_layer,False)           
+        # QgsMapLayerRegistry.instance().addMapLayer(disk_layer,False)
         return disk_layer
     else:
         return None
@@ -427,13 +427,13 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
         height = max_resolution
 
     # append the resolution to the filename and call the save method
-    
+
     filename=layer.name()
     print filename
     if filename.startswith("WMS_"):
        filename=filename.replace("WMS_","")
        print filename
-    else:   
+    else:
        resolution_prefix = '{}_{}-'.format(width, height)
        filename = resolution_prefix + layer.name()
     print filename
@@ -483,8 +483,9 @@ def intersect_shapefiles(shape1, shape2, output_path):
             #progress.setMaximum(100)
             return analyser.intersection(shape1, shape2, output_path) #p=progress)
     except AttributeError, Error:
-        return False
         print(Error)
+        return False
+
 
 
 def edit_housing_layer_attributes(housing_layer):

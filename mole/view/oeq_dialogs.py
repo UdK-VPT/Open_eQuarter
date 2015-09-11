@@ -40,7 +40,9 @@ from ui_modular_dialog import Ui_Modular_dialog
 from ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from ui_information_source_dialog import Ui_InformationSource_dialog
-from mole.extensionActive.ui_extensions_active import Ui_Dialog
+
+
+# from mole.extensionActive.ui_extensions_active import Ui_Dialog
 
 
 
@@ -565,7 +567,8 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.setupUi(self)
         self.defaults = {}
         self.municipals = [{}]
-        self.location_postal.editingFinished.connect(self.find_municipal_information)
+        self.found_locations = [{}]
+        #self.location_postal.editingFinished.connect(self.find_municipal_information)
         self.municipal_information = MunicipalInformationTree()
 
         if self.municipal_information.tree == {}:
@@ -576,12 +579,18 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
             field.textChanged.connect(partial(self.text_changed, field))
 
-        self.location_city.editingFinished.connect(self.location_by_address)
-        self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
         self.lookup_by_address.clicked.connect(self.location_by_address)
+        self.location_city.editingFinished.connect(self.location_by_address)
+        self.location_postal.editingFinished.connect(self.location_by_postal)
+        self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
+        self.location_lat.editingFinished.connect(self.location_by_coordinates)
+        self.location_lon.editingFinished.connect(self.location_by_coordinates)
+        self.location_crs.editingFinished.connect(self.location_by_coordinates)
         self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
 
     def apply(self):
+        if not issubclass(type(self.location_city), QtGui.QLineEdit):
+            self.update_form(1)
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
             if key == 'description':
@@ -611,51 +620,65 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             input_field.setStyleSheet('color: rgb(0,0,0)')
             # print self.location_by_address()
 
-
-    def location_by_address(self):
-        postal = self.location_postal.text()
-        if postal == "Postal": postal = ""
-        city_street = self.location_city.text()
-        if city_street == "City or street": city_street = ""
-        address = u'{} {}'.format(postal, city_street)
-        print address
-        location_info = googlemaps.getCoordinatesByAddress(address, crs=4326)
-        print location_info
-        try:
-            street = location_info['route']
-            city = location_info['locality']
-            country = location_info['country']
-            postal = location_info['postal_code']
-            lon = location_info['longitude']
-            lat = location_info['latitude']
-
-            loc_city = u'{}, {}, {}'.format(street, city, country)
-            self.location_city.setText(loc_city)
-            self.location_postal.setText(postal)
-            self.location_lon.setText(str(lon))
-            self.location_lat.setText(str(lat))
+    def update_form(self, index):
+        index = index - 1
+        self.lineedit_city_layout()
+        if self.found_locations != []:
+            location_info = self.found_locations[index]
+            print location_info
+            self.location_city.setText(location_info['formatted_location'])
+            self.location_postal.setText(location_info['postal_code'])
+            self.location_lon.setText(str(location_info['longitude']))
+            self.location_lat.setText(str(location_info['latitude']))
             self.location_crs.setText('EPSG:4326')
-        except (KeyError, TypeError) as AddressNotFound:
-            print(self.__module__, AddressNotFound)
+            #self.find_municipal_information()
+
+    def location_by_address(self, searchBy='location'):
+        if searchBy == 'postal':
+            if self.location_postal.text() == '': return None
+            self.location_city.setText(u'')
+        else:
+            if self.location_city.text() == '': return None
+            self.location_postal.setText(u'')
+
+        if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
+        postal = self.location_postal.text()
+        city_street = self.location_city.text()
+        address = u'{} {}'.format(postal, city_street)
+        self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+        if len(self.found_locations) == 1:
+            self.update_form(0)
+        elif len(self.found_locations) > 1:
+            self.combobox_city_layout()
+            self.location_city.clear()
+            self.location_city.addItem(_fromUtf8(u'< Select Project Location >'))
+            for loc in self.found_locations:
+                self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+            self.location_city.currentIndexChanged.connect(self.update_form)
+
+    def location_by_postal(self):
+        return self.location_by_address('postal')
+
+
+
 
     def location_by_coordinates(self):
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
-        location_info = googlemaps.getAddressByCoordinates(lat, lon, crs)
-
-        street = location_info['route']
-        city = location_info['locality']
-        country = location_info['country']
-        postal = location_info['postal_code']
-
-        loc_city = u'{}, {}, {}'.format(street, city, country)
-        self.location_city.setText(loc_city)
-        self.location_postal.setText(postal)
-        if crs == 'CRS':
-            self.location_crs.setText('EPSG:4326')
+        self.found_locations = googlemaps.getAddressByCoordinates(lat, lon, crs)
+        if len(self.found_locations) == 1:
+            self.update_form(0)
+        elif len(self.found_locations) > 1:
+            self.combobox_city_layout()
+            self.location_city.clear()
+            self.location_city.addItem(_fromUtf8(u'< Select Project Location >'))
+            for loc in self.found_locations:
+                self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+            self.location_city.currentIndexChanged.connect(self.update_form)
 
     def find_municipal_information(self):
+        if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
         postcode = (self.location_postal.text() + "00000")[:5]
 
         if postcode:
@@ -702,19 +725,20 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         except KeyError as Error:
             print(self.__module__, Error)
 
-    def combobox_city_layout(self):
+    def combobox_city_layout(self, entries=[]):
         location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
         if isinstance(city_edit, QtGui.QLineEdit):
             location_box.removeWidget(city_edit)
+            width = city_edit.minimumWidth()
             city_edit.deleteLater()
             self.location_city = QtGui.QComboBox()
             self.location_city.setObjectName('location_city')
-            self.location_city.setMinimumWidth(228)
+            self.location_city.setMinimumWidth(width)
             location_box.insertWidget(0, self.location_city)
 
-    def lineedit_city_layout(self):
+    def lineedit_city_layout(self, text=''):
         location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
         city_edit = location_box.itemAt(0).widget()
 
@@ -726,6 +750,9 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)
+            self.location_city.editingFinished.connect(self.location_by_address, True)
+
+
 
 
 class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):

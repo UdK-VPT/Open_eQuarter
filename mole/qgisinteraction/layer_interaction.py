@@ -1,13 +1,16 @@
+import os
+import time
+
+from PyQt4.QtCore import QSettings, QSize, QVariant
+
+from PyQt4.QtGui import QPainter, QColor, QImage
+
 from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QgsMapRenderer, QgsProject, QgsField
 from qgis.analysis import QgsOverlayAnalyzer
-from PyQt4.QtCore import QSettings, QSize, QVariant
-from PyQt4.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
-import os
-import time
-from string import find
 from mole.project import config
 from mole import oeq_global
+
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -79,7 +82,8 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
             oeq_global.OeQ_init_warning(title='Write Error!', message='path')
             return vlayer
 
-#remove a layer including all files
+
+# remove a layer including all files
 def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.qpj', '.dbf', '.idm', '.ind']):
     if layer_id is None:
         thelayer = find_layer_by_name(layer_name)
@@ -92,7 +96,6 @@ def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.
             if os.access(os.path.join(oeq_global.OeQ_project_path(), layer_name + i), os.F_OK):
                 os.remove(os.path.join(oeq_global.OeQ_project_path(), layer_name + i))
     time.sleep(0.1)
-
 
 
 def load_layer_from_disk(path_to_layer, name):
@@ -172,7 +175,7 @@ def find_layer_by_id(layer_id):
     return found_layer
 
 
-def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
+def unhide_or_remove_layer(layer_name, mode='hide', iface=None):
     """
     Hide or remove the given layer from the MapLayerRegistry, depending on the mode.
     :param layer_name: Name of the layer to remove/hide
@@ -193,7 +196,7 @@ def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
         iface.legendInterface().setLayerVisible(layer, True)
 
 
-#ToDo Try to use the currently recommended way to save the layer
+# ToDo Try to use the currently recommended way to save the layer
 def write_vector_layer_to_disk(vlayer, full_path):
     """
     Write the given vector layer to disk.
@@ -228,7 +231,7 @@ def write_vector_layer_to_disk(vlayer, full_path):
         crs = provider.crs()
 
         write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
-        #QgsVectorFileWriter()
+        # QgsVectorFileWriter()
         if write_error == QgsVectorFileWriter.WriterError:
             raise IOError('Can\'t create the file: {0}'.format(full_path))
             return None
@@ -371,7 +374,7 @@ def biuniquify_layer_name(layer_name):
         biunique_name = layer_name
         suffix = 0
 
-        while(find_layer_by_name(biunique_name) is not None):
+        while (find_layer_by_name(biunique_name) is not None):
             biunique_name = layer_name + str(suffix)
             suffix += 1
 
@@ -395,13 +398,13 @@ def move_layer_to_position(iface, layer_name, position):
     for layer_node in layers:
         if layer_node.layerName() == layer_name:
             clone = layer_node.clone()
-            root.insertChildNode(position,clone)
+            root.insertChildNode(position, clone)
             root.removeChildNode(layer_node)
             iface.setActiveLayer(clone.layer())
             break
 
 
-def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type = 'tif'):
+def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type='tif'):
     """
     Select and save the currently visible extent to a .tif file
     :param width: image width
@@ -428,14 +431,14 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
 
     # append the resolution to the filename and call the save method
 
-    filename=layer.name()
+    filename = layer.name()
     print filename
     if filename.startswith("WMS_"):
-       filename=filename.replace("WMS_","")
-       print filename
+        filename = filename.replace("WMS_", "")
+        print filename
     else:
-       resolution_prefix = '{}_{}-'.format(width, height)
-       filename = resolution_prefix + layer.name()
+        resolution_prefix = '{}_{}-'.format(width, height)
+        filename = resolution_prefix + layer.name()
     print filename
     img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
     color = QColor(187, 187, 187, 0)
@@ -476,16 +479,15 @@ def intersect_shapefiles(shape1, shape2, output_path):
     try:
         if shape1.isValid() and shape2.isValid():
             analyser = QgsOverlayAnalyzer()
-            #progress = QProgressDialog()
-            #info = QLabel('Intersecting floor plan with investigation layer.\nThis may take up to 30 seconds.')
-            #progress.setLabel(info)
-            #progress.setMinimum(0)
-            #progress.setMaximum(100)
-            return analyser.intersection(shape1, shape2, output_path) #p=progress)
+            # progress = QProgressDialog()
+            # info = QLabel('Intersecting floor plan with investigation layer.\nThis may take up to 30 seconds.')
+            # progress.setLabel(info)
+            # progress.setMinimum(0)
+            # progress.setMaximum(100)
+            return analyser.intersection(shape1, shape2, output_path)  # p=progress)
     except AttributeError, Error:
         print(Error)
         return False
-
 
 
 def edit_housing_layer_attributes(housing_layer):
@@ -517,18 +519,19 @@ def edit_housing_layer_attributes(housing_layer):
         building_id = 0
 
         for feature in provider.getFeatures():
-            #if oeq_global.isnull(feature.attribute('FID')):
-                # if feature.attribute('BLD_ID') == 0:
-                geometry = feature.geometry()
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
             print geometry
-                values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
-                provider.changeAttributeValues({feature.id() : values})
-                building_id += 1
-            #else:
-                # These features are most likely to be duplicates of those that have an FID-entry
+            values = {area_index: geometry.area(), perimeter_index: geometry.length(),
+                      building_index: '{}'.format(building_id)}
+            provider.changeAttributeValues({feature.id(): values})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
             #    provider.deleteFeatures([feature.id()])
 
-        #provider.deleteAttributes([fid_index])
+        # provider.deleteAttributes([fid_index])
         return housing_layer.commitChanges()
     except AttributeError, Error:
         print(__name__, Error)
@@ -604,11 +607,15 @@ def colors_match_feature(color_quadriple, feature, field_name):
     :return: If the quadriple matches
     :rtype: bool
     """
-    match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
-            and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
-            and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))
-            and ((color_quadriple[3]-config.color_match_tolerance) < feature.attribute(field_name + '_a') < (color_quadriple[3]+config.color_match_tolerance))
-            )
+    match = (((color_quadriple[0] - config.color_match_tolerance) < feature.attribute(field_name + '_R') < (
+        color_quadriple[0] + config.color_match_tolerance)) \
+             and ((color_quadriple[1] - config.color_match_tolerance) < feature.attribute(field_name + '_G') < (
+        color_quadriple[1] + config.color_match_tolerance))
+             and ((color_quadriple[2] - config.color_match_tolerance) < feature.attribute(field_name + '_B') < (
+        color_quadriple[2] + config.color_match_tolerance))
+             and ((color_quadriple[3] - config.color_match_tolerance) < feature.attribute(field_name + '_a') < (
+        color_quadriple[3] + config.color_match_tolerance))
+             )
 
     return match
 

@@ -78,17 +78,19 @@ def getAddressByCoordinates(latitude,longitude,crs=None):
     url='http://maps.google.com/maps/api/geocode/json?sensor=false&latlng='+str(latitude)+','+str(longitude)
     response = urllib2.urlopen(url)
     result = json.load(response)
-    try:
-        out={}
-        addrcomp= result['results'][0]['address_components']
-        for i in addrcomp:
-            out[i['types'][0]]=i['long_name']
-        geom= result['results'][0]['geometry']
-        out['latitude=']=geom['location']['lat']
-        out['longitude=']=geom['location']['lng']
-        return out
-    except:
-        return None
+    # try:
+    addrlist = []
+    for addrrecord in result['results']:
+        dataset = {}
+        for i in addrrecord['address_components']:
+            dataset[i['types'][0]] = i['long_name']
+        geom = addrrecord['geometry']
+        dataset['latitude'] = geom['location']['lat']
+        dataset['longitude'] = geom['location']['lng']
+        addrlist.append(complete_google_dataset(dataset))
+    return addrlist
+    # except:
+    #    return []
 
 # Get the coordinates for the specified adress
 def getCoordinatesByAddress(address,crs=None):
@@ -105,26 +107,42 @@ def getCoordinatesByAddress(address,crs=None):
                 'sensor': 'false',
         }
     url='http://maps.google.com/maps/api/geocode/json?'+urllib.urlencode(urlParams)
+    #print url
     response = urllib2.urlopen(url)
     result = json.load(response)
-    try:
-        out={}
-        addrcomp= result['results'][0]['address_components']
-        for i in addrcomp:
-           out[i['types'][0]]=i['long_name']
-        geom= result['results'][0]['geometry']
-        out['latitude']=geom['location']['lat']
-        out['longitude']=geom['location']['lng']
-    except:
-            return None
+    #print result['results']
     if crs:
-        targetCRS=QgsCoordinateReferenceSystem(crs)
-        googleMapsCRS=QgsCoordinateReferenceSystem(4326)
-        transform = QgsCoordinateTransform(googleMapsCRS,targetCRS).transform
-        location=transform(QgsPoint(out['longitude'],out['latitude']))
-        out['latitude']=location.y()
-        out['longitude']=location.x()
-    return out
+        targetCRS = QgsCoordinateReferenceSystem(crs)
+        googleMapsCRS = QgsCoordinateReferenceSystem(4326)
+        transform = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform
+    # try:
+    addrlist = []
+    for addrrecord in result['results']:
+        dataset = {}
+        for i in addrrecord['address_components']:
+            dataset[i['types'][0]] = i['long_name']
+        geom = addrrecord['geometry']
+        dataset['latitude'] = geom['location']['lat']
+        dataset['longitude'] = geom['location']['lng']
+        if crs:
+            location = transform(QgsPoint(dataset['longitude'], dataset['latitude']))
+            dataset['latitude'] = location.y()
+            dataset['longitude'] = location.x()
+        addrlist.append(complete_google_dataset(dataset))
+    # except:
+    #    return []
+    return addrlist
+
+
+def complete_google_dataset(dataset):
+    mandatory_keys = [u'street_number', u'locality', u'sublocality_level_1', u'route', 'longitude', u'postal_code',
+                      u'administrative_area_level_1', u'country', 'latitude'u'sublocality_level_2']
+    for i in mandatory_keys:
+        if not i in dataset.keys():
+            dataset.update({i: ''})
+    zip_city = ' '.join(filter(bool, [dataset['postal_code'], dataset['locality']]))
+    dataset['formatted_location'] = ', '.join(filter(bool, [dataset['route'], zip_city, dataset['country']]))
+    return dataset
 
 
 

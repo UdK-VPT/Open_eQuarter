@@ -20,7 +20,10 @@ def calculation(self=None, parameters={}):
             if oeq_global.isnull(dataset['LENGTH']):
                 p = -float(dataset['PERIMETER'] / 2.0)
                 q = float(dataset['AREA'])
-                dataset['LENGTH'] = -p / 2 + ((((p / 2) ** 2) - q) ** 0.5)
+                if ((p / 2) ** 2) > q:
+                    dataset['LENGTH'] = -p / 2 + ((((p / 2) ** 2) - q) ** 0.5)
+                else:
+                    dataset['LENGTH'] = -p / 4
             dataset['WIDTH'] = float(dataset['AREA']) / float(dataset['LENGTH'])
             l_max = max(dataset['WIDTH'], dataset['LENGTH'])
             l_min = min(dataset['WIDTH'], dataset['LENGTH'])

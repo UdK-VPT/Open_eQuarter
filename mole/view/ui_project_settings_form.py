@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_project_settings_form.ui'
 #
-# Created: Wed Sep  9 11:10:26 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Fri Sep 11 10:44:56 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_project_settings_form(object):
     def setupUi(self, project_settings_form):
         project_settings_form.setObjectName(_fromUtf8("project_settings_form"))
-        project_settings_form.resize(502, 485)
+        project_settings_form.resize(483, 534)
         project_settings_form.setStyleSheet(_fromUtf8("#form QLineEdit {\n"
 "    color: rgb(151, 151, 151,95);\n"
 "}\n"
@@ -87,7 +87,7 @@ class Ui_project_settings_form(object):
         self.zip_label.setObjectName(_fromUtf8("zip_label"))
         self.formLayout_2.setWidget(4, QtGui.QFormLayout.LabelRole, self.zip_label)
         self.location_postal = QtGui.QLineEdit(self.form)
-        self.location_postal.setMaximumSize(QtCore.QSize(323, 21))
+        self.location_postal.setMaximumSize(QtCore.QSize(800, 21))
         self.location_postal.setText(_fromUtf8(""))
         self.location_postal.setObjectName(_fromUtf8("location_postal"))
         self.formLayout_2.setWidget(4, QtGui.QFormLayout.FieldRole, self.location_postal)
@@ -116,7 +116,7 @@ class Ui_project_settings_form(object):
         self.formLayout_2.setWidget(7, QtGui.QFormLayout.LabelRole, self.lattitude_label)
         self.location_lat = QtGui.QLineEdit(self.form)
         self.location_lat.setMinimumSize(QtCore.QSize(323, 21))
-        self.location_lat.setMaximumSize(QtCore.QSize(323, 21))
+        self.location_lat.setMaximumSize(QtCore.QSize(800, 21))
         self.location_lat.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.location_lat.setText(_fromUtf8(""))
         self.location_lat.setObjectName(_fromUtf8("location_lat"))
@@ -125,7 +125,7 @@ class Ui_project_settings_form(object):
         self.crs_label.setObjectName(_fromUtf8("crs_label"))
         self.formLayout_2.setWidget(8, QtGui.QFormLayout.LabelRole, self.crs_label)
         self.location_crs = QtGui.QLineEdit(self.form)
-        self.location_crs.setMaximumSize(QtCore.QSize(323, 21))
+        self.location_crs.setMaximumSize(QtCore.QSize(800, 21))
         self.location_crs.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.location_crs.setText(_fromUtf8(""))
         self.location_crs.setObjectName(_fromUtf8("location_crs"))
@@ -135,21 +135,21 @@ class Ui_project_settings_form(object):
         self.heating_degree_days_label.setObjectName(_fromUtf8("heating_degree_days_label"))
         self.formLayout_2.setWidget(10, QtGui.QFormLayout.LabelRole, self.heating_degree_days_label)
         self.heating_degree_days = QtGui.QLineEdit(self.form)
-        self.heating_degree_days.setMaximumSize(QtCore.QSize(323, 16777215))
+        self.heating_degree_days.setMaximumSize(QtCore.QSize(800, 16777215))
         self.heating_degree_days.setObjectName(_fromUtf8("heating_degree_days"))
         self.formLayout_2.setWidget(10, QtGui.QFormLayout.FieldRole, self.heating_degree_days)
         self.average_build_year_label = QtGui.QLabel(self.form)
         self.average_build_year_label.setObjectName(_fromUtf8("average_build_year_label"))
         self.formLayout_2.setWidget(11, QtGui.QFormLayout.LabelRole, self.average_build_year_label)
         self.average_build_year = QtGui.QLineEdit(self.form)
-        self.average_build_year.setMaximumSize(QtCore.QSize(323, 16777215))
+        self.average_build_year.setMaximumSize(QtCore.QSize(800, 16777215))
         self.average_build_year.setObjectName(_fromUtf8("average_build_year"))
         self.formLayout_2.setWidget(11, QtGui.QFormLayout.FieldRole, self.average_build_year)
         self.population_density_label = QtGui.QLabel(self.form)
         self.population_density_label.setObjectName(_fromUtf8("population_density_label"))
         self.formLayout_2.setWidget(12, QtGui.QFormLayout.LabelRole, self.population_density_label)
         self.population_density = QtGui.QLineEdit(self.form)
-        self.population_density.setMaximumSize(QtCore.QSize(323, 16777215))
+        self.population_density.setMaximumSize(QtCore.QSize(800, 16777215))
         self.population_density.setObjectName(_fromUtf8("population_density"))
         self.formLayout_2.setWidget(12, QtGui.QFormLayout.FieldRole, self.population_density)
         self.description = QtGui.QPlainTextEdit(self.form)
@@ -161,6 +161,14 @@ class Ui_project_settings_form(object):
         self.description_label = QtGui.QLabel(self.form)
         self.description_label.setObjectName(_fromUtf8("description_label"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.description_label)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.formLayout_2.setItem(2, QtGui.QFormLayout.FieldRole, spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.formLayout_2.setItem(5, QtGui.QFormLayout.LabelRole, spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.formLayout_2.setItem(5, QtGui.QFormLayout.FieldRole, spacerItem2)
+        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.formLayout_2.setItem(9, QtGui.QFormLayout.FieldRole, spacerItem3)
         self.gridLayout.addLayout(self.formLayout_2, 0, 0, 1, 1)
         self.buttonBox = QtGui.QDialogButtonBox(self.form)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)

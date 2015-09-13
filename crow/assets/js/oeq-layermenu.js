@@ -1,57 +1,35 @@
-document.getElementById('add-centroids').onclick = function () {
-    map.addLayer(bldCentroids);
-};
-
-
-var wmsBerlinLayer = new ol.layer.Tile({
-	source: new ol.source.TileWMS({
-		preload: Infinity,
-		url: 'http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',
-		serverType:'geoserver',
-		params:{
-			'LAYERS': "Einwohnerdichte 2012",
-            'TILED': true
-		}
-	})
-});
-
-
-document.getElementById('add-wmslayer').onclick = function () {
-    map.addLayer(wmsBerlin);
-};
-
 function updateLayerList () {
-    
+
     var layers = map.getLayers();
     var numberOfLayers = layers.getLength();
     var layersMenu = document.getElementById("layersMenu");
     var layerStack = $('#layerStack');
     layersMenu.innerHTML = String.format('<i class="fa fa-list-alt"></i> Layers ({0})', numberOfLayers);
     layerStack.text('');
-    
+
     for (var i = 0; i < numberOfLayers; i++) {
-                    layer = layers.item(i);
-                    name = layer.get('name')
+                    var layer = layers.item(i);
+                    var name = layer.get('name')
                     layer.set('id', i);
-                    anchor = '<a class="list-group-item" id="{0}">';
+                    var anchor = '<a class="list-group-item" id="{0}">';
                     anchor = String.format(anchor, i);
-                    removeBtn = '<button class="btn btn-xs btn-warning pull-left">\
-                                    <i class="glyphicon glyphicon-remove"></i></button>'; 
-                    span = '<span class="pull-right">';
-                    upBtn = '<button class="btn btn-xs btn-warning">\
-                                <i class="glyphicon glyphicon-arrow-up"></i></button>';            
-                    downBtn = '<button class="btn btn-xs btn-warning">\
-                                <i class="glyphicon glyphicon-arrow-down"></i></button>';                    
-                    layerBtn = anchor + removeBtn + ' ' + name + span + upBtn + downBtn + '</span></a>';
+                    var removeBtn = '<button class="btn btn-xs btn-warning pull-left">\
+                                    <i class="glyphicon glyphicon-remove"></i></button>';
+                    var span = '<span class="pull-right">';
+                    var upBtn = '<button class="btn btn-xs btn-warning">\
+                                <i class="glyphicon glyphicon-arrow-up"></i></button>';
+                    var downBtn = '<button class="btn btn-xs btn-warning">\
+                                <i class="glyphicon glyphicon-arrow-down"></i></button>';
+                    var layerBtn = anchor + removeBtn + ' ' + name + span + upBtn + downBtn + '</span></a>';
                     layerStack.prepend(layerBtn);
-                    
+
                     if( layer.getVisible() )
                         $('#layerStack a:first').addClass('active');
                     $('#layerStack a:first').unbind('click');
                     $('#layerStack a:first').click({layerName: name}, function( event ) {
                         layerCtlListener(event, event.data.layerName);
                 });
-    }   
+    }
 }
 
 function layerCtlListener( event, layerName ) {
@@ -87,7 +65,7 @@ function toggleVisibility(layerName) {
 
 function inLayerList( layer, list ) {
     for ( var i = 0; i < list.getLength(); i++ ) {
-        if ( layer === list.item(i) ) 
+        if ( layer === list.item(i) )
             return i;
     }
     return -1;
@@ -97,7 +75,7 @@ function raiseLayer(layerName) {
     var layer = findByName(layerName);
     var layers = map.getLayers();
     var index = inLayerList(layer, layers);
-    
+
     if ( index >= 0 && index < layers.getLength() - 1 ) {
         former = layers.removeAt(index);
         layers.insertAt(index + 1, former);
@@ -122,8 +100,8 @@ function removeLayer(layerName) {
 }
 
 var limitProperties = function() {
-    doc_height = $(document).height();
-    max = doc_height - $('#properties').offset().top - doc_height * 0.05;
+    var max = doc_height - $('#properties').offset().top - doc_height * 0.05;
+    var doc_height = $(document).height();
     $('#properties').css('max-height', max);
 }
 
@@ -131,7 +109,7 @@ $(document).ready(limitProperties);
 $(window).resize(limitProperties);
 
 function lookupAddress() {
-    address = $('#addressLookup input:first').val();
+    var address = $('#addressLookup input:first').val();
     $.ajax(
         {
             type : "GET",
@@ -144,12 +122,12 @@ function lookupAddress() {
             success: function(data) {
                 if( data && data.results[0] ){
                     $('#addressLookup input:first:text').css('color', 'rgb(0, 0, 0)');
-                    addr = data.results[0];
+                    var addr = data.results[0];
                     $('#addressLookup input:first').val('');
-                    geo_loc = addr.geometry.location;
-                    lat = geo_loc.lat;
-                    lon = geo_loc.lng;
-                    extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
+                    var geo_loc = addr.geometry.location;
+                    var lat = geo_loc.lat;
+                    var lon = geo_loc.lng;
+                    var extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
                     extent = ol.extent.applyTransform(extent, ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
                     map.getView().fit(extent, map.getSize());
                 } else {

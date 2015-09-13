@@ -1,4 +1,4 @@
-var style = new ol.style.Style({
+var STYLE = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 255, 255, 0.6)'
   }),
@@ -17,7 +17,7 @@ var style = new ol.style.Style({
     })
   })
 });
-var styleCache = [style];
+var STYLE_CACHE = [STYLE];
 
 var shapes = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -25,20 +25,20 @@ var shapes = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     style: function(feature, resolution) {
-        style.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return styleCache
+        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
+        return STYLE_CACHE
     }
 });
 shapes.set('name', 'BLD_Shapes');
-    
+
 var bldData = new ol.layer.Vector({
     source: new ol.source.Vector({
         url: '../layers/BLD_Data.geojson',
         format: new ol.format.GeoJSON()
     }),
     style: function(feature, resolution) {
-        style.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return styleCache
+        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
+        return STYLE_CACHE
     }
 });
 bldData.set('name', 'BLD_Data');
@@ -49,8 +49,8 @@ var invArea = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     style: function(feature, resolution) {
-        style.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return styleCache
+        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
+        return STYLE_CACHE
     }
 });
 invArea.set('name', 'Investigation Area');
@@ -61,8 +61,8 @@ var bldCentroids = new ol.layer.Vector({
         format: new ol.format.GeoJSON()
     }),
     style: function(feature, resolution) {
-        style.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return styleCache
+        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
+        return STYLE_CACHE
     }
 });
 bldCentroids.set('name', 'BLD_Centroids');
@@ -93,16 +93,16 @@ function oeq_init () {
 }
 
 
-var highlightStyleCache = {};
-var clickStyleCache = {};
+var highlightSTYLE_CACHE = {};
+var clickSTYLE_CACHE = {};
 
 var featureOverlay = new ol.layer.Vector({
   source: new ol.source.Vector(),
   map: map,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
-    if (!highlightStyleCache[text]) {
-      highlightStyleCache[text] = [new ol.style.Style({
+    if (!highlightSTYLE_CACHE[text]) {
+      highlightSTYLE_CACHE[text] = [new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: '#f00',
           width: 1
@@ -123,7 +123,7 @@ var featureOverlay = new ol.layer.Vector({
         })
       })];
     }
-    return highlightStyleCache[text];
+    return highlightSTYLE_CACHE[text];
   }
 });
 var featureClick = new ol.layer.Vector({
@@ -131,8 +131,8 @@ var featureClick = new ol.layer.Vector({
   map: map,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
-    if (!clickStyleCache[text]) {
-      clickStyleCache[text] = [new ol.style.Style({
+    if (!clickSTYLE_CACHE[text]) {
+      clickSTYLE_CACHE[text] = [new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: '#f00',
           width: 1
@@ -153,7 +153,7 @@ var featureClick = new ol.layer.Vector({
         })
       })];
     }
-    return clickStyleCache[text];
+    return clickSTYLE_CACHE[text];
   }
 });
 var clickedFeature;
@@ -166,7 +166,7 @@ var displayFeatureInfo = function(feature) {
                 '.propSheet td, .propSheet th { padding: 0 5px; } '+
                 '</style>'+
                 '<table class="propSheet">'+
-                '<tr><th>Property</th><th>Value</th></tr>';        
+                '<tr><th>Property</th><th>Value</th></tr>';
     var keys = feature.getKeys();
     for (var i=0; i < keys.length; i++){
         var key = keys[i];

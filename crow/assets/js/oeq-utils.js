@@ -31,15 +31,14 @@ function findByName(name) {
 }
 
 
-function layerFromGeoJSON(url) {
+function layerFromGeoJSON(url, name) {
   var json_layer,
       start,
-      end,
-      name;
+      end;
 
   json_layer = new ol.layer.Vector({
       source: new ol.source.Vector({
-          url: this.url,
+          url: url,
           format: new ol.format.GeoJSON()
       }),
       style: function(feature, resolution) {
@@ -47,10 +46,13 @@ function layerFromGeoJSON(url) {
           return STYLE_CACHE;
       }
   });
-  start = this.url.lastIndexOf('/') + 1;
-  end = this.url.lastIndexOf('.') - start;
-  name = this.url.substr(start, end);
+
+  if (name === undefined) {
+    start = url.lastIndexOf('/') + 1;
+    end = url.lastIndexOf('.') - start;
+    name = url.substr(start, end);
+  }
   json_layer.set('name', name);
 
-  return json_layer;  
+  return json_layer;
 }

@@ -19,53 +19,9 @@ var STYLE = new ol.style.Style({
 });
 var STYLE_CACHE = [STYLE];
 
-var shapes = new ol.layer.Vector({
-    source: new ol.source.Vector({
-        url: '../layers/BLD_Shapes.geojson',
-        format: new ol.format.GeoJSON()
-    }),
-    style: function(feature, resolution) {
-        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return STYLE_CACHE
-    }
-});
-shapes.set('name', 'BLD_Shapes');
-
-var bldData = new ol.layer.Vector({
-    source: new ol.source.Vector({
-        url: '../layers/BLD_Data.geojson',
-        format: new ol.format.GeoJSON()
-    }),
-    style: function(feature, resolution) {
-        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return STYLE_CACHE
-    }
-});
-bldData.set('name', 'BLD_Data');
-
-var invArea = new ol.layer.Vector({
-    source: new ol.source.Vector({
-        url: '../layers/Investigation Area.geojson',
-        format: new ol.format.GeoJSON()
-    }),
-    style: function(feature, resolution) {
-        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return STYLE_CACHE
-    }
-});
-invArea.set('name', 'Investigation Area');
-
-var bldCentroids = new ol.layer.Vector({
-    source: new ol.source.Vector({
-        url: '../layers/BLD_Centroids.geojson',
-        format: new ol.format.GeoJSON()
-    }),
-    style: function(feature, resolution) {
-        STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
-        return STYLE_CACHE
-    }
-});
-bldCentroids.set('name', 'BLD_Centroids');
+var shapes = layerFromGeoJSON('../layers/BLD_Shapes.geojson');
+var bldData = layerFromGeoJSON('../layers/BLD_Data.geojson');
+var invArea = layerFromGeoJSON('../layers/Investigation Area.geojson')
 
 var openStreetMap = new ol.layer.Tile({
   source: new ol.source.OSM({projection: 'EPSG:3857'})
@@ -79,6 +35,44 @@ var map = new ol.Map({
     center: [1492977,6855322],
     zoom: 6
   })
+});
+
+$(document).on('change', '.btn-file :file', function() {
+  var files,
+      reader;
+
+  files = $(this).get(0).files; // FileList object
+
+  // Loop through the FileList and render image files as thumbnails.
+  for (var i = 0, file; file = files[i]; i++) {
+
+    // Only process image files.
+    if (!file.name.match('geojson$')) {
+      continue;
+    }
+
+    reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = (function(theFile) {
+      return function(e) {
+        // Render layer
+        var layer,
+            url = e.target.result,
+            name,
+            end;
+
+        name = escape(theFile.name);
+        end = name.lastIndexOf('.');
+        name = name.substr(0, end);
+        layer = layerFromGeoJSON(url, name);
+        map.addLayer(layer);
+      };
+    })(file);
+
+    // Read in the image file as a data URL.
+    reader.readAsDataURL(file);
+  }
 });
 
 function oeq_init () {

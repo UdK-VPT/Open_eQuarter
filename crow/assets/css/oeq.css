@@ -8,17 +8,39 @@ button.code {
 a.list-group-item.active {
   color: RGB(53, 68, 88);
   background-color: RGB(233, 224, 214);
-  border-color: RGB(203, 204, 194); 
+  border-color: RGB(203, 204, 194);
 }
 
 a.list-group-item.active:hover {
   color: RGB(53, 68, 88);
   background-color: RGB(233, 224, 214);
-  border-color: RGB(203, 204, 194); 
+  border-color: RGB(203, 204, 194);
 }
 
 #properties {
     display: block;
     max-height: 200px;
     overflow: auto;
+}
+
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-file input[type=file] {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 100%;
+      min-height: 100%;
+      font-size: 100px;
+      text-align: right;
+      filter: alpha(opacity=0);
+      opacity: 0;
+      outline: none;
+      background: white;
+      cursor: inherit;
+      display: block;
+  }
 }

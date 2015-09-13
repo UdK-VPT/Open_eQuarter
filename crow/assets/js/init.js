@@ -37,6 +37,7 @@ var map = new ol.Map({
   })
 });
 
+// Add a listener to the 'Open layer...'-file dialog
 $(document).on('change', '.btn-file :file', function() {
   var files,
       reader;
@@ -87,16 +88,16 @@ function oeq_init () {
 }
 
 
-var highlightSTYLE_CACHE = {};
-var clickSTYLE_CACHE = {};
+var HIGHLIGHTSTYLE_CACHE = {};
+var CLICKSTYLE_CACHE = {};
 
 var featureOverlay = new ol.layer.Vector({
   source: new ol.source.Vector(),
   map: map,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
-    if (!highlightSTYLE_CACHE[text]) {
-      highlightSTYLE_CACHE[text] = [new ol.style.Style({
+    if (!HIGHLIGHTSTYLE_CACHE[text]) {
+      HIGHLIGHTSTYLE_CACHE[text] = [new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: '#f00',
           width: 1
@@ -117,7 +118,7 @@ var featureOverlay = new ol.layer.Vector({
         })
       })];
     }
-    return highlightSTYLE_CACHE[text];
+    return HIGHLIGHTSTYLE_CACHE[text];
   }
 });
 var featureClick = new ol.layer.Vector({
@@ -125,8 +126,8 @@ var featureClick = new ol.layer.Vector({
   map: map,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
-    if (!clickSTYLE_CACHE[text]) {
-      clickSTYLE_CACHE[text] = [new ol.style.Style({
+    if (!CLICKSTYLE_CACHE[text]) {
+      CLICKSTYLE_CACHE[text] = [new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: '#f00',
           width: 1
@@ -147,7 +148,7 @@ var featureClick = new ol.layer.Vector({
         })
       })];
     }
-    return clickSTYLE_CACHE[text];
+    return CLICKSTYLE_CACHE[text];
   }
 });
 var clickedFeature;

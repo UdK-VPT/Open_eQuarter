@@ -48,7 +48,6 @@ function layerCtlListener( event, layerName ) {
     }
 }
 
-
 function toggleVisibility(layerName) {
     var layer = findByName(layerName);
     if (layer !== null) {
@@ -100,8 +99,8 @@ function removeLayer(layerName) {
 }
 
 var limitProperties = function() {
-    var max = doc_height - $('#properties').offset().top - doc_height * 0.05;
     var doc_height = $(document).height();
+    var max = doc_height - $('#properties').offset().top - doc_height * 0.05;
     $('#properties').css('max-height', max);
 }
 

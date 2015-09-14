@@ -20,15 +20,13 @@ var STYLE = new ol.style.Style({
 var STYLE_CACHE = [STYLE];
 
 var shapes = layerFromGeoJSON('../layers/BLD_Shapes.geojson');
-var bldData = layerFromGeoJSON('../layers/BLD_Data.geojson');
-var invArea = layerFromGeoJSON('../layers/Investigation Area.geojson')
 
 var openStreetMap = new ol.layer.Tile({
   source: new ol.source.OSM({projection: 'EPSG:3857'})
 });
 openStreetMap.set('name', 'Open Street Map');
 
-var map = new ol.Map({
+var MAP = new ol.Map({
   layers: [openStreetMap],
   target: 'map',
   view: new ol.View({
@@ -37,54 +35,13 @@ var map = new ol.Map({
   })
 });
 
-// Add a listener to the 'Open layer...'-file dialog
-$(document).on('change', '.btn-file :file', function() {
-  var files,
-      reader;
-
-  files = $(this).get(0).files; // FileList object
-
-  // Loop through the FileList and render image files as thumbnails.
-  for (var i = 0, file; file = files[i]; i++) {
-
-    // Only process image files.
-    if (!file.name.match('geojson$')) {
-      continue;
-    }
-
-    reader = new FileReader();
-
-    // Closure to capture the file information.
-    reader.onload = (function(theFile) {
-      return function(e) {
-        // Render layer
-        var layer,
-            url = e.target.result,
-            name,
-            end;
-
-        name = escape(theFile.name);
-        end = name.lastIndexOf('.');
-        name = name.substr(0, end);
-        layer = layerFromGeoJSON(url, name);
-        map.addLayer(layer);
-      };
-    })(file);
-
-    // Read in the image file as a data URL.
-    reader.readAsDataURL(file);
-  }
-});
-
 function oeq_init () {
 
-    map.addLayer(shapes);
-    map.addLayer(bldData);
-    //map.addLayer(invArea);
+    MAP.addLayer(shapes);
     updateLayerList();
-    map.getLayers().on('change', updateLayerList);
-    map.getLayers().on('add', updateLayerList);
-    map.getLayers().on('remove', updateLayerList);
+    MAP.getLayers().on('change', updateLayerList);
+    MAP.getLayers().on('add', updateLayerList);
+    MAP.getLayers().on('remove', updateLayerList);
 }
 
 
@@ -93,7 +50,7 @@ var CLICKSTYLE_CACHE = {};
 
 var featureOverlay = new ol.layer.Vector({
   source: new ol.source.Vector(),
-  map: map,
+  map: MAP,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
     if (!HIGHLIGHTSTYLE_CACHE[text]) {
@@ -123,7 +80,7 @@ var featureOverlay = new ol.layer.Vector({
 });
 var featureClick = new ol.layer.Vector({
   source: new ol.source.Vector(),
-  map: map,
+  map: MAP,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
     if (!CLICKSTYLE_CACHE[text]) {
@@ -182,12 +139,12 @@ var highlightFeature = function(feature) {
     }
 };
 
-map.on('pointermove', function(evt) {
+MAP.on('pointermove', function(evt) {
     if (evt.dragging) {
         return;
     }
-    pixel = map.getEventPixel(evt.originalEvent);
-    feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+    pixel = MAP.getEventPixel(evt.originalEvent);
+    feature = MAP.forEachFeatureAtPixel(pixel, function(feature, layer) {
         return feature;
     });
     if (feature) {
@@ -203,9 +160,9 @@ map.on('pointermove', function(evt) {
     }
 });
 
-map.on('click', function(evt) {
+MAP.on('click', function(evt) {
     pixel = evt.pixel;
-    feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+    feature = MAP.forEachFeatureAtPixel(pixel, function(feature, layer) {
         return feature;
     });
     if (feature) {

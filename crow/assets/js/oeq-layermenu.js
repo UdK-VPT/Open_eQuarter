@@ -1,6 +1,6 @@
 function updateLayerList () {
 
-    var layers = map.getLayers();
+    var layers = MAP.getLayers();
     var numberOfLayers = layers.getLength();
     var layersMenu = document.getElementById("layersMenu");
     var layerStack = $('#layerStack');
@@ -72,7 +72,7 @@ function inLayerList( layer, list ) {
 
 function raiseLayer(layerName) {
     var layer = findByName(layerName);
-    var layers = map.getLayers();
+    var layers = MAP.getLayers();
     var index = inLayerList(layer, layers);
 
     if ( index >= 0 && index < layers.getLength() - 1 ) {
@@ -83,7 +83,7 @@ function raiseLayer(layerName) {
 
 function lowerLayer(layerName) {
     var layer = findByName(layerName);
-    var layers = map.getLayers();
+    var layers = MAP.getLayers();
     var index = inLayerList(layer, layers);
 
     if ( index > 0 ) {
@@ -94,7 +94,7 @@ function lowerLayer(layerName) {
 
 function removeLayer(layerName) {
     var layer = findByName(layerName);
-    var layers = map.getLayers();
+    var layers = MAP.getLayers();
     layers.remove(layer);
 }
 
@@ -128,7 +128,7 @@ function lookupAddress() {
                     var lon = geo_loc.lng;
                     var extent = [lon-0.02, lat-0.02, lon+0.02, lat+0.02];
                     extent = ol.extent.applyTransform(extent, ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
-                    map.getView().fit(extent, map.getSize());
+                    MAP.getView().fit(extent, MAP.getSize());
                 } else {
                     $('#addressLookup input:first:text').css('color', 'rgb(255, 0, 0)');
                 }
@@ -138,3 +138,42 @@ function lookupAddress() {
             }
         });
     }
+
+// Add a listener to the 'Open layer...'-file dialog
+$(document).on('change', '.btn-file :file', function() {
+  var files,
+      reader;
+
+  files = $(this).get(0).files; // FileList object
+
+  // Loop through the FileList and render image files as thumbnails.
+  for (var i = 0, file; file = files[i]; i++) {
+
+    // Only process image files.
+    if (!file.name.match('geojson$')) {
+      continue;
+    }
+
+    reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = (function(theFile) {
+      return function(e) {
+        // Render layer
+        var layer,
+            url = e.target.result,
+            name,
+            end;
+
+        name = escape(theFile.name);
+        end = name.lastIndexOf('.');
+        name = name.substr(0, end);
+        layer = layerFromGeoJSON(url, name);
+        MAP.addLayer(layer);
+      };
+    })(file);
+
+    // Read in the image file as a data URL.
+    reader.readAsDataURL(file);
+  }
+});

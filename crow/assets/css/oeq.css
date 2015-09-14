@@ -44,3 +44,7 @@ a.list-group-item.active:hover {
       display: block;
   }
 }
+
+a > .glyphicon {
+	margin-right: 6px;
+}

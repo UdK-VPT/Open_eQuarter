@@ -20,7 +20,7 @@ String.format = function() {
  * @returns {unresolved}
  */
 function findByName(name) {
-    var layers = map.getLayers();
+    var layers = MAP.getLayers();
     var length = layers.getLength();
     for (var i = 0; i < length; i++) {
         if (name === layers.item(i).get('name')) {

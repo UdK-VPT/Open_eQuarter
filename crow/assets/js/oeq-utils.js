@@ -1,4 +1,4 @@
-String.format = function() {
+String.format = function () {
     // The string containing the format items (e.g. "{0}")
     // will and always has to be the first argument.
     var theString = arguments[0];
@@ -32,27 +32,27 @@ function findByName(name) {
 
 
 function layerFromGeoJSON(url, name) {
-  var json_layer,
-      start,
-      end;
+    var json_layer,
+        start,
+        end;
 
-  json_layer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-          url: url,
-          format: new ol.format.GeoJSON()
-      }),
-      style: function(feature, resolution) {
-          STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
-          return STYLE_CACHE;
-      }
-  });
+    json_layer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: url,
+            format: new ol.format.GeoJSON()
+        }),
+        style: function (feature, resolution) {
+            STYLE.getText().setText(resolution < 5000 ? feature.get('name') : '');
+            return STYLE_CACHE;
+        }
+    });
 
-  if (name === undefined) {
-    start = url.lastIndexOf('/') + 1;
-    end = url.lastIndexOf('.') - start;
-    name = url.substr(start, end);
-  }
-  json_layer.set('name', name);
+    if (name === undefined) {
+        start = url.lastIndexOf('/') + 1;
+        end = url.lastIndexOf('.') - start;
+        name = url.substr(start, end);
+    }
+    json_layer.set('name', name);
 
-  return json_layer;
+    return json_layer;
 }

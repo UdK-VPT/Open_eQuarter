@@ -1,20 +1,20 @@
 button.code {
-   font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
-   font-size: 12px;
-   padding: 5px;
-   margin: 0 5px;
- }
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+    font-size: 12px;
+    padding: 5px;
+    margin: 0 5px;
+}
 
 a.list-group-item.active {
-  color: RGB(53, 68, 88);
-  background-color: RGB(233, 224, 214);
-  border-color: RGB(203, 204, 194);
+    color: RGB(53, 68, 88);
+    background-color: RGB(233, 224, 214);
+    border-color: RGB(203, 204, 194);
 }
 
 a.list-group-item.active:hover {
-  color: RGB(53, 68, 88);
-  background-color: RGB(233, 224, 214);
-  border-color: RGB(203, 204, 194);
+    color: RGB(53, 68, 88);
+    background-color: RGB(233, 224, 214);
+    border-color: RGB(203, 204, 194);
 }
 
 #properties {
@@ -24,31 +24,46 @@ a.list-group-item.active:hover {
 }
 
 .btn-file {
-  position: relative;
-  overflow: hidden;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-file input[type=file] {
-      position: absolute;
-      top: 0;
-      right: 0;
-      min-width: 100%;
-      min-height: 100%;
-      font-size: 100px;
-      text-align: right;
-      filter: alpha(opacity=0);
-      opacity: 0;
-      outline: none;
-      background: white;
-      cursor: inherit;
-      display: block;
-  }
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
 }
 
+
+}
 .navbar-nav i {
     display: inline-block;
 }
-
 .navbar-nav a > .glyphicon {
-	margin-right: 6px;
+    margin-right: 6px;
+}
+
+.main-row .sidebar-left {
+	padding: 0px;	
+}
+
+
+.footer-row {
+    z-index: 45;
+    position: fixed;
+    bottom: 5px;
+}
+
+.footer-row .input-group {
+    width: 95%;
 }

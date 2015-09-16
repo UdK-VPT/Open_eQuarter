@@ -45,6 +45,10 @@ a.list-group-item.active:hover {
   }
 }
 
-a > .glyphicon {
+.navbar-nav i {
+    display: inline-block;
+}
+
+.navbar-nav a > .glyphicon {
 	margin-right: 6px;
 }

@@ -82,7 +82,7 @@ var featureClick = new ol.layer.Vector({
   source: new ol.source.Vector(),
   map: MAP,
   style: function(feature, resolution) {
-    var text = resolution < 5000 ? feature.get('name') : '';
+    var text = resolution < 4 ? feature.get('AREA').toFixed(2) + ' qm' : '';
     if (!CLICKSTYLE_CACHE[text]) {
       CLICKSTYLE_CACHE[text] = [new ol.style.Style({
         stroke: new ol.style.Stroke({
@@ -96,7 +96,7 @@ var featureClick = new ol.layer.Vector({
           font: '12px Calibri,sans-serif',
           text: text,
           fill: new ol.style.Fill({
-            color: '#000'
+            color: '#fff'
           }),
           stroke: new ol.style.Stroke({
             color: '#f00',

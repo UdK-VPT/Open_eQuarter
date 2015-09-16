@@ -19,7 +19,7 @@ var STYLE = new ol.style.Style({
 });
 var STYLE_CACHE = [STYLE];
 
-var shapes = layerFromGeoJSON('../layers/BLD_Shapes.geojson');
+var shapes = layerFromGeoJSON('layers/BLD_Shapes.geojson');
 
 var openStreetMap = new ol.layer.Tile({
     source: new ol.source.OSM({

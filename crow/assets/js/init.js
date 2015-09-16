@@ -38,7 +38,6 @@ var MAP = new ol.Map({
 });
 
 function oeq_init() {
-
     MAP.addLayer(shapes);
     updateLayerList();
     MAP.getLayers().on('change', updateLayerList);
@@ -173,11 +172,14 @@ MAP.on('click', function (evt) {
         clickedFeature = feature;
         displayFeatureInfo(feature);
         featureClick.getSource().addFeature(feature);
+        $('#commentary').css('visibility', 'visible');
+        $('#commentary .input-group-addon').html('@BLD_' + feature.get('BLD_ID'));
     } else {
         if (clickedFeature)
             featureClick.getSource().removeFeature(clickedFeature);
         clickedFeature = null;
         propertiesSheet = document.getElementById('dataSheet');
         propertiesSheet.innerHTML = '<p>Click a feature to display its properties.</p>';
+        $('#commentary').css('visibility', 'hidden');
     }
 });

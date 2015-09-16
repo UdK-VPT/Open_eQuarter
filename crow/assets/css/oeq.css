@@ -67,3 +67,7 @@ a.list-group-item.active:hover {
 .footer-row .input-group {
     width: 95%;
 }
+
+#commentary {
+    visibility: hidden;
+}

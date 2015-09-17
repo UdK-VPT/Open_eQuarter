@@ -517,14 +517,16 @@ def edit_housing_layer_attributes(housing_layer):
         building_id = 0
 
         for feature in provider.getFeatures():
-            #if oeq_global.isnull(feature.attribute('FID')):
-                # if feature.attribute('BLD_ID') == 0:
-                geometry = feature.geometry()
-                values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
-                provider.changeAttributeValues({feature.id() : values})
-                building_id += 1
-            #else:
-                # These features are most likely to be duplicates of those that have an FID-entry
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
+            print geometry
+            values = {area_index: geometry.area(), perimeter_index: geometry.length(),
+                      building_index: '{}'.format(building_id)}
+            provider.changeAttributeValues({feature.id(): values})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
             #    provider.deleteFeatures([feature.id()])
 
         #provider.deleteAttributes([fid_index])

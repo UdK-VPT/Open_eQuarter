@@ -107,7 +107,6 @@ def getCoordinatesByAddress(address,crs=None):
                 'sensor': 'false',
         }
     url='http://maps.google.com/maps/api/geocode/json?'+urllib.urlencode(urlParams)
-    # print url
     response = urllib2.urlopen(url)
     result = json.load(response)
     #print result['results']

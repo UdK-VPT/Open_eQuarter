@@ -5,7 +5,7 @@ from qgis.core import NULL
 from mole import oeq_global
 from mole.project import config
 from mole.extensions import OeQExtension
-
+from mole.stat_corr import common_walls_by_population_density_corr,window_wall_ratio_AVG_by_building_age_lookup
 
 def calculation(self=None, parameters={}):
     from scipy.constants import golden
@@ -13,8 +13,9 @@ def calculation(self=None, parameters={}):
     from PyQt4.QtCore import QVariant
     # factor for golden rule
     dataset = {'AREA': NULL, 'PERIMETER': NULL, 'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL, 'FLOORS': NULL,
-               'PDENS': NULL}
+               'PDENS': NULL,'YOC':NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL}
     dataset.update(parameters)
+    print parameters
     if (not oeq_global.isnull(dataset['AREA'])):
         if (not oeq_global.isnull(dataset['PERIMETER'])):
             if oeq_global.isnull(dataset['LENGTH']):
@@ -64,6 +65,29 @@ def calculation(self=None, parameters={}):
     else:
         if (oeq_global.isnull(dataset['HEIGHT'])):
             dataset['HEIGHT'] = dataset['FLOORS'] * 3.3
+    print type(dataset['YOC'])
+    print dataset['YOC']
+    if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(dataset['YOC'])):
+        dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(str(dataset['YOC']))
+
+    if oeq_global.isnull(dataset['WL_COM']) & (not oeq_global.isnull(dataset['PDENS'])):
+        dataset['WL_COM']=common_walls_by_population_density_corr.get(dataset['PDENS'])
+
+    if oeq_global.isnull(dataset['BS_AR']) & (not oeq_global.isnull(dataset['AREA'])):
+        dataset['BS_AR']=dataset['AREA']
+
+    if oeq_global.isnull(dataset['WL_AR'])& (not oeq_global.isnull(dataset['PERIMETER'])) & (not oeq_global.isnull(dataset['WL_COM']))& (not oeq_global.isnull(dataset['WIDTH'])) & (not oeq_global.isnull(dataset['WN_RAT'])):
+        dataset['WL_AR']=(dataset['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])* dataset['HEIGHT']*(1-dataset['WN_RAT'])
+
+    if oeq_global.isnull(dataset['RF_AR']):
+        dataset['RF_AR']=dataset['AREA']
+
+    if oeq_global.isnull(dataset['WN_AR'])& (not oeq_global.isnull(dataset['PERIMETER'])) & (not oeq_global.isnull(dataset['WL_COM']))& (not oeq_global.isnull(dataset['WIDTH'])) & (not oeq_global.isnull(dataset['WN_RAT'])):
+        dataset['WN_AR']=(dataset['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])*dataset['HEIGHT']*dataset['WN_RAT']
+
+
+    print dataset
+
 
     result = {}
     for i in dataset.keys():
@@ -81,7 +105,7 @@ extension = OeQExtension(
     extension_name='Building Dimensions',
     field_id='DIM',
     source_type='none',
-    par_in=['AREA', 'PERIMETER', 'LENGTH', 'WIDTH', 'HEIGHT', 'FLOORS', 'PDENS'],
+    par_in=['AREA', 'PERIMETER', 'LENGTH', 'WIDTH', 'HEIGHT', 'FLOORS', 'PDENS','YOC'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,

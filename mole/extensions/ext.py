@@ -305,11 +305,11 @@ class OeQExtension:
             self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
 
+
     def work_out_results(self):
-        from mole.qgisinteraction.layer_interaction import fullRemove, create_evaluation_layer, join_layers
+        from mole.qgisinteraction.layer_interaction import fullRemove,create_evaluation_layer,join_layers
         fullRemove(self.extension_name)
-        new_layer = create_evaluation_layer(
-            layer_name=self.extension_name)  # ,group="Component Qualities",subgroup="Contemporary")
+        new_layer = create_evaluation_layer(layer_name=self.extension_name)  # ,group="Component Qualities",subgroup="Contemporary")
         join_layers(new_layer, out_layer)
         new_layer.loadNamedStyle(self.colortable)
         self.iface.legendInterface().setLayerVisible(new_layer, False)

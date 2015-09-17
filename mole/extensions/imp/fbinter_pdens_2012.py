@@ -19,7 +19,7 @@ def calculation(self=None, parameters={}):
         try:
             result['PDENS']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
         except:
-            pass
+            result['PDENS']['value'] = oeq_global.OeQ_project_info['population_density']
 
     return result
 

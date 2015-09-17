@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
+import os,time
 import pickle
 from mole import oeq_global
 from mole.project import config
+from mole.qgisinteraction import legend
 
 def average(self=None, parameters={}):
     print parameters
@@ -225,6 +226,9 @@ class OeQExtension:
             add_attributes_if_not_exists, \
             colors_match_feature
         oeqMain = utils.plugins['mole']
+        legend.nodeStoreVisibility(self.layer_in)
+        legend.nodeShow(self.layer_in)
+        #time.sleep(0.5)
         source_layer = find_layer_by_name(self.layer_in)
         source_provider = source_layer.dataProvider()
         if self.source_type == 'wms':
@@ -263,6 +267,8 @@ class OeQExtension:
                             source_provider.changeAttributeValues({feat.id(): attributevalues})
                         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         oeq_global.OeQ_kill_progressbar()
+        legend.nodeRestoreVisibility(self.layer_in)
+        #time.sleep(0.5)
 
     # extensions.by_category('import')[1].calculate()
     def calculate(self):
@@ -272,6 +278,11 @@ class OeQExtension:
         from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
             add_attributes_if_not_exists
         if self.evaluator == None: return
+        legend.nodeStoreVisibility(self.layer_in)
+        legend.nodeShow(self.layer_in)
+        legend.nodeStoreVisibility(self.layer_out)
+        legend.nodeShow(self.layer_out)
+        #time.sleep(0.5)
         source_layer = find_layer_by_name(self.layer_in)
         target_layer = find_layer_by_name(self.layer_out)
         target_provider = target_layer.dataProvider()
@@ -304,6 +315,9 @@ class OeQExtension:
         if self.show_results:
             self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
+        legend.nodeRestoreVisibility(self.layer_in)
+        legend.nodeRestoreVisibility(self.layer_out)
+        #time.sleep(0.5)
 
 
     def work_out_results(self):

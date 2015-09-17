@@ -129,3 +129,6 @@ def OeQ_kill_error():
 
 def isnull(value):
     return type(value) is type(NULL)
+
+QeQ_current_work_layer = None
+

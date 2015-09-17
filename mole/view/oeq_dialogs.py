@@ -26,9 +26,10 @@ from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
-from mole.qgisinteraction import layer_interaction
+from mole.qgisinteraction import layer_interaction, legend
 from mole import oeq_global
 from mole import extensions
+from mole.project import config
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -201,12 +202,12 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtGui.QDialog.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
         self.layers_dropdown.currentIndexChanged.connect(self.update_color_values)
-
+        self.destroyed.connect(legend.nodeExitSolo)
         # set the table model
         self.header = ['Color value', 'Parameter Name', 'From', 'To', '']
         self.color_entry_manager.add_layer('dummy')
@@ -218,7 +219,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         # connect the signals
         self.color_table_view.clicked.connect(self.remove_entry)
         self.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
-        self.layers_dropdown.currentIndexChanged.connect(self.hide_and_reorder_layers)
+        self.layers_dropdown.currentIndexChanged.connect(self.setup_legend)
 
         role = QtGui.QDialogButtonBox.ActionRole
         load_button = self.buttonBox.addButton('Load legend...', role)
@@ -338,12 +339,12 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.color_table_view.setModel(table_model)
         self.recent_layer = layer
 
-        try:
-            wms_layer = layer_interaction.find_layer_by_name(layer)
-            url = wms_layer.legendUrl()
-            self.legend_view.load(QtCore.QUrl(url))
-        except (TypeError, AttributeError) as NoneTypeError:
-            pass
+        #try:
+        #    wms_layer = layer_interaction.find_layer_by_name(layer)
+        #    url = wms_layer.legendUrl()
+        #    self.legend_view.load(QtCore.QUrl(url))
+        #except (TypeError, AttributeError) as NoneTypeError:
+        #    pass
 
     def check_character_constraint(self, parameter_name):
         """
@@ -411,10 +412,10 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        legend.nodeExitSolo()
         dropdown = self.layers_dropdown
         dropdown.clear()
         raster_list = layer_interaction.get_raster_layer_list(iface, visibility='visible')
-
         layer = None
         for layer in raster_list:
             source = layer.publicSource()
@@ -429,22 +430,21 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
                 ltu_file = ext.colortable
             if os.path.isfile(ltu_file):
                 self.color_entry_manager.read_color_map_from_qml(ltu_file)
-        layer_interaction.move_layer_to_position(iface, layer, 0)
+        oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
+        if oeq_global.QeQ_current_work_layer != None:
+            print config.open_layers_layer_name
+            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
+        #oeq_global.QeQ_current_work_layer = layer
+        #layer_interaction.move_layer_to_position(iface, layer, 0)
 
-    def hide_and_reorder_layers(self):
-        """
-        Hide all .tif-layers except for the one which is currently selected and put that layer on top of the layer tree.
-        :return:
-        :rtype:
-        """
-        for i in range(self.layers_dropdown.count()):
-            layer_name = self.layers_dropdown.itemText(i)
-            layer_interaction.unhide_or_remove_layer(layer_name, 'hide', iface)
+    def setup_legend(self):
+        legend.nodeExitSolo()
+        oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
+        if oeq_global.QeQ_current_work_layer != None:
+            print config.open_layers_layer_name
+            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
 
-        current_layer = self.layers_dropdown.currentText()
-        layer_interaction.move_layer_to_position(iface, current_layer, 0)
-        layer_interaction.unhide_or_remove_layer(current_layer, 'unhide', iface)
-        self.update_color_values()
+
 
     def show(self):
         """
@@ -453,7 +453,6 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         self.refresh_layer_list()
-        self.hide_and_reorder_layers()
         QtGui.QDialog.show(self)
         self.update_color_values()
 

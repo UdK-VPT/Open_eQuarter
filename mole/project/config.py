@@ -15,7 +15,7 @@ open_layer_type_id = 4
 # id=0 - Google Physical
 # id=1 - Google Streets
 # id=4 - OpenStreetMap
-
+open_layers_layer_name='OpenStreetMap'
 # Point Sampling Tool
 pst_plugin_name = 'pointsamplingtool'
 pst_output_layer_name = 'PS Results'

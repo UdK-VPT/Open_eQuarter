@@ -18,6 +18,7 @@ Latest Changes: 2015-09-16 (max)
 
 from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry
 from qgis.utils import iface
+import time
 
 def nodeIsLayer(node):
     """nodeIsLayer: Checks, weather node represents a Layer
@@ -230,15 +231,16 @@ def nodeShow(node):
     """
     nodeShow:       Switch 'node' to visible
     :param node:    Node to show
-    :return:        no return
+    :return:        visibility state
     """
     if (type(node) == type('')) | (type(node) == type(u'')):
         node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
-    print node
     node.setVisible(Qt.Checked)
+    iface.mapCanvas().refresh()
+    return node.isVisible()
 
 def nodesShow(nodes):
     """
@@ -261,6 +263,8 @@ def nodeHide(node):
             return None
         node = node[0]
     node.setVisible(Qt.Unchecked)
+    iface.mapCanvas().refresh()
+    return node.isVisible()
 
 def nodesHide(nodes):
     """
@@ -304,11 +308,12 @@ def nodeRestoreVisibility(node):
             return None
         node = node[0]
 
-    if node.customProperty("was_visible") > 0:
-        node.setVisible(Qt.Checked)
-    else:
-        node.setVisible(Qt.Unchecked)
-    node.removeCustomProperty("was_visible")
+    if node.customProperty("was_visible") != None:
+        if node.customProperty("was_visible") > 0:
+            node.setVisible(Qt.Checked)
+        else:
+            node.setVisible(Qt.Unchecked)
+        node.removeCustomProperty("was_visible")
     return node
 
 

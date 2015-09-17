@@ -38,7 +38,8 @@ from qgisinteraction import (
     layer_interaction,
     raster_layer_interaction,
     project_interaction,
-    wms_utils)
+    wms_utils,
+    legend)
 from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
 from mole import oeq_global
@@ -150,6 +151,12 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        legend.nodeMove(config.investigation_shape_layer_name,'top')
+        legend.nodeMove(config.housing_coordinate_layer_name,1)
+        legend.nodeMove(config.housing_layer_name,2)
+        legend.nodeMove(config.open_layers_layer_name,'bottom')
+
+        '''
         position = -1
         if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
             position += 1
@@ -173,6 +180,8 @@ class OpenEQuarterMain:
             #        groupIndex+=1
             #        if mygroup == child:
             #           break
+        '''
+
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
@@ -204,7 +213,7 @@ class OpenEQuarterMain:
         """
         canvas = self.iface.mapCanvas()
         crs = canvas.mapRenderer().destinationCrs()
-        raster = self.iface.activeLayer()
+        raster = oeq_global.QeQ_current_work_layer
 
         if raster is not None:
             color = raster_layer_interaction.extract_color_at_point(raster, point, crs)
@@ -270,9 +279,11 @@ class OpenEQuarterMain:
         transformer = QgsCoordinateTransform(source_crs, map_crs)
         extent = transformer.transform(extent)
 
-        self.open_layer.setExtent(extent)
-        self.iface.setActiveLayer(self.open_layer)
-        self.iface.actionZoomToLayer().trigger()
+        canvas.setExtent(extent)
+        canvas.refresh()
+        #        self.open_layer.setExtent(extent)
+        #        self.iface.setActiveLayer(self.open_layer)
+        #        self.iface.actionZoomToLayer().trigger()
 
         # except None, Error:
         #print(self.__module__, 'Could not zoom to default extent: {}'.format(Error))
@@ -407,7 +418,7 @@ class OpenEQuarterMain:
                         self.open_layer = layer
                         break
 
-            self.zoom_to_default_extent()
+        self.zoom_to_default_extent()
 
         # remove if necessary
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
@@ -770,9 +781,13 @@ class OpenEQuarterMain:
     def handle_information_sampled(self):
 
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
-        time.sleep(2)  # wait until Layer is removed
+        legend.nodesShow([config.housing_coordinate_layer_name,config.housing_layer_name])
+        #time.sleep(2.0)  # wait until Layer is removed
+
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
+        #time.sleep(2.0)  # wait until Layer is removed
         psti.set_input_layer(config.pst_input_layer_name)
+        #time.sleep(2.0)  # wait until Layer is removed
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name),

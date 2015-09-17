@@ -520,7 +520,6 @@ def edit_housing_layer_attributes(housing_layer):
             #if oeq_global.isnull(feature.attribute('FID')):
                 # if feature.attribute('BLD_ID') == 0:
                 geometry = feature.geometry()
-            print geometry
                 values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
                 provider.changeAttributeValues({feature.id() : values})
                 building_id += 1

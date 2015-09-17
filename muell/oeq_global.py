@@ -29,6 +29,7 @@ OeQ_project_info = {
     'population_density': 14000
 }
 
+
 # global OeQ_project_name
 def OeQ_project_name():
     path_to_project = QgsProject.instance().fileName()

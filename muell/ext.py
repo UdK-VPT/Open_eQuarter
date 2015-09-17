@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import pickle
 from mole import oeq_global
@@ -56,7 +54,6 @@ class OeQExtension:
                  par_out=None,
                  layer_out=None,
                  colortable=None,
-                 show_results=False,
                  evaluation_method=average):
         self.field_id = field_id
         self.source_type = source_type
@@ -79,7 +76,6 @@ class OeQExtension:
         self.type = type
         self.source = source
         self.active = active
-        self.show_results = show_results
         self.evaluator = evaluation_method
         if par_in == None:
             self.par_in = [field_id + '_L', field_id + '_H']
@@ -116,7 +112,6 @@ class OeQExtension:
                layer_in=None,
                par_out=None,
                layer_out=None,
-               show_results=None,
                colortable=None,
                evaluation_method=None):
         if category != None: self.category = category
@@ -134,7 +129,6 @@ class OeQExtension:
         if par_out != None: self.par_out = par_out
         if layer_out != None: self.layer_out = layer_out
         if colortable != None: self.colortable = colortable
-        if show_results != None: self.show_results = show_results
         if evaluation_method != None: self.evaluator = evaluation_method
 
     def activate(self):
@@ -301,21 +295,7 @@ class OeQExtension:
             target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
 
-        if self.show_results:
-            self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
-
-    def work_out_results(self):
-        from mole.qgisinteraction.layer_interaction import fullRemove, create_evaluation_layer, join_layers
-        fullRemove(self.extension_name)
-        new_layer = create_evaluation_layer(
-            layer_name=self.extension_name)  # ,group="Component Qualities",subgroup="Contemporary")
-        join_layers(new_layer, out_layer)
-        new_layer.loadNamedStyle(self.colortable)
-        self.iface.legendInterface().setLayerVisible(new_layer, False)
-        self.iface.legendInterface().setLayerExpanded(new_layer, False)
-
-
 
 
 def by_category(category=None, registry=None):

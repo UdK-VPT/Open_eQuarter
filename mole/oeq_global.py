@@ -82,14 +82,16 @@ def OeQ_init_progressbar(title='Be patient!', message='Background calculations a
 
     # pass the progress bar to the message Bar
     iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
-    print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    OeQ_unlockQgis()
+    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
     return progressbarwidget
 
 
 def OeQ_push_progressbar(progressbarwidget, progress_counter):
     progress_counter = progress_counter + 1
     progressbarwidget.setValue(progress_counter)
-    print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    OeQ_unlockQgis()
+    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
     return progress_counter
 
 
@@ -100,7 +102,8 @@ def OeQ_kill_progressbar():
 def OeQ_init_info(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
-    print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    OeQ_unlockQgis()
+    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
 def OeQ_kill_info():
@@ -110,7 +113,8 @@ def OeQ_kill_info():
 def OeQ_init_warning(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
-    print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    OeQ_unlockQgis()
+    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
 def OeQ_kill_warning():
@@ -120,7 +124,8 @@ def OeQ_kill_warning():
 def OeQ_init_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().CRITICAL)
-    print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    OeQ_unlockQgis()
+    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
 def OeQ_kill_error():
@@ -132,3 +137,6 @@ def isnull(value):
 
 QeQ_current_work_layer = None
 
+def OeQ_unlockQgis():
+    import sys
+    sys.stdout.write('')

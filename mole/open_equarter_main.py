@@ -53,7 +53,6 @@ class OpenEQuarterMain:
     def __init__(self, iface):
         # Save reference to the QGIS interface
         self.iface = iface
-        print 'Hallo 1'
         ### Monitor the users progress
         self.progress_items_model = ProgressItemsModel()
 
@@ -88,12 +87,8 @@ class OpenEQuarterMain:
         self.progress_items_model = ProgressItemsModel()
         import copy
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
-        print "ALLES NEU 1111"
-        # self.oeq_project_settings_form.reset()
-        # self.oeq_project_settings_form
 
     def initGui(self):
-        print 'Hallo 3'
         plugin_icon = QIcon(os.path.join(':', oeq_global.OeQ_plugin_path(), 'icons', 'OeQ_plugin_icon.png'))
         self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
         self.main_action.triggered.connect(self.run)
@@ -116,10 +111,7 @@ class OpenEQuarterMain:
 
     def initGui_process_dock(self):
         self.main_process_dock = MainProcess_dock(self.progress_items_model)
-        print 'Hallo 2'
-
         self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
-
         sections = self.progress_items_model.section_views
         for list_view in sections:
             list_view.clicked.connect(self.process_button_clicked)
@@ -281,12 +273,6 @@ class OpenEQuarterMain:
 
         canvas.setExtent(extent)
         canvas.refresh()
-        #        self.open_layer.setExtent(extent)
-        #        self.iface.setActiveLayer(self.open_layer)
-        #        self.iface.actionZoomToLayer().trigger()
-
-        # except None, Error:
-        #print(self.__module__, 'Could not zoom to default extent: {}'.format(Error))
 
     def set_project_crs(self, crs):
         """
@@ -465,7 +451,6 @@ class OpenEQuarterMain:
     # step 2.0
     def handle_source_layers_loaded(self):
         done = self.information_source_dlg.exec_()
-        print done
         if done:
             shape_sources = extensions.by_type('shp', 'import', True)
             # shape_sources = filter(lambda source: source.type == 'shp', oeq_global.OeQ_information_source)
@@ -586,9 +571,6 @@ class OpenEQuarterMain:
         for info_source in csv_sources:
             pass
         wms_sources = extensions.by_type('wms', 'import', True)
-        print [i.layer_name for i in wms_sources]
-        print [i.layer_id for i in wms_sources]
-        # print [layer_interaction.find_by_id(i.layer_id) for i in wms_sources]
 
         for importextension in wms_sources:
             layer_interaction.fullRemove(layer_id=importextension.layer_id)
@@ -621,13 +603,6 @@ class OpenEQuarterMain:
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         oeq_global.OeQ_kill_progressbar()
 
-        # loaded_layers = QgsMapLayerRegistry.instance().mapLayers()
-        # for layer in loaded_layers.values():
-        #    print(layer.name(), layer.type() == QgsMapLayer.RasterLayer, layer.source())
-        #    if layer.type() == QgsMapLayer.RasterLayer and 'http' in layer.source():
-        #        return 2
-
-        # return 1
         self.continue_process(True)
 
     # step 2.3
@@ -664,8 +639,6 @@ class OpenEQuarterMain:
                     cLay.setLegendUrl(lUrl)
 
                     # set new layer id in extension if available
-                    # print 'OLD '+ clipping_raster.id()
-                    # print 'NEW '+ cLay.id()
                     extension = extensions.by_layerid(clipping_raster.id())
                     if extension is not None:
                         extension[0].layer_id = cLay.id()
@@ -752,42 +725,13 @@ class OpenEQuarterMain:
             return 1
 
     # step 4.1
-    def handle_information_sampled_old(self):
-        layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
-        psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
-        psti.set_input_layer(config.pst_input_layer_name)
-        abbreviations = psti.select_and_rename_files_for_sampling()
-        pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
-        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name),
-                                "ogr")
 
-        # in case the plugin was re-started, reload the color-entries
-        for layer_name, abbreviation in abbreviations.iteritems():
-            print layer_name
-            ext = extensions.by_layername(layer_name, 'import')
-            print ext
-            if ext != []:
-                if ext[0].colortable != None:
-                    in_path = ext[0].colortable
-            print in_path
-            # in_path = os.path.join(oeq_global.OeQ_project_path(), layer_name + '.qml')
-            self.color_picker_dlg.color_entry_manager.read_color_map_from_qml(in_path)
-            layer_color_map = self.color_picker_dlg.color_entry_manager.layer_values_map
-            color_dict = layer_color_map[layer_name]
-            layer_interaction.add_parameter_info_to_layer(color_dict, abbreviation, vlayer)
-        layer_interaction.add_layer_to_registry(vlayer)
-        return 2
 
     def handle_information_sampled(self):
-
-        layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
         legend.nodesShow([config.housing_coordinate_layer_name,config.housing_layer_name])
-        #time.sleep(2.0)  # wait until Layer is removed
-
+        layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
-        #time.sleep(2.0)  # wait until Layer is removed
         psti.set_input_layer(config.pst_input_layer_name)
-        #time.sleep(2.0)  # wait until Layer is removed
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name),
@@ -856,7 +800,6 @@ class OpenEQuarterMain:
                 return new_layer
 
             for attr in in_provider.fields().toList():
-                print attr
                 if attr.name().endswith("YOC"): yoc_fld = attr.name()
                 if attr.name().endswith("PDENS_M"): pdens_fld = attr.name()
                 if attr.name().endswith("FLOORS"): floors_fld = attr.name()
@@ -891,26 +834,11 @@ class OpenEQuarterMain:
                 if len(outFeat) > 0:
                     outFeat = outFeat[0]
                     if not isnull(yoc_fld):
-                        print "YOC NAME"
-                        print yoc_fld
                         if not isnull(inFeat.attribute(yoc_fld)):
                             yoc = inFeat.attribute(yoc_fld)
                     if not isnull(floors_fld):
-                        print "FLOORS NAME"
-                        print floors_fld
                         if not isnull(inFeat.attribute(floors_fld)):
                             floors = inFeat.attribute(floors_fld)
-                            # if not isnull(pdens_fld):
-                            # print "POPDENS NAME"
-                            # print pdens_fld
-                            # if not isnull(inFeat.attribute(pdens_fld)):
-                            # pop_dens=inFeat.attribute(pdens_fld)*0.55 # #Because Berlin has got 45% of green area
-                    print "YOC VALUE"
-                    print yoc
-                    print "FLOORS VALUE"
-                    print floors
-                    print "POPDENS VALUE"
-                    print pop_dens
 
                     est_ed = evaluate_building(population_density=pop_dens,
                                                area=inFeat.attribute("AREA"),
@@ -1107,7 +1035,7 @@ class OpenEQuarterMain:
         # for debugging uncomment the following line
         if True:
             # if self.progress_items_model.check_prerequisites_for(clicked_step):
-            QgsProject.instance().setDirty(True)
+            #QgsProject.instance().setDirty(True)
             item.setCheckState(1)
             handler = 'handle_' + clicked_step
             step_call = getattr(self, handler)
@@ -1140,12 +1068,6 @@ class OpenEQuarterMain:
             self.oeq_project_settings_form.show()
             save = self.oeq_project_settings_form.exec_()
             if save:
-                # for key in oeq_global.OeQ_project_info:
-                #     field = getattr(self.oeq_project_settings_form, key)
-                #    print 'Der Typ hier ist '
-                #    print type(field.text())
-                #    oeq_global.OeQ_project_info[key] = field.text()
-
                 self.handle_project_created()
                 plugin_section = self.progress_items_model.section_views[0]
                 section_model = plugin_section.model()

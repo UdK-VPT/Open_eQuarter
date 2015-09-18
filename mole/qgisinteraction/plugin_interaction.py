@@ -5,7 +5,8 @@ from qgis import utils
 from os import path
 import sys
 
-from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
+from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists, delete_layer_files
+from mole.qgisinteraction import legend
 from mole.project import config
 
 def get_plugin_ifexists(plugin_name):
@@ -43,15 +44,19 @@ class PstInteraction(object):
         self.path_to_output_layer = ''
 
     def set_input_layer(self, layer_name):
-        if layer_name is not None and not layer_name.isspace():
-            layer_registry = QgsMapLayerRegistry.instance()
-            layer_available = layer_registry.mapLayersByName(layer_name)
+        layernode = legend.nodeByName(layer_name,'layer')
+        if len(layernode) == 0:
+            return None
+        in_layer = self.pst_dialog.inSample
+        index = in_layer.findText(layer_name)
+        in_layer.setCurrentIndex(index)
+        #if layer_name is not None and not layer_name.isspace():
+        #    layer_registry = QgsMapLayerRegistry.instance()
+        #    layer_available = layer_registry.mapLayersByName(layer_name)
 
-            if layer_available:
+        #    if layer_available:
                 # drop down menu, listing all available layers
-                in_layer = self.pst_dialog.inSample
-                index = in_layer.findText(layer_name)
-                in_layer.setCurrentIndex(index)
+
 
     def select_and_rename_files_for_sampling(self):
         """
@@ -124,30 +129,14 @@ class PstInteraction(object):
         return replacement_map
 
     def start_sampling(self, path_to_layer, layer_name):
-
         if not path_to_layer or path_to_layer.isspace() or not layer_name or layer_name.isspace():
             return ''
-
         else:
-            if path.exists(path_to_layer):
-
-                if layer_name.upper().endswith('.SHP'):
-                    layer_name = layer_name[:-4]
-
-                if path.exists(path.join(path_to_layer, layer_name + '.shp')):
-                    new_name = layer_name
-                    suffix = 0
-
-                    while path.exists(path.join(path_to_layer, new_name + '.shp')):
-                        suffix += 1
-                        new_name = layer_name + str(suffix)
-
-                    layer_name = new_name
-
-                full_path = path.join(path_to_layer, layer_name + '.shp')
-                self.pst_dialog.sampling(full_path)
-
-                return full_path
+            delete_layer_files(layer_name)
+            full_path = path.join(path_to_layer, layer_name + '.shp')
+            self.set_input_layer(config.pst_input_layer_name)
+            self.pst_dialog.sampling(full_path)
+            return full_path
 
 
 class OlInteraction(object):

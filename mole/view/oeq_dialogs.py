@@ -428,6 +428,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             else:
                 ext = ext[0]
                 ltu_file = ext.colortable
+            print ltu_file
             if os.path.isfile(ltu_file):
                 self.color_entry_manager.read_color_map_from_qml(ltu_file)
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())

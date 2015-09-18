@@ -51,7 +51,6 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
     import os
     from qgis.utils import iface
     from mole import oeq_global
-    print vlayer.providerType()
     if oeq_global.OeQ_project_name() == '':
         iface.actionSaveProjectAs().trigger()
     layer_name = vlayer.name()
@@ -61,14 +60,10 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
     if error == QgsVectorFileWriter.NoError:
         if replace_in_legend:
             QgsMapLayerRegistry.instance().removeMapLayer(vlayer.id())
-            print path
-            print "'" + oeq_global.OeQ_project_path() + "'"
-            print "'" + oeq_global.OeQ_project_name() + "'"
             rewritten_layer = iface.addVectorLayer(path, layer_name, "ogr")
             if not rewritten_layer.isValid():
                 oeq_global.OeQ_init_warning(title='Write Error!', message='path')
                 return vlayer
-            print rewritten_layer.name()
             if style != None:
                 add_style_to_layer(style, rewritten_layer)
                 rewritten_layer.startEditing()
@@ -80,7 +75,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
             return vlayer
 
 #remove a layer including all files
-def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.qpj', '.dbf', '.idm', '.ind']):
+def fullRemove(layer_name=None, layer_id=None):
     if layer_id is None:
         thelayer = find_layer_by_name(layer_name)
     else:
@@ -88,12 +83,25 @@ def fullRemove(layer_name=None, layer_id=None, types=['.shp', '.shx', '.prj', '.
     if thelayer is not None:
         layer_name = thelayer.name()
         QgsMapLayerRegistry.instance().removeMapLayer(thelayer.id())
-        for i in types:
-            if os.access(os.path.join(oeq_global.OeQ_project_path(), layer_name + i), os.F_OK):
-                os.remove(os.path.join(oeq_global.OeQ_project_path(), layer_name + i))
-    time.sleep(0.1)
+        delete_layer_files(layer_name)
+    oeq_global.OeQ_unlockQgis()
 
-
+def delete_layer_files(layer):
+    if (type(layer) == type('')) | (type(layer) == type(u'')):
+        layer = find_layer_by_name(layer)
+    if layer == None:
+        return None
+    source = layer.source()
+    path = os.path.dirname(source)
+    filenameroot = os.path.basename(source).split('.')
+    if len(filenameroot) < 2:
+        return []
+    filenameroot = ''.join(filenameroot[:-1])+ '.'
+    if path.exists(path):
+                files = os.listdir(path)
+                for file in files:
+                    if files.startswith(filenameroot):
+                        os.remove(os.path.join(path, file))
 
 def load_layer_from_disk(path_to_layer, name):
     """
@@ -208,7 +216,6 @@ def write_vector_layer_to_disk(vlayer, full_path):
 
     if out_name.upper().endswith('.SHP'):
         out_name = out_name[:-4]
-    print type(vlayer)
     if vlayer is not None and vlayer.isValid() and os.path.exists(out_path):
 
         if os.path.exists(os.path.join(out_path, out_name + '.shp')):
@@ -429,14 +436,11 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
     # append the resolution to the filename and call the save method
 
     filename=layer.name()
-    print filename
     if filename.startswith("WMS_"):
        filename=filename.replace("WMS_","")
-       print filename
     else:
        resolution_prefix = '{}_{}-'.format(width, height)
        filename = resolution_prefix + layer.name()
-    print filename
     img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
     color = QColor(187, 187, 187, 0)
     img.fill(color.rgba())
@@ -455,7 +459,6 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
     leonardo.end()
 
     filename += '.{}'.format(image_type)
-    print filename
     out_path = os.path.join(path_to_file, filename)
     if img.save(out_path, image_type):
         return out_path
@@ -520,7 +523,6 @@ def edit_housing_layer_attributes(housing_layer):
             # if oeq_global.isnull(feature.attribute('FID')):
             # if feature.attribute('BLD_ID') == 0:
             geometry = feature.geometry()
-            print geometry
             values = {area_index: geometry.area(), perimeter_index: geometry.length(),
                       building_index: '{}'.format(building_id)}
             provider.changeAttributeValues({feature.id(): values})
@@ -550,11 +552,7 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     """
 
     import mole.extensions as extensions
-    print layer.name()
-    print layer.id()
     extension = extensions.by_layername(layer.name(), 'import')
-    print extension
-    print '--------------'
     if extension != []:
         extension = extension[0]
         try:
@@ -569,16 +567,11 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
 
             for feat in provider.getFeatures():
                 if colors_match_feature(color_quadriple, feat, field_name):
-                    par_descr = extension.field_id + '_P'
-                    par_1_name = extension.par_in[0]
-                    par_1_lookop = color_dict[color_key][1]
-                    par_2_name = extension.par_in[1]
-                    par_2_lookop = color_dict[color_key][2]
                     result = {extension.field_id + '_P': {'type': QVariant.String,
                                                           'value': color_dict[color_key][0]},
-                              extension.par_in[0]: {'type': QVariant.Double,
+                               extension.par_in[0]: {'type': QVariant.Double,
                                                     'value': color_dict[color_key][1]},
-                              extension.par_in[1]: {'type': QVariant.Double,
+                               extension.par_in[1]: {'type': QVariant.Double,
                                                     'value': color_dict[color_key][2]}}
 
                     result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],

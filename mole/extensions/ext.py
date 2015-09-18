@@ -7,7 +7,7 @@ from mole.project import config
 from mole.qgisinteraction import legend
 
 def average(self=None, parameters={}):
-    print parameters
+ #   print parameters
     from PyQt4.QtCore import QVariant
     from qgis.core import NULL
     result = {self.field_id + '_P': {'type': QVariant.String,
@@ -24,21 +24,6 @@ def average(self=None, parameters={}):
     return result
 
 
-def average_old(self=None, parameters={}):
-    from PyQt4.QtCore import QVariant
-    # print parameters
-    # print parameters.values()
-    if parameters != {}:
-        # print sum(float(parameters.values()))/len(parameters)
-        return {self.field_id + '_P': {'type': QVariant.String,
-                                       'value': self.layer_name},
-                self.field_id + '_M': {'type': QVariant.Double,
-                                       'value': sum([float(i) for i in parameters.values()]) / len(parameters)}}
-    else:
-        return {self.field_id + '_P': {'type': QVariant.String,
-                                       'value': NULL},
-                self.field_id + '_M': {'type': QVariant.Double,
-                                       'value': NULL}}
 
 
 class OeQExtension:
@@ -298,6 +283,7 @@ class OeQExtension:
                 if source_layer.fieldNameIndex(par) < 0:
                     oeq_global.OeQ_init_warning('Extension "' + self.extension_name + '":',
                                                 'Layer "' + self.layer_in + '" has no attribute "' + par + '"!')
+                    return None
                 value = srcFeat.attributes()[source_layer.fieldNameIndex(par)]
                 par_in_data.update({par: value})
             result = self.evaluate(par_in_data)

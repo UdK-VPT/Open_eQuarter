@@ -18,6 +18,7 @@ Latest Changes: 2015-09-16 (max)
 
 from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry
 from qgis.utils import iface
+from mole import oeq_global
 import time
 
 def nodeIsLayer(node):
@@ -221,6 +222,7 @@ def nodeMove(node,direction='down',target_node=None):
     cloned_node = node.clone()
     target_node.insertChildNode(direction, cloned_node)
     node.parent().removeChildNode(node)
+    oeq_global.OeQ_unlockQgis()
     return cloned_node
 
 
@@ -238,8 +240,11 @@ def nodeShow(node):
         if len(node) == 0:
             return None
         node = node[0]
+    #iface.legendInterface().setLayerVisible(node.layer(),True)
     node.setVisible(Qt.Checked)
-    iface.mapCanvas().refresh()
+    #iface.mapCanvas().refresh()
+    #print node.layer().name()+ ' now visible!'
+    oeq_global.OeQ_unlockQgis()
     return node.isVisible()
 
 def nodesShow(nodes):
@@ -262,8 +267,11 @@ def nodeHide(node):
         if len(node) == 0:
             return None
         node = node[0]
+    #iface.legendInterface().setLayerVisible(node.layer(),False)
     node.setVisible(Qt.Unchecked)
-    iface.mapCanvas().refresh()
+    #print node.layer().name()+ ' now invisible!'
+    oeq_global.OeQ_unlockQgis()
+    #iface.mapCanvas().refresh()
     return node.isVisible()
 
 def nodesHide(nodes):

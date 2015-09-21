@@ -340,4 +340,15 @@ class MunicipalInformationTree:
             print('{}: {}'.format(self.__module__, Error))
 
 
+    def read_municipals(self):
+        self.municipal_db = []
+        try:
+            with open(self.municipal_json_file, encoding='utf-8') as file:
+                for line in file:
+                    entry = json.loads(line, encoding='utf-8')
+                    self.municipal_db.append(entry)
+        except IOError, Error:
+                print('{}: {}'.format(self.__module__, Error))
+
+        return self.municipal_db
 

@@ -79,12 +79,9 @@ class OpenEQuarterMain:
         print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
         self.iface.actionShowPythonDialog().trigger()  # in fact it's not show but toggle
 
-        ### Default values
-        # name of the shapefile which will be created to define the investigation area
-        self.investigation_shape_layer_style = os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_ia_style.qml')
 
     def new_project(self):
-        self.progress_items_model = ProgressItemsModel()
+        self.progress_items_model.load_section_models(config.progress_model)
         import copy
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
 
@@ -148,31 +145,6 @@ class OpenEQuarterMain:
         legend.nodeMove(config.housing_layer_name,2)
         legend.nodeMove(config.open_layers_layer_name,'bottom')
 
-        '''
-        position = -1
-        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
-            position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.investigation_shape_layer_name, position)
-
-        if layer_interaction.find_layer_by_name(config.housing_coordinate_layer_name):
-            position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_coordinate_layer_name, position)
-
-        if layer_interaction.find_layer_by_name(config.housing_layer_name):
-            position += 1
-            layer_interaction.move_layer_to_position(self.iface, config.housing_layer_name, position)
-
-            # def move_layers(self,layer_name,target_group=None,target_position=None):
-            #    def find_child(parent)
-            #    root = QgsProject.instance().layerTreeRoot()
-            #    mygroup = root.findGroup("group1")
-            #    parentGroup = mygroup.parent()
-            #    groupIndex=-1
-            #   for child in parentGroup.children():
-            #        groupIndex+=1
-            #        if mygroup == child:
-            #           break
-        '''
 
 
     def open_settings(self):
@@ -410,18 +382,14 @@ class OpenEQuarterMain:
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
         p_path = os.path.join(oeq_global.OeQ_project_path(), config.investigation_shape_layer_name + '.shp').decode(
             'utf-8')
-        # print QStrp_path
-        fields = QgsFields()
-        fields.append(QgsField("first", QVariant.Int))
-        fields.append(QgsField("second", QVariant.String))
-        # investigation_area = QgsVectorFileWriter(QString(config.investigation_shape_layer_name+'.shp'), "CP1250", fields, QGis.WKBPolygon, config.project_crs, "ESRI Shapefile")
-        # print investigation_area
+
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
                                                                       config.project_crs)
         if investigation_area is not None:
-            layer_interaction.add_style_to_layer(self.investigation_shape_layer_style, investigation_area)
-            layer_interaction.add_layer_to_registry(investigation_area)
+            investigation_area.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', config.investigation_shape_layer_style))
+            oeq_global.QeQ_disableDialogAfterAddingFeature()
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
+            legend.nodeSetActive(config.investigation_shape_layer_name)
             widget = self.iface.messageBar().createMessage('Cover Investigation Area',
                                                            'Click "Done" once the investigation area is completely covered.')
             button = QPushButton(widget)
@@ -434,18 +402,21 @@ class OpenEQuarterMain:
     def confirm_selection_of_investigation_area(self):
         oeq_global.OeQ_kill_info()
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
-        investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-        investigation_area = layer_interaction.write_temporary_vector_layer_to_disk(investigation_area,
-                                                                                    config.investigation_area_style)
-        layer_interaction.unhide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
-        self.iface.setActiveLayer(investigation_area)
-        self.iface.actionZoomToLayer().trigger()
+        #investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+        #investigation_area = layer_interaction.write_temporary_vector_layer_to_disk(investigation_area,config.investigation_area_style)
+        #layer_interaction.unhide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
+        investigation_area_node=legend.nodeByName(config.investigation_shape_layer_name)[0]
+        oeq_global.QeQ_enableDialogAfterAddingFeature()
+        #oeq_global.OeQ_unlockQgis()
+        legend.nodeSetActive(investigation_area_node)
+        oeq_global.OeQ_unlockQgis()
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
         project_item.setCheckState(2)
         #self.continue_process()
-
+        return 2
 
 
     # step 2.0
@@ -457,10 +428,12 @@ class OpenEQuarterMain:
             for shape in shape_sources:
                 # extension =
                 if shape.layer_name.startswith(config.housing_layer_name):
-                    done = 2
-                    break
-
-        return done
+                    source_section = self.progress_items_model.section_views[1]
+                    section_model = source_section.model()
+                    project_item = section_model.findItems("Load source maps")[0]
+                    project_item.setCheckState(2)
+                    return 2
+        return 1
 
     # step 2.1
     def handle_housing_layer_loaded(self):
@@ -468,7 +441,7 @@ class OpenEQuarterMain:
         shape_sources = extensions.by_type('shp', 'import', True)
         shape_name = ''
         shape_path = ''
-
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
         for importextension in shape_sources:
             if importextension.layer_name.startswith(config.housing_layer_name):
                 shape_name = importextension.layer_name
@@ -519,6 +492,10 @@ class OpenEQuarterMain:
                 layer_interaction.trigger_edit_mode(self.iface, data_layer.name(), 'off')
                 self.iface.legendInterface().setLayerVisible(data_layer, False)
                 oeq_global.OeQ_kill_info()
+                source_section = self.progress_items_model.section_views[1]
+                section_model = source_section.model()
+                project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
+                project_item.setCheckState(2)
                 return 2
         oeq_global.OeQ_kill_info()
         return 1
@@ -526,6 +503,8 @@ class OpenEQuarterMain:
     # step 2.2
     def handle_building_coordinates_loaded(self):
         window = self.iface.mainWindow()
+        #legend.nodeZoomTo(config.investigation_shape_layer_name)
+        #oeq_global.OeQ_unlockQgis()
         load_message = "Do you want to load your own set of building coordinates?"
         reply = QMessageBox.question(window, 'Building Coordinates', load_message, QMessageBox.Yes, QMessageBox.No)
 
@@ -543,6 +522,10 @@ class OpenEQuarterMain:
                 rci.calculate_accuracy(polygon, centroid_layer)
                 layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
                 self.reorder_layers()
+                source_section = self.progress_items_model.section_views[1]
+                section_model = source_section.model()
+                project_item = section_model.findItems("Load building coordinates")[0]
+                project_item.setCheckState(2)
                 return 2
             else:
                 return 0
@@ -554,7 +537,8 @@ class OpenEQuarterMain:
         :rtype:
         """
         raster_layers = []
-
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
+        #oeq_global.OeQ_unlockQgis()
         gtiff_sources = extensions.by_type('gtiff', 'import', True)
         for info_source in gtiff_sources:
             pass
@@ -602,8 +586,12 @@ class OpenEQuarterMain:
         # Let's wait for the WMS loading
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         oeq_global.OeQ_kill_progressbar()
-
-        self.continue_process(True)
+        source_section = self.progress_items_model.section_views[1]
+        section_model = source_section.model()
+        project_item = section_model.findItems("Load WMS maps")[0]
+        project_item.setCheckState(2)
+        return 2
+        #self.continue_process(True)
 
     # step 2.3
     def handle_raster_loaded(self):
@@ -612,9 +600,10 @@ class OpenEQuarterMain:
             # an investigation shape is needed, to trigger the zoom to layer function
             if investigation_shape is not None and investigation_shape.featureCount() > 0:
                 # zoom
-                self.iface.setActiveLayer(investigation_shape)
-                self.iface.actionZoomToLayer().trigger()
-
+                #self.iface.setActiveLayer(investigation_shape)
+                #self.iface.actionZoomToLayer().trigger()
+                legend.nodeZoomTo(config.investigation_shape_layer_name)
+               # oeq_global.OeQ_unlockQgis()
                 # clip extent from visible raster layers
                 # save visible layers and set them invisible afterwards, to prevent further from the wms-server
                 raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'visible')
@@ -697,6 +686,10 @@ class OpenEQuarterMain:
                 pass
         time.sleep(1.0)
         oeq_global.OeQ_kill_progressbar()
+        source_section = self.progress_items_model.section_views[1]
+        section_model = source_section.model()
+        project_item = section_model.findItems("Capture WMS maps")[0]
+        project_item.setCheckState(2)
         return 2
 
     def handle_legend_created(self):
@@ -719,14 +712,13 @@ class OpenEQuarterMain:
 
         self.iface.actionPan().trigger()
         if success:
+
             return 2
         else:
             self.reorder_layers()
             return 1
 
     # step 4.1
-
-
     def handle_information_sampled(self):
         legend.nodesShow([config.housing_coordinate_layer_name,config.housing_layer_name])
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)

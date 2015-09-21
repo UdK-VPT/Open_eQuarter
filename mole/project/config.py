@@ -5,6 +5,10 @@ from qgis.core import QgsRectangle
 
 import mole
 
+
+# County
+country = 'Germany'
+
 # Project information
 project_crs = 'EPSG:3857'
 
@@ -34,6 +38,7 @@ default_extent_crs = 'EPSG:4326'
 
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'
+investigation_shape_layer_style = 'oeq_ia_style.qml'
 
 housing_layer_name = 'BLD Shapes'
 building_outline_style ='oeq_floor_sw.qml'
@@ -59,6 +64,10 @@ def qgis_prefix_path():
         return '/Applications/QGIS.app/Contents/MacOS'
 
 
+default_heating_degree_days =  390.06
+default_average_build_year =  1970
+default_population_density =  10000
+
 # default_projectinfo
 pinfo_default = {
     'project_name': u'',
@@ -68,7 +77,7 @@ pinfo_default = {
     'location_lon': u'',
     'location_lat': u'',
     'location_crs': u'',
-    'heating_degree_days': 390.06,
-    'average_build_year': 1970,
-    'population_density': 10000
+    'heating_degree_days': default_heating_degree_days,
+    'average_build_year': default_average_build_year,
+    'population_density': default_population_density
 }

@@ -20,6 +20,7 @@ OeQ_project_info = {
     'project_name': u'MyProject',
     'description': u'The aim of this project, is to analyse a quarter.',
     'location_city': u'City or street',
+    'location_city_short': u'City',
     'location_postal': u'Postal',
     'location_lon': u'Lon',
     'location_lat': u'Lat',
@@ -135,8 +136,31 @@ def OeQ_kill_error():
 def isnull(value):
     return type(value) is type(NULL)
 
+def isEmpty(string):
+    return ((string == '') | (string == u''))
+
+def isStringOrUnicode(string):
+ return (type(string) == type('')) | (type(string) == type(u''))
+
 QeQ_current_work_layer = None
 
 def OeQ_unlockQgis():
     import sys
     sys.stdout.write('')
+
+from PyQt4.QtCore import QSettings
+
+QeQ_disableDialogAfterAddingFeatureState = False
+
+def QeQ_disableDialogAfterAddingFeature():
+    # get user defined current setting
+    global QeQ_disableDialogAfterFeatureState
+    QeQ_disableDialogAfterFeatureState = QSettings().value( '/qgis/digitizing/disable_enter_attribute_values_dialog')
+    # override setting
+    QSettings().setValue( '/qgis/digitizing/disable_enter_attribute_values_dialog', True )
+
+
+def QeQ_enableDialogAfterAddingFeature():
+    # restore setting
+    global QeQ_disableDialogAfterFeatureState
+    QSettings().setValue( '/qgis/digitizing/disable_enter_attribute_values_dialog', QeQ_disableDialogAfterAddingFeatureState )

@@ -538,7 +538,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
             if (page_name) == page.accessibleName():
                 index = self.active_page_dropdown.currentIndex()
-                self.active_page_dropdown.setItemData(index, self._check_mark, Qt.DecorationRole)
+                self.active_page_dropdown.setItemData(index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
 
 
@@ -568,36 +568,25 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.defaults = {}
         self.municipals = [{}]
         self.found_locations = [{}]
-        #self.location_postal.editingFinished.connect(self.find_municipal_information)
         self.municipal_information = MunicipalInformationTree()
-
-        if self.municipal_information.tree == {}:
-            self.municipal_information.split_data_to_tree_model()
-
+        self.municipal_information.read_municipals()
         for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
-
             field.textChanged.connect(partial(self.text_changed, field))
-
+        self.location_country.setText(config.country)
         self.lookup_by_address.clicked.connect(self.location_by_address)
-        self.location_city.editingFinished.connect(self.location_by_address)
-        self.location_postal.editingFinished.connect(self.location_by_postal)
         self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
-        self.location_lat.editingFinished.connect(self.location_by_coordinates)
-        self.location_lon.editingFinished.connect(self.location_by_coordinates)
-        self.location_crs.editingFinished.connect(self.location_by_coordinates)
         self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
 
     def apply(self):
         if not issubclass(type(self.location_city), QtGui.QLineEdit):
-            self.update_form(1)
+             self.update_form(1)
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
             if key == 'description':
                 oeq_global.OeQ_project_info[key] = field.toPlainText()
             else:
                 oeq_global.OeQ_project_info[key] = field.text()
-            print "Action"
 
     def show(self):
         print oeq_global.OeQ_project_info
@@ -625,50 +614,115 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.lineedit_city_layout()
         if self.found_locations != []:
             location_info = self.found_locations[index]
-            print location_info
-            self.location_city.setText(location_info['formatted_location'])
-            self.location_postal.setText(location_info['postal_code'])
+            #print location_info
+            self.location_country.setText(location_info['country'])
+            self.location_city.setText(location_info['locality'])
+            self.location_street.setText(location_info['route'])
+            if not oeq_global.isEmpty(location_info['street_number']):
+                self.location_street.setText(self.location_street.text() + u' ' + location_info['street_number'])
+            if not oeq_global.isEmpty(self.location_postal.setText(location_info['postal_code'])):
+                self.location_postal.setText(location_info['postal_code'])
             self.location_lon.setText(str(location_info['longitude']))
             self.location_lat.setText(str(location_info['latitude']))
             self.location_crs.setText('EPSG:4326')
-            #self.find_municipal_information()
+            self.set_municipal_data()
 
-    def location_by_address(self, searchBy='location'):
-        if searchBy == 'postal':
-            if self.location_postal.text() == '': return None
-            self.location_city.setText(u'')
+
+    def set_municipal_data(self):
+        self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(self.location_postal.text().encode('utf8')) , self.municipal_information.municipal_db)
+        self.municipals = filter(lambda x :  x['NAME'].encode('utf8').startswith(self.location_city.text().encode('utf8')) , self.municipal_information.municipal_db)
+        if len(self.municipals) > 0:
+            pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+            avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
         else:
-            if self.location_city.text() == '': return None
-            self.location_postal.setText(u'')
+            pop_dens = config.default_population_density
+            avg_yoc = config.default_average_build_year
+        self.average_build_year.setText(str(avg_yoc))
+        self.population_density.setText(str(pop_dens))
 
-        if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
-        postal = self.location_postal.text()
-        city_street = self.location_city.text()
-        address = u'{} {}'.format(postal, city_street)
-        self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
-        if len(self.found_locations) == 1:
-            self.update_form(0)
-        elif len(self.found_locations) > 1:
+
+    def get_location_from_web(self,index):
+         index -= 1
+         self.lineedit_city_layout()
+         self.location_city.setText(self.municipals[index]['NAME'])
+         self.location_postal.setText(str(self.municipals[index]['POSTCODE']))
+         pop_dens = '{}'.format(self.municipals[index]['POP_DENS'])
+         self.population_density.setText(pop_dens)
+         avg_yoc = '{}'.format(self.municipals[index]['AVG_YOC'])
+         self.average_build_year.setText(avg_yoc)
+         citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
+         address = ', '.join([config.country, citystring, self.location_street.text()])
+         self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+         if len(self.found_locations) == 1:
+            self.update_form(1)
+         elif len(self.found_locations) > 1:
             self.combobox_city_layout()
             self.location_city.clear()
-            self.location_city.addItem(_fromUtf8(u'< Select Project Location >'))
+            self.location_city.addItem(_fromUtf8(u'< Select Location >'))
             for loc in self.found_locations:
                 self.location_city.addItem(_fromUtf8(loc['formatted_location']))
             self.location_city.currentIndexChanged.connect(self.update_form)
 
-    def location_by_postal(self):
-        return self.location_by_address('postal')
+    def location_by_address(self):
+         #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
+         #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
 
-
+         if oeq_global.isEmpty(self.location_city.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_postal.text())):
+            postal = self.location_postal.text()
+            self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(postal) , self.municipal_information.municipal_db)
+            if len(self.municipals) > 0:
+                if len(self.municipals) ==  1:
+                    self.lineedit_city_layout()
+                    self.location_city.setText(self.municipals[0]['NAME'])
+                    self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                    self.get_location_from_web(1)
+                else:
+                    self.combobox_city_layout()
+                    self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                    for i in [ str(i['POSTCODE']) + u' ' + i['NAME'] for i in self.municipals]:
+                        self.location_city.addItem(_fromUtf8(i))
+                    self.location_city.currentIndexChanged.connect(self.get_location_from_web)
+         elif oeq_global.isEmpty(self.location_postal.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_city.text())):
+            city = self.location_city.text()
+            self.municipals = filter(lambda x :  x['NAME'].startswith(city) , self.municipal_information.municipal_db)
+            if len(self.municipals) > 0:
+                if len(self.municipals) ==  1:
+                    self.lineedit_city_layout()
+                    self.location_city.setText(self.municipals[0]['NAME'])
+                    self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                    self.get_location_from_web(1)
+                else:
+                    self.combobox_city_layout()
+                    self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                    for i in [ str(i['POSTCODE']) + u' ' + i['NAME'] for i in self.municipals]:
+                        self.location_city.addItem(_fromUtf8(i))
+                    self.location_city.currentIndexChanged.connect(self.get_location_from_web)
+         else:
+              #self.lineedit_city_layout()
+              #self.lineedit_postal_layout()
+             citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
+             address = ', '.join([config.country, citystring, self.location_street.text()])
+             self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+             if len(self.found_locations) == 1:
+                self.update_form(1)
+             elif len(self.found_locations) > 1:
+                self.combobox_city_layout()
+                self.location_city.clear()
+                self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                for loc in self.found_locations:
+                    self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+                self.location_city.currentIndexChanged.connect(self.update_form)
 
 
     def location_by_coordinates(self):
+        #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
+        #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
         self.found_locations = googlemaps.getAddressByCoordinates(lat, lon, crs)
         if len(self.found_locations) == 1:
-            self.update_form(0)
+            self.update_form(1)
         elif len(self.found_locations) > 1:
             self.combobox_city_layout()
             self.location_city.clear()
@@ -677,69 +731,62 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
                 self.location_city.addItem(_fromUtf8(loc['formatted_location']))
             self.location_city.currentIndexChanged.connect(self.update_form)
 
+
     def find_municipal_information(self):
-        if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
-        postcode = (self.location_postal.text() + "00000")[:5]
+        city = self.location_city.text()
+        postal = self.location_postal.text()
+        if ((city == '') | (city == u'')):
+            if ((postal != '') & (postal != u'')):
+                self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(postal) , self.municipal_information.municipal_db)
+                if len(self.municipals) > 0:
+                    if len(self.municipals) ==  1:
+                        self.lineedit_city_layout(self.municipals[0]['NAME'])
+                        self.location_city.setText(self.municipals[0]['NAME'])
+                        self.location_city.editingFinished.connect(self.location_by_address, True)
+                        pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+                        self.population_density.setText(pop_dens)
+                        avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
+                        self.average_build_year.setText(avg_yoc)
+                    else:
+                        self.combobox_city_layout()
+                        for i in [i['POSTCODE']+' '+i['NAME'] for i in self.municipals]:
+                            self.location_city.addItem(_fromUtf8(i))
+                        self.location_city.currentIndexChanged.connect(self.set_city)
+        else:
+            if ((city != '') & (city != u'')):
+                self.municipals = filter(lambda x : ((x['NAME'] == city) | x['NAME'].startswith(city+',') | x['NAME'].startswith(city+' ')) , self.municipal_information.municipal_db)
+                if len(self.municipals) > 0:
+                    if len(self.municipals) ==  1:
+                        self.lineedit_postal_layout()
+                        self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                        pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+                        self.population_density.setText(pop_dens)
+                        avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
+                        self.average_build_year.setText(avg_yoc)
+                    else:
+                        self.combobox_postal_layout()
+                        for i in [i['POSTCODE']+' '+i['NAME'] for i in self.municipals]:
+                            self.location_postal.addItem(_fromUtf8(i))
+                        self.location_postal.currentIndexChanged.connect(self.set_postal)
 
-        if postcode:
-            try:
-                l0_key = postcode[0]
-                l1_key = postcode[1]
-                l2_key = postcode[2:]
-                municipals = self.municipal_information.tree[l0_key][l1_key][l2_key]
-            except (KeyError, ValueError):
-                self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
-                return
 
-            self.municipals = municipals
-            if len(municipals) == 1:
-                self.lineedit_city_layout()
-                self.fill_municipal_information(0)
-
-            elif len(municipals) > 1:
-                self.combobox_city_layout()
-                self.location_city.clear()
-
-                for municipal in municipals:
-                    self.location_city.addItem(_fromUtf8(municipal['NAME']))
-
-                self.location_city.currentIndexChanged.connect(self.fill_municipal_information)
-                self.fill_municipal_information(0)
-
-    def fill_municipal_information(self, index):
-        municipal = self.municipals[index]
-
-        if issubclass(type(self.location_city), QtGui.QLineEdit):
-            city_name = _fromUtf8(municipal['NAME'])
-            self.location_city.setText(city_name)
-
-        try:
-            pop_dens = '{}'.format(municipal['POP_DENS'])
-            self.population_density.setText(pop_dens)
-        except KeyError as Error:
-            print(self.__module__, Error)
-
-        try:
-            avg_yoc = '{}'.format(municipal['AVG_YOC'])
-            self.average_build_year.setText(avg_yoc)
-        except KeyError as Error:
-            print(self.__module__, Error)
 
     def combobox_city_layout(self, entries=[]):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
         if isinstance(city_edit, QtGui.QLineEdit):
             location_box.removeWidget(city_edit)
             width = city_edit.minimumWidth()
             city_edit.deleteLater()
-            self.location_city = QtGui.QComboBox()
-            self.location_city.setObjectName('location_city')
+            self.location_city = QtGui.QComboBox(self.form)
+            self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setMinimumWidth(width)
             location_box.insertWidget(0, self.location_city)
 
+
     def lineedit_city_layout(self, text=''):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
         if isinstance(city_edit, QtGui.QComboBox):
@@ -750,8 +797,43 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)
-            self.location_city.editingFinished.connect(self.location_by_address, True)
 
+
+
+    def set_postal(self, index):
+        municipal = self.municipals[index]
+        self.lineedit_postal_layout()
+        self.location_postal.setText(str(municipal['POSTCODE']))
+        pop_dens = '{}'.format(municipal['POP_DENS'])
+        self.population_density.setText(pop_dens)
+        avg_yoc = '{}'.format(municipal['AVG_YOC'])
+        self.average_build_year.setText(avg_yoc)
+
+    def combobox_postal_layout(self, entries=[]):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_edit = location_box.itemAt(0).widget()
+
+        if isinstance(location_edit, QtGui.QLineEdit):
+            location_box.removeWidget(location_edit)
+            width = location_edit.minimumWidth()
+            location_edit.deleteLater()
+            self.location_postal = QtGui.QComboBox()
+            self.location_postal.setObjectName('location_postal')
+            self.location_postal.setMinimumWidth(width)
+            location_box.insertWidget(0, self.location_postal)
+
+    def lineedit_postal_layout(self, text=''):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_edit = location_box.itemAt(0).widget()
+
+        if isinstance(location_edit, QtGui.QComboBox):
+            location_box.removeWidget(location_edit)
+            location_edit.deleteLater()
+            self.location_postal = QtGui.QLineEdit(self.form)
+            self.location_postal.setMinimumWidth(228)
+            self.location_postal.setObjectName(_fromUtf8("location_postal"))
+            self.location_postal.setStyleSheet('color: rgb(0,0,0)')
+            location_box.insertWidget(0, self.location_postal)
 
 
 

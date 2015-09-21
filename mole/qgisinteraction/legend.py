@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# -*- coding: utf-8 -*-
-
 """
 Project:        OpenEQuarter
 Subproject:     Mole
@@ -16,17 +14,19 @@ Latest Changes: 2015-09-16 (max)
 (C) Open eQuarter Project Team UdK-Berlin
 """
 
-from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry
+from PyQt4.QtCore import QVariant
+from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField
 from qgis.utils import iface
 from mole import oeq_global
-import time
+from mole.project import config
+import os
 
 def nodeIsLayer(node):
     """nodeIsLayer: Checks, weather node represents a Layer
     :param node: Node to check or name of node
     :return: True/False/None if node does not exist
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -40,7 +40,7 @@ def nodeIsGroup(node):
     :param node: Node to check or name of node
     :return: True/False/None if node does not exist
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -50,22 +50,22 @@ def nodeIsGroup(node):
     return False
 
 
-def nodeAll(which='all',root=None):
-    """nodeAll: Delivers all nodes of kind 'which' from node 'root'
+def nodeAll(which='all',searchgroup=None):
+    """nodeAll: Delivers all nodes of kind 'which' from node 'searchgroup'
     :param which: kind of node 'all'/'layer'/'group
-    :param root: Parent node to search, default is the legend#s root
+    :param searchgroup: Parent node to search, default is the legend's root
     :return: list of found nodes
     """
-    if root == None:
-        root = QgsProject.instance().layerTreeRoot()
-    if (type(root) == type('')) | (type(root) == type(u'')):
-        root = nodeByName(root)
-        if len(root) == 0:
-            root = None
+    if searchgroup == None: 
+        searchgroup = QgsProject.instance().layerTreeRoot()
+    if oeq_global.isStringOrUnicode(searchgroup):
+        searchgroup = nodeByName(searchgroup,'group')
+        if len(searchgroup) == 0:
+            return []
         else:
-            root = root[0]
+            searchgroup = searchgroup[0]
     nodelist=[]
-    for child in root.children():
+    for child in searchgroup.children():
         nodelist.append(child)
         if isinstance(child, QgsLayerTreeGroup):
             nodelist=nodelist + nodeAll(which,child)
@@ -76,41 +76,41 @@ def nodeAll(which='all',root=None):
     return nodelist
 
 
-def nodeCount(which='all',root=None):
-    """nodeCount: Number of nodes of kind 'which' in 'root'
+def nodeCount(which='all',searchgroup=None):
+    """nodeCount: Number of nodes of kind 'which' in 'searchgroup'
     :param which: kind of node 'all'/'layer'/'group
-    :param root: Parent node to search, default is the legend#s root
+    :param searchgroup: Parent node to search, default is the legend#s root
     :return: Number of nodes
     """
-    return len(nodeAll(which,root))
+    return len(nodeAll(which,searchgroup))
 
 
-def nodeAllGroups(root=None):
+def nodeAllGroups(searchgroup=None):
     """
-    nodeAllGroups:  Delivers all group nodes from node 'root'
-    :param root:    Parent node to search, default is the legend#s root
+    nodeAllGroups:  Delivers all group nodes from node 'searchgroup'
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        list of found nodes
     """
-    return nodeAll('group',root)
+    return nodeAll('group',searchgroup)
 
 
-def nodeAllLayers(root=None):
+def nodeAllLayers(searchgroup=None):
     """
-    nodeAllLayers:  Delivers all layer nodes from node 'root'
-    :param root:    Parent node to search, default is the legend#s root
+    nodeAllLayers:  Delivers all layer nodes from node 'searchgroup'
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        list of found nodes
     """
-    return nodeAll('layer',root)
+    return nodeAll('layer',searchgroup)
 
 
-def nodeNames(which='all',root=None):
+def nodeNames(which='all',searchgroup=None):
     """
-    nodeNames:      Delivers all nodenames from node 'root'
+    nodeNames:      Delivers all nodenames from node 'searchgroup'
     :param which:   kind of node 'all'/'layer'/'group'
-    :param root:    Parent node to search, default is the legend#s root
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        List of names of all found nodes
     """
-    nodelist=nodeAll(which,root)
+    nodelist=nodeAll(which,searchgroup)
     namelist=[]
     for i in nodelist:
         if nodeIsGroup(i):
@@ -120,14 +120,17 @@ def nodeNames(which='all',root=None):
     return namelist
 
 
-def nodeByName(nodename,which='all',root=None):
+def nodeByName(nodename,which='all',searchgroup=None):
     """
-    nodeByName:     Delivers all nodes of kind 'which' named 'nodename'  in 'root'
+    nodeByName:     Delivers all nodes of kind 'which' named 'nodename'  in 'searchgroup'
     :param which:   kind of node 'all'/'layer'/'group
-    :param root:    Parent node to search, default is the legend#s root
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        List of found nodes
     """
-    allnodes=nodeAll(which,root)
+    if oeq_global.isEmpty(nodename):
+        return [QgsProject.instance().layerTreeRoot()] 
+        
+    allnodes=nodeAll(which,searchgroup)
     nodelist=[]
     for i in allnodes:
         if nodeIsGroup(i):
@@ -138,26 +141,26 @@ def nodeByName(nodename,which='all',root=None):
                 nodelist.append(i)
     return nodelist
 
-def nodesByName(nodenames,which='all',root=None):
+def nodesByName(nodenames,which='all',searchgroup=None):
     """
-    nodesByName:    Delivers all nodes of kind 'which' named 'nodenames'  in 'root' for multiple nodenames
+    nodesByName:    Delivers all nodes of kind 'which' named 'nodenames'  in 'searchgroup' for multiple nodenames
     :param which:   kind of node 'all'/'layer'/'group
-    :param root:    Parent node to search, default is the legend#s root
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        List of found nodes for each name in 'nodenames' (as list of lists)
     """
     nodelist=[]
     for nodename in nodenames:
-        nodelist.append(nodeByName(nodename,which,root))
+        nodelist.append(nodeByName(nodename,which,searchgroup))
     return nodelist
 
 
-def nodeByLayer(layer,root=None):
+def nodeByLayer(layer,searchgroup=None):
     """
-    nodeByName:     Delivers all nodes of kind 'which' containing 'layer'  in 'root'
-    :param root:    Parent node to search, default is the legend#s root
+    nodeByName:     Delivers all nodes of kind 'which' containing 'layer'  in 'searchgroup'
+    :param searchgroup:    Parent node to search, default is the legend#s root
     :return:        List of found nodes
     """
-    allnodes=nodeAll('layer',root)
+    allnodes=nodeAll('layer',searchgroup)
     nodelist=[]
     for i in allnodes:
         if nodeIsLayer(i):
@@ -173,7 +176,7 @@ def nodePosition(node):
     :param node:    Node to check or name of node
     :return:        Position of node or None if node does not exist
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -186,14 +189,14 @@ def nodePosition(node):
     return None
 
 
-def nodeMove(node,direction='down',target_node=None):
+def nodeMove(node,position='down',target_node=None):
     """
-    nodeMove:               Moves 'node' in direction or position 'direction' in group 'target_node'
+    nodeMove:               Moves 'node' in position or position 'position' in group 'target_node'
     :param node:            Node to move or name of node to move
     :param target_node:     Target group to move 'node' to or name of the target group
     :return:                moved node or None if source or target node do not exist
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -201,26 +204,26 @@ def nodeMove(node,direction='down',target_node=None):
 
     if target_node == None:
         target_node = node.parent()
-        if direction == 'down':
-                direction = min(nodePosition(node)+2,nodeCount(node))
-        elif direction == 'up':
-                direction = max(nodePosition(node)-1,0)
     else:
-         if (type(target_node) == type('')) | (type(target_node) == type(u'')):
+         if oeq_global.isStringOrUnicode(target_node):
             target_node = nodeByName(target_node)
             if len(target_node) == 0:
                 return None
             target_node = target_node[0]
+    if oeq_global.isStringOrUnicode(position):
+        if position.upper() == 'DOWN':
+            position = min(nodePosition(node)+2,nodeCount(node))
+        elif position.upper() == 'UP':
+            position = max(nodePosition(node)-1,0)
+        elif position.upper() == 'TOP':
+            position = 0
+        elif position.upper() == 'BOTTOM':
+            position=nodeCount(target_node)+1
+    if type(position) != type(int()):
+            position = nodeCount(target_node)
 
-    if direction == 'top':
-        direction = 0
-    if direction == 'bottom':
-        direction=nodeCount(target_node)
-    else:
-        if type(direction) != type(int()):
-                 direction = nodeCount(target_node)
     cloned_node = node.clone()
-    target_node.insertChildNode(direction, cloned_node)
+    target_node.insertChildNode(position, cloned_node)
     node.parent().removeChildNode(node)
     oeq_global.OeQ_unlockQgis()
     return cloned_node
@@ -235,15 +238,12 @@ def nodeShow(node):
     :param node:    Node to show
     :return:        visibility state
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
-    #iface.legendInterface().setLayerVisible(node.layer(),True)
     node.setVisible(Qt.Checked)
-    #iface.mapCanvas().refresh()
-    #print node.layer().name()+ ' now visible!'
     oeq_global.OeQ_unlockQgis()
     return node.isVisible()
 
@@ -262,16 +262,13 @@ def nodeHide(node):
     :param nodes:   list of nodes to hide
     :return:        no return
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
-    #iface.legendInterface().setLayerVisible(node.layer(),False)
     node.setVisible(Qt.Unchecked)
-    #print node.layer().name()+ ' now invisible!'
     oeq_global.OeQ_unlockQgis()
-    #iface.mapCanvas().refresh()
     return node.isVisible()
 
 def nodesHide(nodes):
@@ -291,7 +288,7 @@ def nodeStoreVisibility(node):
     :param node:            Node to work on
     :return:                Success True/False  or None if node not found
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -310,7 +307,7 @@ def nodeRestoreVisibility(node):
     :param node:            Node to work on
     :return:                node or None if node not found
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -323,6 +320,15 @@ def nodeRestoreVisibility(node):
             node.setVisible(Qt.Unchecked)
         node.removeCustomProperty("was_visible")
     return node
+
+
+def nodeToggleSoloAction(node):
+        from mole.project import config
+        from mole.qgisinteraction import legend
+        print node.layer().name()
+        #legend.nodeExitSolo()
+        #legend.nodeInitSolo([config.investigation_shape_layer_name])
+
 
 
 def nodeInitSolo(nodes):
@@ -349,12 +355,12 @@ def nodeExitSolo():
 
 def nodeCopy(node,newname=None,position=None,target_node=None):
     """
-    nodeMove:               Moves 'node' in direction or position 'direction' in group 'target_node'
+    nodeMove:               Moves 'node' in position or position 'position' in group 'target_node'
     :param node:            Node to move or name of node to move
     :param target_node:     Target group to move 'node' to or name of the target group
     :return:                moved node or None if source or target node do not exist
     """
-    if (type(node) == type('')) | (type(node) == type(u'')):
+    if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
@@ -363,22 +369,102 @@ def nodeCopy(node,newname=None,position=None,target_node=None):
     if target_node == None:
         target_node = node.parent()
     else:
-         if (type(target_node) == type('')) | (type(target_node) == type(u'')):
+         if oeq_global.isStringOrUnicode(target_node):
             target_node = nodeByName(target_node)
             if len(target_node) == 0:
                 return None
             target_node = target_node[0]
 
-    if position == 'top':
-        position = 0
-    elif position == 'bottom':
-        position = nodeCount(target_node)
-    else:
-        if type(position) != type(int()):
-            position = max(nodePosition(node)-1,0)
     source_layer = node.layer()
     new_layer = iface.addVectorLayer(source_layer.source(), newname,source_layer.providerType())
     QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
     new_node = nodeByLayer(new_layer)[0]
     new_node = nodeMove(new_node,position,target_node)
     return new_node
+
+def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None,source="Point",crs=None,providertype="ESRI Shapefile",indexfieldname='id'):
+    if target_node == None:
+        target_node = QgsProject.instance().layerTreeRoot()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+
+    if path == None:
+        path= oeq_global.OeQ_project_path()
+    if crs == None:
+        crs = config.project_crs
+    new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
+    new_layer.setProviderEncoding('System')
+    writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , nodename+'.shp'), "System", new_layer.crs(), providertype)
+    if writer != QgsVectorFileWriter.NoError:
+        oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
+        return None
+    del writer
+    iface.addVectorLayer(os.path.join(path , nodename+'.shp'),nodename, 'ogr')
+    new_node = nodeMove(nodename,position,target_node)
+    new_layer = new_node.layer()
+    dataprovider = new_layer.dataProvider()
+    dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
+    new_layer.updateFields()
+
+    oeq_global.OeQ_unlockQgis()
+
+    return new_node
+
+
+
+def nodeCreateGroup(nodename,position='bottom',target_node=None):
+    if target_node == None:
+        target_node = QgsProject.instance().layerTreeRoot()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+
+    if oeq_global.isStringOrUnicode(position):
+        if position.upper() == 'TOP':
+            position = 0
+        elif position.upper() == 'BOTTOM':
+            position=nodeCount(target_node)+1
+    if type(position) != type(int()):
+            position = nodeCount(target_node)
+
+    new_node = target_node.insertGroup(position, nodename)
+    return new_node
+
+
+def nodeSetActive(node):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    iface.setActiveLayer(node.layer())
+
+
+
+def testlayer():
+    nodeCreateGroup('Testgroup1')
+    nodeCreateGroup('Testgroup2',0)
+    nodeCreateGroup('Testgroup3',0,'Testgroup1')
+    nodeCreateVectorLayer('Testlayer1')
+    nodeCreateVectorLayer('Testlayer2',None,'Testgroup2',source='Polygon')
+    nodeCreateVectorLayer('Testlayer3',None,'Testgroup2',source='MultiPoint')
+    nodeCreateVectorLayer('Testlayer2',None,'Testgroup1')
+    nodeCreateVectorLayer('Testlayer4','Top','Testgroup2',source='LineString')
+
+
+def nodeZoomTo(node):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+        canvas = iface.mapCanvas()
+        canvas.setExtent(node.layer().extent())
+        canvas.zoomByFactor(1.1)

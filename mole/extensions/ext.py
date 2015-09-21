@@ -298,22 +298,22 @@ class OeQExtension:
             target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
 
+        legend.nodeRestoreVisibility(self.layer_in)
+        legend.nodeRestoreVisibility(self.layer_out)
         if self.show_results:
             self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
-        legend.nodeRestoreVisibility(self.layer_in)
-        legend.nodeRestoreVisibility(self.layer_out)
-        #time.sleep(0.5)
+       #time.sleep(0.5)
 
 
     def work_out_results(self):
-        from mole.qgisinteraction.layer_interaction import fullRemove,create_evaluation_layer,join_layers
+        from mole.qgisinteraction.layer_interaction import fullRemove
         fullRemove(self.extension_name)
-        new_layer = create_evaluation_layer(layer_name=self.extension_name)  # ,group="Component Qualities",subgroup="Contemporary")
-        join_layers(new_layer, out_layer)
-        new_layer.loadNamedStyle(self.colortable)
-        self.iface.legendInterface().setLayerVisible(new_layer, False)
-        self.iface.legendInterface().setLayerExpanded(new_layer, False)
+        resultLayer=legend.nodeCopy(config.housing_layer_name,self.extension_name,position=1).layer()
+        
+        resultLayer.loadNamedStyle( self.colortable)
+        legend.nodeInitSolo([config.investigation_shape_layer_name,resultLayer.name(),config.open_layers_layer_name])
+
 
 
 

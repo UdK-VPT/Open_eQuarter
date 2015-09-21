@@ -7,6 +7,7 @@ import os
 import time
 from string import find
 from mole.project import config
+from mole.qgisinteraction import legend
 from mole import oeq_global
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
@@ -35,13 +36,15 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
             QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
 
         # create a new shape-file called layer_name, of the type layer_type, with system encoding and crs according to crs_name
-        shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory')
-        shape_layer.setProviderEncoding('System')
+        shape_layer=legend.nodeCreateVectorLayer(layer_name,'top',source=layer_type,crs=crs_name ,providertype="ESRI Shapefile")
+
+        #shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory')
+        #shape_layer.setProviderEncoding('System')
 
         # reset appearance of crs-choice dialog to previous settings
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
         # QgsMapLayerRegistry.instance().addMapLayer(shape_layer,True)
-        return shape_layer
+        return shape_layer.layer()
 
     else:
         return None
@@ -626,3 +629,10 @@ def add_attributes_if_not_exists(layer, attribute):
             provider.addAttributes([att])
     layer.updateFields()
     layer.commitChanges()
+
+def zoomToActiveLayer():
+    from qgis.utils import iface
+    vLayer = iface.activeLayer()
+    canvas = iface.mapCanvas()
+    extent = vLayer.extent()
+    canvas.setExtent(extent)

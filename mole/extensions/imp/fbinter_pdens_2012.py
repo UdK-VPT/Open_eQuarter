@@ -28,7 +28,6 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
-    colortable=os.path.join(__file__[:-3] + '.qml'),
     category='import',
     extension_name='Population Density (2012, WMS)',
     field_id='PDENS',
@@ -37,6 +36,8 @@ extension = OeQExtension(
     active=True,
     description=u'',
     source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',
+    extension_filepath=os.path.join(__file__),
+    colortable = os.path.join(__file__[:-3] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

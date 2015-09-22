@@ -15,7 +15,7 @@ Latest Changes: 2015-09-16 (max)
 """
 
 from PyQt4.QtCore import QVariant
-from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField
+from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature
 from qgis.utils import iface
 from mole import oeq_global
 from mole.project import config
@@ -56,7 +56,7 @@ def nodeAll(which='all',searchgroup=None):
     :param searchgroup: Parent node to search, default is the legend's root
     :return: list of found nodes
     """
-    if searchgroup == None: 
+    if searchgroup == None:
         searchgroup = QgsProject.instance().layerTreeRoot()
     if oeq_global.isStringOrUnicode(searchgroup):
         searchgroup = nodeByName(searchgroup,'group')
@@ -128,8 +128,8 @@ def nodeByName(nodename,which='all',searchgroup=None):
     :return:        List of found nodes
     """
     if oeq_global.isEmpty(nodename):
-        return [QgsProject.instance().layerTreeRoot()] 
-        
+        return [QgsProject.instance().layerTreeRoot()]
+
     allnodes=nodeAll(which,searchgroup)
     nodelist=[]
     for i in allnodes:
@@ -170,7 +170,7 @@ def nodeByLayer(layer,searchgroup=None):
 
 
 
-def nodePosition(node):
+def nodePosition(node,searchgroup=None):
     """
     nodePosition:   Delivers the node position of 'node' in it's parent group
     :param node:    Node to check or name of node
@@ -181,8 +181,12 @@ def nodePosition(node):
         if len(node) == 0:
             return None
         node = node[0]
+
+    if searchgroup == None:
+        searchgroup = QgsProject.instance().layerTreeRoot()
+
     count=0
-    for child in node.parent().children():
+    for child in searchgroup.children():
         if child == node:
                 return count
         count += 1
@@ -227,6 +231,7 @@ def nodeMove(node,position='down',target_node=None):
     node.parent().removeChildNode(node)
     oeq_global.OeQ_unlockQgis()
     return cloned_node
+
 
 
 from PyQt4.QtCore import Qt
@@ -377,8 +382,151 @@ def nodeCopy(node,newname=None,position=None,target_node=None):
 
     source_layer = node.layer()
     new_layer = iface.addVectorLayer(source_layer.source(), newname,source_layer.providerType())
-    QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
     new_node = nodeByLayer(new_layer)[0]
+    new_node = nodeMove(new_node,position,target_node)
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+    return new_node
+
+
+def nodeDuplicate(node,newname=None,position=None,target_node=None):
+    import time
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+             return None
+        node = node[0]
+
+    if target_node == None:
+         target_node = node.parent()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+             target_node = nodeByName(target_node)
+             if len(target_node) == 0:
+                return None
+             target_node = target_node[0]
+
+    layer = node.layer()
+    # source of the layer
+    provider = layer.dataProvider()
+    # creation of the shapefiles:
+    pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
+    ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
+    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), provider.crs(), "ESRI Shapefile")
+    print writer
+    outelem = QgsFeature()
+    # iterating over the input layer
+    for elem in layer.getFeatures():
+             outelem.setGeometry(elem.geometry() )
+             outelem.setAttributes(elem.attributes())
+             writer.addFeature(outelem)
+    del writer
+    time.sleep(1)
+    layer = QgsVectorLayer(pathfile, newname, "ogr")
+    time.sleep(1)
+    QgsMapLayerRegistry.instance().addMapLayer(layer, True)
+    oeq_global.OeQ_unlockQgis()
+    time.sleep(1)
+    layer.loadNamedStyle(ct_pathfile)
+    position = nodePosition(node,target_node)
+    newnode=nodeMove(node,position,target_node)
+    return newnode
+
+def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID'):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    source_layer = node.layer()
+    source_layer.updateFields()
+    source_fieldnames = [field.name() for field in source_layer.dataProvider().fields() ]
+    source_fieldnames = filter( lambda x : x != indexfield, source_fieldnames)
+    if not source_fieldnames: return None
+
+    print source_fieldnames
+
+    print attributenames
+    if attributenames:
+        fieldnames_to_copy = filter( lambda x : x in source_fieldnames, attributenames)
+    else:
+        fieldnames_to_copy = source_names
+
+    print fieldnames_to_copy
+
+    if oeq_global.isStringOrUnicode(target_node):
+        target_node = nodeByName(target_node)
+        if  not target_node: return None
+        target_node = target_node[0]
+
+    target_layer = target_node.layer()
+    target_layer.updateFields()
+    target_fieldnames = [field.name() for field in target_layer.dataProvider().fields() ]
+    target_fieldnames = filter( lambda x : x != indexfield, target_fieldnames)
+
+    fieldnames_to_add = filter(lambda x : x not in target_fieldnames , fieldnames_to_copy)
+    #fieldnames_to_add = filter (lambda x : x in source_fieldnames , fieldnames_to_add)
+
+    print fieldnames_to_add
+
+    target_layer.dataProvider().addAttributes(fieldnames_to_add)
+    target_layer.updateFields()
+
+    source_features = source_layer.dataProvider().getFeatures()
+    target_features = target_layer.dataProvider().getFeatures()
+
+    for feature in target_features:
+        source_feature = filter(lambda x : x.attribute(indexfield)== feature.attribute(indexfield) ,source_features)
+        if not source_feature: continue
+        source_feature = source_feature[0]
+        for fieldname in fieldnames_to_copy:
+            target_field_index = [i for i,x in enumerate([field.name() for field in target_layer.dataProvider().fields()]) if x == fieldname]
+            if not target_field_index: continue
+            target_field_index = target_field_index[0]
+            feature.setAttribute(target_field_index,source_feature.attribute(fieldname))
+    target_layer.updateFields()
+    return target_layer
+
+'''
+
+
+from mole.qgisinteraction import legend
+legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
+
+
+legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
+'''
+
+
+
+def nodeCopyAsMemory(node,newname=None,position=None,target_node=None):
+    """
+    nodeMove:               Moves 'node' in position or position 'position' in group 'target_node'
+    :param node:            Node to move or name of node to move
+    :param target_node:     Target group to move 'node' to or name of the target group
+    :return:                moved node or None if source or target node do not exist
+    """
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+
+    if target_node == None:
+        target_node = node.parent()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+    source_layer = node.layer()
+    print source_layer.name()
+    print source_layer.source()
+    print source_layer.providerType() + u'?crs=' + source_layer.crs().authid()
+    print newname
+    new_layer = QgsVectorLayer( 'Polygon' + '?crs=' + source_layer.crs().authid(), newname, "memory")
+    new_layer.setProviderEncoding('System')
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    new_node = nodeByName(newname)[0]
     new_node = nodeMove(new_node,position,target_node)
     return new_node
 
@@ -413,6 +561,57 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
     oeq_global.OeQ_unlockQgis()
 
     return new_node
+
+
+def nodeCreateMemoryLayer(nodename, position='bottom',target_node=None,source="Point",crs=None,indexfieldname='id'):
+    if target_node == None:
+        target_node = QgsProject.instance().layerTreeRoot()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+
+    if path == None:
+        path= oeq_global.OeQ_project_path()
+    if crs == None:
+        crs = config.project_crs
+    new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
+    new_layer.setProviderEncoding('System')
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    new_node = nodeMove(nodename,position,target_node)
+    new_layer = new_node.layer()
+    dataprovider = new_layer.dataProvider()
+    dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
+    new_layer.updateFields()
+    oeq_global.OeQ_unlockQgis()
+
+    return new_node
+
+
+def nodeSaveMemoryLayer(node , path=None , providertype="ESRI Shapefile"):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+
+    new_layer = node[0].layer()
+    new_layer_name = new_layer.name()
+    writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , new_layer_name+'.shp'), "System", new_layer.crs(), providertype)
+    if writer != QgsVectorFileWriter.NoError:
+        oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , new_layer_name+'.shp'))
+        return None
+    del writer
+    iface.addVectorLayer(os.path.join(path , new_layer_name+'.shp'),new_layer_name, 'ogr')
+    target_node = node.parent()
+    position = nodePosition(node,target_node)
+    new_node = nodeMove(new_layer_name,position,target_node)
+    oeq_global.OeQ_unlockQgis()
+
+    return new_node
+
+
 
 
 

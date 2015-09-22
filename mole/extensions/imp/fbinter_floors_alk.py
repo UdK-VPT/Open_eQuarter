@@ -23,7 +23,6 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
-    colortable=os.path.join(__file__[:-3] + '.qml'),
     category='import',
     extension_name='Floors (ALK Berlin, WMS)',
     field_id='FLRS',
@@ -32,6 +31,8 @@ extension = OeQExtension(
     active=True,
     description=u'',
     source='crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude',
+    extension_filepath=os.path.join(__file__),
+    colortable = os.path.join(__file__[:-3] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

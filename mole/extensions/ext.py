@@ -5,6 +5,7 @@ import pickle
 from mole import oeq_global
 from mole.project import config
 from mole.qgisinteraction import legend
+from qgis.core import QgsVectorJoinInfo
 
 def average(self=None, parameters={}):
  #   print parameters
@@ -31,7 +32,8 @@ class OeQExtension:
                  field_id=None,
                  extension_id=None,
                  extension_name=None,
-                 layer_name='New OeQ Extension',
+                 extension_filepath = None,
+                 layer_name = None,
                  layer_id=None,
                  description='Extention Details',
                  source_type=None,
@@ -51,15 +53,19 @@ class OeQExtension:
             OeQExtension.generic_id_cnt += 1
         else:
             self.extension_id = extension_id
+        if layer_name == None:
+            self.layer_name = extension_id
+        else:
+            self.layer_name = layer_name
         if extension_name == None:
             if self.source_type == None:
-                extension_name = layer_name + ' (Unknown)'
+                self.extension_name = layer_name + ' (Unknown)'
             else:
-                extension_name = layer_name + ' (' + source_type.upper() + ')'
+                self.extension_name = layer_name + ' (' + source_type.upper() + ')'
         else:
             self.extension_name = extension_name
+        self.extension_filepath = extension_filepath
         self.category = category
-        self.layer_name = layer_name
         self.layer_id = layer_id
         self.description = description
         self.type = type
@@ -84,7 +90,9 @@ class OeQExtension:
         else:
             self.layer_out = layer_out
         if colortable != None:
-            if not os.path.isfile(colortable):
+             if not os.path.exists(colortable):
+                colortable = None
+             elif not os.path.isfile(colortable):
                 colortable = None
         self.colortable = colortable
 
@@ -92,7 +100,8 @@ class OeQExtension:
                field_id=None,
                extension_id=None,
                extension_name=None,
-               layer_name='New OeQ Extension',
+               extension_filepath=None,
+               layer_name=None,
                layer_id=None,
                description='Extention Details',
                source_type=None,
@@ -109,6 +118,7 @@ class OeQExtension:
         if field_id != None: self.field_id = field_id
         if extension_id != None: self.extension_id = extension_id
         if extension_name != None: self.extension_name = extension_name
+        if extension_filepath != None: self.extension_filepath = extension_filepath
         if layer_name != None: self.layer_name = layer_name
         if layer_id != None: self.layer_id = layer_id
         if description != None: self.description = description
@@ -167,29 +177,53 @@ class OeQExtension:
 
     def default_colortable(self):
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
-        if defcolortable != []: return defcolortable[0].colortable
+        print defcolortable
+        if len(defcolortable) > 0:
+            print defcolortable[0].colortable
+            return defcolortable[0].colortable
         return None
 
     def update_colortable(self, overwrite=False):
         from shutil import copyfile
-        ct_default = self.default_colortable()
+        ct_default = os.path.join(self.default_colortable())
+        print
         if oeq_global.OeQ_project_path() == u'.':
             self.colortable = ct_default
         else:
-            ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name + '.qml')
-            if overwrite:
+            if ct_default != None:
+                ct_filename=os.path.basename(ct_default)
+                ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
+                if overwrite:
+                    try:
+                        os.remove(ct_project)
+                    except:
+                        pass
                 try:
-                    os.remove(ct_project)
+                     copyfile(ct_default, ct_project)
                 except:
-                    pass
-            if os.path.isfile(ct_project):
+                        pass
+                if os.path.exists(ct_project):
+                    self.colortable = ct_project
+                else:
+                    self.colortable = None
+            else:
+                self.colortable = None
+            '''
+            if not os.path.exists(ct_project):
+                self.colortable = None
+            elif os.path.isfile(ct_project):
                 self.colortable = ct_project
             else:
                 self.colortable = None
                 if ct_default != None:
-                    if os.path.isfile(ct_default):
+                    print ct_default
+                    print type(ct_default)
+                    if not os.path.exists(ct_default):
+                        self.colortable = None
+                    elif os.path.isfile(ct_default):
                         copyfile(ct_default, ct_project)
                         self.colortable = ct_project
+            '''
 
     def inspect(self):
         attrs = ['extension_name', 'extension_id', 'description', 'layer_name', 'layer_id', 'category', 'source',
@@ -300,19 +334,35 @@ class OeQExtension:
 
         legend.nodeRestoreVisibility(self.layer_in)
         legend.nodeRestoreVisibility(self.layer_out)
-        if self.show_results:
-            self.work_out_results()
+        if oeq_global.isStringOrUnicode(self.show_results):
+            self.work_out_results(self.show_results)
         oeq_global.OeQ_kill_progressbar()
        #time.sleep(0.5)
 
 
-    def work_out_results(self):
+    def work_out_results(self,key='AREA'):
         from mole.qgisinteraction.layer_interaction import fullRemove
-        fullRemove(self.extension_name)
-        resultLayer=legend.nodeCopy(config.housing_layer_name,self.extension_name,position=1).layer()
-        
+        fullRemove(self.layer_name)
+        resultLayer=legend.nodeCopy(config.housing_layer_name,self.layer_name,position=1).layer()
+        referencelayer=legend.nodeByName(config.data_layer_name)[0].layer()
+        print self.colortable
+
+        joinObject = QgsVectorJoinInfo()
+        joinObject.joinLayerId = referencelayer.id()
+        joinObject.joinFieldName = u'BLD_ID'
+        joinObject.targetFieldName = u'BLD_ID'
+        joinObject.prefix = u'db_'
+        print 'db_'+key
+        joinObject.setJoinFieldNamesSubset(['db_'+key])
+        joinObject.memoryCache=True
+        resultLayer.addJoin(joinObject)
+
         resultLayer.loadNamedStyle( self.colortable)
-        legend.nodeInitSolo([config.investigation_shape_layer_name,resultLayer.name(),config.open_layers_layer_name])
+
+       # legend.nodeSaveMemoryLayer(resultLayer.name() , path=oeq_global.OeQ_project_path() , providertype="ESRI Shapefile")
+        #resultLayer.triggerRepaint()
+        print self.colortable
+        #legend.nodeInitSolo([config.investigation_shape_layer_name,resultLayer.name()])
 
 
 

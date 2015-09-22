@@ -15,7 +15,7 @@ Latest Changes: 2015-09-16 (max)
 """
 
 from PyQt4.QtCore import QVariant
-from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField
+from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature
 from qgis.utils import iface
 from mole import oeq_global
 from mole.project import config
@@ -229,6 +229,7 @@ def nodeMove(node,position='down',target_node=None):
     return cloned_node
 
 
+
 from PyQt4.QtCore import Qt
 
 
@@ -377,8 +378,115 @@ def nodeCopy(node,newname=None,position=None,target_node=None):
 
     source_layer = node.layer()
     new_layer = iface.addVectorLayer(source_layer.source(), newname,source_layer.providerType())
-    QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
     new_node = nodeByLayer(new_layer)[0]
+    new_node = nodeMove(new_node,position,target_node)
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+    return new_node
+
+
+def nodeDuplicate(node,newname=None,position=None,target_node=None):
+    import time
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+             return None
+        node = node[0]
+
+    if target_node == None:
+         target_node = node.parent()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+             target_node = nodeByName(target_node)
+             if len(target_node) == 0:
+                return None
+             target_node = target_node[0]
+
+    layer = node.layer()
+    # source of the layer
+    provider = layer.dataProvider()
+    # creation of the shapefiles:
+    pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
+    ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
+    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), provider.crs(), "ESRI Shapefile")
+    print writer
+    outelem = QgsFeature()
+    # iterating over the input layer
+    for elem in layer.getFeatures():
+             outelem.setGeometry(elem.geometry() )
+             outelem.setAttributes(elem.attributes())
+             writer.addFeature(outelem)
+    del writer
+    time.sleep(1)
+    layer = QgsVectorLayer(pathfile, newname, "ogr")
+    time.sleep(1)
+    QgsMapLayerRegistry.instance().addMapLayer(layer, True)
+    oeq_global.OeQ_unlockQgis()
+    time.sleep(1)
+    layer.loadNamedStyle(ct_pathfile)
+    position = nodePosition(node,target_node)
+    newnode=nodeMove(node,position,target_node)
+    return newnode
+
+def nodeCopyFeatures(node,target_node,attributes=None):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+             return None
+        node = node[0]
+    source_layer = node.layer()
+
+    if target_node == None:
+         return None
+    if oeq_global.isStringOrUnicode(target_node):
+        target_node = nodeByName(target_node)
+        if len(target_node) == 0:
+            return None
+        target_node = target_node[0]
+    target_layer = target_node.layer()
+
+    outelem = QgsFeature()
+    # iterating over the input layer
+    for elem in source_layer.getFeatures():
+             target_layer.setGeometry(elem.geometry() )
+             if attributes != None:
+                 attr=attributes
+             else:
+                 attr=elem.attributes()
+             target_layer.setAttributes(attr)
+             target_layer.addFeature(outelem)
+    target_layer.upd
+    return target_layer
+
+def nodeCopyAsMemory(node,newname=None,position=None,target_node=None):
+    """
+    nodeMove:               Moves 'node' in position or position 'position' in group 'target_node'
+    :param node:            Node to move or name of node to move
+    :param target_node:     Target group to move 'node' to or name of the target group
+    :return:                moved node or None if source or target node do not exist
+    """
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+
+    if target_node == None:
+        target_node = node.parent()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+    source_layer = node.layer()
+    print source_layer.name()
+    print source_layer.source()
+    print source_layer.providerType() + u'?crs=' + source_layer.crs().authid()
+    print newname
+    new_layer = QgsVectorLayer( 'Polygon' + '?crs=' + source_layer.crs().authid(), newname, "memory")
+    new_layer.setProviderEncoding('System')
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    new_node = nodeByName(newname)[0]
     new_node = nodeMove(new_node,position,target_node)
     return new_node
 
@@ -413,6 +521,57 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
     oeq_global.OeQ_unlockQgis()
 
     return new_node
+
+
+def nodeCreateMemoryLayer(nodename, position='bottom',target_node=None,source="Point",crs=None,indexfieldname='id'):
+    if target_node == None:
+        target_node = QgsProject.instance().layerTreeRoot()
+    else:
+         if oeq_global.isStringOrUnicode(target_node):
+            target_node = nodeByName(target_node)
+            if len(target_node) == 0:
+                return None
+            target_node = target_node[0]
+
+    if path == None:
+        path= oeq_global.OeQ_project_path()
+    if crs == None:
+        crs = config.project_crs
+    new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
+    new_layer.setProviderEncoding('System')
+    QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    new_node = nodeMove(nodename,position,target_node)
+    new_layer = new_node.layer()
+    dataprovider = new_layer.dataProvider()
+    dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
+    new_layer.updateFields()
+    oeq_global.OeQ_unlockQgis()
+
+    return new_node
+
+
+def nodeSaveMemoryLayer(node , path=None , providertype="ESRI Shapefile"):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+
+    new_layer = node[0].layer()
+    new_layer_name = new_layer.name()
+    writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , new_layer_name+'.shp'), "System", new_layer.crs(), providertype)
+    if writer != QgsVectorFileWriter.NoError:
+        oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , new_layer_name+'.shp'))
+        return None
+    del writer
+    iface.addVectorLayer(os.path.join(path , new_layer_name+'.shp'),new_layer_name, 'ogr')
+    target_node = node.parent()
+    position = nodePosition(node,target_node)
+    new_node = nodeMove(new_layer_name,position,target_node)
+    oeq_global.OeQ_unlockQgis()
+
+    return new_node
+
+
 
 
 

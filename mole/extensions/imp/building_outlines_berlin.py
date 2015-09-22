@@ -11,7 +11,6 @@ def calculation(self=None, parameters={}):
 
 extension = OeQExtension(
     extension_id=__name__,
-    colortable=os.path.join(__file__[:-3] + '.qml'),
     category='import',
     field_id='OUTL',
     par_in=[],
@@ -22,6 +21,8 @@ extension = OeQExtension(
     description=u'',
     active=True,
     evaluation_method=calculation,
-    source=os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp'))
+    source=os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp'),
+    extension_filepath=__file__,
+    colortable = os.path.join(__file__[:-3] + '.qml'))
 
 extension.registerExtension(default=True)

@@ -441,7 +441,10 @@ class OpenEQuarterMain:
         shape_sources = extensions.by_type('shp', 'import', True)
         shape_name = ''
         shape_path = ''
+        time.sleep(0.3)
         legend.nodeZoomTo(config.investigation_shape_layer_name)
+        oeq_global.OeQ_unlockQgis()
+        time.sleep(0.3)
         for importextension in shape_sources:
             if importextension.layer_name.startswith(config.housing_layer_name):
                 shape_name = importextension.layer_name
@@ -537,8 +540,9 @@ class OpenEQuarterMain:
         :rtype:
         """
         raster_layers = []
-        legend.nodeZoomTo(config.investigation_shape_layer_name)
-        #oeq_global.OeQ_unlockQgis()
+        legend.nodesShow([config.investigation_shape_layer_name])
+       #legend.nodeZoomTo(config.investigation_shape_layer_name)
+        oeq_global.OeQ_unlockQgis()
         gtiff_sources = extensions.by_type('gtiff', 'import', True)
         for info_source in gtiff_sources:
             pass
@@ -590,11 +594,13 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems("Load WMS maps")[0]
         project_item.setCheckState(2)
+        self.handle_raster_loaded()
         return 2
         #self.continue_process(True)
 
     # step 2.3
     def handle_raster_loaded(self):
+        legend.nodesShow([config.investigation_shape_layer_name])
         try:
             investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
             # an investigation shape is needed, to trigger the zoom to layer function
@@ -720,7 +726,7 @@ class OpenEQuarterMain:
 
     # step 4.1
     def handle_information_sampled(self):
-        legend.nodesShow([config.housing_coordinate_layer_name,config.housing_layer_name])
+        legend.nodesShow([config.investigation_shape_layer_name,config.housing_coordinate_layer_name,config.housing_layer_name,config.pst_input_layer_name])
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)

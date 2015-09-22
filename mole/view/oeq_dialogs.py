@@ -339,12 +339,12 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.color_table_view.setModel(table_model)
         self.recent_layer = layer
 
-        #try:
-        #    wms_layer = layer_interaction.find_layer_by_name(layer)
-        #    url = wms_layer.legendUrl()
-        #    self.legend_view.load(QtCore.QUrl(url))
-        #except (TypeError, AttributeError) as NoneTypeError:
-        #    pass
+        try:
+            wms_layer = legend.nodeByName(layer)[0].layer()
+            url = wms_layer.legendUrl()
+            self.legend_view.load(QtCore.QUrl(url))
+        except (TypeError, AttributeError) as NoneTypeError:
+            pass
 
     def check_character_constraint(self, parameter_name):
         """
@@ -428,9 +428,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             else:
                 ext = ext[0]
                 ltu_file = ext.colortable
+                print ext.colortable
             print ltu_file
-            if os.path.isfile(ltu_file):
-                self.color_entry_manager.read_color_map_from_qml(ltu_file)
+            if ltu_file != None:
+                if os.path.isfile(os.path.join(ltu_file)):
+                    self.color_entry_manager.read_color_map_from_qml(os.path.join(ltu_file))
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
             print config.open_layers_layer_name

@@ -68,7 +68,10 @@ def calculation(self=None, parameters={}):
     print type(dataset['YOC'])
     print dataset['YOC']
     if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(dataset['YOC'])):
-        dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(str(dataset['YOC']))
+       # try:
+       dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(dataset['YOC'])
+        #except:
+        #    pass
 
     if oeq_global.isnull(dataset['WL_COM']) & (not oeq_global.isnull(dataset['PDENS'])):
         dataset['WL_COM']=common_walls_by_population_density_corr.get(dataset['PDENS'])
@@ -103,6 +106,7 @@ extension = OeQExtension(
 
     category='evaluation',
     extension_name='Building Dimensions',
+    layer_name= 'Dimensions',
     field_id='DIM',
     source_type='none',
     par_in=['AREA', 'PERIMETER', 'LENGTH', 'WIDTH', 'HEIGHT', 'FLOORS', 'PDENS','YOC'],
@@ -110,6 +114,8 @@ extension = OeQExtension(
     layer_out=config.data_layer_name,
     active=True,
     description=u'Calculate the Building dimensions from scratch',
+    extension_filepath=os.path.join(__file__),
+    colortable = os.path.join(__file__[:-3] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

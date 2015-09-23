@@ -410,7 +410,7 @@ class OpenEQuarterMain:
         #oeq_global.OeQ_unlockQgis()
         legend.nodeSetActive(investigation_area_node)
         oeq_global.OeQ_unlockQgis()
-        legend.nodeZoomTo(config.investigation_shape_layer_name)
+        #legend.nodeZoomTo(config.investigation_shape_layer_name)
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
@@ -441,10 +441,10 @@ class OpenEQuarterMain:
         shape_sources = extensions.by_type('shp', 'import', True)
         shape_name = ''
         shape_path = ''
-        time.sleep(0.3)
-        legend.nodeZoomTo(config.investigation_shape_layer_name)
-        oeq_global.OeQ_unlockQgis()
-        time.sleep(0.3)
+        #time.sleep(0.3)
+        #legend.nodeZoomTo(config.investigation_shape_layer_name)
+        #oeq_global.OeQ_unlockQgis()
+        #time.sleep(0.3)
         for importextension in shape_sources:
             if importextension.layer_name.startswith(config.housing_layer_name):
                 shape_name = importextension.layer_name

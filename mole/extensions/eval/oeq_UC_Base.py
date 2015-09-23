@@ -43,7 +43,7 @@ extension = OeQExtension(
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results='YOC',
+    show_results=['BS_UC'],
     description=u"Calculate the U-Value of the Building's baseplate",
     evaluation_method=calculation)
 

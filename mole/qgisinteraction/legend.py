@@ -420,14 +420,16 @@ def nodeDuplicate(node,newname=None,position=None,target_node=None):
              outelem.setAttributes(elem.attributes())
              writer.addFeature(outelem)
     del writer
-    time.sleep(1)
+    #time.sleep(1)
+    return
     layer = QgsVectorLayer(pathfile, newname, "ogr")
-    time.sleep(1)
     QgsMapLayerRegistry.instance().addMapLayer(layer, True)
-    oeq_global.OeQ_unlockQgis()
-    time.sleep(1)
-    layer.loadNamedStyle(ct_pathfile)
+   # oeq_global.OeQ_unlockQgis()
+    #time.sleep(1)
+    #layer.loadNamedStyle(ct_pathfile)
+    #time.sleep(1)
     position = nodePosition(node,target_node)
+    #time.sleep(1)
     newnode=nodeMove(node,position,target_node)
     return newnode
 
@@ -437,62 +439,62 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID
         if not node: return None
         node = node[0]
     source_layer = node.layer()
-    source_layer.updateFields()
-    source_fieldnames = [field.name() for field in source_layer.dataProvider().fields() ]
-    source_fieldnames = filter( lambda x : x != indexfield, source_fieldnames)
-    if not source_fieldnames: return None
-
-    print source_fieldnames
-
-    print attributenames
-    if attributenames:
-        fieldnames_to_copy = filter( lambda x : x in source_fieldnames, attributenames)
-    else:
-        fieldnames_to_copy = source_names
-
-    print fieldnames_to_copy
+    source_field_names = [field.name() for field in source_layer.dataProvider().fields() ]
+    if not source_field_names: return None
 
     if oeq_global.isStringOrUnicode(target_node):
         target_node = nodeByName(target_node)
         if  not target_node: return None
-        target_node = target_node[0]
-
+    target_node = target_node[0]
     target_layer = target_node.layer()
-    target_layer.updateFields()
-    target_fieldnames = [field.name() for field in target_layer.dataProvider().fields() ]
-    target_fieldnames = filter( lambda x : x != indexfield, target_fieldnames)
+    target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
 
-    fieldnames_to_add = filter(lambda x : x not in target_fieldnames , fieldnames_to_copy)
-    #fieldnames_to_add = filter (lambda x : x in source_fieldnames , fieldnames_to_add)
+    if attributenames:
+        fieldnames_to_copy = filter( lambda x : x in source_field_names, attributenames)
+    else:
+        fieldnames_to_copy = source_field_names
 
-    print fieldnames_to_add
+    fieldnames_to_copy = filter( lambda x : x != indexfield, fieldnames_to_copy)
 
-    target_layer.dataProvider().addAttributes(fieldnames_to_add)
-    target_layer.updateFields()
+    fieldnames_to_add = filter(lambda x : x not in target_field_names , fieldnames_to_copy)
 
-    source_features = source_layer.dataProvider().getFeatures()
+    fields_to_add = filter (lambda x :  x.name() in fieldnames_to_add , source_layer.dataProvider().fields())
+    target_layer.dataProvider().addAttributes(fields_to_add)
+
+    target_layer.startEditing()
+    target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
+    target_field_ids = [[i for i,x in enumerate(target_field_names) if x == fieldname][0] for fieldname in fieldnames_to_copy]
     target_features = target_layer.dataProvider().getFeatures()
-
     for feature in target_features:
-        source_feature = filter(lambda x : x.attribute(indexfield)== feature.attribute(indexfield) ,source_features)
-        if not source_feature: continue
+        source_features = source_layer.dataProvider().getFeatures()
+        source_feature = filter( lambda x : x[indexfield] == feature[indexfield], source_features)
+        if  not source_feature: continue
         source_feature = source_feature[0]
-        for fieldname in fieldnames_to_copy:
-            target_field_index = [i for i,x in enumerate([field.name() for field in target_layer.dataProvider().fields()]) if x == fieldname]
-            if not target_field_index: continue
-            target_field_index = target_field_index[0]
-            feature.setAttribute(target_field_index,source_feature.attribute(fieldname))
+        attr = dict(zip(target_field_ids,[source_feature[x] for x in fieldnames_to_copy]))
+        target_layer.dataProvider().changeAttributeValues({feature.id():attr})
+
     target_layer.updateFields()
+    target_layer.commitChanges()
     return target_layer
 
 '''
 
-
+import time
 from mole.qgisinteraction import legend
+from mole.qgisinteraction.layer_interaction import  fullRemove
+fullRemove('Base Quality')
+time.sleep(1)
+legend.nodeDuplicate('BLD Shapes','Base Quality')
+time.sleep(1)
+legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
+
+
+
+
 legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
 
 
-legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
+
 '''
 
 

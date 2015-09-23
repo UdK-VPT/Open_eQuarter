@@ -343,27 +343,15 @@ class OeQExtension:
     def work_out_results(self,key='AREA'):
         from mole.qgisinteraction.layer_interaction import fullRemove
         fullRemove(self.layer_name)
-        resultLayer=legend.nodeCopy(config.housing_layer_name,self.layer_name,position=1).layer()
-        referencelayer=legend.nodeByName(config.data_layer_name)[0].layer()
+        self.update_colortable()
+        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name)
+        legend.nodeCopyAttributes(self.layer_name,config.data_layer_name,self.show_results)
+        #referencelayer=legend.nodeByName(config.data_layer_name)[0].layer()
         print self.colortable
 
-        joinObject = QgsVectorJoinInfo()
-        joinObject.joinLayerId = referencelayer.id()
-        joinObject.joinFieldName = u'BLD_ID'
-        joinObject.targetFieldName = u'BLD_ID'
-        joinObject.prefix = u'db_'
-        print 'db_'+key
-        joinObject.setJoinFieldNamesSubset(['db_'+key])
-        joinObject.memoryCache=True
-        resultLayer.addJoin(joinObject)
-
-        resultLayer.loadNamedStyle( self.colortable)
-
-       # legend.nodeSaveMemoryLayer(resultLayer.name() , path=oeq_global.OeQ_project_path() , providertype="ESRI Shapefile")
-        #resultLayer.triggerRepaint()
-        print self.colortable
-        #legend.nodeInitSolo([config.investigation_shape_layer_name,resultLayer.name()])
-
+        resultnode.layer().loadNamedStyle( self.colortable)
+        legend.nodeInitSolo([config.investigation_shape_layer_name,self.layer_name])
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 
 

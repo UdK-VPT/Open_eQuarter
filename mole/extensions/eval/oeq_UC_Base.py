@@ -16,8 +16,8 @@ def calculation(self=None, parameters={}):
     dataset.update(parameters)
 
     if not oeq_global.isnull(dataset['YOC']):
-        print str(dataset['YOC'])
-        print type(dataset['YOC'])
+        #print str(dataset['YOC'])
+        #print type(dataset['YOC'])
         #try:
         dataset['BS_UC']=contemporary_base_uvalue_by_building_age_lookup.get(dataset['YOC'])
         #except:
@@ -37,13 +37,13 @@ extension = OeQExtension(
     layer_name= 'Base Quality',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='BAS_UC',
+    field_id='BS_UC',
     source_type='none',
     par_in=['YOC'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['BS_UC'],
+    show_results=['BS_UC','WN_RAT','YOC'],
     description=u"Calculate the U-Value of the Building's baseplate",
     evaluation_method=calculation)
 

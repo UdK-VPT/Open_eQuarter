@@ -164,3 +164,5 @@ def QeQ_enableDialogAfterAddingFeature():
     # restore setting
     global QeQ_disableDialogAfterFeatureState
     QSettings().setValue( '/qgis/digitizing/disable_enter_attribute_values_dialog', QeQ_disableDialogAfterAddingFeatureState )
+
+OeQ_Solo_Layers_Temp =[]

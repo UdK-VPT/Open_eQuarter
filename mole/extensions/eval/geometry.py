@@ -15,7 +15,7 @@ def calculation(self=None, parameters={}):
     dataset = {'AREA': NULL, 'PERIMETER': NULL, 'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL, 'FLOORS': NULL,
                'PDENS': NULL,'YOC':NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL}
     dataset.update(parameters)
-    print parameters
+    #print parameters
     if (not oeq_global.isnull(dataset['AREA'])):
         if (not oeq_global.isnull(dataset['PERIMETER'])):
             if oeq_global.isnull(dataset['LENGTH']):
@@ -65,8 +65,8 @@ def calculation(self=None, parameters={}):
     else:
         if (oeq_global.isnull(dataset['HEIGHT'])):
             dataset['HEIGHT'] = dataset['FLOORS'] * 3.3
-    print type(dataset['YOC'])
-    print dataset['YOC']
+    #print type(dataset['YOC'])
+    #print dataset['YOC']
     if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(dataset['YOC'])):
        # try:
        dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(dataset['YOC'])
@@ -89,7 +89,7 @@ def calculation(self=None, parameters={}):
         dataset['WN_AR']=(dataset['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])*dataset['HEIGHT']*dataset['WN_RAT']
 
 
-    print dataset
+    #print dataset
 
 
     result = {}

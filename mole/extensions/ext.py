@@ -334,23 +334,25 @@ class OeQExtension:
 
         legend.nodeRestoreVisibility(self.layer_in)
         legend.nodeRestoreVisibility(self.layer_out)
-        if oeq_global.isStringOrUnicode(self.show_results):
-            self.work_out_results(self.show_results)
+        if self.show_results:
+            self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
        #time.sleep(0.5)
 
 
-    def work_out_results(self,key='AREA'):
+    def work_out_results(self):
         from mole.qgisinteraction.layer_interaction import fullRemove
         fullRemove(self.layer_name)
+        #self.update_colortable()
+        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,2)
         self.update_colortable()
-        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name)
-        legend.nodeCopyAttributes(self.layer_name,config.data_layer_name,self.show_results)
-        #referencelayer=legend.nodeByName(config.data_layer_name)[0].layer()
-        print self.colortable
+        legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
 
-        resultnode.layer().loadNamedStyle( self.colortable)
-        legend.nodeInitSolo([config.investigation_shape_layer_name,self.layer_name])
+        #resultnode.layer().loadNamedStyle( self.colortable)
+        #legend.nodeInitSolo([config.investigation_shape_layer_name,resultnode])
+
+        resultnode.setCustomProperty("SoloLayers", [config.investigation_shape_layer_name,self.layer_name])
+        resultnode.visibilityChanged.connect(legend.nodeToggleSoloAction)
         legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 

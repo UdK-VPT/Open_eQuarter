@@ -202,18 +202,19 @@ def nodeMove(node,position='down',target_node=None):
     """
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
+        if not node:
             return None
         node = node[0]
 
-    if target_node == None:
+    if not target_node:
         target_node = node.parent()
     else:
-         if oeq_global.isStringOrUnicode(target_node):
+        if oeq_global.isStringOrUnicode(target_node):
             target_node = nodeByName(target_node)
             if len(target_node) == 0:
                 return None
             target_node = target_node[0]
+
     if oeq_global.isStringOrUnicode(position):
         if position.upper() == 'DOWN':
             position = min(nodePosition(node)+2,nodeCount(node))
@@ -224,7 +225,7 @@ def nodeMove(node,position='down',target_node=None):
         elif position.upper() == 'BOTTOM':
             position=nodeCount(target_node)+1
     if type(position) != type(int()):
-            position = nodeCount(target_node)
+        position = nodeCount(target_node)
 
     cloned_node = node.clone()
     target_node.insertChildNode(position, cloned_node)
@@ -327,27 +328,49 @@ def nodeRestoreVisibility(node):
     return node
 
 
-def nodeToggleSoloAction(node):
-        from mole.project import config
-        from mole.qgisinteraction import legend
-        print node.layer().name()
+def nodeToggleSoloAction(node,state):
+        if oeq_global.isStringOrUnicode(node):
+            node = nodeByName(node)
+            if len(node) == 0:
+                return None
+            node = node[0]
+
+        if state == 2:
+            nodeInitSolo(node.customProperty("SoloLayers"))
+        elif state == 0:
+            nodeExitSolo()
         #legend.nodeExitSolo()
         #legend.nodeInitSolo([config.investigation_shape_layer_name])
+#node.visibilityChanged.connect(list_view.model().itemChanged.connect(self.check_progress_status)
 
 
-
-def nodeInitSolo(nodes):
+def nodeInitSolo(visiblenodes=[]):
     """
     nodeInitSolo:       Init Solo Mode (and Hide all existing nodes and show only 'nodes')
     :param nodes:       List of nodes to show solo
     :return:            True/False/None if node does not exist
     """
-    if type(nodes) != type([]):
-        nodes = [nodes]
-    for node in nodeAll():
-        if nodeStoreVisibility(node):
-            nodeHide(node)
-    nodesShow(nodes)
+
+    if type(visiblenodes) != type([]):
+        visiblenodes = [visiblenodes]
+    nodes_to_show =[]
+    for node in visiblenodes:
+        if oeq_global.isStringOrUnicode(node):
+            node = nodeByName(node)
+            if len(node) == 0:
+                continue
+            node = node[0]
+        nodes_to_show.append( node.layer().name())
+
+    for anode in nodeAll():
+
+         if nodeStoreVisibility(anode):
+            if filter(lambda x : x == anode.layer().name() , nodes_to_show):
+            #if anode.layer().name() in nodes_to_show:
+                nodeShow(anode)
+            else:
+                nodeHide(anode)
+
 
 
 def nodeExitSolo():
@@ -388,7 +411,7 @@ def nodeCopy(node,newname=None,position=None,target_node=None):
     return new_node
 
 
-def nodeDuplicate(node,newname=None,position=None,target_node=None):
+def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     import time
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
@@ -404,7 +427,9 @@ def nodeDuplicate(node,newname=None,position=None,target_node=None):
              if len(target_node) == 0:
                 return None
              target_node = target_node[0]
-
+    #
+    #print node.layer().name()
+    #print newname
     layer = node.layer()
     # source of the layer
     provider = layer.dataProvider()
@@ -412,7 +437,7 @@ def nodeDuplicate(node,newname=None,position=None,target_node=None):
     pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
     ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
     writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), provider.crs(), "ESRI Shapefile")
-    print writer
+    #print writer
     outelem = QgsFeature()
     # iterating over the input layer
     for elem in layer.getFeatures():
@@ -421,16 +446,23 @@ def nodeDuplicate(node,newname=None,position=None,target_node=None):
              writer.addFeature(outelem)
     del writer
     #time.sleep(1)
-    return
-    layer = QgsVectorLayer(pathfile, newname, "ogr")
-    QgsMapLayerRegistry.instance().addMapLayer(layer, True)
+    newlayer = QgsVectorLayer(pathfile, newname, "ogr")
+    #print layer.isValid()
+    QgsMapLayerRegistry.instance().addMapLayer(newlayer, True)
+    print newlayer.name()
+
+    newnode = nodeByName(newlayer.name())
+    if len(newnode) == 0:
+        return None
+    newnode = newnode[0]
    # oeq_global.OeQ_unlockQgis()
     #time.sleep(1)
-    #layer.loadNamedStyle(ct_pathfile)
+    newlayer.loadNamedStyle(ct_pathfile)
     #time.sleep(1)
-    position = nodePosition(node,target_node)
+    #position = nodePosition(node,target_node)
+    newnode=nodeMove(newnode,position,target_node)
     #time.sleep(1)
-    newnode=nodeMove(node,position,target_node)
+
     return newnode
 
 def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID'):
@@ -445,15 +477,16 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID
     if oeq_global.isStringOrUnicode(target_node):
         target_node = nodeByName(target_node)
         if  not target_node: return None
-    target_node = target_node[0]
+        target_node = target_node[0]
     target_layer = target_node.layer()
     target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
 
+    #print attributenames
     if attributenames:
         fieldnames_to_copy = filter( lambda x : x in source_field_names, attributenames)
     else:
         fieldnames_to_copy = source_field_names
-
+    #print fieldnames_to_copy
     fieldnames_to_copy = filter( lambda x : x != indexfield, fieldnames_to_copy)
 
     fieldnames_to_add = filter(lambda x : x not in target_field_names , fieldnames_to_copy)

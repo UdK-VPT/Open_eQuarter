@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import os
@@ -17,7 +18,7 @@ OeQ_ExtensionsLoaded = False
 
 # global OeQ_project_info
 OeQ_project_info = {
-    'project_name': u'MyProject',
+    'project_name': u'My Project',
     'description': u'The aim of this project, is to analyse a quarter.',
     'location_city': u'City or street',
     'location_city_short': u'City',

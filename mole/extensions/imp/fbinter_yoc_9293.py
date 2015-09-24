@@ -53,7 +53,8 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
-    category='import',
+    category='Import',
+    subcategory='WMS',
     field_id='YOC',
     source_type='wms',
     extension_name='Year of Construction (92/93, WMS)',

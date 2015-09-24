@@ -156,8 +156,9 @@ def getAdressByBLD_ID(building_id):
 
     # Out: dict of all informations delivered by googlemaps
 
-    layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
+    layer = legend.nodeByName(config.pst_input_layer_name)
     if not layer: return None
+    layer = layer[0].layer()
     layerEPSG=int(layer.crs().authid()[5:])
     provider=layer.dataProvider()
     building=filter(lambda x: x.attribute('BLD_ID')==str(building_id), provider.getFeatures())

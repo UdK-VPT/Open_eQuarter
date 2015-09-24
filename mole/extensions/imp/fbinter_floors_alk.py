@@ -23,7 +23,8 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
-    category='import',
+    category='Import',
+    subcategory='WMS',
     extension_name='Floors (ALK Berlin, WMS)',
     field_id='FLRS',
     source_type='wms',

@@ -28,7 +28,8 @@ from mole.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,
-    category='import',
+    category='Import',
+    subcategory='WMS',
     extension_name='Population Density (2012, WMS)',
     field_id='PDENS',
     source_type='wms',

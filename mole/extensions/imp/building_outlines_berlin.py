@@ -11,7 +11,8 @@ def calculation(self=None, parameters={}):
 
 extension = OeQExtension(
     extension_id=__name__,
-    category='import',
+    category='Import',
+    subcategory='Data',
     field_id='OUTL',
     par_in=[],
     source_type='shp',

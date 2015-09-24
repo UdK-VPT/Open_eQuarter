@@ -206,13 +206,35 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        from PyQt4.QtCore import QFileInfo
+        from PyQt4.QtGui import QFileDialog,QMessageBox
+        import shutil
         if not project_interaction.project_exists():
             # prompt the user to save the project
             self.project_does_not_exist_dlg.show()
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
-                self.iface.actionSaveProjectAs().trigger()
+                dialog=QFileDialog()
+                path=dialog.getExistingDirectory(None,'Navigate to the directory you want project \"'+ oeq_global.OeQ_project_info['project_name'] + '\" to be stored in:')
+                if path:
+                    project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'].replace (" ", "_"))
+                    project_file = oeq_global.OeQ_project_info['project_name'].replace (" ", "_")+'.qgs'
+                    project_file =  project_file
+                    if os.path.exists(project_dir):
+                        if [i.endswith('.qgs') for i in os.listdir(project_dir)]:
+                            ask=QMessageBox()
+                            reply = ask.question(ask, 'Open eQuarter Alert', "Project exists! Do you want to overwrite?", ask.Yes | ask.No, ask.No)
+                            if reply == ask.No: return
+                        else:
+                            ask=QMessageBox()
+                            ask.question(ask, 'Open eQuarter Alert', "Directory exists, but does not contain a QGIS project! \n Rename your project!", ask.Ok, ask.Ok)
+                            return
+                        shutil.rmtree(project_dir, ignore_errors=True)
+                    os.makedirs(project_dir)
+                    QgsProject.instance().write(QFileInfo(os.path.join(project_dir,project_file)))
+                    self.iface.actionSaveProject().trigger()
+
 
     def osm_layer_is_loaded(self):
         """
@@ -234,9 +256,16 @@ class OpenEQuarterMain:
         """
         # try:
         canvas = self.iface.mapCanvas()
-        x = float(oeq_global.OeQ_project_info['location_lon'])
-        y = float(oeq_global.OeQ_project_info['location_lat'])
-        scale = 0.01
+        print oeq_global.OeQ_project_info['location_lon']
+        print oeq_global.OeQ_project_info['location_lat']
+        if (not oeq_global.OeQ_project_info['location_lon']) | (not  oeq_global.OeQ_project_info['location_lat']):
+            x = config.x
+            y=config.y
+            scale = config.scale
+        else:
+            x = float(oeq_global.OeQ_project_info['location_lon'])
+            y = float(oeq_global.OeQ_project_info['location_lat'])
+            scale = 0.01
         extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
         map_crs = canvas.mapSettings().destinationCrs()
         source_crs = QgsCoordinateReferenceSystem('EPSG:4326')
@@ -334,20 +363,41 @@ class OpenEQuarterMain:
     # step 0.0
     def handle_ol_plugin_installed(self):
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
+        source_section = self.progress_items_model.section_views[0]
+        section_model = source_section.model()
+        project_item = section_model.findItems('Install the "Open Street Map"-Plugin')[0]
         if plugin_exists is not None:
+            project_item.setCheckState(2)
             return 2
+        else:
+            project_item.setCheckState(1)
+            return 1
 
     # step 0.1
     def handle_pst_plugin_installed(self):
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
+        source_section = self.progress_items_model.section_views[0]
+        section_model = source_section.model()
+        project_item = section_model.findItems('Install the "Point Sampling Tool"-Plugin')[0]
         if plugin_exists is not None:
+            project_item.setCheckState(2)
             return 2
+        else:
+            project_item.setCheckState(1)
+            return 1
 
     # step 0.2
     def handle_real_centroid_plugin_installed(self):
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
+        source_section = self.progress_items_model.section_views[0]
+        section_model = source_section.model()
+        project_item = section_model.findItems('Install the "realcentroid"-Plugin')[0]
         if plugin_exists is not None:
+            project_item.setCheckState(2)
             return 2
+        else:
+            project_item.setCheckState(1)
+            return 1
 
     # step 0.3
     def handle_project_created(self):
@@ -402,19 +452,15 @@ class OpenEQuarterMain:
     def confirm_selection_of_investigation_area(self):
         oeq_global.OeQ_kill_info()
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
-        #investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-        #investigation_area = layer_interaction.write_temporary_vector_layer_to_disk(investigation_area,config.investigation_area_style)
-        #layer_interaction.unhide_or_remove_layer(self.open_layer.name(), 'hide', self.iface)
         investigation_area_node=legend.nodeByName(config.investigation_shape_layer_name)[0]
         oeq_global.QeQ_enableDialogAfterAddingFeature()
-        #oeq_global.OeQ_unlockQgis()
         legend.nodeSetActive(investigation_area_node)
         oeq_global.OeQ_unlockQgis()
-        #legend.nodeZoomTo(config.investigation_shape_layer_name)
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
         project_item.setCheckState(2)
+        legend.nodeZoomTo(investigation_area_node)
         #self.continue_process()
         return 2
 
@@ -423,7 +469,7 @@ class OpenEQuarterMain:
     def handle_source_layers_loaded(self):
         done = self.information_source_dlg.exec_()
         if done:
-            shape_sources = extensions.by_type('shp', 'import', True)
+            shape_sources = extensions.by_type('shp', 'Import', True)
             # shape_sources = filter(lambda source: source.type == 'shp', oeq_global.OeQ_information_source)
             for shape in shape_sources:
                 # extension =
@@ -437,63 +483,74 @@ class OpenEQuarterMain:
 
     # step 2.1
     def handle_housing_layer_loaded(self):
-        # shape_sources = filter(lambda ext: ( ext.source_type == 'shapefile' ) & ext.active, oeq_global.OeQ_ImportExtensionRegistry)
-        shape_sources = extensions.by_type('shp', 'import', True)
-        shape_name = ''
-        shape_path = ''
-        #time.sleep(0.3)
-        #legend.nodeZoomTo(config.investigation_shape_layer_name)
-        #oeq_global.OeQ_unlockQgis()
-        #time.sleep(0.3)
-        for importextension in shape_sources:
-            if importextension.layer_name.startswith(config.housing_layer_name):
-                shape_name = importextension.layer_name
-                shape_path = importextension.source
-                break
+        ext_info=extensions.by_layername(config.housing_layer_name)
+        if not ext_info: return False
+        ext_info = ext_info[0]
 
-        building_outlines_path = os.path.normpath(shape_path)
+        building_outlines_path = os.path.normpath(ext_info.source)
         intersection_done = False
 
         # Check wether IA Layer exists and has polygons defined
-        if not layer_interaction.find_layer_by_name(config.investigation_shape_layer_name):
+        investigation_area = legend.nodeByName(config.investigation_shape_layer_name)
+        if not investigation_area:
             oeq_global.OeQ_init_error("Unable to create building outlines",
                                       "Map 'Investigation Area' could not be found...")
             return intersection_done
-        if layer_interaction.find_layer_by_name(config.investigation_shape_layer_name).featureCount() < 0:
+        investigation_area = investigation_area[0].layer()
+
+        if investigation_area.featureCount() < 0:
             oeq_global.OeQ_init_error("Unable to create building outlines",
                                       "No areas defined in map 'Investigation Area'...")
             return intersection_done
 
         oeq_global.OeQ_init_info("Getting building outlines in the investigation area.", "This may take some time...")
         if os.path.exists(building_outlines_path):
-            layer_interaction.fullRemove(shape_name)
+            layer_interaction.fullRemove(ext_info.layer_name)
             layer_interaction.fullRemove(config.data_layer_name)
 
-            intersection_layer_path = os.path.join(oeq_global.OeQ_project_path(), shape_name + '.shp')
+            intersection_layer_path = os.path.join(oeq_global.OeQ_project_path(), ext_info.layer_name + '.shp')
             data_layer_path = os.path.join(oeq_global.OeQ_project_path(), config.data_layer_name + '.shp')
 
-            housing_layer = layer_interaction.load_layer_from_disk(building_outlines_path, shape_name)
-
-            investigation_area = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
+            housing_layer = layer_interaction.load_layer_from_disk(building_outlines_path, ext_info.layer_name)
 
             intersection_done = layer_interaction.intersect_shapefiles(housing_layer, investigation_area,
                                                                        intersection_layer_path)
 
             if intersection_done:
-                out_layer = layer_interaction.load_layer_from_disk(intersection_layer_path, shape_name)
+                out_layer = layer_interaction.load_layer_from_disk(intersection_layer_path, ext_info.layer_name)
                 layer_interaction.add_layer_to_registry(out_layer)
                 layer_interaction.edit_housing_layer_attributes(out_layer)
-                out_layer.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', 'oeq_floor_sw.qml'))
+
                 layer_interaction.trigger_edit_mode(self.iface, out_layer.name(), 'off')
                 inter_layer = self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
                 layer_interaction.add_layer_to_registry(inter_layer)
+
                 QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
                 # layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
                 QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id())
+
                 data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
                 layer_interaction.add_layer_to_registry(data_layer)
-                layer_interaction.trigger_edit_mode(self.iface, data_layer.name(), 'off')
-                self.iface.legendInterface().setLayerVisible(data_layer, False)
+
+                #move housing layer to position 2 in root & load colortable
+                legend.nodeMove(ext_info.layer_name,2)
+                ext_info.update_colortable()
+                out_layer.loadNamedStyle(ext_info.colortable)
+
+                #create group data at bottom of root (if necessary)
+                if not legend.nodeExists(ext_info.subcategory):
+                    cat=legend.nodeCreateGroup(ext_info.subcategory,'bottom')
+                else:
+                    cat=legend.nodeByName(ext_info.subcategory)[0]
+
+                #move data layer into group 'Data' in root, collapse & hide
+                legend.nodeMove(config.data_layer_name,'bottom',cat)
+                legend.nodeCollapse(cat)
+                legend.nodeHide(cat)
+
+                legend.nodeMove(config.open_layers_layer_name,'bottom')
+
+
                 oeq_global.OeQ_kill_info()
                 source_section = self.progress_items_model.section_views[1]
                 section_model = source_section.model()
@@ -521,7 +578,9 @@ class OpenEQuarterMain:
 
             if centroid_layer.isValid():
                 layer_interaction.add_layer_to_registry(centroid_layer)
-                polygon = layer_interaction.find_layer_by_name(polygon)
+                polygon = legend.nodeByName(polygon)
+                if not polygon: return 0
+                polygon = polygon[0].layer()
                 rci.calculate_accuracy(polygon, centroid_layer)
                 layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
                 self.reorder_layers()
@@ -543,22 +602,22 @@ class OpenEQuarterMain:
         legend.nodesShow([config.investigation_shape_layer_name])
        #legend.nodeZoomTo(config.investigation_shape_layer_name)
         oeq_global.OeQ_unlockQgis()
-        gtiff_sources = extensions.by_type('gtiff', 'import', True)
+        gtiff_sources = extensions.by_type('gtiff', 'Import', True)
         for info_source in gtiff_sources:
             pass
-        shp_sources = extensions.by_type('shp', 'import', True)
+        shp_sources = extensions.by_type('shp', 'Import', True)
         for info_source in shp_sources:
             pass
-        wfs_sources = extensions.by_type('wfs', 'import', True)
+        wfs_sources = extensions.by_type('wfs', 'Import', True)
         for info_source in wfs_sources:
             pass
-        dxf_sources = extensions.by_type('dxf', 'import', True)
+        dxf_sources = extensions.by_type('dxf', 'Import', True)
         for info_source in dxf_sources:
             pass
-        csv_sources = extensions.by_type('csv', 'import', True)
+        csv_sources = extensions.by_type('csv', 'Import', True)
         for info_source in csv_sources:
             pass
-        wms_sources = extensions.by_type('wms', 'import', True)
+        wms_sources = extensions.by_type('wms', 'Import', True)
 
         for importextension in wms_sources:
             layer_interaction.fullRemove(layer_id=importextension.layer_id)
@@ -600,51 +659,70 @@ class OpenEQuarterMain:
 
     # step 2.3
     def handle_raster_loaded(self):
+        #print 'Hallo'
         legend.nodesShow([config.investigation_shape_layer_name])
-        try:
-            investigation_shape = layer_interaction.find_layer_by_name(config.investigation_shape_layer_name)
-            # an investigation shape is needed, to trigger the zoom to layer function
-            if investigation_shape is not None and investigation_shape.featureCount() > 0:
-                # zoom
-                #self.iface.setActiveLayer(investigation_shape)
-                #self.iface.actionZoomToLayer().trigger()
-                legend.nodeZoomTo(config.investigation_shape_layer_name)
-               # oeq_global.OeQ_unlockQgis()
-                # clip extent from visible raster layers
-                # save visible layers and set them invisible afterwards, to prevent further from the wms-server
-                raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'visible')
-                raster_layers = filter(lambda wms_layer: not wms_layer.source().endswith('.tif'), raster_layers)
-
-                progressbar = oeq_global.OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
-                                                              u"This may take some time...",
-                                                              maxcount=len(raster_layers) + 2)
-                progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
-
-                for layer in raster_layers:
-                    self.iface.legendInterface().setLayerVisible(layer, False)
-
-                extracted_layers = []
-                for clipping_raster in raster_layers:
-                    progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-                    clipped_layer = self.clip_from_raster(clipping_raster)
-                    extracted_layers.append(clipped_layer)
-
-                    cLay = layer_interaction.find_layer_by_name(clipped_layer)
-                    lUrl = wms_utils.getWmsLegendUrl(clipping_raster)
-                    cLay.setLegendUrl(lUrl)
-
-                    # set new layer id in extension if available
-                    extension = extensions.by_layerid(clipping_raster.id())
-                    if extension is not None:
-                        extension[0].layer_id = cLay.id()
-
-                    # remove the wms source from the legend
-                    QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id())
-
-                oeq_global.OeQ_kill_progressbar()
-        except AttributeError as NoneException:
-            print(self.__module__, NoneException)
+        #try:
+        investigation_area = legend.nodeByName(config.investigation_shape_layer_name)
+        if not investigation_area:
+            oeq_global.OeQ_init_error("Unable to create building outlines",
+                                  "Map 'Investigation Area' could not be found...")
             return 0
+        investigation_area = investigation_area[0].layer()
+
+        if investigation_area.featureCount() < 0:
+            oeq_global.OeQ_init_error("Unable to create building outlines",
+                                  "No areas defined in map 'Investigation Area'...")
+            return 0
+
+        # an investigation shape is needed, to trigger the zoom to layer function
+        print investigation_area
+
+        #if investigation_shape.featureCount() > 0:
+        # zoom
+        #self.iface.setActiveLayer(investigation_shape)
+        #self.iface.actionZoomToLayer().trigger()
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
+       # oeq_global.OeQ_unlockQgis()
+        # clip extent from visible raster layers
+        # save visible layers and set them invisible afterwards, to prevent further from the wms-server
+        raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'visible')
+        print [l.name() for l in raster_layers]
+        raster_layers = filter(lambda wms_layer: not wms_layer.source().endswith('.tif'), raster_layers)
+
+        progressbar = oeq_global.OeQ_init_progressbar(u"Caching the WMS Section to GeoTIFF",
+                                                      u"This may take some time...",
+                                                      maxcount=len(raster_layers) + 2)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+
+        for layer in raster_layers:
+            self.iface.legendInterface().setLayerVisible(layer, False)
+        extracted_layers = []
+        for clipping_raster in raster_layers:
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+            clipped_layer = self.clip_from_raster(clipping_raster)
+            print 'clipped'
+            extracted_layers.append(clipped_layer)
+
+            cLay = legend.nodeByName(clipped_layer)
+            if not cLay: return 0
+            cLay=cLay[0].layer()
+            print 'now get url'
+
+            lUrl = wms_utils.getWmsLegendUrl(clipping_raster)
+            cLay.setLegendUrl(lUrl)
+
+            # set new layer id in extension if available
+            extension = extensions.by_layerid(clipping_raster.id())
+            if extension is not None:
+                extension[0].layer_id = cLay.id()
+
+            # remove the wms source from the legend
+            QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id())
+
+        oeq_global.OeQ_kill_progressbar()
+        #except AttributeError as NoneException:
+        #    print(self.__module__, NoneException)
+         #   return 0
 
         progressbar = oeq_global.OeQ_init_progressbar(u"Reproject GeoTIFF to EPSG 3857 (WGS 84 / Pseodo-Mercator)",
                                                       u"This may take some time.",
@@ -654,7 +732,10 @@ class OpenEQuarterMain:
         for layer_name in extracted_layers:
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
             try:
-                layer = layer_interaction.find_layer_by_name(layer_name)
+                layer = legend.nodeByName(layer_name)
+                if not layer: return 0
+                layer = layer[0].layer()
+                print 'url'
                 # save legendUrl from source
                 legUrl = layer.legendUrl()
                 raster_layer_interaction.gdal_warp_layer(layer, config.project_crs)
@@ -735,8 +816,8 @@ class OpenEQuarterMain:
         vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name),
                                 "ogr")
         layer_interaction.add_layer_to_registry(vlayer)
-        extensions.run_active_extensions('import')
-        extensions.run_active_extensions('evaluation')
+        extensions.run_active_extensions('Import')
+        extensions.run_active_extensions('Evaluation')
         return 2
 
     # step 4.2

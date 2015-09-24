@@ -49,6 +49,12 @@ def nodeIsGroup(node):
         return True
     return False
 
+def nodeExists(nodename):
+        node = nodeByName(nodename)
+        if not node:
+            return False
+        return True
+
 
 def nodeAll(which='all',searchgroup=None):
     """nodeAll: Delivers all nodes of kind 'which' from node 'searchgroup'
@@ -237,6 +243,37 @@ def nodeMove(node,position='down',target_node=None):
 
 from PyQt4.QtCore import Qt
 
+def nodeExpand(node):
+    """
+    nodeShow:       Switch 'node' to visible
+    :param node:    Node to show
+    :return:        visibility state
+    """
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    if nodeIsGroup(node):
+        node.setExpanded(True)
+        oeq_global.OeQ_unlockQgis()
+    return node.isExpanded()
+
+def nodeCollapse(node):
+    """
+    nodeShow:       Switch 'node' to visible
+    :param node:    Node to show
+    :return:        visibility state
+    """
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    if nodeIsGroup(node):
+        node.setExpanded(False)
+        oeq_global.OeQ_unlockQgis()
+    return node.isExpanded()
 
 def nodeShow(node):
     """
@@ -362,7 +399,7 @@ def nodeInitSolo(visiblenodes=[]):
             node = node[0]
         nodes_to_show.append( node.layer().name())
 
-    for anode in nodeAll():
+    for anode in nodeAllLayers():
 
          if nodeStoreVisibility(anode):
             if filter(lambda x : x == anode.layer().name() , nodes_to_show):
@@ -378,7 +415,7 @@ def nodeExitSolo():
     nodeExitSolo:       Exit Solo Mode (and Restore visibility states)
     :return:            no return
     """
-    for i in nodeAll():
+    for i in nodeAllLayers():
         nodeRestoreVisibility(i)
 
 def nodeCopy(node,newname=None,position=None,target_node=None):
@@ -700,5 +737,6 @@ def nodeZoomTo(node):
             return None
         node = node[0]
         canvas = iface.mapCanvas()
-        canvas.setExtent(node.layer().extent())
+        extent=node.layer().extent()
+        canvas.setExtent(extent)
         canvas.zoomByFactor(1.1)

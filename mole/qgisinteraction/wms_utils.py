@@ -9,12 +9,14 @@ from webbrowser import open as open_url
 
 from mole.oeq_global import *
 from mole.qgisinteraction import raster_layer_interaction
-from mole.qgisinteraction import layer_interaction
+from mole.qgisinteraction import layer_interaction , legend
 
 
 def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_output = True):
 
-    export_wms_layer = layer_interaction.find_layer_by_name(wms_layer_name)
+    export_wms_layer = legend.nodeByName(wms_layer_name)
+    if not export_wms_layer: return None
+    export_wms_layer = export_wms_layer[0].layer()
     iface = qgis.utils.iface
     canvas = iface.mapCanvas()
 
@@ -26,7 +28,7 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
     #QMessageBox.information(iface.mainWindow(), 'Info', info_text)
     if not geo_reference_output:
       export_wms_layer.setLayerName(export_wms_layer.name().replace("_RAW",""))
-    
+
     filename = layer_interaction.save_layer_as_image(export_wms_layer, export_extent, OeQ_project_path(), max_res)
 
     if geo_reference_output:
@@ -47,7 +49,7 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
         else:
             #os.remove(filename)
             filename = dest_filename
-     
+
     return filename
 
 def getWmsLegendUrl(layer): #Very quick and very dirty

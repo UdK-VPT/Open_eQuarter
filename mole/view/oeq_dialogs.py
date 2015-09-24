@@ -75,7 +75,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         self.extension_dropdown.clear()
         self.placeholder = '<Select information type>'
         self.extension_dropdown.addItem(self.placeholder)
-        for importextension in extensions.by_category('import'):
+        for importextension in extensions.by_category('Import'):
             self.extension_dropdown.addItem(importextension.extension_name)
 
 
@@ -93,7 +93,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             line_edit.clear()
 
         extension = self.extension_dropdown.currentText()
-        for importextension in extensions.by_category('import'):
+        for importextension in extensions.by_category('Import'):
             if extension == importextension.extension_name:
                 self.layer_name.setText(importextension.layer_name)
                 self.field_id.setText(importextension.field_id)
@@ -104,7 +104,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
     def toggle_state(self):
         import mole.extensions as extensions
         extension_name = self.extension_dropdown.currentText()
-        if extension_name in [i.extension_name for i in extensions.by_category('import')]:
+        if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
             extension = extensions.by_name(self.extension_dropdown.currentText())[0]
             extension.active = not extension.active
             self.stateBox.setChecked(extension.active)
@@ -126,7 +126,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
         if extension_name != self.placeholder:
             print "update information"
-            if extension_name in [i.extension_name for i in extensions.by_category('import')]:
+            if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
                 print "found"
                 extensions.by_name(extension_name)[0].update(
                     field_id=field_id,

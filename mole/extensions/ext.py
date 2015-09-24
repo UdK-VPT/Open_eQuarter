@@ -29,6 +29,7 @@ def average(self=None, parameters={}):
 
 class OeQExtension:
     def __init__(self, category=None,
+                 subcategory = None,
                  field_id=None,
                  extension_id=None,
                  extension_name=None,
@@ -66,6 +67,7 @@ class OeQExtension:
             self.extension_name = extension_name
         self.extension_filepath = extension_filepath
         self.category = category
+        self.subcategory = subcategory
         self.layer_id = layer_id
         self.description = description
         self.type = type
@@ -97,6 +99,7 @@ class OeQExtension:
         self.colortable = colortable
 
     def update(self, category=None,
+               subcategory = None,
                field_id=None,
                extension_id=None,
                extension_name=None,
@@ -115,6 +118,7 @@ class OeQExtension:
                colortable=None,
                evaluation_method=None):
         if category != None: self.category = category
+        if subcategory != None: self.subcategory = subcategory
         if field_id != None: self.field_id = field_id
         if extension_id != None: self.extension_id = extension_id
         if extension_name != None: self.extension_name = extension_name
@@ -343,8 +347,16 @@ class OeQExtension:
     def work_out_results(self):
         from mole.qgisinteraction.layer_interaction import fullRemove
         fullRemove(self.layer_name)
-        #self.update_colortable()
-        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,2)
+        self.update_colortable()
+        if not legend.nodeExists(self.category):
+            cat=legend.nodeCreateGroup(self.category,2)
+        else:
+            cat=legend.nodeByName(self.category)[0]
+        if not legend.nodeExists(self.subcategory):
+            subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
+        else:
+            subcat=legend.nodeByName(self.subcategory)[0]
+        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,2,subcat)
         self.update_colortable()
         legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
 

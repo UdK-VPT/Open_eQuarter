@@ -25,17 +25,11 @@
     <edittype widgetv2type="TextEdit" name="BLD_ID">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="YOC">
-      <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="WN_RAT">
-      <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="BS_UC">
+    <edittype widgetv2type="TextEdit" name="WL_UC">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="BS_UC" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
+  <renderer-v2 attr="WL_UC" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
       <range render="true" symbol="0" lower="1.006000" upper="1.200000" label=" 1.01 - 1.20 "/>
       <range render="true" symbol="1" lower="1.200000" upper="1.400000" label=" 1.20 - 1.40 "/>
@@ -976,8 +970,8 @@
   <customproperties>
     <property key="labeling" value="pal"/>
     <property key="labeling/addDirectionSymbol" value="false"/>
-    <property key="labeling/angleOffset" value="0"/>
-    <property key="labeling/blendMode" value="0"/>
+    <property key="labeling/angleOffset" value="30"/>
+    <property key="labeling/blendMode" value="10"/>
     <property key="labeling/bufferBlendMode" value="0"/>
     <property key="labeling/bufferColorA" value="255"/>
     <property key="labeling/bufferColorB" value="255"/>
@@ -992,15 +986,15 @@
     <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
     <property key="labeling/bufferTransp" value="24"/>
     <property key="labeling/centroidInside" value="false"/>
-    <property key="labeling/centroidWhole" value="false"/>
-    <property key="labeling/decimals" value="3"/>
+    <property key="labeling/centroidWhole" value="true"/>
+    <property key="labeling/decimals" value="1"/>
     <property key="labeling/displayAll" value="false"/>
     <property key="labeling/dist" value="0"/>
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value=" round(BS_UC,2)"/>
+    <property key="labeling/fieldName" value=" round(WL_UC,2)"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value="Arial"/>
@@ -1017,9 +1011,9 @@
     <property key="labeling/fontUnderline" value="false"/>
     <property key="labeling/fontWeight" value="50"/>
     <property key="labeling/fontWordSpacing" value="0"/>
-    <property key="labeling/formatNumbers" value="false"/>
+    <property key="labeling/formatNumbers" value="true"/>
     <property key="labeling/isExpression" value="true"/>
-    <property key="labeling/labelOffsetInMapUnits" value="true"/>
+    <property key="labeling/labelOffsetInMapUnits" value="false"/>
     <property key="labeling/labelOffsetMapUnitMaxScale" value="0"/>
     <property key="labeling/labelOffsetMapUnitMinScale" value="0"/>
     <property key="labeling/labelPerPart" value="false"/>
@@ -1035,8 +1029,8 @@
     <property key="labeling/namedStyle" value="Standard"/>
     <property key="labeling/obstacle" value="true"/>
     <property key="labeling/placeDirectionSymbol" value="0"/>
-    <property key="labeling/placement" value="2"/>
-    <property key="labeling/placementFlags" value="6"/>
+    <property key="labeling/placement" value="1"/>
+    <property key="labeling/placementFlags" value="0"/>
     <property key="labeling/plussign" value="false"/>
     <property key="labeling/preserveRotation" value="true"/>
     <property key="labeling/previewBkgrdColor" value="#ffffff"/>

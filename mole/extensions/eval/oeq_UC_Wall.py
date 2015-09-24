@@ -5,21 +5,21 @@ from qgis.core import NULL
 from mole import oeq_global
 from mole.project import config
 from mole.extensions import OeQExtension
-from mole.stat_corr import contemporary_base_uvalue_by_building_age_lookup
+from mole.stat_corr import contemporary_wall_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={}):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'YOC': NULL,'BS_UC':NULL}
+    dataset = {'YOC': NULL,'WL_UC':NULL}
     dataset.update(parameters)
 
     if not oeq_global.isnull(dataset['YOC']):
         #print str(dataset['YOC'])
         #print type(dataset['YOC'])
         #try:
-        dataset['BS_UC']=contemporary_base_uvalue_by_building_age_lookup.get(dataset['YOC'])
+        dataset['WL_UC']=contemporary_wall_uvalue_by_building_age_lookup.get(dataset['YOC'])
         #except:
         #    pass
     result = {}
@@ -33,19 +33,19 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Base',
-    extension_name='Base Quality (U_Value, Contemporary)',
-    layer_name= 'U Base Contemporary',
+    subcategory='Wall',
+    extension_name='Wall Quality (U_Value, Contemporary)',
+    layer_name= 'U Wall (Contemporary)',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='BS_UC',
+    field_id='WL_UC',
     source_type='none',
     par_in=['YOC'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['BS_UC','WN_RAT','YOC'],
-    description=u"Calculate the U-Value of the Building's baseplate",
+    show_results=['WL_UC'],
+    description=u"Calculate the U-Value of the Building's walls",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

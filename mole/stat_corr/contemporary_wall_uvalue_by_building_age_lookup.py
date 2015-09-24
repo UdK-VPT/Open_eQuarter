@@ -9,6 +9,7 @@ def get(*xin):
 
     l_lookup = oeq.lookuptable(
 [
+0,2,
 1849,2,
 1850,2,
 1851,2,
@@ -181,5 +182,6 @@ def get(*xin):
 2018,0.26,
 2019,0.26,
 2020,0.26,
-2021,0.263])
+2021,0.263,
+10000,0.2])
     return(l_lookup.lookup(xin))

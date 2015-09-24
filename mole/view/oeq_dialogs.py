@@ -138,7 +138,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         else:
             print "new information"
             extension = extensions.OeQExtension(
-                category='import',
+                category='Import',
                 field_id=field_id,
                 source_type=type,
                 layer_name=layer_name,
@@ -316,7 +316,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.message_label.clear()
             #ToDo change to use the correct para-name instead
-            parameter_name = str(self.layers_dropdown.currentText())[:10]
+            #parameter_name = str(self.layers_dropdown.currentText())[:10]
+            parameter_name = extensions.by_name(layer).field_id
             self.color_entry_manager.add_color_value_quadruple_to_layer([color_key, parameter_name, 0, 0], layer)
             color_map = self.color_entry_manager.layer_values_map[layer]
             model = QColorTableModel(color_map, self.header, self)

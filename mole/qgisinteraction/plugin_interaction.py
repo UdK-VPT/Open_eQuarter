@@ -113,11 +113,10 @@ class PstInteraction(object):
                 except IndexError as IError:
                     RGBa_index = 0
                     print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
-
-                if extensions.by_layername(layer_name, 'import') == []:
+                if extensions.by_layername(layer_name, 'Import') == []:
                     export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
                 else:
-                    export_name = extensions.by_layername(layer_name, 'import')[0].field_id + '_' + rgba
+                    export_name = extensions.by_layername(layer_name, 'Import')[0].field_id + '_' + rgba
 
                 replacement_map[layer_name] = export_name[:-2]
                 # Change the text in the table, so the pst can manage its model accordingly/appropriately

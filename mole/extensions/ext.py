@@ -145,7 +145,7 @@ class OeQExtension:
 
     def registerExtension(self, default=False):
         from mole.oeq_global import OeQ_ExtensionRegistry, OeQ_ExtensionDefaultRegistry
-        # if self.category == 'import':
+        # if self.category == 'Import':
         #    OeQ_ImportExtensionRegistry.append(self)
         # elif self.category == 'export':
         #      OeQ_ExportExtensionRegistry.append(self)
@@ -240,7 +240,7 @@ class OeQExtension:
 
 
 
-    # extensions.by_category('import')[1].decode_color_table()
+    # extensions.by_category('Import')[1].decode_color_table()
     def decode_color_table(self):
         from qgis import utils
         from qgis.core import QgsField
@@ -263,6 +263,7 @@ class OeQExtension:
                                                               u'Decoding colors in "' + self.layer_in + '"!',
                                                               maxcount=len(color_dict) * source_layer.featureCount())
                 progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+                print color_dict
                 for color_key in color_dict.keys():
                     color_quadriple = color_key[5:-1].split(',')
                     color_quadriple = map(int, color_quadriple)
@@ -293,7 +294,7 @@ class OeQExtension:
         legend.nodeRestoreVisibility(self.layer_in)
         #time.sleep(0.5)
 
-    # extensions.by_category('import')[1].calculate()
+    # extensions.by_category('Import')[1].calculate()
     def calculate(self):
         from qgis import utils
         from qgis.core import QgsField

@@ -27,6 +27,8 @@ def get_address(building_id):
         return result['results'][0]['address_components']
     except:
         return None
+        '''
         http: // maps.google.com / maps / api / geocode / json?sensor = false & latlng = 37.4418834, -122.1430195
 
         http: // maps.google.com / maps / api / geocode / json?sensor = false & latlng = 1497629.51478, 6891333.65947
+        '''

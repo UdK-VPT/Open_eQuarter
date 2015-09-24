@@ -346,8 +346,8 @@ def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
         else:
             return rlayer
 
-
-def zoom_to_layer(iface, layer_name):
+'''
+def Xzoom_to_layer(iface, layer_name):
     """
     Trigger the iface's zoom-to-layer-action on the layer given by its name.
     :param iface: Reference to Qgis interface
@@ -367,7 +367,7 @@ def zoom_to_layer(iface, layer_name):
             iface.actionZoomToLayer().trigger()
 
 
-def biuniquify_layer_name(layer_name):
+def Xbiuniquify_layer_name(layer_name):
     """
     Check the layer-registry if a layer with the same name exists and if so, append a number to make the name unique.
     :param layer_name: Name which will be checked for uniqueness
@@ -409,7 +409,7 @@ def move_layer_to_position(iface, layer_name, position):
             root.removeChildNode(layer_node)
             iface.setActiveLayer(clone.layer())
             break
-
+'''
 
 def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type = 'tif'):
     """
@@ -555,7 +555,7 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     """
 
     import mole.extensions as extensions
-    extension = extensions.by_layername(layer.name(), 'import')
+    extension = extensions.by_layername(layer.name(), 'Import')
     if extension != []:
         extension = extension[0]
         try:
@@ -601,6 +601,10 @@ def colors_match_feature(color_quadriple, feature, field_name):
     :return: If the quadriple matches
     :rtype: bool
     """
+    print 'COLOR MATCH'
+    print color_quadriple
+    print feature
+    print field_name
     match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
             and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
             and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))

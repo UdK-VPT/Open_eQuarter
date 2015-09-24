@@ -694,8 +694,13 @@ class OpenEQuarterMain:
                                                       maxcount=len(raster_layers) + 2)
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
 
+        print [i.name() for i in raster_layers]
         for layer in raster_layers:
-            self.iface.legendInterface().setLayerVisible(layer, False)
+            layernode=legend.nodeByLayer(layer)
+            if not layernode: continue
+            layernode = layernode[0]
+            legend.nodeHide(layernode)
+            #self.iface.legendInterface().setLayerVisible(layer, False)
         extracted_layers = []
         for clipping_raster in raster_layers:
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
@@ -709,6 +714,7 @@ class OpenEQuarterMain:
             print 'now get url'
 
             lUrl = wms_utils.getWmsLegendUrl(clipping_raster)
+            print lUrl
             cLay.setLegendUrl(lUrl)
 
             # set new layer id in extension if available
@@ -812,16 +818,21 @@ class OpenEQuarterMain:
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
+        print 'Abbreviations'
+        print abbreviations
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
-        vlayer = QgsVectorLayer(pst_output_layer, layer_interaction.biuniquify_layer_name(config.pst_output_layer_name),
-                                "ogr")
+        vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         layer_interaction.add_layer_to_registry(vlayer)
         extensions.run_active_extensions('Import')
         extensions.run_active_extensions('Evaluation')
         return 2
 
+
     # step 4.2
     def handle_building_calculations(self):
+        pass
+
+    '''
         # ToDo Change to non default-values
         area = NULL
         perimeter = NULL
@@ -1072,7 +1083,7 @@ class OpenEQuarterMain:
             return 2
         else:
             return 0
-
+    '''
     def continue_process(self, autorun=False):
         """
         Call the appropriate handle-function, depending on the progress-step, that has to be executed next.

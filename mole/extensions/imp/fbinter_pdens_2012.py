@@ -33,7 +33,7 @@ extension = OeQExtension(
     extension_name='Population Density (2012, WMS)',
     field_id='PDENS',
     source_type='wms',
-    layer_name='Population Density',
+    layer_name='Population Density (WMS Capture)',
     active=True,
     description=u'',
     source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',

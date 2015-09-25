@@ -361,11 +361,9 @@ class OeQExtension:
         self.update_colortable()
         legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
 
-        #resultnode.layer().loadNamedStyle( self.colortable)
-        #legend.nodeInitSolo([config.investigation_shape_layer_name,resultnode])
-
-        resultnode.setCustomProperty("SoloLayers", [config.investigation_shape_layer_name,self.layer_name])
-        resultnode.visibilityChanged.connect(legend.nodeToggleSoloAction)
+        resultnode.layer().loadNamedStyle( self.colortable)
+        legend.nodeRadioAdd(resultnode,self.category)
+        legend.nodeShow(resultnode)
         legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 

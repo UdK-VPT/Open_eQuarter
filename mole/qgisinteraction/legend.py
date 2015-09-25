@@ -324,7 +324,7 @@ def nodesHide(nodes):
         nodeHide(node)
 
 
-def nodeStoreVisibility(node):
+def nodeStoreVisibility(node,restorevariablename="was_visible_before_Solo"):
     """
     nodeStoreVisibility:    Stores the current visibility state in a custom property
                             (if the property does not already exist)
@@ -337,13 +337,13 @@ def nodeStoreVisibility(node):
             return None
         node = node[0]
 
-    if node.customProperty("was_visible") == None:
-            node.setCustomProperty("was_visible", node.isVisible())
+    if node.customProperty(restorevariablename) == None:
+            node.setCustomProperty(restorevariablename, node.isVisible())
             return True
     return False
 
 
-def nodeRestoreVisibility(node):
+def nodeRestoreVisibility(node,restorevariablename="was_visible_before_Solo"):
     """
     nodeStoreVisibility:    Sets the visibility state to the state stored earlier
                             (and delete the custom property)
@@ -356,12 +356,12 @@ def nodeRestoreVisibility(node):
             return None
         node = node[0]
 
-    if node.customProperty("was_visible") != None:
-        if node.customProperty("was_visible") > 0:
+    if node.customProperty(restorevariablename) != None:
+        if node.customProperty(restorevariablename) > 0:
             node.setVisible(Qt.Checked)
         else:
             node.setVisible(Qt.Unchecked)
-        node.removeCustomProperty("was_visible")
+        node.removeCustomProperty(restorevariablename)
     return node
 
 
@@ -376,9 +376,16 @@ def nodeToggleSoloAction(node,state):
             nodeInitSolo(node.customProperty("SoloLayers"))
         elif state == 0:
             nodeExitSolo()
+
         #legend.nodeExitSolo()
         #legend.nodeInitSolo([config.investigation_shape_layer_name])
 #node.visibilityChanged.connect(list_view.model().itemChanged.connect(self.check_progress_status)
+
+def nodeInitRadioAction(node,state):
+        if state == 2:
+            nodeInitRadio(node.customProperty("SoloLayers"))
+        elif state == 0:
+            nodeExitSolo()
 
 
 def nodeInitSolo(visiblenodes=[]):
@@ -407,6 +414,81 @@ def nodeInitSolo(visiblenodes=[]):
                 nodeShow(anode)
             else:
                 nodeHide(anode)
+
+def nodeRadioAdd(node,radiogroup=None):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+
+    if isinstance(node, QgsLayerTreeLayer):
+        if isinstance(radiogroup, QgsLayerTreeGroup):
+           radiogroup = radiogroup.name()
+        if not node.customProperty("radiogroup"):
+            node.setCustomProperty("radiogroup" , radiogroup)
+            nodeHide(node)
+            node.visibilityChanged.connect(nodeRadioSwitch)
+    elif isinstance(node, QgsLayerTreeGroup):
+        for node_item in nodeAllLayers(node):
+            nodeRadioAdd(node_item,node)
+    return node
+
+def nodeRadioRemove(node,radiogroup=None):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+
+    if isinstance(node, QgsLayerTreeLayer):
+        if isinstance(radiogroup, QgsLayerTreeGroup):
+            radiogroup = radiogroup.name()
+        if node.customProperty("radiogroup"):
+            node.removeCustomProperty("radiogroup")
+            node.visibilityChanged.disconnect(nodeRadioSwitch)
+    elif isinstance(node, QgsLayerTreeGroup):
+        for node_item in nodeAllLayers(node):
+            nodeRadioRemove(node_item,node)
+    return node
+
+def nodeRadioSwitch(node,state=None):
+    if state:
+        if oeq_global.isStringOrUnicode(node):
+            node = nodeByName(node)
+            if not node: return None
+            node = node[0]
+
+        radiogroup = node.customProperty("radiogroup")
+        for nodeitem in nodeAllLayers():
+            if nodeitem.layer().name() != node.layer().name():
+                if nodeitem.customProperty("radiogroup") == radiogroup:
+                    nodeHide(nodeitem)
+
+
+'''
+
+import time
+from mole.qgisinteraction import legend
+legend.nodeRadioAdd('Investigation Area','Import')
+legend.nodeRadioAdd('BLD Shapes','Import')
+legend.nodeRadioAdd('Import')
+
+from mole.qgisinteraction.layer_interaction import  fullRemove
+fullRemove('Base Quality')
+time.sleep(1)
+legend.nodeDuplicate('BLD Shapes','Base Quality')
+time.sleep(1)
+legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
+
+
+
+
+legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
+
+
+
+'''
+
+
 
 
 
@@ -547,25 +629,6 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID
     target_layer.commitChanges()
     return target_layer
 
-'''
-
-import time
-from mole.qgisinteraction import legend
-from mole.qgisinteraction.layer_interaction import  fullRemove
-fullRemove('Base Quality')
-time.sleep(1)
-legend.nodeDuplicate('BLD Shapes','Base Quality')
-time.sleep(1)
-legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
-
-
-
-
-legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
-
-
-
-'''
 
 
 

@@ -232,7 +232,7 @@ class OpenEQuarterMain:
                             return
                         shutil.rmtree(project_dir, ignore_errors=True)
                     os.makedirs(project_dir)
-                    QgsProject.instance().write(QFileInfo(os.path.join(project_dir,project_file)))
+                    QgsProject.instance().setFileName(os.path.join(project_dir,project_file))
                     self.iface.actionSaveProject().trigger()
 
 
@@ -675,7 +675,6 @@ class OpenEQuarterMain:
             return 0
 
         # an investigation shape is needed, to trigger the zoom to layer function
-        print investigation_area
 
         #if investigation_shape.featureCount() > 0:
         # zoom

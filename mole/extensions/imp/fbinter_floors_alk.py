@@ -28,7 +28,7 @@ extension = OeQExtension(
     extension_name='Floors (ALK Berlin, WMS)',
     field_id='FLRS',
     source_type='wms',
-    layer_name='Floors',
+    layer_name='Floors (WMS Capture)',
     active=True,
     description=u'',
     source='crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude',

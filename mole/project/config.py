@@ -70,7 +70,7 @@ default_population_density =  10000
 
 # default_projectinfo
 pinfo_default = {
-    'project_name': u'',
+    'project_name': u'New Project',
     'description': u'',
     'location_city': u'',
     'location_postal': u'',

@@ -586,6 +586,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
              self.update_form(1)
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
+            if (key == 'project_name') & (not field): continue
             if key == 'description':
                 oeq_global.OeQ_project_info[key] = field.toPlainText()
             else:

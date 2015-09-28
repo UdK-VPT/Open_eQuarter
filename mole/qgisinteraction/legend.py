@@ -794,12 +794,24 @@ def testlayer():
 
 
 def nodeZoomTo(node):
+    import time
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
-            return None
+        if not node: return None
         node = node[0]
+        oeq_global.OeQ_unlockQgis()
         canvas = iface.mapCanvas()
+        time.sleep(0.2)
+        canvas = iface.mapCanvas()
+        time.sleep(0.2)
+        canvas = iface.mapCanvas()
+        time.sleep(0.2)
+        currExt = canvas.extent()
+        canvasCenter = currExt.center()
+        canvas = iface.mapCanvas()
+        currExt = canvas.extent()
+        canvasCenter = currExt.center()
+
         extent=node.layer().extent()
         canvas.setExtent(extent)
         canvas.zoomByFactor(1.1)

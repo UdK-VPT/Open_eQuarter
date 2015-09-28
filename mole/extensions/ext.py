@@ -190,13 +190,13 @@ class OeQExtension:
     def update_colortable(self, overwrite=False):
         from shutil import copyfile
         ct_default = os.path.join(self.default_colortable())
-        print
+        print ct_default
         if oeq_global.OeQ_project_path() == u'.':
             self.colortable = ct_default
         else:
             if ct_default != None:
-                ct_filename=os.path.basename(ct_default)
                 ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
+                print ct_project
                 if overwrite:
                     try:
                         os.remove(ct_project)
@@ -364,6 +364,9 @@ class OeQExtension:
         resultnode.layer().loadNamedStyle( self.colortable)
         legend.nodeRadioAdd(resultnode,self.category)
         legend.nodeShow(resultnode)
+        legend.nodeCollapse(subcat)
+        legend.nodeCollapse(cat)
+
         legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 
@@ -460,8 +463,7 @@ def save():
     project_name = oeq_global.OeQ_project_name()
     if not oeq_global.OeQ_project_saved():
         load_defaults()
-    for ext in oeq_global.OeQ_ExtensionRegistry:
-        ext.update_colortable()
+    update_all_colortables()
     registry_file = os.path.join(project_path, project_name + '.xreg')
     try:
         with open(registry_file, 'wb') as output:
@@ -478,3 +480,7 @@ def run_active_extensions(category=None):
 
 def export():
     pass
+
+def update_all_colortables():
+    for ext in by_state(True):
+        ext.update_colortable()

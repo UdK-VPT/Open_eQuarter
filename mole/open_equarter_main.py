@@ -429,9 +429,9 @@ class OpenEQuarterMain:
         self.zoom_to_default_extent()
 
         # remove if necessary
+        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
-        p_path = os.path.join(oeq_global.OeQ_project_path(), config.investigation_shape_layer_name + '.shp').decode(
-            'utf-8')
+        p_path = os.path.join(oeq_global.OeQ_project_path(), config.investigation_shape_layer_name + '.shp').decode('utf-8')
 
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
                                                                       config.project_crs)
@@ -460,7 +460,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
         project_item.setCheckState(2)
-        legend.nodeZoomTo(investigation_area_node)
+        #legend.nodeZoomTo(config.investigation_shape_layer_name)
         #self.continue_process()
         return 2
 
@@ -492,16 +492,18 @@ class OpenEQuarterMain:
 
         # Check wether IA Layer exists and has polygons defined
         investigation_area = legend.nodeByName(config.investigation_shape_layer_name)
-        if not investigation_area:
-            oeq_global.OeQ_init_error("Unable to create building outlines",
-                                      "Map 'Investigation Area' could not be found...")
-            return intersection_done
-        investigation_area = investigation_area[0].layer()
+        ia_ok = bool(investigation_area)
+        if ia_ok:
+            investigation_area = investigation_area[0].layer()
+            ia_ok &= investigation_area.featureCount()
 
-        if investigation_area.featureCount() < 0:
-            oeq_global.OeQ_init_error("Unable to create building outlines",
-                                      "No areas defined in map 'Investigation Area'...")
+        if not ia_ok:
+            self.handle_investigation_area_selected()
+            #oeq_global.OeQ_init_error("Unable to create building outlines",
+            #                          "Map 'Investigation Area' could not be found...")
             return intersection_done
+
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
 
         oeq_global.OeQ_init_info("Getting building outlines in the investigation area.", "This may take some time...")
         if os.path.exists(building_outlines_path):
@@ -556,6 +558,8 @@ class OpenEQuarterMain:
                 section_model = source_section.model()
                 project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
                 project_item.setCheckState(2)
+                self.handle_building_coordinates_loaded()
+                oeq_global.OeQ_kill_info()
                 return 2
         oeq_global.OeQ_kill_info()
         return 1
@@ -584,6 +588,7 @@ class OpenEQuarterMain:
                 rci.calculate_accuracy(polygon, centroid_layer)
                 layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
                 self.reorder_layers()
+                legend.nodeCollapse(config.pst_input_layer_name)
                 source_section = self.progress_items_model.section_views[1]
                 section_model = source_section.model()
                 project_item = section_model.findItems("Load building coordinates")[0]
@@ -619,33 +624,45 @@ class OpenEQuarterMain:
             pass
         wms_sources = extensions.by_type('wms', 'Import', True)
 
-        for importextension in wms_sources:
-            layer_interaction.fullRemove(layer_id=importextension.layer_id)
-            name = 'WMS_' + importextension.layer_name + '_RAW'
-            url = importextension.source
-            raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
-            if raster_layer is not None:
-                importextension.layer_id = raster_layer.id()
-                raster_layers.append(raster_layer)
-
-        raster_loaded = False
         progressbar = oeq_global.OeQ_init_progressbar(u"Loading WMS Layer",
                                                       u"WMS Servers are slow, this may take a while...",
                                                       maxcount=len(raster_layers) + 2)
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
-        for raster in raster_layers:
-            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-            try:
-                if raster.isValid():
-                    layer_interaction.add_layer_to_registry(raster)
-                    self.iface.setActiveLayer(raster)
-                    raster_loaded = True
 
+        for importextension in wms_sources:
+            layer_interaction.fullRemove(layer_id=info_source.layer_id)
+
+            if not legend.nodeExists(importextension.category):
+                cat=legend.nodeCreateGroup(importextension.category,'bottom')
+            else:
+                cat=legend.nodeByName(importextension.category)[0]
+           #create group data at bottom of root (if necessary)
+            if not legend.nodeExists(importextension.subcategory):
+                subcat=legend.nodeCreateGroup(importextension.subcategory,'bottom',cat)
+            else:
+                subcat=legend.nodeByName(importextension.subcategory)[0]
+            legend.nodeMove(config.open_layers_layer_name,'bottom')
+
+            name = 'WMS_' + importextension.layer_name + '_RAW'
+            url = importextension.source
+            raster_layer = layer_interaction.open_wms_as_raster(self.iface, url, name)
+
+            raster_loaded = False
+            try:
+                if raster_layer.isValid():
+                    layer_interaction.add_layer_to_registry(raster_layer)
+                    self.iface.setActiveLayer(raster_layer)
+                    raster_loaded = True
             except AttributeError as NoneTypeError:
                 print(self.__module__, NoneTypeError)
 
-        if not raster_loaded:
-            self.iface.actionAddWmsLayer().trigger()
+            if not raster_loaded:
+                self.iface.actionAddWmsLayer().trigger()
+            else:
+                raster_layer = legend.nodeMove(raster_layer.name(),'bottom',subcat).layer()
+                importextension.layer_id = raster_layer.id()
+            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+
         # Let's wait for the WMS loading
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         oeq_global.OeQ_kill_progressbar()
@@ -723,6 +740,8 @@ class OpenEQuarterMain:
 
             # remove the wms source from the legend
             QgsMapLayerRegistry.instance().removeMapLayer(clipping_raster.id())
+            #legend.nodeCollapse(subcat)
+            #legend.nodeCollapse(cat)
 
         oeq_global.OeQ_kill_progressbar()
         #except AttributeError as NoneException:
@@ -822,6 +841,7 @@ class OpenEQuarterMain:
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         layer_interaction.add_layer_to_registry(vlayer)
+        legend.nodeMove(vlayer.name(),'bottom','Data')
         extensions.run_active_extensions('Import')
         extensions.run_active_extensions('Evaluation')
         return 2

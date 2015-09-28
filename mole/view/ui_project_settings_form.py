@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_project_settings_form.ui'
 #
-# Created: Sat Sep 19 19:28:19 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Mon Sep 28 16:59:08 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -67,7 +67,7 @@ class Ui_project_settings_form(object):
         self.description_label.setObjectName(_fromUtf8("description_label"))
         self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.description_label)
         self.description = QtGui.QPlainTextEdit(self.form)
-        self.description.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.description.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.description.setObjectName(_fromUtf8("description"))
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.description)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -104,15 +104,6 @@ class Ui_project_settings_form(object):
         self.location_postal.setText(_fromUtf8(""))
         self.location_postal.setObjectName(_fromUtf8("location_postal"))
         self.location_postal_layout.addWidget(self.location_postal)
-        self.lookup_by_postal = QtGui.QPushButton(self.form)
-        self.lookup_by_postal.setMinimumSize(QtCore.QSize(25, 21))
-        self.lookup_by_postal.setMaximumSize(QtCore.QSize(25, 21))
-        self.lookup_by_postal.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.lookup_by_postal.setText(_fromUtf8(""))
-        self.lookup_by_postal.setIcon(icon)
-        self.lookup_by_postal.setFlat(True)
-        self.lookup_by_postal.setObjectName(_fromUtf8("lookup_by_postal"))
-        self.location_postal_layout.addWidget(self.lookup_by_postal)
         self.formLayout.setLayout(6, QtGui.QFormLayout.FieldRole, self.location_postal_layout)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.formLayout.setItem(7, QtGui.QFormLayout.FieldRole, spacerItem1)
@@ -200,6 +191,7 @@ class Ui_project_settings_form(object):
         self.location_country_layout.setObjectName(_fromUtf8("location_country_layout"))
         self.location_country = QtGui.QLineEdit(self.form)
         self.location_country.setMinimumSize(QtCore.QSize(228, 0))
+        self.location_country.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.location_country.setText(_fromUtf8(""))
         self.location_country.setObjectName(_fromUtf8("location_country"))
         self.location_country_layout.addWidget(self.location_country)
@@ -211,9 +203,7 @@ class Ui_project_settings_form(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), project_settings_form.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), project_settings_form.reject)
         QtCore.QMetaObject.connectSlotsByName(project_settings_form)
-        project_settings_form.setTabOrder(self.project_name, self.description)
-        project_settings_form.setTabOrder(self.description, self.location_country)
-        project_settings_form.setTabOrder(self.location_country, self.location_city)
+        project_settings_form.setTabOrder(self.project_name, self.location_city)
         project_settings_form.setTabOrder(self.location_city, self.location_street)
         project_settings_form.setTabOrder(self.location_street, self.location_postal)
         project_settings_form.setTabOrder(self.location_postal, self.location_lon)
@@ -223,6 +213,8 @@ class Ui_project_settings_form(object):
         project_settings_form.setTabOrder(self.heating_degree_days, self.average_build_year)
         project_settings_form.setTabOrder(self.average_build_year, self.population_density)
         project_settings_form.setTabOrder(self.population_density, self.buttonBox)
+        project_settings_form.setTabOrder(self.buttonBox, self.description)
+        project_settings_form.setTabOrder(self.description, self.location_country)
 
     def retranslateUi(self, project_settings_form):
         project_settings_form.setWindowTitle(_translate("project_settings_form", "Dialog", None))
@@ -237,7 +229,6 @@ class Ui_project_settings_form(object):
         self.lookup_by_address.setToolTip(_translate("project_settings_form", "Lookup address", None))
         self.zip_label.setText(_translate("project_settings_form", "ZIP:", None))
         self.location_postal.setPlaceholderText(_translate("project_settings_form", "Postal Code", None))
-        self.lookup_by_postal.setToolTip(_translate("project_settings_form", "Lookup address", None))
         self.longitude_label.setText(_translate("project_settings_form", "Longitude", None))
         self.lookup_by_coords.setToolTip(_translate("project_settings_form", "Lookup coordinates", None))
         self.lattitude_label.setText(_translate("project_settings_form", "Lattitude", None))
@@ -254,7 +245,7 @@ class Ui_project_settings_form(object):
         self.population_density.setText(_translate("project_settings_form", "3.859", None))
         self.street_label.setText(_translate("project_settings_form", "Street", None))
         self.location_street.setPlaceholderText(_translate("project_settings_form", "Street", None))
-        self.country_label.setText(_translate("project_settings_form", "Street", None))
+        self.country_label.setText(_translate("project_settings_form", "Country", None))
         self.location_country.setPlaceholderText(_translate("project_settings_form", "Country", None))
 
 import resources_rc

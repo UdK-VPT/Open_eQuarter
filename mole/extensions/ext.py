@@ -367,7 +367,7 @@ class OeQExtension:
         legend.nodeCollapse(subcat)
         legend.nodeCollapse(cat)
 
-        legend.nodeZoomTo(config.investigation_shape_layer_name)
+        #legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 
 

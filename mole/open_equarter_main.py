@@ -149,6 +149,11 @@ class OpenEQuarterMain:
 
     def open_settings(self):
         self.oeq_project_settings_form.show()
+        save = self.oeq_project_settings_form.exec_()
+        if save:
+            self.handle_project_created()
+        #self.run()
+        #self.oeq_project_settings_form.show()
 
     def open_progress(self, doc):
         progress = os.path.join(oeq_global.OeQ_project_path(), oeq_global.OeQ_project_name() + '.oeq')
@@ -450,12 +455,15 @@ class OpenEQuarterMain:
             return 1
 
     def confirm_selection_of_investigation_area(self):
+        #import time
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
         oeq_global.OeQ_kill_info()
+        #time.sleep(1)
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         investigation_area_node=legend.nodeByName(config.investigation_shape_layer_name)[0]
-        oeq_global.QeQ_enableDialogAfterAddingFeature()
-        legend.nodeSetActive(investigation_area_node)
-        oeq_global.OeQ_unlockQgis()
+        #oeq_global.QeQ_enableDialogAfterAddingFeature()
+        #legend.nodeSetActive(investigation_area_node)
+        #oeq_global.OeQ_unlockQgis()
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
@@ -569,11 +577,20 @@ class OpenEQuarterMain:
         window = self.iface.mainWindow()
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
         #oeq_global.OeQ_unlockQgis()
+        layer_interaction.fullRemove(config.pst_input_layer_name)
         load_message = "Do you want to load your own set of building coordinates?"
         reply = QMessageBox.question(window, 'Building Coordinates', load_message, QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            print('Open file dlg')
+            dialog=QFileDialog()
+            filepath=dialog.getOpenFileName(None,'Select a shape file that holds the bulding coordinates (.shp):',selectedFilter='*.shp')
+            if filepath:
+                centroid_layer=load_layer_from_disk(filepath)
+            if centroid_layer:
+                centroid_layer.setName(config.pst_input_layer_name)
+                return 2
+            else:
+                return 0
         else:
             rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
             polygon = config.housing_layer_name
@@ -588,7 +605,8 @@ class OpenEQuarterMain:
                 rci.calculate_accuracy(polygon, centroid_layer)
                 layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
                 self.reorder_layers()
-                legend.nodeCollapse(config.pst_input_layer_name)
+                print centroid_layer.name()
+                legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
                 source_section = self.progress_items_model.section_views[1]
                 section_model = source_section.model()
                 project_item = section_model.findItems("Load building coordinates")[0]
@@ -795,8 +813,8 @@ class OpenEQuarterMain:
             except (OSError, AttributeError) as Clipping_Error:
                 print(self.__module__, Clipping_Error)
                 pass
-        time.sleep(1.0)
         oeq_global.OeQ_kill_progressbar()
+
         source_section = self.progress_items_model.section_views[1]
         section_model = source_section.model()
         project_item = section_model.findItems("Capture WMS maps")[0]
@@ -831,7 +849,9 @@ class OpenEQuarterMain:
 
     # step 4.1
     def handle_information_sampled(self):
-        legend.nodesShow([config.investigation_shape_layer_name,config.housing_coordinate_layer_name,config.housing_layer_name,config.pst_input_layer_name])
+        legend.nodesShow([config.investigation_shape_layer_name,config.housing_coordinate_layer_name,config.pst_input_layer_name])
+        legend.nodesShow(i.layer_name for i in extensions.by_category('Import'))
+
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
@@ -843,6 +863,8 @@ class OpenEQuarterMain:
         layer_interaction.add_layer_to_registry(vlayer)
         legend.nodeMove(vlayer.name(),'bottom','Data')
         extensions.run_active_extensions('Import')
+        legend.nodeCollapse('Import')
+        legend.nodeHide('Import')
         extensions.run_active_extensions('Evaluation')
         return 2
 

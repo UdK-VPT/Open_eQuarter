@@ -15,7 +15,7 @@ Latest Changes: 2015-09-16 (max)
 """
 
 from PyQt4.QtCore import QVariant
-from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature
+from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsMapLayerRegistry,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature,QgsCoordinateReferenceSystem,QgsCoordinateTransform
 from qgis.utils import iface
 from mole import oeq_global
 from mole.project import config
@@ -461,8 +461,10 @@ def nodeRadioSwitch(node,state=None):
         for nodeitem in nodeAllLayers():
             if nodeitem.layer().name() != node.layer().name():
                 if nodeitem.customProperty("radiogroup") == radiogroup:
+                    nodeCollapse(nodeitem)
                     nodeHide(nodeitem)
-
+            else:
+                nodeExpand(nodeitem)
 
 '''
 
@@ -795,23 +797,25 @@ def testlayer():
 
 def nodeZoomTo(node):
     import time
+
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node: return None
         node = node[0]
-        oeq_global.OeQ_unlockQgis()
-        canvas = iface.mapCanvas()
-        time.sleep(0.2)
-        canvas = iface.mapCanvas()
-        time.sleep(0.2)
-        canvas = iface.mapCanvas()
-        time.sleep(0.2)
-        currExt = canvas.extent()
-        canvasCenter = currExt.center()
-        canvas = iface.mapCanvas()
-        currExt = canvas.extent()
-        canvasCenter = currExt.center()
 
+        canvas = iface.mapCanvas()
+        canvas.freeze(True)
         extent=node.layer().extent()
         canvas.setExtent(extent)
-        canvas.zoomByFactor(1.1)
+        center =canvas.center()
+        #canvas.zoomByFactor(1.1)
+        #limit scale to openstreetmap min
+        print canvas.scale()
+        if canvas.scale() < 1700/1.1:
+            canvas.zoomScale(1700)
+        else:
+            canvas.zoomByFactor(1.1)
+        canvas.setCenter(center)
+        canvas.freeze(False)
+
+

@@ -16,5 +16,8 @@ from .ext import *
 OeQExtension.generic_id_cnt = 0
 import imp
 import exp
-import eval
+import eval1
+import eval2
+import eval3
+import eval4
 # OeQ_ExtensionsLoaded=True

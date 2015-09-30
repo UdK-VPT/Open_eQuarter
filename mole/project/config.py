@@ -64,8 +64,8 @@ def qgis_prefix_path():
         return '/Applications/QGIS.app/Contents/MacOS'
 
 
-default_heating_degree_days =  390.06
-default_average_build_year =  1970
+default_heating_degree_days =  2750
+default_average_build_year =  1950
 default_population_density =  10000
 
 # default_projectinfo

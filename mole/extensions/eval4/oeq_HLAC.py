@@ -12,16 +12,14 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'YOC': NULL,'BS_UC':NULL}
+    dataset = {'HLAC': NULL}
     dataset.update(parameters)
-
-    if not oeq_global.isnull(dataset['YOC']):
-        #print str(dataset['YOC'])
-        #print type(dataset['YOC'])
-        #try:
-        dataset['BS_UC']=contemporary_base_uvalue_by_building_age_lookup.get(dataset['YOC'])
-        #except:
-        #    pass
+    living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
+    qtp_total = float(dataset['BS_QTC'])
+    qtp_total = qtp_total + float(dataset['RF_QTC'])
+    qtp_total = qtp_total + float(dataset['WL_QTC'])
+    qtp_total = qtp_total + float(dataset['WN_QTC'])*1.2
+    dataset['HLAC']=qtp_total/living_area
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,
@@ -33,19 +31,19 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Base',
-    extension_name='Base Quality (U_Value, Contemporary)',
-    layer_name= 'U Base Contemporary',
+    subcategory='Building',
+    extension_name='Building Quality (QT per Livig Area, Contemporary)',
+    layer_name= 'QT Building per Livig Area Contemporary',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='BS_UC',
+    field_id='HLAC',
     source_type='none',
-    par_in=['YOC'],
+    par_in=['AREA','FLOORS','BS_QTC','RF_QTC','WL_QTC','WN_QTC'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['BS_UC','WN_RAT','YOC'],
-    description=u"Calculate the U-Value of the Building's baseplate",
+    show_results=['HLAC'],
+    description=u"Calculate the contemporary Transmission Heat Loss per Living Area",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

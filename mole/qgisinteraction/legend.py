@@ -456,15 +456,14 @@ def nodeRadioSwitch(node,state=None):
             node = nodeByName(node)
             if not node: return None
             node = node[0]
-
+            nodeExpand(node)
         radiogroup = node.customProperty("radiogroup")
         for nodeitem in nodeAllLayers():
             if nodeitem.layer().name() != node.layer().name():
                 if nodeitem.customProperty("radiogroup") == radiogroup:
                     nodeCollapse(nodeitem)
                     nodeHide(nodeitem)
-            else:
-                nodeExpand(nodeitem)
+
 
 '''
 

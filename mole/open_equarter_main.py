@@ -445,11 +445,13 @@ class OpenEQuarterMain:
             oeq_global.QeQ_disableDialogAfterAddingFeature()
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
             legend.nodeSetActive(config.investigation_shape_layer_name)
+
+
             widget = self.iface.messageBar().createMessage('Cover Investigation Area',
                                                            'Click "Done" once the investigation area is completely covered.')
-            button = QPushButton(widget)
+            button = QPushButton()
             button.setText('Done')
-            button.pressed.connect(self.confirm_selection_of_investigation_area)
+            button.released.connect(self.confirm_selection_of_investigation_area)
             widget.layout().addWidget(button)
             self.iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING)
             return 1
@@ -468,6 +470,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems('Define your investigation area')[0]
         project_item.setCheckState(2)
+        oeq_global.OeQ_unlockQgis()
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
         #self.continue_process()
         return 2
@@ -486,6 +489,7 @@ class OpenEQuarterMain:
                     section_model = source_section.model()
                     project_item = section_model.findItems("Load source maps")[0]
                     project_item.setCheckState(2)
+                    oeq_global.OeQ_unlockQgis()
                     return 2
         return 1
 
@@ -566,8 +570,9 @@ class OpenEQuarterMain:
                 section_model = source_section.model()
                 project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
                 project_item.setCheckState(2)
-                self.handle_building_coordinates_loaded()
+                oeq_global.OeQ_unlockQgis()
                 oeq_global.OeQ_kill_info()
+                self.handle_building_coordinates_loaded()
                 return 2
         oeq_global.OeQ_kill_info()
         return 1
@@ -611,6 +616,8 @@ class OpenEQuarterMain:
                 section_model = source_section.model()
                 project_item = section_model.findItems("Load building coordinates")[0]
                 project_item.setCheckState(2)
+                oeq_global.OeQ_unlockQgis()
+                self.handle_load_raster_maps()
                 return 2
             else:
                 return 0
@@ -688,6 +695,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems("Load WMS maps")[0]
         project_item.setCheckState(2)
+        oeq_global.OeQ_unlockQgis()
         self.handle_raster_loaded()
         return 2
         #self.continue_process(True)
@@ -819,6 +827,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems("Capture WMS maps")[0]
         project_item.setCheckState(2)
+        oeq_global.OeQ_unlockQgis()
         return 2
 
     def handle_legend_created(self):
@@ -866,6 +875,7 @@ class OpenEQuarterMain:
         legend.nodeCollapse('Import')
         legend.nodeHide('Import')
         extensions.run_active_extensions('Evaluation')
+        oeq_global.OeQ_unlockQgis()
         return 2
 
 

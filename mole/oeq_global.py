@@ -104,7 +104,7 @@ def OeQ_kill_progressbar():
 def OeQ_init_info(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
-    OeQ_unlockQgis()
+    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -115,7 +115,7 @@ def OeQ_kill_info():
 def OeQ_init_warning(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
-    OeQ_unlockQgis()
+    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -126,7 +126,7 @@ def OeQ_kill_warning():
 def OeQ_init_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().CRITICAL)
-    OeQ_unlockQgis()
+    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -135,7 +135,12 @@ def OeQ_kill_error():
 
 
 def isnull(value):
-    return type(value) is type(NULL)
+    if type(value) != type([]):
+        value = [value]
+    for i in value:
+        if type(i) is type(NULL):
+            return True
+    return False
 
 def isEmpty(string):
     return ((string == '') | (string == u''))

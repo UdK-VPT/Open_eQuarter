@@ -14,9 +14,11 @@ def calculation(self=None, parameters={}):
     # factor for golden rule
     dataset = {'AVR': NULL}
     dataset.update(parameters)
-    volume = float(dataset['AREA']) * float(dataset['HEIGHT'])
-    env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
-    dataset['AVR']=env_area/volume
+
+    if not oeq_global.isnull([dataset['AREA'] , dataset['HEIGHT'] , dataset['BS_AR'] , dataset['RF_AR'] , dataset['WL_AR'] , dataset['WN_AR']]):
+        volume = float(dataset['AREA']) * float(dataset['HEIGHT'])
+        env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
+        dataset['AVR']=env_area/volume
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

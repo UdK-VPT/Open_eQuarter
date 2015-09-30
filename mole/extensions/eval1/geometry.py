@@ -25,6 +25,15 @@ def calculation(self=None, parameters={}):
                     dataset['LENGTH'] = -p / 2 + ((((p / 2) ** 2) - q) ** 0.5)
                 else:
                     dataset['LENGTH'] = -p / 4
+            print ' '
+            print 'BLD_ID'
+            print dataset['BLD_ID']
+
+            print 'LENGTH'
+            print dataset['LENGTH']
+            print 'AREA'
+            print dataset['AREA']
+
             dataset['WIDTH'] = float(dataset['AREA']) / float(dataset['LENGTH'])
             l_max = max(dataset['WIDTH'], dataset['LENGTH'])
             l_min = min(dataset['WIDTH'], dataset['LENGTH'])
@@ -110,7 +119,7 @@ extension = OeQExtension(
     layer_name= 'Dimensions',
     field_id='DIM',
     source_type='none',
-    par_in=['AREA', 'PERIMETER', 'LENGTH', 'WIDTH', 'HEIGHT', 'FLOORS', 'PDENS','YOC'],
+    par_in=['AREA', 'PERIMETER', 'LENGTH', 'WIDTH', 'HEIGHT', 'FLOORS', 'PDENS','YOC','BLD_ID'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,

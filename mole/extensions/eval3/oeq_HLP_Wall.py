@@ -12,10 +12,12 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'BS_QTP': NULL}
+    dataset = {'WL_QTP': NULL}
     dataset.update(parameters)
 
-    dataset['WL_QTP']=dataset['WL_AR']*dataset['WL_UP']*0.6*dataset['HHRS']/1000
+    if not oeq_global.isnull([dataset['WL_AR'],dataset['WL_AR'],dataset['HHRS']]):
+        dataset['WL_QTP']=float(dataset['WL_AR']) * float(dataset['WL_AR'])*float(dataset['HHRS'])/1000
+
 
     result = {}
     for i in dataset.keys():

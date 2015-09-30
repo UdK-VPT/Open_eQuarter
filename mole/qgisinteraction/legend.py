@@ -578,6 +578,7 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
    # oeq_global.OeQ_unlockQgis()
     #time.sleep(1)
     newlayer.loadNamedStyle(ct_pathfile)
+    nodeCollapse(newnode)
     #time.sleep(1)
     #position = nodePosition(node,target_node)
     newnode=nodeMove(newnode,position,target_node)

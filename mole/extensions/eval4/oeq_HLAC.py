@@ -14,12 +14,11 @@ def calculation(self=None, parameters={}):
     # factor for golden rule
     dataset = {'HLAC': NULL}
     dataset.update(parameters)
-    living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-    qtp_total = float(dataset['BS_QTC'])
-    qtp_total = qtp_total + float(dataset['RF_QTC'])
-    qtp_total = qtp_total + float(dataset['WL_QTC'])
-    qtp_total = qtp_total + float(dataset['WN_QTC'])*1.2
-    dataset['HLAC']=qtp_total/living_area
+
+    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'] , dataset['BS_QTC'] , dataset['RF_QTC'] , dataset['WL_QTC'] , dataset['WN_QTC']]):
+        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
+        qtp_total = float(dataset['BS_QTC']) + float(dataset['RF_QTC']) + float(dataset['WL_QTC']) + float(dataset['WN_QTC'])*1.2
+        dataset['HLAC']=qtp_total/living_area
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

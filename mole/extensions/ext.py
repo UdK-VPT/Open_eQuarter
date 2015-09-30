@@ -362,8 +362,10 @@ class OeQExtension:
         legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
 
         resultnode.layer().loadNamedStyle( self.colortable)
+
         legend.nodeRadioAdd(resultnode,self.category)
         legend.nodeShow(resultnode)
+        legend.nodeCollapse(resultnode)
         legend.nodeCollapse(subcat)
         legend.nodeCollapse(cat)
 

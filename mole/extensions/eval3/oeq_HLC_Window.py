@@ -15,7 +15,8 @@ def calculation(self=None, parameters={}):
     dataset = {'WN_QTC': NULL}
     dataset.update(parameters)
 
-    dataset['WN_QTC']=dataset['WN_AR']*dataset['WN_UC']*0.6*dataset['HHRS']/1000
+    if not oeq_global.isnull([dataset['WN_AR'],dataset['WN_UC'],dataset['HHRS']]):
+        dataset['WN_QTC']=float(dataset['WN_AR']) * float(dataset['WN_UC'])*float(dataset['HHRS'])/1000
 
     result = {}
     for i in dataset.keys():

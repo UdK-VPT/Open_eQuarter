@@ -25,9 +25,7 @@ def calculation(self=None, parameters={}):
                     dataset['LENGTH'] = -p / 2 + ((((p / 2) ** 2) - q) ** 0.5)
                 else:
                     dataset['LENGTH'] = -p / 4
-            print ' '
             print 'BLD_ID'
-            print dataset['BLD_ID']
 
             print 'LENGTH'
             print dataset['LENGTH']

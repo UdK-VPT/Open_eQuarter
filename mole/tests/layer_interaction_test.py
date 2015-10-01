@@ -202,7 +202,7 @@ class LayerInteraction_test(unittest.TestCase):
         layer_interaction.trigger_edit_mode(self.iface, edit_layer_name, 'off')
         self.assertFalse(edit_layer.isEditable())
 
-    def test_get_wms_layer_list(self):
+    def test_get_raster_layer_list(self):
         wms_url_with_parameters = self.valid_wms_url
         # use this list for proper testing...
         visibility = [True, False, True, True, True, False]
@@ -221,7 +221,7 @@ class LayerInteraction_test(unittest.TestCase):
         # get a list of all visible wms layers
         expected_layers = {}
         actual_layers = {}
-        visible_raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'visible')
+        visible_raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'visible')
         for i, visible in enumerate(visibility):
             if visible:
                 expected_layers[self.layer_list[i]] = True
@@ -235,7 +235,7 @@ class LayerInteraction_test(unittest.TestCase):
         # get a list of all invisible wms layers
         expected_layers = {}
         actual_layers = {}
-        invisible_raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'invisible')
+        invisible_raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'invisible')
         for i, visible in enumerate(visibility):
             if not visible:
                 expected_layers[self.layer_list[i]] = False
@@ -249,7 +249,7 @@ class LayerInteraction_test(unittest.TestCase):
         # get a list of wms layers
         expected_layers = {}
         actual_layers = {}
-        invisible_raster_layers = layer_interaction.get_wms_layer_list(self.iface, 'all')
+        invisible_raster_layers = layer_interaction.get_raster_layer_list(self.iface, 'all')
         for i, visible in enumerate(visibility):
             expected_layers[self.layer_list[i]] = visible
 

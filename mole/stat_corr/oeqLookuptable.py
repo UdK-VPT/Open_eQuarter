@@ -10,7 +10,7 @@ class lookuptable:
       self.dat= dict(zip(args[0],args[1]))
     else:
       self.dat=dict(zip(args[0::2],args[1::2]))
-      
+
   def __getitem__(self,args): 
     fixed_args=[]
     for j in args:
@@ -24,7 +24,7 @@ class lookuptable:
   
   def values(self):
     return self.dat.values()
-  
+
   def lookup(self,args):
     fixed_args=[]
     for j in args:

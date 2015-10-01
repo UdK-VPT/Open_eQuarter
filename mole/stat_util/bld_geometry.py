@@ -9,8 +9,8 @@ def isnull(value):
 
 def dimensions(area=NULL,perimeter=NULL,length=NULL):
  # golden_rule_ratio=(1 + 5 ** 0.5) / 2 
-  if (isnull(area) & isnull(perimeter)): 
-    if isnull(length): return NULL
+  if (isnull(area) & isnull(perimeter)):
+    if isnull(length) or (length == 0): return NULL
     width = perimeter/2-length
     perimeter=2*length*(1+1/golden)
     area = width * length

@@ -1,20 +1,22 @@
 import os
 import json
+import pickle
 
 from zipfile import ZipFile
 from PyQt4.QtGui import QListView, QStandardItemModel, QStandardItem
 from PyQt4.QtCore import QSize
 
-from mole.project import config
+from mole.project.config import progress_model
 from mole.view.oeq_ui_classes import QProcessViewDelegate
-from mole.oeq_global import OeQ_project_path, OeQ_project_name, OeQ_project_info, OeQ_plugin_path
+from mole import oeq_global
+from mole import extensions
 
 
 class ProgressItemsModel:
 
     def __init__(self):
         self.section_views = []
-        self.load_section_models(config.progress_model)
+        self.load_section_models(progress_model)
 
     def load_section_models(self, path):
         """
@@ -60,11 +62,14 @@ class ProgressItemsModel:
                     data = oeq_zip.read('project_info.json')
                     json_data = json.loads(data)
 
-                for key in OeQ_project_info.keys():
-                    OeQ_project_info[key] = json_data[key]
+                for key in oeq_global.OeQ_project_info.keys():
+                    oeq_global.OeQ_project_info[key] = json_data[key]
 
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
+
+        extensions.load()
+        print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
 
     def save_oeq_project(self):
         """
@@ -75,9 +80,9 @@ class ProgressItemsModel:
         :rtype:
         """
         try:
-            plugin_path = OeQ_plugin_path()
-            project_path = OeQ_project_path()
-            project_name = OeQ_project_name()
+            plugin_path = oeq_global.OeQ_plugin_path()
+            project_path = oeq_global.OeQ_project_path()
+            project_name = oeq_global.OeQ_project_name()
 
             default_progress = os.path.join(plugin_path, 'project', 'default_progress')
             project_file = os.path.join(project_path, project_name + '.oeq')
@@ -99,9 +104,15 @@ class ProgressItemsModel:
 
             # write project info
             with ZipFile(project_file, 'a') as oeq_zip:
-                oeq_zip.writestr('project_info.json', json.dumps(OeQ_project_info))
+                oeq_zip.writestr('project_info.json', json.dumps(oeq_global.OeQ_project_info))
+
         except (TypeError, AttributeError) as AccessOeqGlobalError:
             print(self.__module__, AccessOeqGlobalError)
+
+        extensions.save()
+        print 'Save Project'
+        print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
+
 
     def check_prerequisites_for(self, step_name):
         """

@@ -19,15 +19,17 @@
  ***************************************************************************/
 '''
 import os
+from functools import partial
 
 from PyQt4 import QtGui, QtCore
-from functools import partial
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import iface
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree, InformationSource
-from mole.qgisinteraction import layer_interaction
-from mole.oeq_global import OeQ_project_info, OeQ_information_source, OeQ_information_defaults
+from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
+from mole.qgisinteraction import layer_interaction, legend
+from mole import oeq_global
+from mole import extensions
+from mole.project import config
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
@@ -41,28 +43,42 @@ from ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from ui_information_source_dialog import Ui_InformationSource_dialog
 
 
+# from mole.extensionActive.ui_extensions_active import Ui_Dialog
+
+
+
+# import mole.extensions as extensions
+
+
+
 class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
     def __init__(self):
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
-
-        self.placeholder = '<Select information type>'
-        self.extension_dropdown.addItem(self.placeholder)
-        for info_source in OeQ_information_defaults:
-            self.extension_dropdown.addItem(info_source.extension)
+        #self.refresh_dropdown()
         self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
-
         role = QtGui.QDialogButtonBox.AcceptRole
         self.buttonBox.addButton('Done', role)
         role = QtGui.QDialogButtonBox.ActionRole
         next_button = self.buttonBox.addButton('Save source...', role)
-        next_button.clicked.connect(self.store_information)
-
+        next_button.clicked.connect(self.register_information)
         self.open_geotiff_btn.clicked.connect(lambda: self.load_source_from_disk(self.geotiff))
         self.open_shapefile_btn.clicked.connect(lambda: self.load_source_from_disk(self.shapefile))
         self.open_csv_btn.clicked.connect(lambda: self.load_source_from_disk(self.csv))
         self.open_dxf_btn.clicked.connect(lambda: self.load_source_from_disk(self.dxf))
+        self.stateBox.clicked.connect(self.toggle_state)
+        self.complete_information()
+
+    def refresh_dropdown(self):
+        import mole.extensions as extensions
+        self.extension_dropdown.clear()
+        self.placeholder = '<Select information type>'
+        self.extension_dropdown.addItem(self.placeholder)
+        for importextension in extensions.by_category('Import'):
+            self.extension_dropdown.addItem(importextension.extension_name)
+
+
 
     def complete_information(self):
         """
@@ -71,44 +87,78 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         :rtype:
         """
         # clear all line-edits first
+        import mole.extensions as extensions
         line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
         for line_edit in line_edits:
             line_edit.clear()
 
         extension = self.extension_dropdown.currentText()
-        for info_source in OeQ_information_defaults:
-            if extension == info_source.extension:
-                self.layer_name.setText(info_source.layer_name)
-                self.field_id.setText(info_source.field_id)
-                field = getattr(self, info_source.type)
-                field.setText(info_source.source)
+        for importextension in extensions.by_category('Import'):
+            if extension == importextension.extension_name:
+                self.layer_name.setText(importextension.layer_name)
+                self.field_id.setText(importextension.field_id)
+                field = getattr(self, importextension.source_type)
+                field.setText(importextension.source)
+                self.stateBox.setChecked(importextension.active)
 
-    def store_information(self):
-        if self.extension_dropdown.currentText() is not self.placeholder:
-            extension = self.extension_dropdown.currentText()
-            layer_name = self.layer_name.text()
-            field_id = self.field_id.text()
-            source_path = ''
-            type = ''
+    def toggle_state(self):
+        import mole.extensions as extensions
+        extension_name = self.extension_dropdown.currentText()
+        if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
+            extension = extensions.by_name(self.extension_dropdown.currentText())[0]
+            extension.active = not extension.active
+            self.stateBox.setChecked(extension.active)
 
-            line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
-            for line_edit in line_edits:
-                if line_edit is not self.layer_name and line_edit.text():
-                    type = line_edit.objectName()
-                    source_path = line_edit.text()
-                    break
+    def register_information(self):
+        import mole.extensions as extensions
+        extension_name = self.extension_dropdown.currentText()
+        layer_name = self.layer_name.text()
+        field_id = self.field_id.text()
+        source_path = ''
+        type = ''
+        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        for line_edit in line_edits:
+            if line_edit is not self.layer_name and line_edit.text():
+                type = line_edit.objectName()
+                source_path = line_edit.text()
+                break
+        print "register information"
 
-            if type == 'wms':
-                if not layer_name.startswith('WMS_'):
-                    layer_name = 'WMS_' + str(layer_name)
-                if not layer_name.endswith('_RAW'):
-                    layer_name = str(layer_name) + '_RAW'
+        if extension_name != self.placeholder:
+            print "update information"
+            if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
+                print "found"
+                extensions.by_name(extension_name)[0].update(
+                    field_id=field_id,
+                    source_type=type,
+                    layer_name=layer_name,
+                    source=source_path,
+                    active=self.stateBox.isChecked())
 
-            info_source = InformationSource(extension, type, field_id, layer_name, source_path)
-            OeQ_information_source.append(info_source)
+        else:
+            print "new information"
+            extension = extensions.OeQExtension(
+                category='Import',
+                field_id=field_id,
+                source_type=type,
+                layer_name=layer_name,
+                description=u'Generic extension for ' + layer_name,
+                source=source_path,
+                active=self.stateBox.isChecked())
+            extension.registerExtension()
+        self.refresh_dropdown()
 
-            for line_edit in line_edits:
-                line_edit.clear()
+        # if type == 'wms':
+        #     if not layer_name.startswith('WMS_'):
+        #         layer_name = 'WMS_' + str(layer_name)
+        #    if not layer_name.endswith('_RAW'):
+        #         layer_name = str(layer_name) + '_RAW'
+
+        # info_source = InformationSource(extension, type, field_id, layer_name, source_path)
+        #  oeq_global.OeQ_information_source.append(info_source)
+
+        # for line_edit in line_edits:
+        #    line_edit.clear()
 
     def load_source_from_disk(self, field):
         """
@@ -135,15 +185,29 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter=ext_filter)
             field.setText(filename)
 
+    def exec_(self):
+        """
+        Call the super exec_ method
+        :return:
+        :rtype:
+        """
+        self.refresh_dropdown()
+        QtGui.QDialog.exec_(self)
+        self.refresh_dropdown()
+
+
+
+
+
 class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtGui.QDialog.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
         self.layers_dropdown.currentIndexChanged.connect(self.update_color_values)
-
+        self.destroyed.connect(legend.nodeExitSolo)
         # set the table model
         self.header = ['Color value', 'Parameter Name', 'From', 'To', '']
         self.color_entry_manager.add_layer('dummy')
@@ -155,7 +219,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         # connect the signals
         self.color_table_view.clicked.connect(self.remove_entry)
         self.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
-        self.layers_dropdown.currentIndexChanged.connect(self.hide_and_reorder_layers)
+        self.layers_dropdown.currentIndexChanged.connect(self.setup_legend)
 
         role = QtGui.QDialogButtonBox.ActionRole
         load_button = self.buttonBox.addButton('Load legend...', role)
@@ -252,7 +316,10 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.message_label.clear()
             #ToDo change to use the correct para-name instead
-            parameter_name = str(self.layers_dropdown.currentText())[:10]
+            #parameter_name = str(self.layers_dropdown.currentText())[:10]
+            parameter_name = extensions.by_layername(layer)
+            if not parameter_name: return None
+            parameter_name = parameter_name[0].field_id
             self.color_entry_manager.add_color_value_quadruple_to_layer([color_key, parameter_name, 0, 0], layer)
             color_map = self.color_entry_manager.layer_values_map[layer]
             model = QColorTableModel(color_map, self.header, self)
@@ -276,7 +343,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.recent_layer = layer
 
         try:
-            wms_layer = layer_interaction.find_layer_by_name(layer)
+            wms_layer = legend.nodeByName(layer)[0].layer()
             url = wms_layer.legendUrl()
             self.legend_view.load(QtCore.QUrl(url))
         except (TypeError, AttributeError) as NoneTypeError:
@@ -308,6 +375,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
         self.color_entry_manager.read_color_map_from_qml(filename)
         self.update_color_values()
+        activeextensions = extensions.by_name(layer)
+        try:
+            activeextensions[0].colortable = filename
+        except:
+            pass
 
     def save_color_map(self):
         """
@@ -330,39 +402,55 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         else:
             self.message_label.setStyleSheet(_fromUtf8("color: red;"))
             self.message_label.setText('Failure - Could not write legend to to \n\t"{}".'.format(out_path))
+        activeextensions = extensions.by_layername(layer.name())
+        try:
+            activeextensions[0].colortable = out_path
+        except:
+            pass
 
     def refresh_layer_list(self):
+        from mole import extensions
         """
         Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
         :return:
         :rtype:
         """
+        legend.nodeExitSolo()
         dropdown = self.layers_dropdown
         dropdown.clear()
-        wms_list = layer_interaction.get_wms_layer_list(iface, visibility='visible')
-
+        raster_list = layer_interaction.get_raster_layer_list(iface, visibility='visible')
         layer = None
-        for layer in wms_list:
+        for layer in raster_list:
             source = layer.publicSource()
-            if os.path.basename(source).endswith('.tif'):
-                dropdown.addItem(layer.name())
-                self.color_entry_manager.add_layer(layer.name())
+            dropdown.addItem(layer.name())
+            self.color_entry_manager.add_layer(layer.name())
+            ext = extensions.by_layername(layer.name())
+            if ext == []:
+                ltu_file = os.path.dirname(layer.publicSource())
+                ltu_file = os.path.join(ltu_file, layer.name() + '.qml')
+            else:
+                ext = ext[0]
+                ltu_file = ext.colortable
+                print ext.colortable
+            print ltu_file
+            if ltu_file != None:
+                if os.path.isfile(os.path.join(ltu_file)):
+                    self.color_entry_manager.read_color_map_from_qml(os.path.join(ltu_file))
+        oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
+        if oeq_global.QeQ_current_work_layer != None:
+            print config.open_layers_layer_name
+            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
+        #oeq_global.QeQ_current_work_layer = layer
+        #layer_interaction.move_layer_to_position(iface, layer, 0)
 
-        layer_interaction.move_layer_to_position(iface, layer, 0)
+    def setup_legend(self):
+        legend.nodeExitSolo()
+        oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
+        if oeq_global.QeQ_current_work_layer != None:
+            print config.open_layers_layer_name
+            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
 
-    def hide_and_reorder_layers(self):
-        """
-        Hide all .tif-layers except for the one which is currently selected and put that layer on top of the layer tree.
-        :return:
-        :rtype:
-        """
-        for i in range(self.layers_dropdown.count()):
-            layer_name = self.layers_dropdown.itemText(i)
-            layer_interaction.unhide_or_remove_layer(layer_name, 'hide', iface)
 
-        current_layer = self.layers_dropdown.currentText()
-        layer_interaction.move_layer_to_position(iface, current_layer, 0)
-        layer_interaction.unhide_or_remove_layer(current_layer, 'unhide', iface)
 
     def show(self):
         """
@@ -371,8 +459,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         self.refresh_layer_list()
-        self.hide_and_reorder_layers()
         QtGui.QDialog.show(self)
+        self.update_color_values()
 
     def exec_(self):
         """
@@ -455,7 +543,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
             if (page_name) == page.accessibleName():
                 index = self.active_page_dropdown.currentIndex()
-                self.active_page_dropdown.setItemData(index, self._check_mark, Qt.DecorationRole)
+                self.active_page_dropdown.setItemData(index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
 
 
@@ -484,141 +572,227 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.setupUi(self)
         self.defaults = {}
         self.municipals = [{}]
-        self.location_postal.editingFinished.connect(self.find_municipal_information)
+        self.found_locations = [{}]
         self.municipal_information = MunicipalInformationTree()
-
-        if self.municipal_information.tree == {}:
-            self.municipal_information.split_data_to_tree_model()
-
+        self.municipal_information.read_municipals()
         for field in self.form.findChildren(QtGui.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
-
-        self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
+        self.location_country.setText(config.country)
         self.lookup_by_address.clicked.connect(self.location_by_address)
+        self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
+        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
 
+    def apply(self):
+        if not issubclass(type(self.location_city), QtGui.QLineEdit):
+             self.update_form(1)
+        for key in oeq_global.OeQ_project_info:
+            field = getattr(self, key)
+            if (key == 'project_name') & (not field): continue
+            if key == 'description':
+                oeq_global.OeQ_project_info[key] = field.toPlainText()
+            else:
+                oeq_global.OeQ_project_info[key] = field.text()
 
     def show(self):
-        for key in OeQ_project_info:
+        print oeq_global.OeQ_project_info
+        for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
-            # print str(OeQ_project_info[key])
-            field.setText(str(OeQ_project_info[key]))
+            if key == 'description':
+                field.setPlainText(unicode(oeq_global.OeQ_project_info[key]))
+            else:
+                field.setText(unicode(oeq_global.OeQ_project_info[key]))
         QtGui.QDialog.show(self)
+
+    def reset(self):
+        for key in oeq_global.OeQ_project_info:
+            field = getattr(self, key)
+            field.setText(unicode(u''))
+        print 'resetted'
 
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
+            # print self.location_by_address()
+
+    def update_form(self, index):
+        index = index - 1
+        self.lineedit_city_layout()
+        if self.found_locations != []:
+            location_info = self.found_locations[index]
+            #print location_info
+            self.location_country.setText(location_info['country'])
+            self.location_city.setText(location_info['locality'])
+            self.location_street.setText(location_info['route'])
+            if not oeq_global.isEmpty(location_info['street_number']):
+                self.location_street.setText(self.location_street.text() + u' ' + location_info['street_number'])
+            if not oeq_global.isEmpty(self.location_postal.setText(location_info['postal_code'])):
+                self.location_postal.setText(location_info['postal_code'])
+            self.location_lon.setText(str(location_info['longitude']))
+            self.location_lat.setText(str(location_info['latitude']))
+            self.location_crs.setText('EPSG:4326')
+            self.set_municipal_data()
+
+
+    def set_municipal_data(self):
+        self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(self.location_postal.text().encode('utf8')) , self.municipal_information.municipal_db)
+        self.municipals = filter(lambda x :  x['NAME'].encode('utf8').startswith(self.location_city.text().encode('utf8')) , self.municipal_information.municipal_db)
+        if len(self.municipals) > 0:
+            pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+            avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
+        else:
+            pop_dens = config.default_population_density
+            avg_yoc = config.default_average_build_year
+        self.average_build_year.setText(str(avg_yoc))
+        self.population_density.setText(str(pop_dens))
+
+
+    def get_location_from_web(self,index):
+         index -= 1
+         self.lineedit_city_layout()
+         self.location_city.setText(self.municipals[index]['NAME'])
+         self.location_postal.setText(str(self.municipals[index]['POSTCODE']))
+         pop_dens = '{}'.format(self.municipals[index]['POP_DENS'])
+         self.population_density.setText(pop_dens)
+         avg_yoc = '{}'.format(self.municipals[index]['AVG_YOC'])
+         self.average_build_year.setText(avg_yoc)
+         citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
+         address = ', '.join([config.country, citystring, self.location_street.text()])
+         self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+         if len(self.found_locations) == 1:
+            self.update_form(1)
+         elif len(self.found_locations) > 1:
+            self.combobox_city_layout()
+            self.location_city.clear()
+            self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+            for loc in self.found_locations:
+                self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+            self.location_city.currentIndexChanged.connect(self.update_form)
 
     def location_by_address(self):
-        postal = self.location_postal.text()
-        if postal == "Postal": postal = ""
-        city_street = self.location_city.text()
-        if city_street == "City or street": city_street = ""
+         #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
+         #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
 
-        if isinstance(city_street, unicode):
-            city_street = city_street.encode('utf-8')
-            address = '{} {}'.format(postal, city_street)
-            address = address.decode('utf-8')
-        else:
-            address = '{} {}'.format(postal, city_street)
-        print address
-        location_info = googlemaps.getCoordinatesByAddress(address, crs=4326)
+         if oeq_global.isEmpty(self.location_city.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_postal.text())):
+            postal = self.location_postal.text()
+            self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(postal) , self.municipal_information.municipal_db)
+            if len(self.municipals) > 0:
+                if len(self.municipals) ==  1:
+                    self.lineedit_city_layout()
+                    self.location_city.setText(self.municipals[0]['NAME'])
+                    self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                    self.get_location_from_web(1)
+                else:
+                    self.combobox_city_layout()
+                    self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                    for i in [ str(i['POSTCODE']) + u' ' + i['NAME'] for i in self.municipals]:
+                        self.location_city.addItem(_fromUtf8(i))
+                    self.location_city.currentIndexChanged.connect(self.get_location_from_web)
+         elif oeq_global.isEmpty(self.location_postal.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_city.text())):
+            city = self.location_city.text()
+            self.municipals = filter(lambda x :  x['NAME'].startswith(city) , self.municipal_information.municipal_db)
+            if len(self.municipals) > 0:
+                if len(self.municipals) ==  1:
+                    self.lineedit_city_layout()
+                    self.location_city.setText(self.municipals[0]['NAME'])
+                    self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                    self.get_location_from_web(1)
+                else:
+                    self.combobox_city_layout()
+                    self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                    for i in [ str(i['POSTCODE']) + u' ' + i['NAME'] for i in self.municipals]:
+                        self.location_city.addItem(_fromUtf8(i))
+                    self.location_city.currentIndexChanged.connect(self.get_location_from_web)
+         else:
+              #self.lineedit_city_layout()
+              #self.lineedit_postal_layout()
+             citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
+             address = ', '.join([config.country, citystring, self.location_street.text()])
+             self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+             if len(self.found_locations) == 1:
+                self.update_form(1)
+             elif len(self.found_locations) > 1:
+                self.combobox_city_layout()
+                self.location_city.clear()
+                self.location_city.addItem(_fromUtf8(u'< Select Location >'))
+                for loc in self.found_locations:
+                    self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+                self.location_city.currentIndexChanged.connect(self.update_form)
 
-        try:
-            street = location_info['route']
-            city = location_info['locality']
-            country = location_info['country']
-            postal = location_info['postal_code']
-            lon = location_info['longitude']
-            lat = location_info['latitude']
-
-            loc_city = u'{}, {}, {}'.format(street, city, country)
-            self.location_city.setText(loc_city)
-            self.location_postal.setText(postal)
-            self.location_lon.setText(str(lon))
-            self.location_lat.setText(str(lat))
-            self.location_crs.setText('EPSG:4326')
-        except (KeyError, TypeError) as AddressNotFound:
-            print(self.__module__, AddressNotFound)
 
     def location_by_coordinates(self):
+        #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
+        #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
-        location_info = googlemaps.getAddressByCoordinates(lat, lon, crs)
+        self.found_locations = googlemaps.getAddressByCoordinates(lat, lon, crs)
+        if len(self.found_locations) == 1:
+            self.update_form(1)
+        elif len(self.found_locations) > 1:
+            self.combobox_city_layout()
+            self.location_city.clear()
+            self.location_city.addItem(_fromUtf8(u'< Select Project Location >'))
+            for loc in self.found_locations:
+                self.location_city.addItem(_fromUtf8(loc['formatted_location']))
+            self.location_city.currentIndexChanged.connect(self.update_form)
 
-        street = location_info['route']
-        city = location_info['locality']
-        country = location_info['country']
-        postal = location_info['postal_code']
-
-        loc_city = u'{}, {}, {}'.format(street, city, country)
-        self.location_city.setText(loc_city)
-        self.location_postal.setText(postal)
-        if crs == 'CRS':
-            self.location_crs.setText('EPSG:4326')
 
     def find_municipal_information(self):
-        postcode = self.location_postal.text()
+        city = self.location_city.text()
+        postal = self.location_postal.text()
+        if ((city == '') | (city == u'')):
+            if ((postal != '') & (postal != u'')):
+                self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(postal) , self.municipal_information.municipal_db)
+                if len(self.municipals) > 0:
+                    if len(self.municipals) ==  1:
+                        self.lineedit_city_layout(self.municipals[0]['NAME'])
+                        self.location_city.setText(self.municipals[0]['NAME'])
+                        self.location_city.editingFinished.connect(self.location_by_address, True)
+                        pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+                        self.population_density.setText(pop_dens)
+                        avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
+                        self.average_build_year.setText(avg_yoc)
+                    else:
+                        self.combobox_city_layout()
+                        for i in [i['POSTCODE']+' '+i['NAME'] for i in self.municipals]:
+                            self.location_city.addItem(_fromUtf8(i))
+                        self.location_city.currentIndexChanged.connect(self.set_city)
+        else:
+            if ((city != '') & (city != u'')):
+                self.municipals = filter(lambda x : ((x['NAME'] == city) | x['NAME'].startswith(city+',') | x['NAME'].startswith(city+' ')) , self.municipal_information.municipal_db)
+                if len(self.municipals) > 0:
+                    if len(self.municipals) ==  1:
+                        self.lineedit_postal_layout()
+                        self.location_postal.setText(str(self.municipals[0]['POSTCODE']))
+                        pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+                        self.population_density.setText(pop_dens)
+                        avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
+                        self.average_build_year.setText(avg_yoc)
+                    else:
+                        self.combobox_postal_layout()
+                        for i in [i['POSTCODE']+' '+i['NAME'] for i in self.municipals]:
+                            self.location_postal.addItem(_fromUtf8(i))
+                        self.location_postal.currentIndexChanged.connect(self.set_postal)
 
-        if postcode:
-            try:
-                l0_key = postcode[0]
-                l1_key = postcode[1]
-                l2_key = postcode[2:]
-                municipals = self.municipal_information.tree[l0_key][l1_key][l2_key]
-            except (KeyError, ValueError):
-                self.location_postal.setStyleSheet('color: rgb(255, 0, 0)')
-                return
 
-            self.municipals = municipals
-            if len(municipals) == 1:
-                self.lineedit_city_layout()
-                self.fill_municipal_information(0)
 
-            elif len(municipals) > 1:
-                self.combobox_city_layout()
-                self.location_city.clear()
-
-                for municipal in municipals:
-                    self.location_city.addItem(_fromUtf8(municipal['NAME']))
-
-                self.location_city.currentIndexChanged.connect(self.fill_municipal_information)
-                self.fill_municipal_information(0)
-
-    def fill_municipal_information(self, index):
-        municipal = self.municipals[index]
-
-        if issubclass(type(self.location_city), QtGui.QLineEdit):
-            city_name = _fromUtf8(municipal['NAME'])
-            self.location_city.setText(city_name)
-
-        try:
-            pop_dens = '{}'.format(municipal['POP_DENS'])
-            self.population_density.setText(pop_dens)
-        except KeyError as Error:
-            print(self.__module__, Error)
-
-        try:
-            avg_yoc = '{}'.format(municipal['AVG_YOC'])
-            self.average_build_year.setText(avg_yoc)
-        except KeyError as Error:
-            print(self.__module__, Error)
-
-    def combobox_city_layout(self):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
+    def combobox_city_layout(self, entries=[]):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
         if isinstance(city_edit, QtGui.QLineEdit):
             location_box.removeWidget(city_edit)
+            width = city_edit.minimumWidth()
             city_edit.deleteLater()
-            self.location_city = QtGui.QComboBox()
-            self.location_city.setObjectName('location_city')
-            self.location_city.setMinimumWidth(228)
+            self.location_city = QtGui.QComboBox(self.form)
+            self.location_city.setObjectName(_fromUtf8("location_city"))
+            self.location_city.setMinimumWidth(width)
             location_box.insertWidget(0, self.location_city)
 
-    def lineedit_city_layout(self):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_layout')
+
+    def lineedit_city_layout(self, text=''):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
         if isinstance(city_edit, QtGui.QComboBox):
@@ -629,6 +803,44 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
             location_box.insertWidget(0, self.location_city)
+
+
+
+    def set_postal(self, index):
+        municipal = self.municipals[index]
+        self.lineedit_postal_layout()
+        self.location_postal.setText(str(municipal['POSTCODE']))
+        pop_dens = '{}'.format(municipal['POP_DENS'])
+        self.population_density.setText(pop_dens)
+        avg_yoc = '{}'.format(municipal['AVG_YOC'])
+        self.average_build_year.setText(avg_yoc)
+
+    def combobox_postal_layout(self, entries=[]):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_edit = location_box.itemAt(0).widget()
+
+        if isinstance(location_edit, QtGui.QLineEdit):
+            location_box.removeWidget(location_edit)
+            width = location_edit.minimumWidth()
+            location_edit.deleteLater()
+            self.location_postal = QtGui.QComboBox()
+            self.location_postal.setObjectName('location_postal')
+            self.location_postal.setMinimumWidth(width)
+            location_box.insertWidget(0, self.location_postal)
+
+    def lineedit_postal_layout(self, text=''):
+        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_edit = location_box.itemAt(0).widget()
+
+        if isinstance(location_edit, QtGui.QComboBox):
+            location_box.removeWidget(location_edit)
+            location_edit.deleteLater()
+            self.location_postal = QtGui.QLineEdit(self.form)
+            self.location_postal.setMinimumWidth(228)
+            self.location_postal.setObjectName(_fromUtf8("location_postal"))
+            self.location_postal.setStyleSheet('color: rgb(0,0,0)')
+            location_box.insertWidget(0, self.location_postal)
+
 
 
 class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):

@@ -7,7 +7,8 @@ import os
 import time
 from string import find
 from mole.project import config
-from mole.oeq_global import *
+from mole.qgisinteraction import legend
+from mole import oeq_global
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -35,26 +36,75 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
             QSettings().setValue('/Projections/defaultBehaviour', 'prompt')
 
         # create a new shape-file called layer_name, of the type layer_type, with system encoding and crs according to crs_name
-        shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory', False)
-        shape_layer.setProviderEncoding('System')
+        shape_layer=legend.nodeCreateVectorLayer(layer_name,'top',source=layer_type,crs=crs_name ,providertype="ESRI Shapefile")
+
+        #shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory')
+        #shape_layer.setProviderEncoding('System')
 
         # reset appearance of crs-choice dialog to previous settings
         QSettings().setValue('/Projections/defaultBehaviour', old_validation)
-        #QgsMapLayerRegistry.instance().addMapLayer(shape_layer,False) 
-        return shape_layer
+        # QgsMapLayerRegistry.instance().addMapLayer(shape_layer,True)
+        return shape_layer.layer()
 
     else:
         return None
 
+
+def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=True):
+    import os
+    from qgis.utils import iface
+    from mole import oeq_global
+    if oeq_global.OeQ_project_name() == '':
+        iface.actionSaveProjectAs().trigger()
+    layer_name = vlayer.name()
+    layer_crs = vlayer.crs()
+    path = os.path.join(oeq_global.OeQ_project_path(), layer_name + '.shp')
+    error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, path, "System", layer_crs, 'ESRI Shapefile')
+    if error == QgsVectorFileWriter.NoError:
+        if replace_in_legend:
+            QgsMapLayerRegistry.instance().removeMapLayer(vlayer.id())
+            rewritten_layer = iface.addVectorLayer(path, layer_name, "ogr")
+            if not rewritten_layer.isValid():
+                oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+                return vlayer
+            if style != None:
+                add_style_to_layer(style, rewritten_layer)
+                rewritten_layer.startEditing()
+                time.sleep(0.2)
+                rewritten_layer.commitChanges()
+            return rewritten_layer
+        else:
+            oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+            return vlayer
+
 #remove a layer including all files
-def fullRemove(layer_name,types=['.shp','.shx','.prj','.qpj','.dbf','.idm','.ind']):
-  if find_layer_by_name(layer_name) is not None:
-     QgsMapLayerRegistry.instance().removeMapLayer( find_layer_by_name(layer_name).id() )
-  for i in types: 
-     if os.access(os.path.join(OeQ_project_path(), layer_name + i), os.F_OK):
-        os.remove(os.path.join(OeQ_project_path(), layer_name + i))
+def fullRemove(layer_name=None, layer_id=None):
+    if layer_id is None:
+        thelayer = find_layer_by_name(layer_name)
+    else:
+        thelayer = find_layer_by_id(layer_id)
+    if thelayer is not None:
+        layer_name = thelayer.name()
+        QgsMapLayerRegistry.instance().removeMapLayer(thelayer.id())
+        delete_layer_files(layer_name)
+    oeq_global.OeQ_unlockQgis()
 
-
+def delete_layer_files(layer):
+    if (type(layer) == type('')) | (type(layer) == type(u'')):
+        layer = find_layer_by_name(layer)
+    if layer == None:
+        return None
+    source = layer.source()
+    path = os.path.dirname(source)
+    filenameroot = os.path.basename(source).split('.')
+    if len(filenameroot) < 2:
+        return []
+    filenameroot = ''.join(filenameroot[:-1])+ '.'
+    if path.exists(path):
+                files = os.listdir(path)
+                for file in files:
+                    if files.startswith(filenameroot):
+                        os.remove(os.path.join(path, file))
 
 def load_layer_from_disk(path_to_layer, name):
     """
@@ -68,7 +118,7 @@ def load_layer_from_disk(path_to_layer, name):
     """
     if os.path.exists(path_to_layer):
         disk_layer = QgsVectorLayer(path_to_layer, name, 'ogr')
-        #QgsMapLayerRegistry.instance().addMapLayer(disk_layer,False)           
+        # QgsMapLayerRegistry.instance().addMapLayer(disk_layer,False)
         return disk_layer
     else:
         return None
@@ -118,6 +168,21 @@ def find_layer_by_name(layer_name):
             return None
 
 
+def find_layer_by_id(layer_id):
+    """
+    Iterate over all layers and return the layer with the id layer_id, if found
+    :param layer_name: Name of the layer that shall be looked for
+    :type layer_name: str
+    :return:
+    :rtype:
+    """
+    try:
+        found_layer = QgsMapLayerRegistry.instance().mapLayers()[layer_id]
+    except:
+        return None
+    return found_layer
+
+
 def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
     """
     Hide or remove the given layer from the MapLayerRegistry, depending on the mode.
@@ -138,6 +203,7 @@ def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
     if layer and mode == 'unhide' and iface:
         iface.legendInterface().setLayerVisible(layer, True)
 
+
 #ToDo Try to use the currently recommended way to save the layer
 def write_vector_layer_to_disk(vlayer, full_path):
     """
@@ -153,7 +219,6 @@ def write_vector_layer_to_disk(vlayer, full_path):
 
     if out_name.upper().endswith('.SHP'):
         out_name = out_name[:-4]
-
     if vlayer is not None and vlayer.isValid() and os.path.exists(out_path):
 
         if os.path.exists(os.path.join(out_path, out_name + '.shp')):
@@ -171,8 +236,9 @@ def write_vector_layer_to_disk(vlayer, full_path):
         provider = vlayer.dataProvider()
         encoding = provider.encoding()
         crs = provider.crs()
-        write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
 
+        write_error = QgsVectorFileWriter.writeAsVectorFormat(vlayer, full_path, encoding, crs, 'ESRI Shapefile')
+        #QgsVectorFileWriter()
         if write_error == QgsVectorFileWriter.WriterError:
             raise IOError('Can\'t create the file: {0}'.format(full_path))
             return None
@@ -183,21 +249,19 @@ def write_vector_layer_to_disk(vlayer, full_path):
             while not os.path.exists(full_path) and timeout:
                 time.sleep(0.1)
                 timeout -= 1
+                # disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
 
-            disk_layer = QgsVectorLayer(full_path, out_name, 'ogr')
-            
-            if disk_layer.isValid():
-                old_features = provider.getFeatures()
-                new_provider = disk_layer.dataProvider()
-                feature_list = []
-                for feature in old_features:
-                    feature_list.append(feature)
+                # if disk_layer.isValid():
+                #    old_features = provider.getFeatures()
+                #    new_provider = disk_layer.dataProvider()
+                #    feature_list = []
+                #    for feature in old_features:
+                #        feature_list.append(feature)
 
-                new_provider.addFeatures(feature_list)
-                return disk_layer
-            else:
-                return None
-
+                #    new_provider.addFeatures(feature_list)
+                #    return disk_layer
+                # else:
+                #    return None
     else:
         return None
 
@@ -227,7 +291,7 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
                 edit_layer.commitChanges()
 
 
-def get_wms_layer_list(iface, visibility='all'):
+def get_raster_layer_list(iface, visibility='all'):
     """
     Iterate over all layers and return a list of the currently visible WMS-files.
     :param iface: The Qgis-interface that will be accessed
@@ -235,30 +299,30 @@ def get_wms_layer_list(iface, visibility='all'):
     :return: A list containing raster layers with the given visibility-value
     :rtype: list
     """
-    active_wms_layers = []
+    active_raster_layers = []
     layer_list = QgsMapLayerRegistry.instance().mapLayers()
     interface = iface.legendInterface()
 
     if visibility == 'visible':
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and interface.isLayerVisible(layer):
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
     elif visibility == 'invisible':
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer and not interface.isLayerVisible(layer):
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
     else:
         for key, layer in layer_list.iteritems():
             if layer.type() == QgsMapLayer.RasterLayer:
-                active_wms_layers.append(layer)
+                active_raster_layers.append(layer)
 
-        return active_wms_layers
+        return active_raster_layers
 
 
 def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
@@ -282,8 +346,8 @@ def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
         else:
             return rlayer
 
-
-def zoom_to_layer(iface, layer_name):
+'''
+def Xzoom_to_layer(iface, layer_name):
     """
     Trigger the iface's zoom-to-layer-action on the layer given by its name.
     :param iface: Reference to Qgis interface
@@ -303,7 +367,7 @@ def zoom_to_layer(iface, layer_name):
             iface.actionZoomToLayer().trigger()
 
 
-def biuniquify_layer_name(layer_name):
+def Xbiuniquify_layer_name(layer_name):
     """
     Check the layer-registry if a layer with the same name exists and if so, append a number to make the name unique.
     :param layer_name: Name which will be checked for uniqueness
@@ -345,7 +409,7 @@ def move_layer_to_position(iface, layer_name, position):
             root.removeChildNode(layer_node)
             iface.setActiveLayer(clone.layer())
             break
-
+'''
 
 def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type = 'tif'):
     """
@@ -373,16 +437,13 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
         height = max_resolution
 
     # append the resolution to the filename and call the save method
-    
+
     filename=layer.name()
-    print filename
     if filename.startswith("WMS_"):
        filename=filename.replace("WMS_","")
-       print filename
-    else:   
+    else:
        resolution_prefix = '{}_{}-'.format(width, height)
        filename = resolution_prefix + layer.name()
-    print filename
     img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
     color = QColor(187, 187, 187, 0)
     img.fill(color.rgba())
@@ -401,7 +462,6 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
     leonardo.end()
 
     filename += '.{}'.format(image_type)
-    print filename
     out_path = os.path.join(path_to_file, filename)
     if img.save(out_path, image_type):
         return out_path
@@ -429,8 +489,9 @@ def intersect_shapefiles(shape1, shape2, output_path):
             #progress.setMaximum(100)
             return analyser.intersection(shape1, shape2, output_path) #p=progress)
     except AttributeError, Error:
-        return False
         print(Error)
+        return False
+
 
 
 def edit_housing_layer_attributes(housing_layer):
@@ -454,21 +515,26 @@ def edit_housing_layer_attributes(housing_layer):
         area_index = name_to_index['AREA']
         perimeter_index = name_to_index['PERIMETER']
         building_index = name_to_index['BLD_ID']
-        fid_index = name_to_index['FID']
+        try:
+            fid_index = name_to_index['FID']
+        except:
+            pass
+
         building_id = 0
 
         for feature in provider.getFeatures():
-            if isnull(feature.attribute('FID')):
-                # if feature.attribute('BLD_ID') == 0:
-                geometry = feature.geometry()
-                values = {area_index : geometry.area(), perimeter_index : geometry.length(), building_index : '{}'.format(building_id)}
-                provider.changeAttributeValues({feature.id() : values})
-                building_id += 1
-            else:
-                # These features are most likely to be duplicates of those that have an FID-entry
-                provider.deleteFeatures([feature.id()])
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
+            values = {area_index: geometry.area(), perimeter_index: geometry.length(),
+                      building_index: '{}'.format(building_id)}
+            provider.changeAttributeValues({feature.id(): values})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
+            #    provider.deleteFeatures([feature.id()])
 
-        provider.deleteAttributes([fid_index])
+        #provider.deleteAttributes([fid_index])
         return housing_layer.commitChanges()
     except AttributeError, Error:
         print(__name__, Error)
@@ -487,42 +553,40 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     :return:
     :rtype:
     """
-    provider = None
-    try:
-        provider = layer.dataProvider()
-    except AttributeError, NoneTypeError:
-        print(__name__, NoneTypeError)
-        return
 
-    for color_key in color_dict.keys():
-        color_quadriple = color_key[5:-1].split(',')
-        color_quadriple = map(int,  color_quadriple)
+    import mole.extensions as extensions
+    extension = extensions.by_layername(layer.name(), 'Import')
+    if extension != []:
+        extension = extension[0]
+        try:
+            provider = layer.dataProvider()
+        except AttributeError, NoneTypeError:
+            print(__name__, NoneTypeError)
+            return
 
-        for feat in provider.getFeatures():
-            if colors_match_feature(color_quadriple, feat, field_name):
-                parameter_name = field_name + '_P'
-                parameter_low = field_name + '_L'
-                parameter_high = field_name + '_H'
-                parameter_average = field_name + '_M'
-                attributes = [QgsField(parameter_name, QVariant.String),
-                              QgsField(parameter_low, QVariant.Double),
-                              QgsField(parameter_average, QVariant.Double),
-                              QgsField(parameter_high, QVariant.Double),
-                              ]
-                add_attributes_if_not_exists(layer, attributes)
+        for color_key in color_dict.keys():
+            color_quadriple = color_key[5:-1].split(',')
+            color_quadriple = map(int, color_quadriple)
 
-                name_index = provider.fieldNameIndex(parameter_name)
-                low_index = provider.fieldNameIndex(parameter_low)
-                average_index = provider.fieldNameIndex(parameter_average)
-                high_index = provider.fieldNameIndex(parameter_high)
+            for feat in provider.getFeatures():
+                if colors_match_feature(color_quadriple, feat, field_name):
+                    result = {extension.field_id + '_P': {'type': QVariant.String,
+                                                          'value': color_dict[color_key][0]},
+                               extension.par_in[0]: {'type': QVariant.Double,
+                                                    'value': color_dict[color_key][1]},
+                               extension.par_in[1]: {'type': QVariant.Double,
+                                                    'value': color_dict[color_key][2]}}
 
-                name_value = color_dict[color_key][0]
-                low_value = color_dict[color_key][1]
-                average_value = (float(color_dict[color_key][1])+float(color_dict[color_key][2]))/2
-                high_value = color_dict[color_key][2]
+                    result.update(extension.evaluate({extension.par_in[0]: color_dict[color_key][1],
+                                                      extension.par_in[1]: color_dict[color_key][2]}))
+                    attributes = []
+                    attributevalues = {}
+                    for i in result.keys():
+                        attributes.append(QgsField(i, result[i]['type']))
+                        attributevalues.update(provider.fieldNameIndex(i), result[i]['value'])
 
-                values = {name_index: name_value, low_index: low_value, average_index: average_value, high_index: high_value}
-                provider.changeAttributeValues({feat.id(): values})
+                    add_attributes_if_not_exists(layer, attributes)
+                    provider.changeAttributeValues({feat.id(): attributevalues})
 
 
 def colors_match_feature(color_quadriple, feature, field_name):
@@ -537,6 +601,10 @@ def colors_match_feature(color_quadriple, feature, field_name):
     :return: If the quadriple matches
     :rtype: bool
     """
+    print 'COLOR MATCH'
+    print color_quadriple
+    print feature
+    print field_name
     match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
             and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
             and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))
@@ -563,5 +631,12 @@ def add_attributes_if_not_exists(layer, attribute):
     for att in attribute:
         if att.name() not in name_map:
             provider.addAttributes([att])
-
+    layer.updateFields()
     layer.commitChanges()
+
+def zoomToActiveLayer():
+    from qgis.utils import iface
+    vLayer = iface.activeLayer()
+    canvas = iface.mapCanvas()
+    extent = vLayer.extent()
+    canvas.setExtent(extent)

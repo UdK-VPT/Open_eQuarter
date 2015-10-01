@@ -1,9 +1,9 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <?xml-stylesheet type='text/xsl' href='/plugins.xsl' ?>
 <plugins>
-  <pyqgis_plugin name='Open eQuarter' version='0.4A'>
+  <pyqgis_plugin name='Open eQuarter' version='0.8'>
     <description>The plugin automates the setup for investigating an area.</description>
-    <version>0.4A</version>
+    <version>0.8</version>
     <qgis_minimum_version>2.4</qgis_minimum_version>
     <homepage>http://udk-vpt.github.io/Open_eQuarter</homepage>
     <file_name>mole.zip</file_name>
@@ -11,6 +11,6 @@
     <download_url>http://udk-vpt.github.io/Open_eQuarter/qgis_repo/mole.zip</download_url>
     <uploaded_by>OeQ Team</uploaded_by>
     <create_date>2015-03-10</create_date>
-    <update_date>2015-08-10</update_date>
+    <update_date>2015-10-01</update_date>
   </pyqgis_plugin>
 </plugins

@@ -182,7 +182,7 @@ class OeQExtension:
     def default_colortable(self):
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
         print defcolortable
-        if len(defcolortable) > 0:
+        if defcolortable:
             print defcolortable[0].colortable
             return defcolortable[0].colortable
         return None

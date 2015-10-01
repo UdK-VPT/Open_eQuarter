@@ -365,8 +365,11 @@ class OeQExtension:
 
         legend.nodeRadioAdd(resultnode,self.category)
         legend.nodeShow(resultnode)
+        time.sleep(0.1)
         legend.nodeCollapse(resultnode)
+        time.sleep(0.1)
         legend.nodeCollapse(subcat)
+        time.sleep(0.1)
         legend.nodeCollapse(cat)
 
         #legend.nodeZoomTo(config.investigation_shape_layer_name)

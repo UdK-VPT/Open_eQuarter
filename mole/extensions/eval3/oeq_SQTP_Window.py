@@ -30,8 +30,8 @@ extension = OeQExtension(
 
     category='Evaluation',
     subcategory='Window',
-    extension_name='Window SpecTransm (SQT, Contemporary)',
-    layer_name= 'SQT Window Contemporary',
+    extension_name='Window SpecTransm (SQT, Present)',
+    layer_name= 'SQT Window Present',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
     field_id='WN_SQTP',

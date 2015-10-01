@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="2.10.1-Pisa" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+<qgis version="2.10.1-Pisa" minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
     <edittype widgetv2type="TextEdit" name="gml_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
@@ -977,15 +977,15 @@
     <property key="labeling/bufferColorB" value="255"/>
     <property key="labeling/bufferColorG" value="255"/>
     <property key="labeling/bufferColorR" value="255"/>
-    <property key="labeling/bufferDraw" value="false"/>
+    <property key="labeling/bufferDraw" value="true"/>
     <property key="labeling/bufferJoinStyle" value="64"/>
     <property key="labeling/bufferNoFill" value="false"/>
-    <property key="labeling/bufferSize" value="1"/>
+    <property key="labeling/bufferSize" value="1.2"/>
     <property key="labeling/bufferSizeInMapUnits" value="false"/>
     <property key="labeling/bufferSizeMapUnitMaxScale" value="0"/>
     <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
     <property key="labeling/bufferTransp" value="0"/>
-    <property key="labeling/centroidInside" value="false"/>
+    <property key="labeling/centroidInside" value="true"/>
     <property key="labeling/centroidWhole" value="false"/>
     <property key="labeling/decimals" value="3"/>
     <property key="labeling/displayAll" value="false"/>
@@ -993,8 +993,8 @@
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
-    <property key="labeling/enabled" value="false"/>
-    <property key="labeling/fieldName" value=""/>
+    <property key="labeling/enabled" value="true"/>
+    <property key="labeling/fieldName" value="'~ ' +  to_string( round(HEIGHT,0))"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>
@@ -1018,12 +1018,12 @@
     <property key="labeling/labelOffsetMapUnitMinScale" value="0"/>
     <property key="labeling/labelPerPart" value="false"/>
     <property key="labeling/leftDirectionSymbol" value="&lt;"/>
-    <property key="labeling/limitNumLabels" value="false"/>
+    <property key="labeling/limitNumLabels" value="true"/>
     <property key="labeling/maxCurvedCharAngleIn" value="20"/>
     <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
     <property key="labeling/maxNumLabels" value="2000"/>
     <property key="labeling/mergeLines" value="false"/>
-    <property key="labeling/minFeatureSize" value="0"/>
+    <property key="labeling/minFeatureSize" value="2"/>
     <property key="labeling/multilineAlign" value="0"/>
     <property key="labeling/multilineHeight" value="1"/>
     <property key="labeling/namedStyle" value=""/>
@@ -1138,6 +1138,7 @@
   <SingleCategoryDiagramRenderer diagramType="Pie">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="-4.65661e-10">
       <fontProperties description=".Helvetica Neue DeskInterface,13,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" showAll="1"/>

@@ -25,21 +25,21 @@
     <edittype widgetv2type="TextEdit" name="BLD_ID">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="RF_UC">
+    <edittype widgetv2type="TextEdit" name="RF_SQTP">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="RF_UC" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
+  <renderer-v2 attr="RF_SQTP" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
-      <range render="true" symbol="0" lower="0.000000" upper="0.300000" label="     &lt; 0.3 W/(K·m²)"/>
-      <range render="true" symbol="1" lower="0.300000" upper="0.600000" label="0.3 - 0.6 W/(K·m²)"/>
-      <range render="true" symbol="2" lower="0.600000" upper="0.900000" label="0.6 - 0.9 W/(K·m²)"/>
-      <range render="true" symbol="3" lower="0.900000" upper="1.200000" label="0.9 - 1.2 W/(K·m²)"/>
-      <range render="true" symbol="4" lower="1.200000" upper="1.500000" label="1.2 - 1.5 W/(K·m²)"/>
-      <range render="true" symbol="5" lower="1.500000" upper="1.800000" label="1.5 - 1.8 W/(K·m²)"/>
-      <range render="true" symbol="6" lower="1.800000" upper="2.100000" label="1.8 - 2.1 W/(K·m²)"/>
-      <range render="true" symbol="7" lower="2.100000" upper="2.400000" label="2.1 - 2.4 W/(K·m²)"/>
-      <range render="true" symbol="8" lower="2.400000" upper="10.000000" label="     > 2.4 W/(K·m²)"/>
+      <range render="true" symbol="0" lower="0.000000" upper="20.000000" label="        &lt; 20 W/(m2a)"/>
+      <range render="true" symbol="1" lower="20.000000" upper="40.000000" label="    20 - 40 W/(m2a)"/>
+      <range render="true" symbol="2" lower="40.000000" upper="60.000000" label="    40 - 60 W/(m2a)"/>
+      <range render="true" symbol="3" lower="60.000000" upper="80.000000" label="    60 - 80 W/(m2a)"/>
+      <range render="true" symbol="4" lower="80.000000" upper="120.000000" label="  80 - 120 W/(m2a) "/>
+      <range render="true" symbol="5" lower="120.000000" upper="150.000000" label="120 - 150 W/(m2a)"/>
+      <range render="true" symbol="6" lower="150.000000" upper="200.000000" label="150 - 200 W/(m2a)"/>
+      <range render="true" symbol="7" lower="200.000000" upper="300.000000" label="200 - 300 W/(m2a)"/>
+      <range render="true" symbol="8" lower="300.000000" upper="1000.000000" label="      > 300 W/(m2a)"/>
     </ranges>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
@@ -740,7 +740,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="89,133,181,255"/>
+          <prop k="color" v="72,219,23,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -825,7 +825,7 @@
     <mode name="equal"/>
     <rotation/>
     <sizescale scalemethod="diameter"/>
-    <labelformat format=" %1 - %2 " trimtrailingzeroes="false" decimalplaces="3"/>
+    <labelformat format=" %1 - %2 " trimtrailingzeroes="false" decimalplaces="0"/>
     <effect enabled="0" type="effectStack">
       <effect type="dropShadow">
         <prop k="blend_mode" v="13"/>
@@ -908,24 +908,24 @@
     <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
     <property key="labeling/bufferTransp" value="0"/>
     <property key="labeling/centroidInside" value="false"/>
-    <property key="labeling/centroidWhole" value="true"/>
-    <property key="labeling/decimals" value="1"/>
+    <property key="labeling/centroidWhole" value="false"/>
+    <property key="labeling/decimals" value="0"/>
     <property key="labeling/displayAll" value="false"/>
     <property key="labeling/dist" value="0"/>
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="RF_UC"/>
+    <property key="labeling/fieldName" value="RF_SQTP"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
-    <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>
+    <property key="labeling/fontFamily" value="Helvetica"/>
     <property key="labeling/fontItalic" value="false"/>
     <property key="labeling/fontLetterSpacing" value="0"/>
     <property key="labeling/fontLimitPixelSize" value="false"/>
     <property key="labeling/fontMaxPixelSize" value="10000"/>
     <property key="labeling/fontMinPixelSize" value="3"/>
-    <property key="labeling/fontSize" value="13"/>
+    <property key="labeling/fontSize" value="12"/>
     <property key="labeling/fontSizeInMapUnits" value="false"/>
     <property key="labeling/fontSizeMapUnitMaxScale" value="0"/>
     <property key="labeling/fontSizeMapUnitMinScale" value="0"/>
@@ -945,19 +945,19 @@
     <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
     <property key="labeling/maxNumLabels" value="2000"/>
     <property key="labeling/mergeLines" value="false"/>
-    <property key="labeling/minFeatureSize" value="0"/>
+    <property key="labeling/minFeatureSize" value="5"/>
     <property key="labeling/multilineAlign" value="0"/>
     <property key="labeling/multilineHeight" value="1"/>
-    <property key="labeling/namedStyle" value=""/>
+    <property key="labeling/namedStyle" value="Normal"/>
     <property key="labeling/obstacle" value="true"/>
     <property key="labeling/placeDirectionSymbol" value="0"/>
-    <property key="labeling/placement" value="0"/>
+    <property key="labeling/placement" value="1"/>
     <property key="labeling/placementFlags" value="0"/>
     <property key="labeling/plussign" value="false"/>
     <property key="labeling/preserveRotation" value="true"/>
     <property key="labeling/previewBkgrdColor" value="#ffffff"/>
     <property key="labeling/priority" value="5"/>
-    <property key="labeling/quadOffset" value="4"/>
+    <property key="labeling/quadOffset" value="5"/>
     <property key="labeling/repeatDistance" value="0"/>
     <property key="labeling/repeatDistanceMapUnitMaxScale" value="0"/>
     <property key="labeling/repeatDistanceMapUnitMinScale" value="0"/>
@@ -965,7 +965,7 @@
     <property key="labeling/reverseDirectionSymbol" value="false"/>
     <property key="labeling/rightDirectionSymbol" value=">"/>
     <property key="labeling/scaleMax" value="10000000"/>
-    <property key="labeling/scaleMin" value="1"/>
+    <property key="labeling/scaleMin" value="19"/>
     <property key="labeling/scaleVisibility" value="false"/>
     <property key="labeling/shadowBlendMode" value="6"/>
     <property key="labeling/shadowColorB" value="0"/>
@@ -995,7 +995,7 @@
     <property key="labeling/shapeBorderWidthMapUnitMaxScale" value="0"/>
     <property key="labeling/shapeBorderWidthMapUnitMinScale" value="0"/>
     <property key="labeling/shapeBorderWidthUnits" value="1"/>
-    <property key="labeling/shapeDraw" value="true"/>
+    <property key="labeling/shapeDraw" value="false"/>
     <property key="labeling/shapeFillColorA" value="255"/>
     <property key="labeling/shapeFillColorB" value="255"/>
     <property key="labeling/shapeFillColorG" value="255"/>
@@ -1020,7 +1020,7 @@
     <property key="labeling/shapeSizeUnits" value="1"/>
     <property key="labeling/shapeSizeX" value="0"/>
     <property key="labeling/shapeSizeY" value="0"/>
-    <property key="labeling/shapeTransparency" value="33"/>
+    <property key="labeling/shapeTransparency" value="0"/>
     <property key="labeling/shapeType" value="0"/>
     <property key="labeling/textColorA" value="255"/>
     <property key="labeling/textColorB" value="0"/>
@@ -1038,7 +1038,7 @@
   <displayfield>gml_id</displayfield>
   <label>0</label>
   <labelattributes>
-    <label fieldname="" text="Beschriftung"/>
+    <label fieldname="" text="Label"/>
     <family fieldname="" name=".Helvetica Neue DeskInterface"/>
     <size fieldname="" units="pt" value="12"/>
     <bold fieldname="" on="0"/>
@@ -1058,7 +1058,7 @@
     <selectedonly on=""/>
   </labelattributes>
   <SingleCategoryDiagramRenderer diagramType="Pie">
-    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="0">
+    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="-4.65661e-10">
       <fontProperties description=".Helvetica Neue DeskInterface,13,-1,5,50,0,0,0,0,0" style=""/>
       <attribute field="" color="#000000" label=""/>
     </DiagramCategory>

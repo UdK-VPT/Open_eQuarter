@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="2.10.1-Pisa" minimumScale="0" maximumScale="0" simplifyDrawingHints="1" minLabelScale="1" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+<qgis version="2.10.1-Pisa" minimumScale="-4.65661e-10" maximumScale="-4.65661e-10" simplifyDrawingHints="1" minLabelScale="1" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
     <edittype widgetv2type="TextEdit" name="gml_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
@@ -31,17 +31,17 @@
   </edittypes>
   <renderer-v2 attr="PDENS" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
-      <range render="true" symbol="0" lower="3000.000000" upper="7000.000000" label="3000.0 - 7000.0"/>
-      <range render="true" symbol="1" lower="500.000000" upper="3000.000000" label="500.0 - 3000.0"/>
-      <range render="true" symbol="2" lower="100.000000" upper="500.000000" label="100.0 - 500.0"/>
-      <range render="true" symbol="3" lower="7000.000000" upper="15000.000000" label="7000.0 - 15000.0"/>
-      <range render="true" symbol="4" lower="15000.000000" upper="25000.000000" label="15000.0 - 25000.0"/>
+      <range render="true" symbol="0" lower="100.000000" upper="500.000000" label="        100 - 500 Inhab./km2"/>
+      <range render="true" symbol="1" lower="500.000000" upper="3000.000000" label="      500 - 3000 Inhab./km2"/>
+      <range render="true" symbol="2" lower="3000.000000" upper="7000.000000" label="    3000 - 7000 Inhab./km2"/>
+      <range render="true" symbol="3" lower="7000.000000" upper="15000.000000" label="  7000 - 15000 Inhab./km2"/>
+      <range render="true" symbol="4" lower="15000.000000" upper="25000.000000" label="15000 - 25000 Inhab./km2"/>
     </ranges>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,206,99,255"/>
+          <prop k="color" v="206,255,99,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -67,7 +67,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -97,7 +100,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -138,7 +144,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -168,7 +177,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -183,7 +195,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="206,255,99,255"/>
+          <prop k="color" v="255,206,99,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -209,7 +221,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -239,7 +254,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -280,7 +298,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -310,7 +331,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -351,7 +375,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -381,7 +408,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -413,7 +443,10 @@
       <effect type="outerGlow">
         <prop k="blend_mode" v="0"/>
         <prop k="blur_level" v="3"/>
+        <prop k="color1" v="0,0,255,255"/>
+        <prop k="color2" v="0,255,0,255"/>
         <prop k="color_type" v="0"/>
+        <prop k="discrete" v="0"/>
         <prop k="draw_mode" v="2"/>
         <prop k="enabled" v="0"/>
         <prop k="single_color" v="255,255,255,255"/>
@@ -443,7 +476,10 @@
       <effect type="innerGlow">
         <prop k="blend_mode" v="0"/>
         <prop k="blur_level" v="3"/>
+        <prop k="color1" v="0,0,255,255"/>
+        <prop k="color2" v="0,255,0,255"/>
         <prop k="color_type" v="0"/>
+        <prop k="discrete" v="0"/>
         <prop k="draw_mode" v="2"/>
         <prop k="enabled" v="0"/>
         <prop k="single_color" v="255,255,255,255"/>
@@ -464,15 +500,15 @@
     <property key="labeling/bufferColorB" value="255"/>
     <property key="labeling/bufferColorG" value="255"/>
     <property key="labeling/bufferColorR" value="255"/>
-    <property key="labeling/bufferDraw" value="false"/>
+    <property key="labeling/bufferDraw" value="true"/>
     <property key="labeling/bufferJoinStyle" value="64"/>
     <property key="labeling/bufferNoFill" value="false"/>
-    <property key="labeling/bufferSize" value="1"/>
+    <property key="labeling/bufferSize" value="1.5"/>
     <property key="labeling/bufferSizeInMapUnits" value="false"/>
     <property key="labeling/bufferSizeMapUnitMaxScale" value="0"/>
     <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
     <property key="labeling/bufferTransp" value="0"/>
-    <property key="labeling/centroidInside" value="false"/>
+    <property key="labeling/centroidInside" value="true"/>
     <property key="labeling/centroidWhole" value="false"/>
     <property key="labeling/decimals" value="3"/>
     <property key="labeling/displayAll" value="false"/>
@@ -480,17 +516,17 @@
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
-    <property key="labeling/enabled" value="false"/>
-    <property key="labeling/fieldName" value=""/>
+    <property key="labeling/enabled" value="true"/>
+    <property key="labeling/fieldName" value="'~'+ to_string( round( &quot;PDENS&quot;,0) )"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
-    <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>
+    <property key="labeling/fontFamily" value="Helvetica"/>
     <property key="labeling/fontItalic" value="false"/>
     <property key="labeling/fontLetterSpacing" value="0"/>
     <property key="labeling/fontLimitPixelSize" value="false"/>
     <property key="labeling/fontMaxPixelSize" value="10000"/>
     <property key="labeling/fontMinPixelSize" value="3"/>
-    <property key="labeling/fontSize" value="13"/>
+    <property key="labeling/fontSize" value="12"/>
     <property key="labeling/fontSizeInMapUnits" value="false"/>
     <property key="labeling/fontSizeMapUnitMaxScale" value="0"/>
     <property key="labeling/fontSizeMapUnitMinScale" value="0"/>
@@ -510,10 +546,10 @@
     <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
     <property key="labeling/maxNumLabels" value="2000"/>
     <property key="labeling/mergeLines" value="false"/>
-    <property key="labeling/minFeatureSize" value="0"/>
+    <property key="labeling/minFeatureSize" value="2"/>
     <property key="labeling/multilineAlign" value="0"/>
     <property key="labeling/multilineHeight" value="1"/>
-    <property key="labeling/namedStyle" value=""/>
+    <property key="labeling/namedStyle" value="Normal"/>
     <property key="labeling/obstacle" value="true"/>
     <property key="labeling/placeDirectionSymbol" value="0"/>
     <property key="labeling/placement" value="1"/>
@@ -623,8 +659,9 @@
     <selectedonly on=""/>
   </labelattributes>
   <SingleCategoryDiagramRenderer diagramType="Pie">
-    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="0">
+    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="-4.65661e-10">
       <fontProperties description=".Helvetica Neue DeskInterface,13,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" showAll="1"/>

@@ -25,7 +25,6 @@ def calculation(self=None, parameters={}):
                            'value': dataset[i]}})
     return result
 
-
 extension = OeQExtension(
     extension_id=__name__,
 

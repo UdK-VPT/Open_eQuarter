@@ -40,7 +40,7 @@ extension = OeQExtension(
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['RP_QTP'],
+    show_results=['RF_QTP'],
     description=u"Calculate the present Transmission Heat Loss of the Building's Roof",
     evaluation_method=calculation)
 

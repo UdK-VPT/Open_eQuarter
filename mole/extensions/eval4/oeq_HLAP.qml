@@ -31,21 +31,21 @@
   </edittypes>
   <renderer-v2 attr="HLAP" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
-      <range render="true" symbol="0" lower="0.000000" upper="25.000000" label="A+ [&lt; 25 kWh/(m2a)] "/>
-      <range render="true" symbol="1" lower="25.000000" upper="50.000000" label="A  [25 - 50 kWh/(m2a)] "/>
-      <range render="true" symbol="2" lower="50.000000" upper="75.000000" label="B  [50 - 75 kWh/(m2a)] "/>
-      <range render="true" symbol="3" lower="75.000000" upper="100.000000" label="C  [75 - 100 kWh/(m2a)] "/>
-      <range render="true" symbol="4" lower="100.000000" upper="130.000000" label="D  [100 - 130 kWh/(m2a)] "/>
-      <range render="true" symbol="5" lower="130.000000" upper="160.000000" label="E  [130 - 160 kWh/(m2a)] "/>
-      <range render="true" symbol="6" lower="160.000000" upper="200.000000" label="F  [160 - 200 kWh/(m2a)] "/>
-      <range render="true" symbol="7" lower="200.000000" upper="250.000000" label="G  [200 - 250 kWh/(m2a)] "/>
-      <range render="true" symbol="8" lower="250.000000" upper="1000.000000" label="H  [> 250 kWh/(m2a)] "/>
+      <range render="true" symbol="0" lower="0.000000" upper="25.000000" label="A+         &lt; 25 kWh/(m2a)"/>
+      <range render="true" symbol="1" lower="25.000000" upper="50.000000" label="A       25 - 50 kWh/(m2a)"/>
+      <range render="true" symbol="2" lower="50.000000" upper="75.000000" label="B       50 - 75 kWh/(m2a)"/>
+      <range render="true" symbol="3" lower="75.000000" upper="100.000000" label="C     75 - 100 kWh/(m2a)"/>
+      <range render="true" symbol="4" lower="100.000000" upper="130.000000" label="D   100 - 130 kWh/(m2a)"/>
+      <range render="true" symbol="5" lower="130.000000" upper="160.000000" label="E   130 - 160 kWh/(m2a)"/>
+      <range render="true" symbol="6" lower="160.000000" upper="200.000000" label="F   160 - 200 kWh/(m2a)"/>
+      <range render="true" symbol="7" lower="200.000000" upper="250.000000" label="G   200 - 250 kWh/(m2a)"/>
+      <range render="true" symbol="8" lower="250.000000" upper="1000.000000" label="H         > 250 kWh/(m2a)"/>
     </ranges>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="26,150,65,255"/>
+          <prop k="color" v="0,208,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -71,7 +71,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -101,7 +104,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -116,7 +122,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="96,183,85,255"/>
+          <prop k="color" v="0,231,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -142,7 +148,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -172,7 +181,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -187,7 +199,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="166,217,106,255"/>
+          <prop k="color" v="0,255,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -213,7 +225,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -243,7 +258,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -258,7 +276,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="210,236,149,255"/>
+          <prop k="color" v="127,244,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -284,7 +302,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -314,7 +335,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -329,7 +353,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="4">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,255,192,255"/>
+          <prop k="color" v="255,234,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -355,7 +379,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -385,7 +412,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -400,7 +430,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="5">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="254,214,144,255"/>
+          <prop k="color" v="255,117,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -426,7 +456,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -456,7 +489,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -471,7 +507,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="6">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="253,174,97,255"/>
+          <prop k="color" v="255,0,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -497,7 +533,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -527,7 +566,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -542,7 +584,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="7">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="234,99,62,255"/>
+          <prop k="color" v="234,0,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -568,7 +610,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -598,7 +643,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -613,7 +661,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="8">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="215,25,28,255"/>
+          <prop k="color" v="213,0,0,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0"/>
@@ -639,7 +687,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -669,7 +720,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -712,7 +766,10 @@
             <effect type="outerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -742,7 +799,10 @@
             <effect type="innerGlow">
               <prop k="blend_mode" v="0"/>
               <prop k="blur_level" v="3"/>
+              <prop k="color1" v="0,0,255,255"/>
+              <prop k="color2" v="0,255,0,255"/>
               <prop k="color_type" v="0"/>
+              <prop k="discrete" v="0"/>
               <prop k="draw_mode" v="2"/>
               <prop k="enabled" v="0"/>
               <prop k="single_color" v="255,255,255,255"/>
@@ -756,12 +816,12 @@
       </symbol>
     </source-symbol>
     <colorramp type="gradient" name="[source]">
-      <prop k="color1" v="215,25,28,255"/>
-      <prop k="color2" v="26,150,65,255"/>
+      <prop k="color1" v="0,208,0,255"/>
+      <prop k="color2" v="213,0,0,255"/>
       <prop k="discrete" v="0"/>
-      <prop k="stops" v="0.25;253,174,97,255:0.5;255,255,192,255:0.75;166,217,106,255"/>
+      <prop k="stops" v="0.25;0,255,0,255:0.5;255,234,0,255:0.75;255,0,0,255"/>
     </colorramp>
-    <invertedcolorramp value="1"/>
+    <invertedcolorramp value="0"/>
     <mode name="equal"/>
     <rotation/>
     <sizescale scalemethod="diameter"/>
@@ -782,7 +842,10 @@
       <effect type="outerGlow">
         <prop k="blend_mode" v="0"/>
         <prop k="blur_level" v="3"/>
+        <prop k="color1" v="0,0,255,255"/>
+        <prop k="color2" v="0,255,0,255"/>
         <prop k="color_type" v="0"/>
+        <prop k="discrete" v="0"/>
         <prop k="draw_mode" v="2"/>
         <prop k="enabled" v="0"/>
         <prop k="single_color" v="255,255,255,255"/>
@@ -812,7 +875,10 @@
       <effect type="innerGlow">
         <prop k="blend_mode" v="0"/>
         <prop k="blur_level" v="3"/>
+        <prop k="color1" v="0,0,255,255"/>
+        <prop k="color2" v="0,255,0,255"/>
         <prop k="color_type" v="0"/>
+        <prop k="discrete" v="0"/>
         <prop k="draw_mode" v="2"/>
         <prop k="enabled" v="0"/>
         <prop k="single_color" v="255,255,255,255"/>
@@ -994,13 +1060,14 @@
   <SingleCategoryDiagramRenderer diagramType="Pie">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="-4.65661e-10">
       <fontProperties description=".Helvetica Neue DeskInterface,13,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" showAll="1"/>
-  <editform></editform>
+  <editform>.</editform>
   <editforminit/>
   <featformsuppress>0</featformsuppress>
-  <annotationform></annotationform>
+  <annotationform>.</annotationform>
   <editorlayout>generatedlayout</editorlayout>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>

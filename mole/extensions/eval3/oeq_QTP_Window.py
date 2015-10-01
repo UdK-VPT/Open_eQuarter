@@ -30,8 +30,8 @@ extension = OeQExtension(
 
     category='Evaluation',
     subcategory='Window',
-    extension_name='Window Quality (QT, Contemporary)',
-    layer_name= 'QT Window Contemporary',
+    extension_name='Window Quality (QT, Present)',
+    layer_name= 'QT Window Present',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
     field_id='WN_QTP',
@@ -41,7 +41,7 @@ extension = OeQExtension(
     layer_out=config.data_layer_name,
     active=True,
     show_results=['WN_QTP'],
-    description=u"Calculate the contemporary Transmission Heat Loss of the Building's Windows",
+    description=u"Calculate the present Transmission Heat Loss of the Building's Windows",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

@@ -15,10 +15,23 @@ def calculation(self=None, parameters={}):
     dataset = {'HLAP': NULL}
     dataset.update(parameters)
 
+    print '------'
+    print dataset['AREA']
+    print dataset['FLOORS']
+    print float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
+    print dataset['BS_QTP']
+    print dataset['RF_QTP']
+    print dataset['WL_QTP']
+    print dataset['WN_QTP']
+    print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
+
+
     if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'] , dataset['BS_QTP'] , dataset['RF_QTP'] , dataset['WL_QTP'] , dataset['WN_QTP']]):
         living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
         qtp_total = float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
         dataset['HLAP']=qtp_total/living_area
+    print qtp_total/living_area
+    print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,
@@ -31,7 +44,7 @@ extension = OeQExtension(
 
     category='Evaluation',
     subcategory='Building',
-    extension_name='Building Quality (QT per Livig Area, Present)',
+    extension_name='Building Quality (QT per Living Area, Present)',
     layer_name= 'QT Building per Livig Area Present',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),

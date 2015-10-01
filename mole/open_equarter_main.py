@@ -411,6 +411,7 @@ class OpenEQuarterMain:
 
         # if project was created stop execution
         if oeq_global.OeQ_project_saved():
+            extensions.update_all_colortables()
             return 2
 
     # step 1.0
@@ -489,7 +490,7 @@ class OpenEQuarterMain:
                     section_model = source_section.model()
                     project_item = section_model.findItems("Load source maps")[0]
                     project_item.setCheckState(2)
-                    oeq_global.OeQ_unlockQgis()
+                    time.sleep(0.1)
                     return 2
         return 1
 
@@ -570,8 +571,7 @@ class OpenEQuarterMain:
                 section_model = source_section.model()
                 project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
                 project_item.setCheckState(2)
-                oeq_global.OeQ_unlockQgis()
-                oeq_global.OeQ_kill_info()
+                time.sleep(0.1)
                 self.handle_building_coordinates_loaded()
                 return 2
         oeq_global.OeQ_kill_info()
@@ -593,6 +593,12 @@ class OpenEQuarterMain:
                 centroid_layer=load_layer_from_disk(filepath)
             if centroid_layer:
                 centroid_layer.setName(config.pst_input_layer_name)
+                source_section = self.progress_items_model.section_views[1]
+                section_model = source_section.model()
+                project_item = section_model.findItems("Load building coordinates")[0]
+                project_item.setCheckState(2)
+                time.sleep(0.1)
+                self.handle_building_coordinates_loaded()
                 return 2
             else:
                 return 0
@@ -616,7 +622,7 @@ class OpenEQuarterMain:
                 section_model = source_section.model()
                 project_item = section_model.findItems("Load building coordinates")[0]
                 project_item.setCheckState(2)
-                oeq_global.OeQ_unlockQgis()
+                time.sleep(0.1)
                 self.handle_load_raster_maps()
                 return 2
             else:
@@ -695,7 +701,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems("Load WMS maps")[0]
         project_item.setCheckState(2)
-        oeq_global.OeQ_unlockQgis()
+        time.sleep(0.1)
         self.handle_raster_loaded()
         return 2
         #self.continue_process(True)
@@ -827,7 +833,7 @@ class OpenEQuarterMain:
         section_model = source_section.model()
         project_item = section_model.findItems("Capture WMS maps")[0]
         project_item.setCheckState(2)
-        oeq_global.OeQ_unlockQgis()
+        time.sleep(0.1)
         return 2
 
     def handle_legend_created(self):

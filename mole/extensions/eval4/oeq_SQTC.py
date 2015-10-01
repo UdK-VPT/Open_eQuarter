@@ -12,13 +12,12 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'HTP': NULL}
+    dataset = {'WN_SQTP': NULL}
     dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['BS_UP'] , dataset['BS_AR'] , dataset['RF_UP'] , dataset['RF_AR'] , dataset['WL_UP'] , dataset['WL_AR'] , dataset['WN_UP'] , dataset['WN_AR']]):
-        qtp_total = float(dataset['BS_UP'] * dataset['BS_AR'] * 0.35 ) + float(dataset['RF_UP'] * dataset['RF_AR']) + float(dataset['WL_UP'] * dataset['WL_AR'] ) + float(dataset['WN_UP'] * dataset['WN_AR'])
-        env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
-        dataset['HTP']=qtp_total/env_area
+    if not oeq_global.isnull([dataset['WN_UP'],dataset['HHRS']]):
+        dataset['WN_SQTP']= float(dataset['WN_UP'])*float(dataset['HHRS'])/1000
+
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,
@@ -30,19 +29,19 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Building',
-    extension_name='Envelope Quality (HT, Present)',
-    layer_name= 'HT Envelope Present',
+    subcategory='Window',
+    extension_name='Window SpecTransm (SQT, Present)',
+    layer_name= 'SQT Window Present',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='HTP',
+    field_id='WN_SQTP',
     source_type='none',
-    par_in=['BS_AR','RF_AR','WL_AR','WN_AR','BS_UP','RF_UP','WL_UP','WN_UP'],
+    par_in=['WN_UP','HHRS'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['HTP'],
-    description=u"Calculate the present Transmission Heat Coefficient of the Building",
+    show_results=['WN_SQTP'],
+    description=u"Calculate the contemporary Transmission Heat Loss of the Building's Windows per m2",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

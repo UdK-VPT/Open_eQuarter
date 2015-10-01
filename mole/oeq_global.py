@@ -61,7 +61,7 @@ def OeQ_plugin_path():
 
 # global OeQ_style_path
 def OeQ_style_path():
-    return os.path.join(OeQ_plugin_path() + 'styles')
+    return os.path.join(OeQ_plugin_path() , 'styles')
 
 
 # the project path equals './' as long as the project has not been saved

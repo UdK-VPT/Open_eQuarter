@@ -191,7 +191,7 @@ class OeQExtension:
         from shutil import copyfile
         ct_default = os.path.join(self.default_colortable())
         print ct_default
-        if oeq_global.OeQ_project_path() == u'.':
+        if not oeq_global.OeQ_project_path():
             self.colortable = ct_default
         else:
             if ct_default != None:

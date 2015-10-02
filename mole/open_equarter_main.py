@@ -508,7 +508,7 @@ class OpenEQuarterMain:
         ia_ok = bool(investigation_area)
         if ia_ok:
             investigation_area = investigation_area[0].layer()
-            ia_ok &= investigation_area.featureCount()
+            ia_ok &= (investigation_area.featureCount() > 0)
 
         if not ia_ok:
             self.handle_investigation_area_selected()

@@ -67,8 +67,8 @@ def OeQ_style_path():
 # the project path equals './' as long as the project has not been saved
 #global OeQ_project_saved
 def OeQ_project_saved():
-    # return OeQ_project_path() != './'
-    return OeQ_project_name() != ''
+    return (len(OeQ_project_path()) > 3)
+    #return OeQ_project_name() != ''
 
 
 def OeQ_init_progressbar(title='Be patient!', message='Background calculations are going on...', timeout=0,

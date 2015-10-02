@@ -91,11 +91,11 @@ class OeQExtension:
             self.layer_out = config.data_layer_name
         else:
             self.layer_out = layer_out
-        if colortable != None:
-             if not os.path.exists(colortable):
-                colortable = None
-             elif not os.path.isfile(colortable):
-                colortable = None
+        #if colortable != None:
+        #     if not os.path.exists(colortable):
+        #        colortable = None
+        #     elif not os.path.isfile(colortable):
+        #        colortable = None
         self.colortable = colortable
 
     def update(self, category=None,
@@ -191,7 +191,7 @@ class OeQExtension:
         from shutil import copyfile
         ct_default = os.path.join(self.default_colortable())
         print ct_default
-        if not oeq_global.OeQ_project_path():
+        if not oeq_global.OeQ_project_saved():
             self.colortable = ct_default
         else:
             if ct_default != None:
@@ -460,7 +460,7 @@ def load():
     if oeq_global.OeQ_ExtensionRegistry == []:
         load_defaults()
     for ext in oeq_global.OeQ_ExtensionRegistry:
-        ext.update_colortable()
+        ext.update_colortable(True)
 
 
 def save():
@@ -486,6 +486,6 @@ def run_active_extensions(category=None):
 def export():
     pass
 
-def update_all_colortables():
-    for ext in by_state(True):
+def update_all_colortables(overwrite=True):
+    for ext in by_state(overwrite):
         ext.update_colortable()

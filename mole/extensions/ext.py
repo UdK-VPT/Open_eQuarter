@@ -189,29 +189,27 @@ class OeQExtension:
 
     def update_colortable(self, overwrite=False):
         from shutil import copyfile
-        ct_default = os.path.join(self.default_colortable())
-        print ct_default
-        if not oeq_global.OeQ_project_saved():
+        ct_default = self.default_colortable()
+        if (not ct_default) | (not oeq_global.OeQ_project_saved()):
             self.colortable = ct_default
         else:
-            if ct_default != None:
-                ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
-                print ct_project
-                if overwrite:
-                    try:
-                        os.remove(ct_project)
-                    except:
-                        pass
+            ct_default = os.path.join(ct_default)
+            ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
+            print ct_project
+            if overwrite:
                 try:
-                     copyfile(ct_default, ct_project)
+                    os.remove(ct_project)
                 except:
-                        pass
-                if os.path.exists(ct_project):
-                    self.colortable = ct_project
-                else:
-                    self.colortable = None
+                    pass
+            try:
+                 copyfile(ct_default, ct_project)
+            except:
+                    pass
+            if os.path.exists(ct_project):
+                self.colortable = ct_project
             else:
                 self.colortable = None
+            return self.colortable
             '''
             if not os.path.exists(ct_project):
                 self.colortable = None

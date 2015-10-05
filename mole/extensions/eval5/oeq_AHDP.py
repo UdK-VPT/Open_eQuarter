@@ -12,12 +12,19 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'RF_QTC': NULL}
+    dataset = {'AHDP': NULL}
     dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['RF_AR'],dataset['RF_UC'],dataset['HHRS']]):
-        dataset['RF_QTC']=float(dataset['RF_AR']) * float(dataset['RF_UC'])*float(dataset['HHRS'])/1000
+    print '------'
+    print dataset['HLAP']
 
+    if not oeq_global.isnull([dataset['HLAP']]):
+        dataset['AHDP']= float(dataset['HLAP']) + 40.0 * 0.8
+        # Air Change Heatloss for standard Rooms 40kWh/m2a nach Geiger Lüftung im Wohnungsbau
+        # 20% of the Total Area are used for stairs and floors
+
+
+    print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,
@@ -29,19 +36,19 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Roof',
-    extension_name='Roof Quality (QT, Contemporary)',
-    layer_name= 'QT Roof Contemporary',
+    subcategory='Building',
+    extension_name='AHD Building per Livig Area Present',
+    layer_name= 'Annual Heat Demand (per Living Area, Present)',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='RF_QTC',
+    field_id='AHDP',
     source_type='none',
-    par_in=['RF_AR','RF_UC','HHRS'],
+    par_in=['HLAP'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['RF_QTC'],
-    description=u"Calculate the Contemporary Transmission Heat Loss of the Building's roof",
+    show_results=['AHDP'],
+    description=u"Calculate present Annual Heat Demand per Living Area",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

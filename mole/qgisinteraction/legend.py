@@ -333,7 +333,7 @@ def nodeStoreVisibility(node,restorevariablename="was_visible_before_Solo"):
     """
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
+        if not node:
             return None
         node = node[0]
 

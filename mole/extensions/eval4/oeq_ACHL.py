@@ -12,24 +12,21 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'HLAP': NULL}
+    dataset = {'ACHL': NULL}
     dataset.update(parameters)
 
     print '------'
     print dataset['AREA']
     print dataset['FLOORS']
     #print float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-    print dataset['BS_QTP']
-    print dataset['RF_QTP']
-    print dataset['WL_QTP']
-    print dataset['WN_QTP']
+    print dataset['HHRS']
+
     #print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
 
 
-    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'] , dataset['BS_QTP'] , dataset['RF_QTP'] , dataset['WL_QTP'] , dataset['WN_QTP']]):
-        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-        qtp_total = float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
-        dataset['HLAP']=qtp_total/living_area
+    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'], dataset['HHRS']]):
+        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8 * 0.8 #20% Construction, 20 % floors and stairs
+        dataset['ACHL']= 20 * living_area *float(dataset['HHRS'])/1000
     #print qtp_total/living_area
     print '------'
     result = {}
@@ -44,18 +41,18 @@ extension = OeQExtension(
 
     category='Evaluation',
     subcategory='Building',
-    extension_name='Building Quality (QT per Living Area, Present)',
-    layer_name= 'QT Building per Livig Area Present',
+    extension_name='Air change heat loss',
+    layer_name= 'Air change heat loss',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(__file__[:-3] + '.qml'),
-    field_id='HLAP',
+    field_id='ACHL',
     source_type='none',
-    par_in=['AREA','FLOORS','BS_QTP','RF_QTP','WL_QTP','WN_QTP'],
+    par_in=['AREA','FLOORS','HHRS'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['HLAP'],
-    description=u"Calculate the present Transmission Heat Loss per Living Area",
+    show_results=['ACHL'],
+    description=u"Calculate Air Change Heat loss per Living Area",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

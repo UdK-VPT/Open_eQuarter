@@ -190,27 +190,33 @@ class OeQExtension:
     def update_colortable(self, overwrite=False):
         from shutil import copyfile
         ct_default = self.default_colortable()
-        if (not ct_default) | (not oeq_global.OeQ_project_saved()):
+        if (not ct_default):
+            self.colortable = None
+        elif not oeq_global.OeQ_project_saved():
             self.colortable = ct_default
         else:
             ct_default = os.path.join(ct_default)
             ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
+            print "Copy from"
+            print ct_default
+            print "To"
             print ct_project
             if overwrite:
                 try:
                     os.remove(ct_project)
                 except:
                     pass
-            try:
-                 copyfile(ct_default, ct_project)
-            except:
-                    pass
+            #try:
+            if os.path.exists(ct_default):
+                copyfile(ct_default, ct_project)
+            #except:
+            #        pass
             if os.path.exists(ct_project):
                 self.colortable = ct_project
             else:
                 self.colortable = None
-            return self.colortable
-            '''
+        return self.colortable
+        '''
             if not os.path.exists(ct_project):
                 self.colortable = None
             elif os.path.isfile(ct_project):
@@ -243,14 +249,19 @@ class OeQExtension:
         from qgis import utils
         from qgis.core import QgsField
         from PyQt4.QtCore import QVariant
-        from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
-            add_attributes_if_not_exists, \
+        from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists, \
             colors_match_feature
         oeqMain = utils.plugins['mole']
-        legend.nodeStoreVisibility(self.layer_in)
-        legend.nodeShow(self.layer_in)
+        source_layer = legend.nodeByName(self.layer_in)
+        if not source_layer:
+            print "layer not found in decode color table"
+            print source_layer
+            return
+        source_layer = source_layer[0]
+        legend.nodeStoreVisibility(source_layer)
+        legend.nodeShow(source_layer)
         #time.sleep(0.5)
-        source_layer = find_layer_by_name(self.layer_in)
+        source_layer = source_layer.layer()
         source_provider = source_layer.dataProvider()
         if self.source_type == 'wms':
             if self.colortable != None:
@@ -300,13 +311,21 @@ class OeQExtension:
         from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
             add_attributes_if_not_exists
         if self.evaluator == None: return
-        legend.nodeStoreVisibility(self.layer_in)
-        legend.nodeShow(self.layer_in)
-        legend.nodeStoreVisibility(self.layer_out)
-        legend.nodeShow(self.layer_out)
+        source_layer = legend.nodeByName(self.layer_in)
+        target_layer = legend.nodeByName(self.layer_out)
+        if (not source_layer) | (not target_layer):
+            print "layer not found in calculate"
+            print source_layer
+            print target_layer
+        source_layer =source_layer[0]
+        target_layer = target_layer[0]
+        legend.nodeStoreVisibility(source_layer)
+        legend.nodeShow(source_layer)
+        legend.nodeStoreVisibility(target_layer)
+        legend.nodeShow(target_layer)
+        source_layer = source_layer.layer()
+        target_layer = target_layer.layer()
         #time.sleep(0.5)
-        source_layer = find_layer_by_name(self.layer_in)
-        target_layer = find_layer_by_name(self.layer_out)
         target_provider = target_layer.dataProvider()
         if self.get_par_out() != []:
             add_attributes_if_not_exists(target_layer, self.par_out_as_attributes())
@@ -330,8 +349,10 @@ class OeQExtension:
 
             tgtFeat = filter(lambda x: x.attribute('BLD_ID') == srcFeat.attribute('BLD_ID'),
                              target_layer.getFeatures())
-            if len(tgtFeat) > 0:
+            if tgtFeat:
                 tgtFeat = tgtFeat[0]
+            else:
+                continue
             target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
 

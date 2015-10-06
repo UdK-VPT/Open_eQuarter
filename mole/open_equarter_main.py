@@ -558,6 +558,21 @@ class OpenEQuarterMain:
                 else:
                     cat=legend.nodeByName(ext_info.subcategory)[0]
 
+                ###
+                attributes = [QgsField('YOC', QVariant.Double),
+                              QgsField('PDENS', QVariant.Double),
+                              QgsField('FLOORS', QVariant.Double)]
+
+                layer_interaction.add_attributes_if_not_exists(data_layer, attributes)
+
+                data_layer_provider= data_layer.dataProvider()
+                attributevalues = {data_layer_provider.fieldNameIndex('YOC'): oeq_global.OeQ_project_info['average_build_year'],
+                                   data_layer_provider.fieldNameIndex('PDENS'): oeq_global.OeQ_project_info['population_density'] * 100,
+                                   data_layer_provider.fieldNameIndex('FLOORS'): 3.5}
+
+                for feat in data_layer_provider.getFeatures():
+                    data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
+
                 #move data layer into group 'Data' in root, collapse & hide
                 legend.nodeMove(config.data_layer_name,'bottom',cat)
                 legend.nodeCollapse(cat)
@@ -567,12 +582,13 @@ class OpenEQuarterMain:
 
 
                 oeq_global.OeQ_kill_info()
+
                 source_section = self.progress_items_model.section_views[1]
                 section_model = source_section.model()
                 project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
                 project_item.setCheckState(2)
                 time.sleep(0.1)
-                self.handle_building_coordinates_loaded()
+                #self.handle_building_coordinates_loaded()
                 return 2
         oeq_global.OeQ_kill_info()
         return 1

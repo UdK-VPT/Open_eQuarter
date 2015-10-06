@@ -29,7 +29,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Base',
+    subcategory='Contemp. Transm. Heat Loss',
     extension_name='Base Quality (QT, Contemporary)',
     layer_name= 'QT Base Contemporary',
     extension_filepath=os.path.join(__file__),

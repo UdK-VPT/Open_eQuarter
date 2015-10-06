@@ -33,7 +33,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Window',
+    subcategory='U-Values Contemporary',
     extension_name='Window Quality (U_Value, Contemporary)',
     layer_name= 'U Window Contemporary',
     extension_filepath=os.path.join(__file__),

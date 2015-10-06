@@ -12,11 +12,19 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'WN_SQTP': NULL}
+    ratio_solar_available=0.5
+    ratio_solar_installable=0.5
+    solar_earnings_per_sqm=450.0
+
+    dataset = {'SOLAR':NULL,'SOLIAR': NULL,'SOLHE': NULL,'SOLHEL': NULL,'SOLCRT': NULL}
     dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['WN_UP'],dataset['HHRS']]):
-        dataset['WN_SQTP']= float(dataset['WN_UP'])*float(dataset['HHRS'])/1000
+    if not oeq_global.isnull([dataset['AHDP'], dataset['RF_AR'],dataset['LIV_AR']]):
+        dataset['SOLAR']=float(dataset['RF_AR']) * float(ratio_solar_available)
+        dataset['SOLIAR']=float(dataset['SOLAR'])*float(ratio_solar_installable)
+        dataset['SOLHE']=solar_earnings_per_sqm * float(dataset['SOLIAR'])
+        dataset['SOLHEL']=dataset['SOLHE']/float(dataset['LIV_AR'])
+        dataset['SOLCRT']=float(dataset['SOLHEL'])/float(dataset['AHDP'])*100
 
     result = {}
     for i in dataset.keys():
@@ -24,24 +32,23 @@ def calculation(self=None, parameters={}):
                            'value': dataset[i]}})
     return result
 
-
 extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Window',
-    extension_name='Window SpecTransm (SQT, Present)',
-    layer_name= 'SQT Window Present',
+    subcategory='Solarthermics',
+    extension_name='Solar Coverage Ratio (P)',
+    layer_name= 'Solar Coverage Ratio (Present)',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
-    field_id='WN_SQTP',
+    field_id='SOLCRT',
     source_type='none',
-    par_in=['WN_UP','HHRS'],
+    par_in=['AHDP','RF_AR','LIV_AR'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
-    show_results=['WN_SQTP'],
-    description=u"Calculate the contemporary Transmission Heat Loss of the Building's Windows per m2",
+    show_results=['SOLCRT'],
+    description=u"Calculate the Solar Coverage Ratio (Present)",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

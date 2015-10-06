@@ -33,7 +33,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Base',
+    subcategory='U-Values Contemporary',
     extension_name='Base Quality (U_Value, Contemporary)',
     layer_name= 'U Base Contemporary',
     extension_filepath=os.path.join(__file__),

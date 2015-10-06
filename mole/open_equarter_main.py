@@ -82,6 +82,12 @@ class OpenEQuarterMain:
 
     def new_project(self):
         self.progress_items_model.load_section_models(config.progress_model)
+        self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
+        sections = self.progress_items_model.section_views
+
+        for list_view in sections:
+            list_view.clicked.connect(self.process_button_clicked)
+
         import copy
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
 
@@ -492,17 +498,17 @@ class OpenEQuarterMain:
                     project_item.setCheckState(2)
                     time.sleep(0.1)
                     #return 2
-        self.handle_load_raster_maps()
+        #self.handle_load_raster_maps()
         return 2
 
-    def create_database(self,overwrite=True):
+    def create_database(self,overwrite=True, category = None):
         if overwrite:
             layer_interaction.fullRemove(layer_interaction.fullRemove(config.data_layer_name))
         geometry_layer=legend.nodeByName(config.housing_layer_name)
         if not geometry_layer:
             print "Cannot build database without buildings (missing geometry layer)!"
             return None
-        db_layer = legend.nodeCopy(geometry_layer[0],config.data_layer_name)
+        db_layer = legend.nodeDuplicate(geometry_layer[0],config.data_layer_name)
         if not db_layer:
             print "Could not build database (copy failed)!"
             return None
@@ -521,9 +527,9 @@ class OpenEQuarterMain:
         for feat in data_layer_provider.getFeatures():
                 data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
 
-        legend.nodeMove(config.data_layer_name,'bottom','Data')
-                legend.nodeCollapse('Data')
-                legend.nodeHide('Data')
+        legend.nodeMove(config.data_layer_name,'bottom',category)
+        legend.nodeCollapse(category)
+        legend.nodeHide(category)
         return db_layer
 
     # step 2.1
@@ -556,7 +562,7 @@ class OpenEQuarterMain:
             layer_interaction.fullRemove(config.data_layer_name)
 
             intersection_layer_path = os.path.join(oeq_global.OeQ_project_path(), ext_info.layer_name + '.shp')
-            data_layer_path = os.path.join(oeq_global.OeQ_project_path(), config.data_layer_name + '.shp')
+            #data_layer_path = os.path.join(oeq_global.OeQ_project_path(), config.data_layer_name + '.shp')
 
             housing_layer = layer_interaction.load_layer_from_disk(building_outlines_path, ext_info.layer_name)
 
@@ -572,12 +578,12 @@ class OpenEQuarterMain:
                 inter_layer = self.iface.addVectorLayer(out_layer.source(), 'BLD Calculate', out_layer.providerType())
                 layer_interaction.add_layer_to_registry(inter_layer)
 
-                QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
+                #QgsVectorFileWriter.writeAsVectorFormat(inter_layer, data_layer_path, "CP1250", None, "ESRI Shapefile")
                 # layer_interaction.write_vector_layer_to_disk(inter_layer, data_layer_path)
                 QgsMapLayerRegistry.instance().removeMapLayer(inter_layer.id())
 
-                data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
-                layer_interaction.add_layer_to_registry(data_layer)
+                #data_layer = layer_interaction.load_layer_from_disk(data_layer_path, config.data_layer_name)
+                #layer_interaction.add_layer_to_registry(data_layer)
 
                 #move housing layer to position 2 in root & load colortable
                 legend.nodeMove(ext_info.layer_name,2)
@@ -585,33 +591,8 @@ class OpenEQuarterMain:
                 out_layer.loadNamedStyle(ext_info.colortable)
 
                 #create group data at bottom of root (if necessary)
-                if not legend.nodeExists(ext_info.subcategory):
-                    cat=legend.nodeCreateGroup(ext_info.subcategory,'bottom')
-                else:
-                    cat=legend.nodeByName(ext_info.subcategory)[0]
-
-                ###
-                attributes = [QgsField('YOC', QVariant.Double),
-                              QgsField('PDENS', QVariant.Double),
-                              QgsField('FLOORS', QVariant.Double)]
-
-                layer_interaction.add_attributes_if_not_exists(data_layer, attributes)
-
-                data_layer_provider= data_layer.dataProvider()
-                attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
-                                   data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']) * 100.0,
-                                   data_layer_provider.fieldNameIndex('FLOORS'): 3.5}
-
-                for feat in data_layer_provider.getFeatures():
-                    data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
-
-                #move data layer into group 'Data' in root, collapse & hide
-                legend.nodeMove(config.data_layer_name,'bottom',cat)
-                legend.nodeCollapse(cat)
-                legend.nodeHide(cat)
 
                 legend.nodeMove(config.open_layers_layer_name,'bottom')
-
 
                 oeq_global.OeQ_kill_info()
 
@@ -620,7 +601,7 @@ class OpenEQuarterMain:
                 project_item = section_model.findItems("Intersect building outlines (\"Hausumringe\") with your investigation area")[0]
                 project_item.setCheckState(2)
                 time.sleep(0.1)
-                #self.handle_building_coordinates_loaded()
+                self.handle_building_coordinates_loaded()
                 return 2
         oeq_global.OeQ_kill_info()
         return 1
@@ -671,7 +652,7 @@ class OpenEQuarterMain:
                 project_item = section_model.findItems("Load building coordinates")[0]
                 project_item.setCheckState(2)
                 time.sleep(0.1)
-                self.handle_load_raster_maps()
+                #self.handle_load_raster_maps()
                 return 2
             else:
                 return 0
@@ -914,22 +895,43 @@ class OpenEQuarterMain:
 
     # step 4.1
     def handle_information_sampled(self):
-        legend.nodesShow([config.investigation_shape_layer_name,config.housing_coordinate_layer_name,config.pst_input_layer_name])
-        legend.nodesShow(i.layer_name for i in extensions.by_category('Import'))
 
+        # create data node
+        if not legend.nodeExists('Data'):
+            cat=legend.nodeCreateGroup('Data')
+        else:
+            cat=legend.nodeByName('Data')[0]
+
+        #create_database
+        self.create_database(True,'Data')
+
+        # show import layers
+        layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
+        layerstoshow += ([i.layer_name for i in extensions.by_category('Import',extensions.by_state(True))])
+        legend.nodesShow(layerstoshow)
+
+        #remove point sampling layer
         layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
+
+        #run point sampling tool
         psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
-        print 'Abbreviations'
-        print abbreviations
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         layer_interaction.add_layer_to_registry(vlayer)
+
+        #move to data
         legend.nodeMove(vlayer.name(),'bottom','Data')
+
+        #run import extensions
         extensions.run_active_extensions('Import')
+
+        # collapse and hide
         legend.nodeCollapse('Import')
         legend.nodeHide('Import')
+
+        # unlock
         oeq_global.OeQ_unlockQgis()
         return 2
 
@@ -937,6 +939,7 @@ class OpenEQuarterMain:
     # step 4.2
     def handle_building_calculations(self):
         extensions.run_active_extensions('Evaluation')
+        legend.nodeHide(config.pst_input_layer_name)
         return 2
 
     '''

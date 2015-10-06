@@ -29,7 +29,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Window',
+    subcategory='Present Transm. Heat Loss',
     extension_name='Window Quality (QT, Present)',
     layer_name= 'QT Window Present',
     extension_filepath=os.path.join(__file__),

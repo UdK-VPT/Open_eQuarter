@@ -30,7 +30,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Building',
+    subcategory='General',
     extension_name='AV Ratio',
     layer_name= 'AV Ratio',
     extension_filepath=os.path.join(__file__),

@@ -29,7 +29,7 @@ extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='Wall',
+    subcategory='Present Spec. Transm. Heat Loss',
     extension_name='Wall SpecTransm (SQT, Present)',
     layer_name= 'SQT Wall Present',
     extension_filepath=os.path.join(__file__),

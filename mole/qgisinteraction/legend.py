@@ -254,9 +254,9 @@ def nodeExpand(node):
         if len(node) == 0:
             return None
         node = node[0]
-    if nodeIsGroup(node):
-        node.setExpanded(True)
-        oeq_global.OeQ_unlockQgis()
+    #if nodeIsGroup(node):
+    node.setExpanded(True)
+        #oeq_global.OeQ_unlockQgis()
     return node.isExpanded()
 
 def nodeCollapse(node):
@@ -270,9 +270,9 @@ def nodeCollapse(node):
         if len(node) == 0:
             return None
         node = node[0]
-    if nodeIsGroup(node):
-        node.setExpanded(False)
-        oeq_global.OeQ_unlockQgis()
+    #if nodeIsGroup(node):
+    node.setExpanded(False)
+        #oeq_global.OeQ_unlockQgis()
     return node.isExpanded()
 
 def nodeShow(node):
@@ -281,9 +281,10 @@ def nodeShow(node):
     :param node:    Node to show
     :return:        visibility state
     """
+    print node
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
+        if not node:
             return None
         node = node[0]
     node.setVisible(Qt.Checked)

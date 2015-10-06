@@ -13,7 +13,7 @@ def calculation(self=None, parameters={}):
     from PyQt4.QtCore import QVariant
     # factor for golden rule
     dataset = {'AREA': NULL, 'PERIMETER': NULL, 'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL, 'FLOORS': NULL,
-               'PDENS': NULL,'YOC':NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL}
+               'PDENS': NULL,'YOC':NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
     dataset.update(parameters)
     #print parameters
     if (not oeq_global.isnull(dataset['AREA'])):
@@ -95,7 +95,8 @@ def calculation(self=None, parameters={}):
     if oeq_global.isnull(dataset['WN_AR'])& (not oeq_global.isnull(dataset['PERIMETER'])) & (not oeq_global.isnull(dataset['WL_COM']))& (not oeq_global.isnull(dataset['WIDTH'])) & (not oeq_global.isnull(dataset['WN_RAT'])):
         dataset['WN_AR']=(dataset['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])*dataset['HEIGHT']*dataset['WN_RAT']
 
-
+    if not oeq_global.isnull([dataset['AREA'],dataset['FLOORS']]):
+        dataset['LIV_AR'] = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
     #print dataset
 
 

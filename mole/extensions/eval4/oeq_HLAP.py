@@ -15,14 +15,14 @@ def calculation(self=None, parameters={}):
     dataset = {'HLAP': NULL}
     dataset.update(parameters)
 
-    print '------'
-    print dataset['AREA']
-    print dataset['FLOORS']
+  #  print '------'
+  #  print dataset['AREA']
+  #  print dataset['FLOORS']
     #print float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-    print dataset['BS_QTP']
-    print dataset['RF_QTP']
-    print dataset['WL_QTP']
-    print dataset['WN_QTP']
+  #  print dataset['BS_QTP']
+  #  print dataset['RF_QTP']
+  #  print dataset['WL_QTP']
+  #  print dataset['WN_QTP']
     #print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
 
 
@@ -31,7 +31,7 @@ def calculation(self=None, parameters={}):
         qtp_total = float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
         dataset['HLAP']=qtp_total/living_area
     #print qtp_total/living_area
-    print '------'
+  #  print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

@@ -15,8 +15,8 @@ def calculation(self=None, parameters={}):
     dataset = {'AHDC': NULL}
     dataset.update(parameters)
 
-    print '------'
-    print dataset['HLAC']
+ #   print '------'
+  #  print dataset['HLAC']
 
     if not oeq_global.isnull([dataset['HLAC']]):
         dataset['AHDC']=float(dataset['HLAC']) + 40.0 * 0.8
@@ -24,7 +24,7 @@ def calculation(self=None, parameters={}):
         # 20% of the Total Area are used for stairs and floors
 
 
-    print '------'
+  #  print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

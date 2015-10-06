@@ -491,8 +491,40 @@ class OpenEQuarterMain:
                     project_item = section_model.findItems("Load source maps")[0]
                     project_item.setCheckState(2)
                     time.sleep(0.1)
-                    return 2
-        return 1
+                    #return 2
+        self.handle_load_raster_maps()
+        return 2
+
+    def create_database(self,overwrite=True):
+        if overwrite:
+            layer_interaction.fullRemove(layer_interaction.fullRemove(config.data_layer_name))
+        geometry_layer=legend.nodeByName(config.housing_layer_name)
+        if not geometry_layer:
+            print "Cannot build database without buildings (missing geometry layer)!"
+            return None
+        db_layer = legend.nodeCopy(geometry_layer[0],config.data_layer_name)
+        if not db_layer:
+            print "Could not build database (copy failed)!"
+            return None
+        db_layer = db_layer.layer()
+        attributes = [QgsField('YOC', QVariant.Double),
+                              QgsField('PDENS', QVariant.Double),
+                              QgsField('FLOORS', QVariant.Double)]
+
+        layer_interaction.add_attributes_if_not_exists(db_layer, attributes)
+
+        data_layer_provider= db_layer.dataProvider()
+        attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
+                           data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']) * 100.0,
+                           data_layer_provider.fieldNameIndex('FLOORS'): 3.5}
+
+        for feat in data_layer_provider.getFeatures():
+                data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
+
+        legend.nodeMove(config.data_layer_name,'bottom','Data')
+                legend.nodeCollapse('Data')
+                legend.nodeHide('Data')
+        return db_layer
 
     # step 2.1
     def handle_housing_layer_loaded(self):
@@ -566,8 +598,8 @@ class OpenEQuarterMain:
                 layer_interaction.add_attributes_if_not_exists(data_layer, attributes)
 
                 data_layer_provider= data_layer.dataProvider()
-                attributevalues = {data_layer_provider.fieldNameIndex('YOC'): oeq_global.OeQ_project_info['average_build_year'],
-                                   data_layer_provider.fieldNameIndex('PDENS'): oeq_global.OeQ_project_info['population_density'] * 100,
+                attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
+                                   data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']) * 100.0,
                                    data_layer_provider.fieldNameIndex('FLOORS'): 3.5}
 
                 for feat in data_layer_provider.getFeatures():
@@ -677,6 +709,8 @@ class OpenEQuarterMain:
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
 
         for importextension in wms_sources:
+            if legend.nodeIsLayer(importextension.layer_name):
+                continue
             layer_interaction.fullRemove(layer_id=info_source.layer_id)
 
             if not legend.nodeExists(importextension.category):
@@ -896,14 +930,14 @@ class OpenEQuarterMain:
         extensions.run_active_extensions('Import')
         legend.nodeCollapse('Import')
         legend.nodeHide('Import')
-        extensions.run_active_extensions('Evaluation')
         oeq_global.OeQ_unlockQgis()
         return 2
 
 
     # step 4.2
     def handle_building_calculations(self):
-        pass
+        extensions.run_active_extensions('Evaluation')
+        return 2
 
     '''
         # ToDo Change to non default-values

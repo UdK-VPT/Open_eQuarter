@@ -18,7 +18,8 @@ def calculation(self=None, parameters={}):
             result['YOC']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
         except:
             result['YOC']['value'] = oeq_global.OeQ_project_info['average_build_year']
-
+    else:
+        result['YOC']['value'] = oeq_global.OeQ_project_info['average_build_year']
     return result
 
 

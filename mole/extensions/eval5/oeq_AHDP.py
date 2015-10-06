@@ -15,8 +15,8 @@ def calculation(self=None, parameters={}):
     dataset = {'AHDP': NULL}
     dataset.update(parameters)
 
-    print '------'
-    print dataset['HLAP']
+ #   print '------'
+ #   print dataset['HLAP']
 
     if not oeq_global.isnull([dataset['HLAP']]):
         dataset['AHDP']= float(dataset['HLAP']) + 40.0 * 0.8
@@ -24,7 +24,7 @@ def calculation(self=None, parameters={}):
         # 20% of the Total Area are used for stairs and floors
 
 
-    print '------'
+  #  print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

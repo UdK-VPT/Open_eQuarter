@@ -14,7 +14,9 @@ def calculation(self=None, parameters={}):
         try:
             result['FLOORS']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
         except:
-            pass
+            result['FLOORS']['value'] = 3.5
+    else:
+           result['FLOORS']['value'] = 3.5
     return result
 
 

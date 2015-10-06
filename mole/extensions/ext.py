@@ -182,7 +182,7 @@ class OeQExtension:
 
     def default_colortable(self):
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
-        print defcolortable
+      #  print defcolortable
         if defcolortable:
             print defcolortable[0].colortable
             return defcolortable[0].colortable
@@ -198,10 +198,10 @@ class OeQExtension:
         else:
             ct_default = os.path.join(ct_default)
             ct_project = os.path.join(oeq_global.OeQ_project_path(), self.layer_name+'.qml')
-            print "Copy from"
-            print ct_default
-            print "To"
-            print ct_project
+         #   print "Copy from"
+         #   print ct_default
+         #   print "To"
+         #   print ct_project
             if overwrite:
                 try:
                     os.remove(ct_project)
@@ -273,7 +273,7 @@ class OeQExtension:
                                                               u'Decoding colors in "' + self.layer_in + '"!',
                                                               maxcount=len(color_dict) * source_layer.featureCount())
                 progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
-                print color_dict
+            #    print color_dict
                 for color_key in color_dict.keys():
                     color_quadriple = color_key[5:-1].split(',')
                     color_quadriple = map(int, color_quadriple)

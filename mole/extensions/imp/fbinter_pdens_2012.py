@@ -20,8 +20,11 @@ def calculation(self=None, parameters={}):
             result['PDENS']['value'] = sum([float(i) for i in parameters.values()]) / len(parameters)
         except:
             result['PDENS']['value'] = oeq_global.OeQ_project_info['population_density']
-
+    else:
+        result['PDENS']['value'] = oeq_global.OeQ_project_info['population_density']
     return result
+
+
 
 import os
 from mole.extensions import OeQExtension

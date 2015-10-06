@@ -10,7 +10,7 @@ from mole.project.config import progress_model
 from mole.view.oeq_ui_classes import QProcessViewDelegate
 from mole import oeq_global
 from mole import extensions
-
+print extensions.__all__
 
 class ProgressItemsModel:
 

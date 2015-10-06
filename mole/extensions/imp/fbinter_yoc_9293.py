@@ -63,7 +63,7 @@ extension = OeQExtension(
                 + u'aus der Veroeffentlichung: Staedtebauliche Entwicklung Berlins seit 1650 in Karten',
     source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
     extension_filepath=os.path.join(__file__),
-    colortable = os.path.join(__file__[:-3] + '.qml'),
+    colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     active=True,
     evaluation_method=calculation)
 

@@ -33,7 +33,7 @@ extension = OeQExtension(
     description=u'',
     source='crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude',
     extension_filepath=os.path.join(__file__),
-    colortable = os.path.join(__file__[:-3] + '.qml'),
+    colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

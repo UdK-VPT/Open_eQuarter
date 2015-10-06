@@ -123,7 +123,7 @@ extension = OeQExtension(
     active=True,
     description=u'Calculate the Building dimensions from scratch',
     extension_filepath=os.path.join(__file__),
-    colortable = os.path.join(__file__[:-3] + '.qml'),
+    colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

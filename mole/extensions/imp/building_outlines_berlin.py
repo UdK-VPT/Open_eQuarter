@@ -24,6 +24,7 @@ extension = OeQExtension(
     evaluation_method=calculation,
     source=os.path.join(os.path.expanduser('~'), 'Hausumringe EPSG3857', 'Hausumringe EPSG3857.shp'),
     extension_filepath=__file__,
-    colortable = os.path.join(__file__[:-3] + '.qml'))
+    colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'))
+#from . import *
 
 extension.registerExtension(default=True)

@@ -98,6 +98,7 @@ class OeQExtension:
         #        colortable = None
         self.colortable = colortable
 
+
     def update(self, category=None,
                subcategory = None,
                field_id=None,
@@ -393,6 +394,8 @@ class OeQExtension:
 
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
 
+
+OeQExtension.generic_id_cnt = 0
 
 
 

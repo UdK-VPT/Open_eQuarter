@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^$', 'layertree.views.layer_tree', name='home'),
+    url(r'^$', 'crow.views.home_page', name='home'),
+    url(r'^layers/', 'layertree.views.layer_tree', name='layers'),
     url(r'^admin/', include(admin.site.urls)),
 ]

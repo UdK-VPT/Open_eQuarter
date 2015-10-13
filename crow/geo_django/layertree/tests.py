@@ -6,5 +6,5 @@ from layertree.views import layer_tree
 class TreeRootTest(TestCase):
 
     def test_root_url_resolves_to_layer_tree(self):
-        found = resolve('/')
+        found = resolve('layers')
         self.assertEqual(found.func, layer_tree)

@@ -17,9 +17,13 @@ class NewVisitorTest(unittest.TestCase):
 
         # He expects the title of the tool to be in the browser
         self.assertIn('Open eQuarter - Crow', self.browser.title)
+
+        # A header navigation-bar is displayed, which shows the clickable companies logo as a first entry
+        navigation_bar = self.browser.find_element_by_tag_name('nav')
+        logo_link = navigation_bar.find_element_by_tag_name('a')
+        logo = logo_link.find_element_by_tag_name('img')
+        self.assertTrue(logo.get_attribute('src'))
+
         self.fail('Finish the test')
-
-        # A header navigation is displayed, which shows the companies logo
-
 if __name__ == '__main__':
     unittest.main()

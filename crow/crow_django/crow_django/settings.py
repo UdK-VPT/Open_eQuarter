@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crow',
+    'layertree',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -51,7 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'geo_django.urls'
+ROOT_URLCONF = 'crow_django.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'geo_django.wsgi.application'
+WSGI_APPLICATION = 'crow_django.wsgi.application'
 
 
 # Database
@@ -79,8 +80,9 @@ WSGI_APPLICATION = 'geo_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'crow',
-        'USER': 'geodjango',
+        'NAME': 'crow_django',
+        'USER': 'djangocrow',
+        'PASSWORD': 'djangocrow'
     }
 }
 

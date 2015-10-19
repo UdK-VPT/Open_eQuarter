@@ -5,7 +5,7 @@ require.config({
     },
     paths: {
         jquery: ['//code.jquery.com/jquery-1.11.3.min', 'libs/jquery/jquery.min'],
-        bootstrap: ['//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min', 'libs/bootstrap/bootstrap.min'],
+        bootstrap: ['//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min', 'libs/bootstrap/bootstrap.min'],
         domReady: 'libs/require/domReady'
     },
 

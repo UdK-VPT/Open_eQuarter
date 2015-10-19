@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    {% load staticfiles %}
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>Open eQuarter - Crow</title>
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="{% static 'crow/css/layout.css' %}" />
+    <link rel="stylesheet" href="{% static 'crow/css/oeq.css' %}" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'crow/icons/OeQ_logo_favicon.ico' %}">
+    <script data-main="{% static 'crow/main.js' %}" src="{% static 'crow/libs/require/require.js' %}"></script>
 </head>
 <body>
+<div class="container-fluid">
     <nav class="navbar navbar-fixed-top navbar-default" role="navigation">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -17,7 +26,8 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#"><img src="icons/OeQ_plugin_icon.png" width="28px" height="28px">Crow</a>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'crow/icons/OeQ_plugin_icon.png' %}" width="28px" height="28px">Crow</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="main-navbar">
@@ -36,9 +46,9 @@
             <form id="addressLookup" action="javascript:lookupAddress();" class="navbar-form navbar-left" role="search">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Lookup address...">
-                            <span class="input-group-btn">
-                    <button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-search"></i></button>
-                </span>
+                        <span class="input-group-btn">
+                <button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-search"></i></button>
+            </span>
                 </div>
             </form>
             <ul class="nav navbar-nav navbar-right">
@@ -46,5 +56,51 @@
             </ul>
         </div><!-- /.navbar-collapse -->
     </nav>
+    <div id="map"></div>
+    <div class="row main-row">
+        <div class="col-sm-4 col-md-3 sidebar sidebar-left pull-left">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a id="layersMenu" data-toggle="collapse" data-target="#layerstack-collapse" href="#layers">
+                                <i class="fa fa-list-alt"></i>
+                                Layers
+                            </a>
+                        </h4>
+                    </div>
+                    <div class="panel-collapse collapse in" id="layerstack-collapse">
+                        <div id="layerStack" class="panel-body list-group" role="group">
+                        </div>
+                    </div>
+                </div><!-- /.panel panel-default -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-target="#properties" href="#properties">
+                                <i class="fa fa-list-alt"></i>
+                                Properties
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="properties" class="panel-collapse collapse in">
+                        <div id="dataSheet" class="panel-body">
+                            <p>Click a feature to display its properties.</p>
+                        </div>
+                    </div>
+                </div><!-- /.panel panel-default -->
+            </div><!-- /.panel-group sidebar-body -->
+        </div><!-- /.panel-group sidebar-left -->
+    </div><!-- /.row main-row -->
+    <div class="row footer-row center-block" id="commentary">
+        <div class="input-group">
+            <span class="input-group-addon">@</span>
+            <input type="text" class="form-control" placeholder="Add a comment...">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">Save</button>
+                </span>
+        </div>
+    </div>
+</div><!-- /.container-fluid -->
 </body>
 </html>

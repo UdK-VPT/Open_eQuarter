@@ -1,8 +1,0 @@
-{
-  "name": "Main Test Suite",
-  "js_files": [
-    "../../../static/crow/js/CrowOl.js"
-  ],
-  "media_files": [
-  ]
-}

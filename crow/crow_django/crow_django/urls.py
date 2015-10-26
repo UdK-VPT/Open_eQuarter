@@ -15,10 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django_jasmine import urls as jasmine_urls
 
 urlpatterns = [
     url(r'^$', 'crow.views.home_page', name='home'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^jasmine/$', include(jasmine_urls.urlpatterns)),
 ]

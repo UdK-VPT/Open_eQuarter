@@ -37,11 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_jasmine',
     'crow',
 )
-
-JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, 'crow', 'tests', 'crow', 'js')
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

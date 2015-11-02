@@ -2,8 +2,7 @@
   "name": "Main Test Suite",
   "js_files": [
     "/static/crow/libs/jquery/jquery.min.js",
-    "/static/crow/libs/require/require.js",
-    "/static/crow/js/CrowOL.js"
+    "/static/crow/libs/require/require.js"
   ],
   "media_files": [
   ]

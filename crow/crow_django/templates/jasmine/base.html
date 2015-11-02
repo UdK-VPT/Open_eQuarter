@@ -19,6 +19,7 @@
     {% for url in suite.js_files %}
         <script src="{{ url }}"></script>
     {% endfor %}
+    <script> require.config({ baseUrl: '../static/crow' }); </script>
 
     {# static files #}
     {% for url in suite.static_files %}

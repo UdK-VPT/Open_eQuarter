@@ -1,5 +1,7 @@
-var Hello = {
-    world : function () {
-        return "Hello";
-    }
-};
+define([], function () {
+    return {
+        speak: function () {
+            return "hello";
+        }
+    };
+});

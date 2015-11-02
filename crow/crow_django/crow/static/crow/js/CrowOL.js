@@ -1,5 +1,5 @@
 var Hello = {
-  world : function () {
-    return "Hello";
-  }
+    world : function () {
+        return "Hello";
+    }
 };

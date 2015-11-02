@@ -12,6 +12,7 @@
 #   - dist/**/*.js
 #
 src_files:
+  - crow/libs/require/require.js
   - crow/js/*.js
 
 # stylesheets

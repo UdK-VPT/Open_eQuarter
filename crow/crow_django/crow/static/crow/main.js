@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: 'static/crow',
+
     shim : {
         bootstrap : { deps :['jquery'] }
     },

@@ -1,16 +1,19 @@
-describe('Test CrowOL', function() {
-  var crowOlModule;
+describe('CrowOL API test - CrowOL Module', function() {
+    var CrowOL;
 
-  // Use require.js to fetch the module
-  it("should load the AMD module", function(done) {
-    require(['js/CrowOL'], function (loadedModule) {
-      crowOlModule = loadedModule;
-      done();
+    // Use require.js to fetch the module
+    it("should load the AMD module", function(done) {
+        require(['js/CrowOL'], function (loadedModule) {
+            CrowOL = loadedModule;
+            done();
+        });
     });
-  });
 
-  //run tests that use the crowOlModule object
-  it("can access the AMD module", function() {
-    expect(crowOlModule.speak()).toBe("hello");
-  });
+    it('was loaded properly', function () {
+       expect(CrowOL).toBeDefined();
+    });
+
+    it('has an init-function', function() {
+        expect(CrowOL.initialise()).toBeDefined();
+    });
 });

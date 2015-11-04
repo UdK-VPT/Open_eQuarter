@@ -1,7 +1,9 @@
-define([], function () {
+define(['openlayers'], function (ol) {
+    var initialise = function() {
+        return 'hello';
+    };
+
     return {
-        speak: function () {
-            return "hello";
-        }
+        initialise: initialise
     };
 });

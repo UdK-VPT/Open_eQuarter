@@ -14,6 +14,6 @@ describe('CrowOL API test - CrowOL Module', function() {
     });
 
     it('has an init-function', function() {
-        expect(CrowOL.initialise()).toBeDefined();
+        expect(CrowOL.initialise).toBeDefined();
     });
 });

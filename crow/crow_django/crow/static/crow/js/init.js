@@ -1,5 +1,6 @@
 define([
     'domReady!',
-], function(dr){
-   console.log('Loaded')
+    'js/CrowOL'
+], function(dr, CrowOL){
+    CrowOL.initialise();
 });

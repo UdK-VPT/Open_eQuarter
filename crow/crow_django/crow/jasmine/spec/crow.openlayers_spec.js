@@ -1,8 +1,8 @@
 define(['crow-openlayers'], function(CrowOL){
 
-    describe('Crow Openlayers Module test', function () {
+    describe('Crow Openlayers Module test -', function () {
 
-        describe('CrowOL-API', function () {
+        describe('API - CrowOL module', function () {
             it('should load properly using requirejs', function () {
                 expect(CrowOL).toBeDefined();
             });

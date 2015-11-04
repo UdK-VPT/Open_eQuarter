@@ -14,7 +14,8 @@ require.config({
         'jasmine-boot': 'libs/jasmine/boot',
 
         // local modules
-        'crow-openlayers': 'js/crow.openlayers'
+        'crow-openlayers': 'js/crow.openlayers',
+        'crow-googlemaps': 'js/crow.googlemaps'
     },
 
     shim : {

@@ -1,6 +1,6 @@
 define([
     'domReady!',
-    'js/CrowOL'
+    'crow-openlayers'
 ], function(dr, CrowOL){
     CrowOL.initialise();
 });

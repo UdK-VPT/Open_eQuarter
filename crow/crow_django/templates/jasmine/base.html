@@ -9,65 +9,32 @@
 
     <link rel="shortcut icon" type="image/png" href="{% static 'crow/libs/jasmine/jasmine_favicon.png' %}">
     <link rel="stylesheet" href="{% static 'crow/libs/jasmine/jasmine.css' %}">
-
-    <script src="{% static 'crow/libs/jasmine/jasmine.js' %}"></script>
-    <script src="{% static 'crow/libs/jasmine/jasmine-html.js' %}"></script>
-    <script src="{% static 'crow/libs/jasmine/boot.js' %}"></script>
+    <script type="text/javascript" src="{% static 'crow/libs/require/require.js' %}"></script>
+    <script type="text/javascript" src="{% static 'crow/common.js' %}"></script>
 
     {# source files as defined in crow/jasmine/files.json #}
     {% for url in suite.js_files %}
         <script src="{{ url }}"></script>
     {% endfor %}
 
-    <script data-main="{% static 'crow/main.js' %}" src="{% static 'crow/libs/require/require.js' %}"></script>
-
-
     {# static files as defined in crow/jasmine/files.json #}
     {% for url in suite.static_files %}
         <script src="{{ STATIC_URL }}{{ url }}"></script>
     {% endfor %}
 
-    {# spec files as found in crow/jasmine/spec/*#}
-    {% for file in files %}
-        <script src="{% url "jasmine_test" file %}"></script>
-    {% endfor %}
-
+    <script>
+        require(['jasmine-boot'], function () {
+            require([
+                {% for file in files %}
+                    '{% url "jasmine_test" file %}',
+                {% endfor %}
+            ], function(){
+                //trigger Jasmine
+                window.onload();
+            })
+        });
+    </script>
 </head>
 <body>
-{##}
-{#<script>#}
-{#    {% block jasmine %}#}
-{#        (function() {#}
-{#            var jasmineEnv = jasmine.getEnv();#}
-{#            jasmineEnv.updateInterval = 1000;#}
-{##}
-{#            var htmlReporter = new jasmine.HtmlReporter();#}
-{##}
-{#            jasmineEnv.addReporter(htmlReporter);#}
-{##}
-{#            jasmineEnv.specFilter = function(spec) {#}
-{#                return htmlReporter.specFilter(spec);#}
-{#            };#}
-{##}
-{#            // Additional configuration can be done in this block#}
-{#            {% block jasmine_extra %}{% endblock %}#}
-{##}
-{#            var currentWindowOnload = window.onload;#}
-{##}
-{#            window.onload = function() {#}
-{#                if (currentWindowOnload) {#}
-{#                    currentWindowOnload();#}
-{#                }#}
-{#                execJasmine();#}
-{#            };#}
-{##}
-{#            function execJasmine() {#}
-{#                jasmineEnv.execute();#}
-{#            }#}
-{##}
-{#        })();#}
-{#    {% endblock %}#}
-{#</script>#}
-
 </body>
 </html>

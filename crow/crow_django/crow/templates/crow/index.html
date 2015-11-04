@@ -12,7 +12,11 @@
     <link rel="stylesheet" href="{% static 'crow/css/layout.css' %}" />
     <link rel="stylesheet" href="{% static 'crow/css/oeq.css' %}" />
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'crow/icons/OeQ_logo_favicon.ico' %}">
-    <script data-main="{% static 'crow/main.js' %}" src="{% static 'crow/libs/require/require.js' %}"></script>
+    <script type="text/javascript" src="{% static 'crow/libs/require/require.js' %}"></script>
+    <script type="text/javascript" src="{% static 'crow/common.js' %}"></script>
+    <script>
+        require(['jquery', 'bootstrap', 'js/init']);
+    </script>
 </head>
 <body>
 <div class="container-fluid">

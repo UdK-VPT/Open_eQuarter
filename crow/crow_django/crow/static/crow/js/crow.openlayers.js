@@ -1,4 +1,6 @@
-define(['openlayers'], function (ol) {
+define(['openlayers'], function () {
+    var ol = require('openlayers');
+
     var STYLE,
         STYLE_CACHE,
         MAP,

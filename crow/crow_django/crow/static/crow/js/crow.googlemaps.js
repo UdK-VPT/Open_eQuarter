@@ -1,6 +1,7 @@
 define(['jquery'], function ($) {
 
-    var lookupAddress;
+    var lookupAddress,
+        extractLocation;
 
     lookupAddress = function (addressString) {
         var data,

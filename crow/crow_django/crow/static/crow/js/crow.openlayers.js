@@ -3,7 +3,6 @@ define(['openlayers'], function () {
 
     var STYLE,
         STYLE_CACHE,
-        MAP,
         openStreetMap;
 
     var initialise = function() {
@@ -36,17 +35,26 @@ define(['openlayers'], function () {
         });
         openStreetMap.set('name', 'Open Street Map');
 
-        MAP = new ol.Map({
-            layers: [openStreetMap],
-            target: 'map',
+    }
+
+    var CrowOL = function (mapTarget) {
+
+        this.map = new ol.Map({
+            layers: [],
+            target: mapTarget,
             view: new ol.View({
                 center: [1492977, 6855322],
                 zoom: 6
             })
         });
-    }
 
-    return {
-        initialise: initialise
+        this.styleCache = [];
+
+        CrowOL.prototype.addStyle = function (style) {
+            this.styleCache.push(style);
+        };
+
     };
+
+    return { CrowOL: CrowOL};
 });

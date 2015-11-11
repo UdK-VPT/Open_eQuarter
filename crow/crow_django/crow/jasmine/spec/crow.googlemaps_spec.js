@@ -7,10 +7,10 @@ define(['crow-googlemaps'], function(CrowGM) {
                 expect(CrowGM).toBeDefined();
             });
 
-            it('should have a lookupAddress-method, which accepts one parameter', function () {
+            it('should have a lookupAddress-method', function () {
                 expect(CrowGM.lookupAddress).toBeDefined();
-
             });
+
         });
 
         describe('Unittest - CrowGM', function () {
@@ -31,6 +31,7 @@ define(['crow-googlemaps'], function(CrowGM) {
                     done();
                 });
             });
+
         });
     });
 

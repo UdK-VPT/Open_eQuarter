@@ -1,18 +1,7 @@
 define(['jquery'], function ($) {
 
-    var defaultAddress,
-        ajaxPromise,
+    var ajaxPromise,
         lookupAddress;
-
-    defaultAddress = {
-        geometry : {
-            location: {
-                lat: 52.3110,
-                lng: 13.2424
-            }
-        }
-    };
-
 
     ajaxPromise = function (data) {
         var url,
@@ -24,7 +13,6 @@ define(['jquery'], function ($) {
         return response_data;
     };
 
-
     lookupAddress = function (addressString) {
         var addressDict = addressString,
             data = {
@@ -32,17 +20,10 @@ define(['jquery'], function ($) {
                 sensor: "false"
             },
             promise,
-            result;
 
         promise = ajaxPromise(data);
 
-        return promise.done(function (data){
-            result = data.results[0];
-            console.log(result);
-            addressDict = result;
-            return addressDict;
-
-        });
+        return promise;
     };
 
     return {

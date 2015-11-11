@@ -1,20 +1,10 @@
 define(['jquery'], function ($) {
 
-    var ajaxPromise,
-        lookupAddress;
-
-    ajaxPromise = function (data) {
-        var url,
-            response_data;
-
-        url = "http://maps.google.com/maps/api/geocode/json",
-        response_data = $.get(url, data);
-
-        return response_data;
-    };
+    var lookupAddress;
 
     lookupAddress = function (addressString) {
         var data,
+            url = "http://maps.google.com/maps/api/geocode/json",
             promise;
 
         data = {
@@ -22,7 +12,7 @@ define(['jquery'], function ($) {
             sensor: "false"
         };
 
-        promise = ajaxPromise(data);
+        promise = $.get(url, data);
 
         return promise;
     };

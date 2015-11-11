@@ -9,6 +9,7 @@ define(['crow-googlemaps'], function(CrowGM) {
 
             it('should have a lookupAddress-method, which accepts one parameter', function () {
                 expect(CrowGM.lookupAddress).toBeDefined();
+
             });
         });
 

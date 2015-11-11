@@ -14,12 +14,13 @@ define(['jquery'], function ($) {
     };
 
     lookupAddress = function (addressString) {
-        var addressDict = addressString,
-            data = {
-                address: addressString,
-                sensor: "false"
-            },
-            promise,
+        var data,
+            promise;
+
+        data = {
+            address: addressString,
+            sensor: "false"
+        };
 
         promise = ajaxPromise(data);
 

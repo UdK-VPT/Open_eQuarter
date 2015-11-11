@@ -3,7 +3,6 @@ import os
 import json
 import mole
 import qgis.utils
-from mole import extensions
 import xml.etree.ElementTree as etree
 from io import open
 from collections import OrderedDict
@@ -20,6 +19,7 @@ class ColorEntryManager:
         self.layer_abbreviation_map = {}
 
     def add_layer(self, layer_name):
+        from mole import extensions
         if not self.layer_values_map.has_key(layer_name):
             self.layer_values_map[layer_name] = OrderedDict()
         ext = extensions.by_layername(layer_name)
@@ -239,7 +239,7 @@ class ColorEntryManager:
             print('{}: {}'.format(self.__module__, Error))
 
         self.set_color_map_of_layer(result_dict, layer_name)
-
+        return result_dict
 
 class MunicipalInformationParser:
     """

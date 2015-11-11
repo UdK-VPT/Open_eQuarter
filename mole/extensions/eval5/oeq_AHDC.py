@@ -52,3 +52,8 @@ extension = OeQExtension(
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)
+
+'''
+for k in range(1,25):
+   print [e.extension_id for e in  ext.by_state(True)[k].required()]
+'''

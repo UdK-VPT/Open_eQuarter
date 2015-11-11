@@ -15,11 +15,11 @@ def calculation(self=None, parameters={}):
     dataset = {'ACHL': NULL}
     dataset.update(parameters)
 
-    print '------'
-    print dataset['AREA']
-    print dataset['FLOORS']
+    #print '------'
+    #print dataset['AREA']
+    #print dataset['FLOORS']
     #print float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-    print dataset['HHRS']
+    #print dataset['HHRS']
 
     #print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
 
@@ -28,7 +28,7 @@ def calculation(self=None, parameters={}):
         living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8 * 0.8 #20% Construction, 20 % floors and stairs
         dataset['ACHL']= 20 * living_area *float(dataset['HHRS'])/1000
     #print qtp_total/living_area
-    print '------'
+    #print '------'
     result = {}
     for i in dataset.keys():
         result.update({i: {'type': QVariant.Double,

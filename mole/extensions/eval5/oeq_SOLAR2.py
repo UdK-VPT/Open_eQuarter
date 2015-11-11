@@ -12,7 +12,7 @@ def calculation(self=None, parameters={}):
 
 
 extension = OeQExtension(
-    #extension_id=__name__,
+    extension_id=__name__,
     category='Evaluation',
     subcategory='Solarthermics',
     extension_name='Solar Heat Earning',

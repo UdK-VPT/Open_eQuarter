@@ -925,7 +925,6 @@ class OpenEQuarterMain:
         legend.nodeMove(vlayer.name(),'bottom','Data')
 
         #run import extensions
-        extensions.run_active_extensions('Import')
 
         # collapse and hide
         legend.nodeCollapse('Import')
@@ -938,6 +937,8 @@ class OpenEQuarterMain:
 
     # step 4.2
     def handle_building_calculations(self):
+        extensions.run_active_extensions('Import')
+
         extensions.run_active_extensions('Evaluation')
         legend.nodeHide(config.pst_input_layer_name)
         return 2

@@ -8,13 +8,13 @@ from mole.project import config
 def calculation(self=None, parameters={}):
     return {}
 
-
 extension = OeQExtension(
     extension_id=__name__,
     category='Import',
     subcategory='Data',
     field_id='OUTL',
     par_in=[],
+    par_out=['PERIMETER'],
     source_type='shp',
     extension_name='Building Outlines ("Hausumringe")',
     layer_name=config.housing_layer_name,

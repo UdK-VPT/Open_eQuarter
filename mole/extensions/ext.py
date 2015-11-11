@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os,time
+import os,time,datetime
 import pickle
 from mole import oeq_global
 from mole.project import config
@@ -46,7 +46,8 @@ class OeQExtension:
                  layer_out=None,
                  colortable=None,
                  show_results=False,
-                 evaluation_method=average):
+                 evaluation_method=average,
+                 last_calculation=None):
         self.field_id = field_id
         self.source_type = source_type
         if extension_id == None:
@@ -97,6 +98,7 @@ class OeQExtension:
         #     elif not os.path.isfile(colortable):
         #        colortable = None
         self.colortable = colortable
+        self.last_calculation = last_calculation
 
 
     def update(self, category=None,
@@ -117,7 +119,8 @@ class OeQExtension:
                layer_out=None,
                show_results=None,
                colortable=None,
-               evaluation_method=None):
+               evaluation_method=None,
+               last_calculation=None):
         if category != None: self.category = category
         if subcategory != None: self.subcategory = subcategory
         if field_id != None: self.field_id = field_id
@@ -137,6 +140,7 @@ class OeQExtension:
         if colortable != None: self.colortable = colortable
         if show_results != None: self.show_results = show_results
         if evaluation_method != None: self.evaluator = evaluation_method
+        if last_calculation != None: self.last_calculation = last_calculation
 
     def activate(self):
         self.active = True
@@ -171,6 +175,9 @@ class OeQExtension:
         if self.par_in == None:
             return {}
         return self.evaluate(dict(zip(self.par_in, [1 for i in self.par_in]))).keys()
+
+    def get_par_out_not_in(self):
+        return filter(lambda par: not (par in self.par_in), self.get_par_out())
 
     def par_out_as_attributes(self):
         from qgis.core import QgsField
@@ -244,6 +251,81 @@ class OeQExtension:
 
 
 
+    def load_wms(self):
+        from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
+        from mole.oeq_global import wait_for_renderer
+        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image
+        from mole.qgisinteraction.layer_interaction import fullRemove
+        wmslayer='WMS_'+self.layer_name+'_RAW'
+        rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
+        QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+        if not wait_for_renderer(120000):
+            oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
+            return False
+        path = save_wms_extent_as_image(wmslayer)
+        fullRemove(wmslayer)
+        rlayer = QgsRasterLayer(path, self.layer_name)
+        QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+
+
+    '''
+    import mole.extensions as ext
+    ext.by_type('wms')[0].load_raster()
+
+    '''
+
+    #decode RGBa color by the colormap
+    def decode_color(self, red = 0 ,green = 0 ,blue = 0 ,alpha = 0 ,resultkeys = [], mode = 'range'):
+        from qgis import utils
+        from qgis.core import NULL
+        from qgis.core import QgsField
+        from PyQt4.QtCore import QVariant
+
+        #define generic result
+        if mode == 'average':
+            if not resultkeys: resultkey = ['AvgVal']
+            result = {resultkeys[0] + '': {'type': QVariant.Double,'value': NULL}}
+
+        else:
+            if not resultkeys: resultkey = ['Name','MinVal','MaxVal']
+            result = {resultkeys[0]: {'type': QVariant.String,'value': NULL},
+                      resultkeys[1]: {'type': QVariant.Double,'value': NULL},
+                      resultkeys[2]: {'type': QVariant.Double,'value': NULL}}
+
+        #read colormap
+        try:
+            oeqMain = utils.plugins['mole']
+        except:
+            print self.extension_id + ".decode_color(): Could not connect to Colormanager"
+            return result
+
+        color_dict = oeqMain.color_picker_dlg.color_entry_manager.read_color_map_from_qml(self.colortable)
+        #check every color for match
+        for color_key in color_dict.keys():
+            #extract color map entry
+            color_quadriple = color_key[5:-1].split(',')
+            color_quadriple = map(int, color_quadriple)
+
+            #check if color matches
+            match = (((color_quadriple[0]-config.color_match_tolerance) < red < (color_quadriple[0]+config.color_match_tolerance))
+                    and ((color_quadriple[1]-config.color_match_tolerance) < green < (color_quadriple[1]+config.color_match_tolerance))
+                    and ((color_quadriple[2]-config.color_match_tolerance) < blue < (color_quadriple[2]+config.color_match_tolerance))
+                    and ((color_quadriple[3]-config.color_match_tolerance) < alpha < (color_quadriple[3]+config.color_match_tolerance)))
+
+            #set generic result to mapped values and return
+            if match:
+                if mode == 'average':
+                    result[resultkeys[0]]['value'] = (float(color_dict[color_key][1]) + float(color_dict[color_key][2])) / 2
+                else:
+                    result[resultkeys[0]]['value'] = color_dict[color_key][0]
+                    result[resultkeys[1]]['value'] = color_dict[color_key][1]
+                    result[resultkeys[2]]['value'] = color_dict[color_key][2]
+                return result
+
+        #return generic result
+        return result
+
+
 
     # extensions.by_category('Import')[1].decode_color_table()
     def decode_color_table(self):
@@ -304,6 +386,35 @@ class OeQExtension:
         legend.nodeRestoreVisibility(self.layer_in)
         #time.sleep(0.5)
 
+
+    def required(self):
+        req=[]
+        all_suppliers=filter(lambda ext: ext != self, by_state(True))
+        #if self.category != 'Import':
+        if True:
+            for ipar in self.par_in:
+                supplier = filter(lambda ext: ipar in ext.get_par_out_not_in(), all_suppliers)
+                if supplier:
+                    if not (supplier[0] in req):
+                        #print supplier[0].extension_id
+                        req.insert(0, supplier[0])
+                else:
+                    print str(self.extension_id)+' can not find a supplier found for "'+str(ipar)+'"'
+        #print self.extension_id + ' needs:'
+        #print [e.extension_id for e in req]
+        return req
+
+    def needs_evaluation(self,required=None):
+        if not required:
+            required = self.required()
+        if not self.last_calculation:
+            return True
+        for ext in required:
+            if ext.last_calculation:
+                if self.last_calculation < ext.last_calculation:
+                    return True
+        return False
+
     # extensions.by_category('Import')[1].calculate()
     def calculate(self):
         from qgis import utils
@@ -311,7 +422,18 @@ class OeQExtension:
         from PyQt4.QtCore import QVariant
         from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
             add_attributes_if_not_exists
+
+        #check wether a evaluation function is defined
         if self.evaluator == None: return
+        #self.calculate_required()
+
+        required = self.required()
+        for ext in required:
+            ext.calculate()
+        if not self.needs_evaluation(required):
+            return
+
+        #get source and target nodes
         source_layer = legend.nodeByName(self.layer_in)
         target_layer = legend.nodeByName(self.layer_out)
         if (not source_layer) | (not target_layer):
@@ -320,69 +442,117 @@ class OeQExtension:
             print target_layer
         source_layer =source_layer[0]
         target_layer = target_layer[0]
+
+        #save visibility states and st them to 'visible'
         legend.nodeStoreVisibility(source_layer)
         legend.nodeShow(source_layer)
         legend.nodeStoreVisibility(target_layer)
         legend.nodeShow(target_layer)
+
+        #get source and target layers
         source_layer = source_layer.layer()
         target_layer = target_layer.layer()
         #time.sleep(0.5)
+
+        #get target data provider
         target_provider = target_layer.dataProvider()
-        if self.get_par_out() != []:
+
+        if self.get_par_out():
+            #add missing attributes to target
             add_attributes_if_not_exists(target_layer, self.par_out_as_attributes())
+
+        #init progressbar
         progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
                                                       u'Updating layer "' + self.layer_out + '" from "' + self.layer_in + '"!',
                                                       maxcount=source_layer.featureCount())
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+
+        #do calculation feature by feature
         for srcFeat in source_layer.getFeatures():
+            #define empty input parameter dict
             par_in_data = {}
+
+            #get input parameters from source
             for par in self.par_in:
+                #check whether anptut parameter exists in source attributes
                 if source_layer.fieldNameIndex(par) < 0:
                     oeq_global.OeQ_init_warning('Extension "' + self.extension_name + '":',
                                                 'Layer "' + self.layer_in + '" has no attribute "' + par + '"!')
                     return None
+
+                #get the corresponding value
                 value = srcFeat.attributes()[source_layer.fieldNameIndex(par)]
+
+                #add it to the input parameter dict
                 par_in_data.update({par: value})
+
+            #execute the extension specific evaluations
             result = self.evaluate(par_in_data)
+
+            #define empty output parameter dict
             attributevalues = {}
+
+            #add values to the output parameter dict
+            #print "RESULTKEYS"
+            #print result.keys()
             for i in result.keys():
                 attributevalues.update({target_layer.fieldNameIndex(i): result[i]['value']})
 
+            #get the target feature of the same building id as the source feature
             tgtFeat = filter(lambda x: x.attribute('BLD_ID') == srcFeat.attribute('BLD_ID'),
                              target_layer.getFeatures())
+            #if it does not exist go to next
             if tgtFeat:
                 tgtFeat = tgtFeat[0]
             else:
                 continue
+
+            #set the attribute values of the target provider to the evaluated output parameters
             target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
+
+            #trigger pogressbar
             progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
 
+        #restore visibility states
         legend.nodeRestoreVisibility(self.layer_in)
         legend.nodeRestoreVisibility(self.layer_out)
+
+        #if any result shall be visualized
         if self.show_results:
             self.work_out_results()
         oeq_global.OeQ_kill_progressbar()
+        self.last_calculation=datetime.datetime.now()
        #time.sleep(0.5)
 
 
     def work_out_results(self):
         from mole.qgisinteraction.layer_interaction import fullRemove
+
         fullRemove(self.layer_name)
         self.update_colortable()
+
+        #create category group in legend
         if not legend.nodeExists(self.category):
             cat=legend.nodeCreateGroup(self.category,2)
         else:
             cat=legend.nodeByName(self.category)[0]
+        #create subcategory group in legend
         if not legend.nodeExists(self.subcategory):
             subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
         else:
             subcat=legend.nodeByName(self.subcategory)[0]
+
+        #use the housing layer as a template for the resultlayer
         resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,2,subcat)
         self.update_colortable()
+
+        #copy the required attributes of the datalayer to the resultlayer
         legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
 
+        #add the colortable as style
         resultnode.layer().loadNamedStyle( self.colortable)
 
+        #add node entry to the radiogroup of the category
         legend.nodeRadioAdd(resultnode,self.category)
         legend.nodeShow(resultnode)
         time.sleep(0.1)
@@ -500,8 +670,8 @@ def save():
 
 def run_active_extensions(category=None):
     for extension in by_state(True, category):
-        if extension.source_type == 'wms':
-            extension.decode_color_table()
+       # if extension.source_type == 'wms':
+       #     extension.decode_color_table()
         extension.calculate()
 
 

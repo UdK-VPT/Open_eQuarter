@@ -111,7 +111,6 @@ def calculation(self=None, parameters={}):
 
 extension = OeQExtension(
     extension_id=__name__,
-
     category='Evaluation',
     subcategory='General',
     extension_name='Building Dimensions',

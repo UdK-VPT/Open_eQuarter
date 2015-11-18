@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_jasmine',
     'crow',
+    'ates',
 )
 
 JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, 'crow', 'jasmine')
@@ -84,9 +85,15 @@ DATABASES = {
         'NAME': 'crow_django',
         'USER': 'djangocrow',
         'PASSWORD': 'djangocrow'
+    },
+    'atesdb': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'buildingDB',
+        'USER': 'ATESuser',
+        'PASSWORD': 'ATESuser',
     }
 }
-
+DATABASE_ROUTERS = ['ates.routers.AtesRouter']
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

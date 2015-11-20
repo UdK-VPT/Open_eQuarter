@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django_jasmine',
     'crow',
     'ates',
+    'django_extensions',
 )
 
 JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, 'crow', 'jasmine')

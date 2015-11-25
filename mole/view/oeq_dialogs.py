@@ -23,12 +23,11 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
-from qgis.utils import iface
+from qgis.utils import iface,plugins
 
 from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction, legend
 from mole import oeq_global
-from mole import extensions
 from mole.project import config
 from mole.webinteraction import googlemaps
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
@@ -302,6 +301,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        from mole import extensions
+
         layer = self.layers_dropdown.currentText()
         self.recent_layer = layer
         color_map = self.color_entry_manager.layer_values_map[layer]
@@ -370,6 +371,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        from mole import extensions
+
         layer = self.layers_dropdown.currentText()
         caption = 'Chose a .qml-legend file for the "{}"-layer...'.format(layer)
         filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
@@ -387,6 +390,8 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        from mole import extensions
+
         layer = iface.activeLayer()
         selected_layer = self.layers_dropdown.currentText()
         if layer.name() != selected_layer:
@@ -479,24 +484,37 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def __init__(self, progress_model):
+        from qgis import utils
+        mole = utils.plugins['mole']
         QtGui.QDockWidget.__init__(self)
         self.setupUi(self)
         self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self._semiopen_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
         self.progress_model = progress_model
+        self.ol_plugin_installed.pressed.connect(mole.handle_ol_plugin_installed)
+        self.pst_plugin_installed.pressed.connect(mole.handle_pst_plugin_installed)
+        self.real_centroid_plugin_installed.pressed.connect(mole.handle_real_centroid_plugin_installed)
+        self.project_created.pressed.connect(mole.handle_project_created)
+        self.project_saved.pressed.connect(mole.handle_project_saved)
+        self.investigationarea_defined.pressed.connect(mole.handle_investigationarea_defined)
+        self.building_outlines_acquired.pressed.connect(mole.handle_building_outlines_acquired)
+        self.building_coordinates_acquired.pressed.connect(mole.handle_building_coordinates_acquired)
+        self.import_ext_selected.pressed.connect(mole.handle_import_ext_selected)
+        self.information_layers_loaded.pressed.connect(mole.handle_information_layers_loaded)
+        self.needle_request_done.pressed.connect(mole.handle_needle_request_done)
+        #self.ol_plugin_installed.connect(QtCore.SIGNAL(_fromUtf8("released()")), plugins['mole'].handle_ol_plugin_installed())
+       # for dropdown_index, list_view in enumerate(self.progress_model.section_views):
+       #     self.process_page.addWidget(list_view)
+       #     self.active_page_dropdown.addItem(list_view.accessibleName())
+       #     self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, QtCore.Qt.DecorationRole)
+       #     list_view.model().itemChanged.connect(self.check_progress_status)
 
-        for dropdown_index, list_view in enumerate(self.progress_model.section_views):
-            self.process_page.addWidget(list_view)
-            self.active_page_dropdown.addItem(list_view.accessibleName())
-            self.active_page_dropdown.setItemData(dropdown_index, self._open_mark, QtCore.Qt.DecorationRole)
-            list_view.model().itemChanged.connect(self.check_progress_status)
+       # self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
 
-        self.active_page_dropdown.currentIndexChanged.connect(lambda: self.go_to_page(self.active_page_dropdown.currentText()))
-
-        # Remove once the ui_main_process_dock was adopted to the new model
-        self.active_page_dropdown.setCurrentIndex(2)
-        self.active_page_dropdown.setCurrentIndex(0)
+       # # Remove once the ui_main_process_dock was adopted to the new model
+       # self.active_page_dropdown.setCurrentIndex(2)
+       # self.active_page_dropdown.setCurrentIndex(0)
 
     def check_progress_status(self, changed_item):
         # explicitly check the state, since otherwise the next section gets changed, too
@@ -524,6 +542,16 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
                 self.process_page.setCurrentWidget(child)
                 break
 
+    def select_page(self,section_name):
+        pages = self.process_page.children()
+        itemindex = [i.objectName() for i in pages].index(section_name)
+        dropdownentry = pages[itemindex].accessibleName()
+        print dropdownentry
+        allitems = [self.active_page_dropdown.itemText(i) for i in range(self.active_page_dropdown.count())]
+        itemindex = allitems.index(dropdownentry)
+        self.active_page_dropdown.setCurrentIndex(itemindex)
+
+
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
         if isinstance(check_yes_no, bool):
             page = self.findChild(QtGui.QWidget, page_name)
@@ -545,6 +573,8 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
                 index = self.active_page_dropdown.currentIndex()
                 self.active_page_dropdown.setItemData(index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
+
+
 
 
 class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):

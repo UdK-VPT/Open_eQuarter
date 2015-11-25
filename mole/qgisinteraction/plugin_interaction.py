@@ -19,11 +19,12 @@ def get_plugin_ifexists(plugin_name):
     :return plugin: Return the plugin if it was found or None otherwise
     :rtype: plugin instance
     """
+    from mole import oeq_global
     try:
         plugin = utils.plugins[plugin_name]
         return plugin
     except KeyError:
-        print "No plugin with the given name '" + plugin_name + "' found. Please check the plugin settings."
+        oeq_global.OeQ_init_warning(title="Mandatory Plugins: ", message="Please install Plugin '" + plugin_name + "' ")
         return None
 
 class PstInteraction(object):

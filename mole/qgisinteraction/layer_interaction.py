@@ -100,11 +100,64 @@ def delete_layer_files(layer):
     if len(filenameroot) < 2:
         return []
     filenameroot = ''.join(filenameroot[:-1])+ '.'
-    if path.exists(path):
+    if os.path.exists(path):
                 files = os.listdir(path)
                 for file in files:
-                    if files.startswith(filenameroot):
+                    if file.startswith(filenameroot):
                         os.remove(os.path.join(path, file))
+
+def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
+    import os
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    tgt_files=filter(lambda x: x.startswith(filenamebase+'.'),os.listdir(path))
+    print tgt_files
+    if ext:
+        tgt_files=filter(lambda x: x.split('.')[1] in ext , tgt_files)
+    print tgt_files
+    if ignore:
+        tgt_files=filter(lambda x: not x.split('.')[1]  in ignore , tgt_files)
+    print tgt_files
+    for i in tgt_files:
+            try:
+                print i
+                os.remove(os.path.join(path,i))
+                os.wait()
+            except:
+                pass
+    return tgt_files
+
+def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
+    import os
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    src_files=filter(lambda x: x.startswith(filenamebase+'.'),os.listdir(path))
+    print src_files
+    if ext:
+        src_files=filter(lambda x: x.split('.')[1] in ext , src_files)
+    print src_files
+    if ignore:
+        src_files=filter(lambda x: not x.split('.')[1]  in ignore , src_files)
+    print src_files
+    print [newfilenamebase+'.'+i.split('.')[1] for i in src_files]
+    tgt_files=[[i,newfilenamebase+'.'+i.split('.')[1]] for i in src_files]
+    print tgt_files
+    for i in tgt_files:
+            try:
+                print i[0]
+                print i[1]
+                os.rename(os.path.join(path,i[0]),os.path.join(path,i[1]))
+                os.wait()
+            except:
+                pass
+    return tgt_files
+
+def remove_layer(layer,physical=False):
+    from qgis.core import QgsMapLayerRegistry
+    tgt_dir=os.path.dirname(layer.source())
+    basename=layer.name()
+    QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+    if physical:
+        return remove_filegroup(tgt_dir,basename,ignore=['qml'])
+    return True
 
 def load_layer_from_disk(path_to_layer, name):
     """
@@ -539,6 +592,83 @@ def edit_housing_layer_attributes(housing_layer):
     except AttributeError, Error:
         print(__name__, Error)
         return False
+
+def init_building_geometries(housing_layer):
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
+    try:
+        provider = housing_layer.dataProvider()
+        housing_layer.startEditing()
+
+        attributes = [QgsField('AREA', QVariant.Double),
+                      QgsField('PERIMETER', QVariant.Double)]
+        provider.addAttributes(attributes)
+        name_to_index = provider.fieldNameMap()
+        area_index = name_to_index['AREA']
+        perimeter_index = name_to_index['PERIMETER']
+        for feature in provider.getFeatures():
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
+            values = {area_index: geometry.area(), perimeter_index: geometry.length()}
+            provider.changeAttributeValues({feature.id(): values})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
+            #    provider.deleteFeatures([feature.id()])
+
+        #provider.deleteAttributes([fid_index])
+        return housing_layer.commitChanges()
+    except AttributeError, Error:
+        print(__name__, Error)
+        return False
+
+def init_building_ids(housing_layer):
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
+    try:
+        provider = housing_layer.dataProvider()
+        housing_layer.startEditing()
+
+        provider.addAttribute(QgsField('BLD_ID', QVariant.String))
+        name_to_index = provider.fieldNameMap()
+        building_index = name_to_index['BLD_ID']
+        try:
+            fid_index = name_to_index['FID']
+        except:
+            pass
+
+        building_id = 0
+
+        for feature in provider.getFeatures():
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
+            provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
+            #    provider.deleteFeatures([feature.id()])
+
+        #provider.deleteAttributes([fid_index])
+        return housing_layer.commitChanges()
+    except AttributeError, Error:
+        print(__name__, Error)
+        return False
+
+
 
 
 def add_parameter_info_to_layer(color_dict, field_name, layer):

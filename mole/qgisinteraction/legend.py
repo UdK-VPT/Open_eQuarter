@@ -21,6 +21,7 @@ from mole import oeq_global
 from mole.project import config
 import os
 
+
 def nodeIsLayer(node):
     """nodeIsLayer: Checks, weather node represents a Layer
     :param node: Node to check or name of node
@@ -491,6 +492,18 @@ legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
 '''
 
 
+def nodeRemove(node,physical=False):
+    import os
+    from mole.qgisinteraction import layer_interaction
+    from mole import oeq_global
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    return layer_interaction.remove_layer(node.layer(),physical=physical)
+
 
 
 
@@ -571,6 +584,7 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     #print layer.isValid()
     QgsMapLayerRegistry.instance().addMapLayer(newlayer, True)
     print newlayer.name()
+
 
     newnode = nodeByName(newlayer.name())
     if len(newnode) == 0:
@@ -785,6 +799,191 @@ def nodeSetActive(node):
 
 
 
+
+
+def nodeConvertCRSold(node,crs=None):
+    import os, subprocess
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    from mole import oeq_global
+    from mole.qgisinteraction import legend
+    from mole.qgisinteraction import layer_interaction
+    if crs == None:
+        crs='epsg:4326' #default is WGS84
+    if oeq_global.isStringOrUnicode(node):
+        node = legend.nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    src_crs = node.layer().crs().authid()
+    name=node.layer().name()
+    src_path = node.layer().source()
+    src_dir =os.path.dirname(src_path)
+    src_name = os.path.basename(src_path).split('.')[0]
+    src_ext = src_path.split('.')[1]
+    tgt_name = src_name+'_tmp'
+    tgt_path = os.path.join(src_dir,tgt_name+'.'+src_ext)
+    tgt_crs=QgsCoordinateReferenceSystem(int(crs.split(':')[1]))
+    bu_name= src_name+'_'+src_crs.split(':')[1]
+    bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
+    print src_path
+    print tgt_path
+    print src_crs
+    print crs
+    cmd = ' '.join(["ogr2ogr", "-f","'ESRI Shapefile'","-s_srs",src_crs,"-t_srs",crs,"'"+tgt_path+"'","'"+src_path+"'"])
+    print cmd
+    #try:
+    print subprocess.call(cmd,shell=True)
+    #except:
+    try:
+        layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+    except:
+        pass
+    print bu_path
+    try:
+        layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+    except:
+        pass
+    try:
+        layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+    except:
+        pass
+    #node.parent().removeChildNode(node)
+    print bu_path
+    iface.addVectorLayer(src_path,name, 'ogr')
+    newnode=nodeByName(name)
+    if newnode:
+            return newnode[0]
+    return None
+
+def nodeConvertCRS(node,crs=None):
+    import os, subprocess
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    from mole import oeq_global
+    from mole.qgisinteraction.legend import *
+    from mole.qgisinteraction import layer_interaction
+    if crs == None:
+        crs='epsg:4326' #default is WGS84
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    src_crs = node.layer().crs().authid()
+    name=node.layer().name()
+    src_path = node.layer().source()
+    src_dir =os.path.dirname(src_path)
+    src_name = os.path.basename(src_path).split('.')[0]
+    src_ext = src_path.split('.')[1]
+    tgt_name = src_name+'_tmp'
+    tgt_path = os.path.join(src_dir,tgt_name+'.'+src_ext)
+    bu_name= src_name+'_'+src_crs.split(':')[1]
+    bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
+    nodeVectorSave(node,tgt_path,crs)
+    #    return None
+    try:
+        layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+    except:
+        pass
+    try:
+        layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+    except:
+        pass
+    try:
+        layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+    except:
+        pass
+    nodeRemove(node)
+    iface.addVectorLayer(src_path,name, 'ogr')
+    newnode=nodeByName(name)
+    if newnode:
+            return newnode[0]
+    return None
+
+
+
+def nodeClipByShapefile(node,clip_path=None,clipped_path=None):
+    import os, subprocess
+    from mole import oeq_global
+    from mole.qgisinteraction.legend import *
+    from mole.qgisinteraction import layer_interaction
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    if clip_path == None:
+        return None
+    clp_path = os.path.join(clip_path)
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    src_crs = node.layer().crs().authid()
+    src_lname = node.layer().name()
+    src_path = node.layer().source()
+    src_dir =os.path.dirname(src_path)
+    src_name = os.path.basename(src_path).split('.')[0]
+    src_ext = src_path.split('.')[1]
+    if clipped_path:
+        tgt_name=os.path.basename(clipped_path).split('.')[0]
+        tgt_path=clipped_path
+    else:
+        tgt_name = src_name+'_tmp'
+        tgt_path = os.path.join(src_dir,tgt_name+'.'+src_ext)
+    bu_name= src_name+'_before_clip'
+    bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
+    subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clp_path, tgt_path, src_path])
+    node.parent().removeChildNode(node)
+    #raw_input("Press Enter to terminate.BU")
+    if not clipped_path:
+        try:
+            layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+        except:
+            pass
+        #raw_input("Press Enter to terminate.SRC->BU")
+        try:
+            layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+        except:
+            pass
+        #raw_input("Press Enter to terminate.TGT->SRC")
+        try:
+            layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+        except:
+            pass
+        print bu_path
+        newlayer = iface.addVectorLayer(src_path,src_lname, 'ogr')
+    else:
+        newlayer = iface.addVectorLayer(tgt_path,tgt_name, 'ogr')
+    newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])))
+    newlayer.triggerRepaint()
+    return nodeByLayer(newlayer)[0]
+
+
+'''
+import mole.extensions as ext
+ext.by_type('wfs')[0].load_wfs()
+from mole.qgisinteraction.legend import *
+nodeConvertCRS('Building Outlines (WFS Capture)','EPSG:32633')
+nodeClipByShapenode('Building Outlines (WFS Capture)','Investigation Area')
+'''
+
+def nodeClipByShapenode(node,clip_node=None,clipped_name=None):
+    import os, subprocess
+    from mole import oeq_global
+    from mole.qgisinteraction import legend
+    os.environ['PATH'] += ":"+"/usr/local/bin"
+    if oeq_global.isStringOrUnicode(node):
+        node = legend.nodeByName(node)
+        if len(node) == 0:
+            return None
+        node = node[0]
+    if oeq_global.isStringOrUnicode(clip_node):
+        clip_node = legend.nodeByName(clip_node)
+        if len(clip_node) == 0:
+            return None
+        clip_node = clip_node[0]
+    clipped_path = clip_node.layer().source()
+    if clipped_name:
+        clipped_path=os.path.join(os.path.dirname(clipped_path),clipped_name+'.'+clipped_path.split('.')[1])
+    return nodeClipByShapefile(node,clipped_path)
+
 def testlayer():
     nodeCreateGroup('Testgroup1')
     nodeCreateGroup('Testgroup2',0)
@@ -820,3 +1019,148 @@ def nodeZoomTo(node):
         canvas.freeze(False)
 
 
+def nodeGetExtent(node):
+    canvas = iface.mapCanvas()
+    #canvas.freeze(True)
+    backup_extent = canvas.extent()
+    nodeZoomTo(node)
+    node_extent = canvas.extent()
+    canvas.setExtent(backup_extent)
+    canvas.refresh()
+    return node_extent
+
+
+def nodeVectorSave(node,filepath=None,crs=None,load=False):
+    from qgis.core import QgsCoordinateReferenceSystem,QgsVectorFileWriter
+    from qgis.utils import iface
+    from mole import oeq_global
+    from mole.qgisinteraction.legend import *
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    if not filepath:
+        filepath=node.layer().source()
+    if not crs:
+        crs=node.layer().crs()
+    else:
+        crs = QgsCoordinateReferenceSystem(int(crs.split(':')[1]))
+    QgsVectorFileWriter.writeAsVectorFormat( node.layer(),os.path.join(filepath),'System',crs,'ESRI Shapefile')
+    if load:
+        iface.addVectorLayer(os.path.join(filepath),None, 'ogr')
+
+def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=True, category = None,subcategory=None,position='bottom'):
+    from mole import oeq_global
+    from mole.project import config
+    from mole.qgisinteraction import layer_interaction,legend
+    from PyQt4.QtCore import QVariant
+    #get node for building_outline if only layer name is given
+    if oeq_global.isStringOrUnicode(node):
+        node = legend.nodeByName(node)
+        if not node:
+            oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
+            return None
+    node = node[0]
+    #remove database if necessary
+    if overwrite:
+        legend.nodeRemove(database_layer_name,physical=True)
+    #use project reference crs if not given
+    if not reference_crs:
+        reference_crs = config.measurement_projection
+    #generate db from building outline layer
+    db_layer_node = legend.nodeDuplicate(node,database_layer_name)
+    #convert db layer to reference crs
+    db_layer_node = legend.nodeConvertCRS(db_layer_node,reference_crs)
+    if not db_layer_node:
+        oeq_global.OeQ_init_warning('nodeCreateDatabase :','Could not build database !')
+        return None
+    #create attributes
+    db_layer = db_layer_node.layer()
+    attributes = [QgsField('AREA', QVariant.Double),
+                  QgsField('PERIMETER', QVariant.Double),
+                  QgsField('YOC', QVariant.Double),
+                  QgsField('PDENS', QVariant.Double),
+                  QgsField('FLOORS', QVariant.Double)]
+    layer_interaction.add_attributes_if_not_exists(db_layer, attributes)
+    data_layer_provider= db_layer.dataProvider()
+    #set attributes for all features
+    for feat in data_layer_provider.getFeatures():
+            #get geometry
+            geometry = feat.geometry()
+            attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
+                               data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']) * 100.0,
+                               data_layer_provider.fieldNameIndex('FLOORS'): 3.5,
+                               data_layer_provider.fieldNameIndex('AREA'): geometry.area(),
+                               data_layer_provider.fieldNameIndex('PERIMETER'): geometry.length()}
+            data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
+    #create category group in legend
+    if category:
+        if not legend.nodeExists(category):
+            cat=legend.nodeCreateGroup(category,position)
+        else:
+            cat=legend.nodeByName(category)[0]
+        legend.nodeHide(cat)
+        #create subcategory group in legend
+        if subcategory:
+            if not legend.nodeExists(subcategory):
+                subcat=legend.nodeCreateGroup(subcategory,'bottom',cat)
+            else:
+                subcat=legend.nodeByName(subcategory)[0]
+            legend.nodeHide(subcat)
+            legend.nodeMove(db_layer_node,'bottom',subcat)
+            legend.nodeCollapse(subcat)
+        else:
+            legend.nodeMove(db_layer_node,'bottom',cat)
+            legend.nodeCollapse(cat)
+    return db_layer_node
+
+def nodeCreateBuildingIDs(building_outline_node):
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
+    from mole import oeq_global
+    from mole.project import config
+    from mole.qgisinteraction import layer_interaction,legend
+    from PyQt4.QtCore import QVariant
+    #get node for building_outline if only layer name is given
+    if oeq_global.isStringOrUnicode(building_outline_node):
+        building_outline_node = legend.nodeByName(building_outline_node)
+        if not building_outline_node:
+            oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
+            return None
+    building_outline_node = building_outline_node[0]
+
+    try:
+        provider = building_outline_node.layer().dataProvider()
+        housing_layer.startEditing()
+
+        provider.addAttribute(QgsField('BLD_ID', QVariant.String))
+        name_to_index = provider.fieldNameMap()
+        building_index = name_to_index['BLD_ID']
+        try:
+            fid_index = name_to_index['FID']
+        except:
+            pass
+
+        building_id = 0
+
+        for feature in provider.getFeatures():
+            # if oeq_global.isnull(feature.attribute('FID')):
+            # if feature.attribute('BLD_ID') == 0:
+            geometry = feature.geometry()
+            provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
+            building_id += 1
+            # else:
+            # These features are most likely to be duplicates of those that have an FID-entry
+            #    provider.deleteFeatures([feature.id()])
+
+        #provider.deleteAttributes([fid_index])
+        return housing_layer.commitChanges()
+    except AttributeError, Error:
+        print(__name__, Error)
+        return False

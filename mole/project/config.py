@@ -11,7 +11,7 @@ country = 'Germany'
 
 # Project information
 project_crs = 'EPSG:3857'
-
+measurement_projection='EPSG:32633'
 ### Information needed to use external plugins
 # OpenStreetMap plugin
 ol_plugin_name = 'openlayers_plugin'
@@ -34,7 +34,7 @@ x = 10.447683
 y = 51.163375
 scale = 0.5
 default_extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-default_extent_crs = 'EPSG:4326'
+default_extent_crs = 'EPSG:3857'
 
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'

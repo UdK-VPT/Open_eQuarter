@@ -9,8 +9,9 @@ from PyQt4.QtCore import QSize
 from mole.project.config import progress_model
 from mole.view.oeq_ui_classes import QProcessViewDelegate
 from mole import oeq_global
-from mole import extensions
-print extensions.__all__
+
+
+
 
 class ProgressItemsModel:
 
@@ -29,18 +30,21 @@ class ProgressItemsModel:
         """
         try:
             dir_entries = ZipFile(path).namelist()
+            print dir_entries
             section_files = filter(lambda entry: entry.startswith('section') and entry.endswith('.json'), dir_entries)
+            print section_files
             views = []
             for json_section in section_files:
                 with ZipFile(path, 'r') as oeq_zip:
                     data = oeq_zip.read(json_section)
                     json_data = json.loads(data)
-
+                    print json_data
                 step_items = QListView()
                 step_items.setItemDelegate(QProcessViewDelegate(step_items))
-                step_items.setAccessibleName(json_data['description'])
+                step_items.setAccessibleName(json_data['section_name']+':'+json_data['description'])
                 step_items.setGridSize(QSize(320,40))
                 step_items.setSpacing(5)
+                print step_items
                 section_model = QStandardItemModel(step_items)
 
                 for step in json_data['steplist']:
@@ -48,7 +52,7 @@ class ProgressItemsModel:
                     item.setCheckable(True)
                     item.setTristate(True)
                     item.setEditable(False)
-                    item.setAccessibleText(step['step_name'])
+                    item.setAccessibleText(step['step_name']+':'+step['description'])
                     item.setCheckState(step['state'])
                     section_model.appendRow(item)
 
@@ -67,9 +71,14 @@ class ProgressItemsModel:
 
         except IOError, FileNotFoundError:
             print(self.__module__, FileNotFoundError)
+        from mole.extensions import load
 
-        extensions.load()
+        load()
         print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
+
+
+
+
 
     def save_oeq_project(self):
         """
@@ -79,6 +88,7 @@ class ProgressItemsModel:
         :return:
         :rtype:
         """
+        from mole import extensions
         try:
             plugin_path = oeq_global.OeQ_plugin_path()
             project_path = oeq_global.OeQ_project_path()
@@ -145,3 +155,32 @@ class ProgressItemsModel:
 
             if not prereq_given:
                 return item
+
+    def maketree(self):
+        #tree={}
+        for view in self.section_views:
+            #tree.update({view_model.accessibleName:view.model()})
+            view_model = view.model()
+
+            for index in xrange(view_model.rowCount()):
+               if view_model.item(index).accessibleText() == step_name:
+                   return {'view':view,'item':view_model.item(index)}
+        return[]
+
+    def findItemByName(self,step_name):
+        for view in self.section_views:
+            view_model = view.model()
+            for index in xrange(view_model.rowCount()):
+               if view_model.item(index).accessibleText() == step_name:
+                   return {'view':view,'item':view_model.item(index)}
+        return[]
+
+
+def findByStepname(qlist,step_name):
+    for view in qlist.section_views:
+        view_model = view.model()
+        for index in xrange(view_model.rowCount()):
+           if view_model.item(index).accessibleText() == step_name:
+               return {'view':view,'item':view_model.item(index)}
+    return[]
+

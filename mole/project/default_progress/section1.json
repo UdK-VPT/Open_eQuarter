@@ -1,8 +1,8 @@
 {"section_name": "project_basics", "description": "Project Basics", "steplist":
 [
-  {"step_name": "ol_plugin_installed", "description": "Install the \"Open Street Map\"-Plugin", "state": 0},
-  {"step_name": "pst_plugin_installed", "description": "Install the \"Point Sampling Tool\"-Plugin", "state": 0},
-  {"step_name": "real_centroid_plugin_installed", "description": "Install the \"realcentroid\"-Plugin", "state": 0},
-  {"step_name": "project_created", "description": "Create a new project and save it", "state": 0}
+  {"step_name": "ol_plugin_installed", "description": "Plugin 'OpenLayers' found and loaded", "state": 0},
+  {"step_name": "pst_plugin_installed", "description": "Plugin 'Point Sampling Tool' found and loaded", "state": 0},
+  {"step_name": "real_centroid_plugin_installed", "description": "Plugin 'realcentriod'  found and loaded", "state": 0},
+  {"step_name": "project_created", "description": "Project Location and Basics defined and saved", "state": 0}
 ]
 }

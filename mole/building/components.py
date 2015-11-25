@@ -268,7 +268,7 @@ class building:
 
 class quarter:
     def __init__(self, name=OeQ_project_info['project_name'], description=OeQ_project_info['description'],
-                 center_coordinates=None, crs='epsg:3857',
+                 center_coordinates=None, crs=config.project_crs.split(':')[2],
                  population_density=OeQ_project_info['population_density'],
                  year_of_construction=OeQ_project_info['average_build_year'],
                  heating_degree_days=OeQ_project_info['heating_degree_days']):

@@ -15,12 +15,15 @@ oeq_global.OeQ_ExtensionsLoaded = True
 #from ext import *
 
 #OeQExtension.generic_id_cnt = 0
-from imp import *
-from exp import *
-from eval1 import *
-from eval2 import *
-from eval3 import *
-from eval4 import *
-from eval5 import *
-# OeQ_ExtensionsLoaded=True
+try:
+    from imp import *
+    from exp import *
+    from eval1 import *
+    from eval2 import *
+    from eval3 import *
+    from eval4 import *
+    from eval5 import *
+    OeQ_ExtensionsLoaded=True
+except:
+    pass
 

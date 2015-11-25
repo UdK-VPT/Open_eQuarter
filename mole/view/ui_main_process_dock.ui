@@ -52,7 +52,7 @@ QListView {
 </string>
   </property>
   <property name="windowTitle">
-   <string>Open eQuarter - Analysis</string>
+   <string>Open eQuarter Mole</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="sizePolicy">
@@ -156,7 +156,31 @@ QListView {
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="active_page_dropdown"/>
+       <widget class="QComboBox" name="active_page_dropdown">
+        <property name="accessibleName">
+         <string>Information Sources</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Requirements</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Project Basics</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Information Sources</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Evaluation</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </item>
@@ -177,6 +201,12 @@ QListView {
         <height>280</height>
        </size>
       </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="accessibleName">
+       <string>jkiiuuu</string>
+      </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
@@ -196,11 +226,14 @@ QListView {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
-      <widget class="QWidget" name="project_basics_page">
+      <widget class="QWidget" name="oeq_requirements">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="accessibleName">
-        <string>Project Basics</string>
+        <string>Requirements</string>
        </property>
        <property name="accessibleDescription">
         <string/>
@@ -211,32 +244,46 @@ QListView {
        <property name="styleSheet">
         <string notr="true"/>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="Requirements">
         <item>
-         <widget class="QProcessButton" name="ol_plugin_installed_chckBox">
+         <widget class="QProcessButton" name="ol_plugin_installed">
           <property name="text">
-           <string>Install the Open Street Map Plugin</string>
+           <string>Check if 'OpenLayers' Plugin is available</string>
+          </property>
+          <property name="shortcut">
+           <string notr="true"/>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <property name="autoRepeat">
+           <bool>false</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="pst_plugin_installed_chckBox">
+         <widget class="QProcessButton" name="pst_plugin_installed">
           <property name="text">
-           <string>Install the PointSamplingTool Plugin</string>
+           <string>Check if 'Point Sampling Tool' Plugin is available</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="project_created_chckBox">
+         <widget class="QProcessButton" name="real_centroid_plugin_installed">
           <property name="text">
-           <string>Create a new project and save it.</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QProcessButton" name="osm_layer_loaded_chckBox">
-          <property name="text">
-           <string>Open an Open Layers Map</string>
+           <string>Check if 'realcentriod'  Plugin is available</string>
           </property>
          </widget>
         </item>
@@ -255,40 +302,32 @@ QListView {
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="investigation_area_page">
+      <widget class="QWidget" name="oeq_project_basics">
        <property name="accessibleName">
-        <string>Investigation Area</string>
+        <string>Project Basics</string>
        </property>
        <property name="accessibleDescription">
         <string/>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="Project">
         <item>
-         <widget class="QProcessButton" name="temp_shapefile_created_chckBox">
+         <widget class="QProcessButton" name="project_created">
           <property name="text">
-           <string>Create a new Polygon-Shapelayer</string>
+           <string>Define Project Location and Parameters</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="editing_temp_shapefile_started_chckBox">
+         <widget class="QProcessButton" name="project_saved">
           <property name="text">
-           <string>Activate the edit mode</string>
+           <string>Save Project</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="investigation_area_selected_chckBox">
+         <widget class="QProcessButton" name="investigationarea_defined">
           <property name="text">
-           <string>Add new features to cover your
-investigation area with</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QProcessButton" name="editing_temp_shapefile_stopped_chckBox">
-          <property name="text">
-           <string>Deactivate the edit mode</string>
+           <string>Define Investigation Area</string>
           </property>
          </widget>
         </item>
@@ -307,22 +346,43 @@ investigation area with</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="building_shapes_page">
+      <widget class="QWidget" name="oeq_informationsources">
        <property name="accessibleName">
         <string>Building Shapes</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="QProcessButton" name="housing_layer_loaded_chckBox">
+         <widget class="QProcessButton" name="import_ext_selected">
           <property name="text">
-           <string>Load a floor plan layer ('Hausumringe')</string>
+           <string>Select Import Extensions</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="building_coordinates_loaded_chckBox">
+         <widget class="QProcessButton" name="building_outlines_acquired">
           <property name="text">
-           <string>Load building coordinates</string>
+           <string>Acquire Building Outlines</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="building_coordinates_acquired">
+          <property name="text">
+           <string>Acquire Building Coordinates</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="information_layers_loaded">
+          <property name="text">
+           <string>Load Information Layers</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="needle_request_done">
+          <property name="text">
+           <string>Perform Needle Request</string>
           </property>
          </widget>
         </item>
@@ -341,32 +401,39 @@ investigation area with</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="real_estate_cadaster_page">
+      <widget class="QWidget" name="oeq_building_evaluation">
        <property name="accessibleName">
-        <string>Real Estate Cadaster</string>
+        <string>Evaluation</string>
        </property>
        <property name="accessibleDescription">
         <string/>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QProcessButton" name="raster_loaded_chckBox">
+         <widget class="QProcessButton" name="eval_ext_selected">
           <property name="text">
-           <string>Load a new (wms) raster-map</string>
+           <string>Select Evaluation Extensions</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="extent_clipped_chckBox">
+         <widget class="QProcessButton" name="disp_ext_selected">
           <property name="text">
-           <string>Export the investigation areas extent as .tif</string>
+           <string>Select Display Extensions</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="legend_created_chckBox">
+         <widget class="QProcessButton" name="buildings_evaluated">
           <property name="text">
-           <string>Create a legend for the clipped .tif-file</string>
+           <string>Evaluate Buildings</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="quarter_evaluated">
+          <property name="text">
+           <string>Evaluate Quarter</string>
           </property>
          </widget>
         </item>
@@ -388,7 +455,7 @@ investigation area with</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="sampling_points_page">
+      <widget class="QWidget" name="oeq_quarter_evaluation">
        <property name="accessibleName">
         <string>Point Sampling</string>
        </property>
@@ -558,8 +625,47 @@ the information</string>
    <header>oeq_ui_classes</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>ol_plugin_installed</tabstop>
+  <tabstop>pst_plugin_installed</tabstop>
+  <tabstop>real_centroid_plugin_installed</tabstop>
+  <tabstop>process_button_next</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>settings_dropdown_btn</tabstop>
+  <tabstop>tools_dropdown_btn</tabstop>
+  <tabstop>active_page_dropdown</tabstop>
+  <tabstop>building_outlines_acquired</tabstop>
+  <tabstop>building_coordinates_acquired</tabstop>
+  <tabstop>eval_ext_selected</tabstop>
+  <tabstop>disp_ext_selected</tabstop>
+  <tabstop>temp_pointlayer_created_chckBox</tabstop>
+  <tabstop>editing_temp_pointlayer_started_chckBox</tabstop>
+  <tabstop>points_of_interest_defined_chckBox</tabstop>
+  <tabstop>editing_temp_pointlayer_stopped_chckBox</tabstop>
+  <tabstop>information_sampled_chckBox</tabstop>
+  <tabstop>project_created</tabstop>
+  <tabstop>investigationarea_defined</tabstop>
+  <tabstop>project_saved</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>active_page_dropdown</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>process_page</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>287</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>270</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

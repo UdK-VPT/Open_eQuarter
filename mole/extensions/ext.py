@@ -40,6 +40,7 @@ class OeQExtension:
                  source_type=None,
                  active=False,
                  source=None,
+                 source_crs=None,
                  par_in=None,
                  layer_in=None,
                  par_out=None,
@@ -73,6 +74,7 @@ class OeQExtension:
         self.description = description
         self.type = type
         self.source = source
+        self.source_crs = source_crs
         self.active = active
         self.show_results = show_results
         self.evaluator = evaluation_method
@@ -113,6 +115,7 @@ class OeQExtension:
                source_type=None,
                active=None,
                source=None,
+               source_crs=None,
                par_in=None,
                layer_in=None,
                par_out=None,
@@ -133,6 +136,7 @@ class OeQExtension:
         if source_type != None: self.source_type = source_type
         if active != None: self.active = active
         if source != None: self.source = source
+        if source_crs != None: self.source_crs = source_crs
         if par_in != None: self.par_in = par_in
         if layer_in != None: self.layer_in = layer_in
         if par_out != None: self.par_out = par_out
@@ -251,27 +255,223 @@ class OeQExtension:
 
 
 
-    def load_wms(self):
+    def load_wms(self,capture=True):
         from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
         from mole.oeq_global import wait_for_renderer
         from mole.qgisinteraction.wms_utils import save_wms_extent_as_image
-        from mole.qgisinteraction.layer_interaction import fullRemove
+        from mole.qgisinteraction import layer_interaction
+        #init progressbar
+        progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+                                                              u'Loading WMS-Map "' + self.layer_name + '"!',
+                                                              maxcount=3)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+
         wmslayer='WMS_'+self.layer_name+'_RAW'
         rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         if not wait_for_renderer(120000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
+        #push progressbar
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+
         path = save_wms_extent_as_image(wmslayer)
-        fullRemove(wmslayer)
+        try:
+            layer_interaction.remove_layer(rlayer,physical=True)
+        except:
+            pass
+
+        #push progressbar
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+        #close progressbar
+        oeq_global.OeQ_kill_progressbar()
+        wmsnode=legend.nodeByLayer(rlayer)[0]
+        if self.category:
+            if not legend.nodeExists(self.category):
+                cat=legend.nodeCreateGroup(self.category)
+            else:
+                cat=legend.nodeByName(self.category)[0]
+            legend.nodeHide(cat)
+            #create subcategory group in legend
+            if self.subcategory:
+                if not legend.nodeExists(self.subcategory):
+                    subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
+                else:
+                    subcat=legend.nodeByName(self.subcategory)[0]
+                legend.nodeHide(subcat)
+                legend.nodeMove(wmsnode,'bottom',subcat)
+                legend.nodeCollapse(subcat)
+            else:
+                legend.nodeMove(wmsnode,'bottom',cat)
+                legend.nodeCollapse(cat)
+        return wmsnode.layer()
+
+
+
+    def load_wfs(self,extent=None):
+        import os
+        from mole.project import config
+        from mole import oeq_global
+        from mole.qgisinteraction import legend,layer_interaction
+        from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter
+        from qgis.utils import iface
+        #check whether extent is defined, if not use investigationarea extent
+        if not extent:
+            extent= legend.nodeGetExtent(config.investigation_shape_layer_name)
+
+        #init progressbar
+        progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+                                                              u'Loading WFS-Map "' + self.layer_name + '"!',
+                                                              maxcount=3)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+
+        #get crs objects
+        crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]))
+        crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]))
+        #transform extent
+        coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
+        extent = coord_transformer.transform(extent)
+        #load wfs
+        wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
+        #push progressbar
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        if not wfsLayer.isValid():
+            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not load WFS-Map "' + self.source + '"!')
+            return None
+
+        wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
+        QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
+        if not  oeq_global.wait_for_renderer(120000):
+            oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
+            return False
+
+        if not wfsLayer.isValid():
+            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
+            return None
+        wfsnode=legend.nodeByLayer(wfsLayer)
+        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        if not wfsnode:
+            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
+            return None
+        wfsnode=wfsnode[0]
+
+        wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
+
+        oeq_global.OeQ_kill_progressbar()
+        if self.category:
+            if not legend.nodeExists(self.category):
+                cat=legend.nodeCreateGroup(self.category)
+            else:
+                cat=legend.nodeByName(self.category)[0]
+            legend.nodeHide(cat)
+            #create subcategory group in legend
+            if self.subcategory:
+                if not legend.nodeExists(self.subcategory):
+                    subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
+                else:
+                    subcat=legend.nodeByName(self.subcategory)[0]
+                legend.nodeHide(subcat)
+                legend.nodeMove(wfsnode,'bottom',subcat)
+                legend.nodeCollapse(subcat)
+            else:
+                legend.nodeMove(wfsnode,'bottom',cat)
+                legend.nodeCollapse(cat)
+        return wfsnode.layer()
+
 
 
     '''
-    import mole.extensions as ext
-    ext.by_type('wms')[0].load_raster()
 
+def convert_crs
+import processing
+input = legend.nodeByName('Floors (WMS Capture)')[0].layer().source()
+mask= legend.nodeByName('Investigation Area')[0].layer().source()
+output=input.split('.')[0]+'_tmp.'+ input.split('.')[1]
+processing.runalg('gdalogr:cliprasterbymasklayer', input, mask, 'none', False, False, '', output)
+processing.load(output)
+
+
+
+import mole.extensions as ext
+ext.by_type('wms')[0].load_wms()
+
+
+
+
+layer = iface.activeLayer()
+
+extent = layer.extent()
+width, height = layer.width(), layer.height()
+renderer = layer.renderer()
+provider=layer.dataProvider()
+crs = layer.crs().toWkt()
+
+pipe = QgsRasterPipe()
+pipe.set(provider.clone())
+pipe.set(renderer.clone())
+
+file_writer = QgsRasterFileWriter('/Users/wk/Tresors/VPT/Open eQuarter/QGIS/output2.tif')
+
+file_writer.writeRaster(pipe,
+                        width,
+                        height,
+                        extent,
+                        layer.crs())
+    '''
+
+
+
+
+
+
+    '''
+    #generate_building id and get area and perimeters
+    def complete_outlines(self):
+        from qgis import utils
+        from qgis.core import NULL
+        from qgis.core import QgsField
+        from PyQt4.QtCore import QVariant
+
+        result = {'BLD_ID': {'type': QVariant.String,'value': NULL},
+                'AREA': {'type': QVariant.Double,'value': NULL},
+                'PERIMETER']: {'type': QVariant.Double,'value': NULL}}
+
+        #read colormap
+        try:
+            oeqMain = utils.plugins['mole']
+        except:
+            print self.extension_id + ".decode_color(): Could not connect to Colormanager"
+            return result
+
+        color_dict = oeqMain.color_picker_dlg.color_entry_manager.read_color_map_from_qml(self.colortable)
+        #check every color for match
+        for color_key in color_dict.keys():
+            #extract color map entry
+            color_quadriple = color_key[5:-1].split(',')
+            color_quadriple = map(int, color_quadriple)
+
+            #check if color matches
+            match = (((color_quadriple[0]-config.color_match_tolerance) < red < (color_quadriple[0]+config.color_match_tolerance))
+                    and ((color_quadriple[1]-config.color_match_tolerance) < green < (color_quadriple[1]+config.color_match_tolerance))
+                    and ((color_quadriple[2]-config.color_match_tolerance) < blue < (color_quadriple[2]+config.color_match_tolerance))
+                    and ((color_quadriple[3]-config.color_match_tolerance) < alpha < (color_quadriple[3]+config.color_match_tolerance)))
+
+            #set generic result to mapped values and return
+            if match:
+                if mode == 'average':
+                    result[resultkeys[0]]['value'] = (float(color_dict[color_key][1]) + float(color_dict[color_key][2])) / 2
+                else:
+                    result[resultkeys[0]]['value'] = color_dict[color_key][0]
+                    result[resultkeys[1]]['value'] = color_dict[color_key][1]
+                    result[resultkeys[2]]['value'] = color_dict[color_key][2]
+                return result
+
+        #return generic result
+        return result
     '''
 
     #decode RGBa color by the colormap
@@ -405,6 +605,18 @@ class OeQExtension:
         return req
 
     def needs_evaluation(self,required=None):
+        if not required:
+            required = self.required()
+        if not self.last_calculation:
+            return True
+        for ext in required:
+            if ext.last_calculation:
+                if self.last_calculation < ext.last_calculation:
+                    return True
+        return False
+
+
+    def needs_needle_request(self,required=None):
         if not required:
             required = self.required()
         if not self.last_calculation:
@@ -565,6 +777,77 @@ class OeQExtension:
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
 
 
+    def needle_request(self):
+        from mole.qgisinteraction import layer_interaction,plugin_interaction,legend
+        from mole.project import config
+        from mole import extensions
+        from qgis.core import QgsVectorLayer
+        from qgis.utils import iface
+        # create data node
+        if not legend.nodeExists(config.pst_input_layer_name):
+            rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
+            polygon = config.housing_layer_name
+            output = os.path.join(oeq_global.OeQ_project_path(), config.pst_input_layer_name + '.shp')
+            centroid_layer = rci.create_centroids(polygon, output)
+
+            if centroid_layer.isValid():
+                layer_interaction.add_layer_to_registry(centroid_layer)
+                polygon = legend.nodeByName(polygon)
+                if not polygon: return 0
+                polygon = polygon[0].layer()
+                rci.calculate_accuracy(polygon, centroid_layer)
+                layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
+                #self.reorder_layers()
+                print centroid_layer.name()
+                legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
+                #source_section = self.progress_items_model.section_views[1]
+                #section_model = source_section.model()
+                #project_item = section_model.findItems("Load building coordinates")[0]
+                #project_item.setCheckState(2)
+                #time.sleep(0.1)
+                #self.handle_load_raster_maps()
+                return 2
+            else:
+                return 0
+        if not legend.nodeExists('Data'):
+            cat=legend.nodeCreateGroup('Data')
+        else:
+            cat=legend.nodeByName('Data')[0]
+
+        #create_database
+        #self.create_database(True,'Data')
+
+        # show import layers
+        layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
+        layerstoshow += ([i.layer_name for i in extensions.by_category('Import',extensions.by_state(True))])
+        legend.nodesShow(layerstoshow)
+
+        #remove point sampling layer
+        legend.nodeRemove(config.pst_output_layer_name,physical=True)
+
+        #run point sampling tool
+        psti = plugin_interaction.PstInteraction(iface, config.pst_plugin_name)
+        psti.set_input_layer(config.pst_input_layer_name)
+        abbreviations = psti.select_and_rename_files_for_sampling()
+        pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
+        vlayer = iface.addVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
+        #vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
+        #layer_interaction.add_layer_to_registry(vlayer)
+
+        #move to data
+        legend.nodeMove(vlayer.name(),'bottom','Data')
+
+        #run import extensions
+
+        # collapse and hide
+        legend.nodeCollapse('Import')
+        legend.nodeHide('Import')
+
+        # unlock
+        oeq_global.OeQ_unlockQgis()
+        return 2
+
+
 OeQExtension.generic_id_cnt = 0
 
 
@@ -681,3 +964,4 @@ def export():
 def update_all_colortables(overwrite=True):
     for ext in by_state(overwrite):
         ext.update_colortable()
+

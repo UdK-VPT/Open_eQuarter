@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block style_css %}
+
+#register {
+    position: relative;
+    top: 30%;
+    transform: translateY(-30%);
+    max-width: 31.2rem;
+    margin: 0 auto;
+    padding: 1.85rem 0 2.5rem 0;
+    background-color: rgb(235, 235, 235);
+    border-radius: 7px;
+}
+
+#register h1 {
+    font-size: 230%;
+    max-width: 25rem;
+    margin: 0 auto 1.25rem auto;
+}
+
+#register form {
+    margin: 0 auto;
+    max-width: 25rem;
+}
+
+#overlay {
+    position: absolute;
+    top: 50px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    z-index: 50;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+{% endblock %}
+
+{% block content %}
+<div id="overlay"></div>
+<form method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form layout='inline' %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">
+        {% bootstrap_icon "user" %} Register
+    </button>
+    {% endbuttons %}
+</form>
+{% endblock %}

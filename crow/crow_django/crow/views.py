@@ -9,6 +9,6 @@ def login_register(request):
     return render(request, 'crow/login_register.html')
 
 # Create your views here.
-#@login_required
+@login_required
 def home_page(request):
     return render(request, 'crow/index.html')

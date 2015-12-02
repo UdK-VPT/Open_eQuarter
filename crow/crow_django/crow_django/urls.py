@@ -19,8 +19,8 @@ from django_jasmine import urls as django_jasmine
 
 
 urlpatterns = [
-    url(r'^$', 'crow.views.login_register', name='login'),
-    url(r'^crow/', 'crow.views.home_page', name='home'),
+    url(r'^$', 'crow.views.home_page', name='home'),
+    url(r'^accounts/login/', 'django.contrib.auth.views.login', name='login', kwargs={'template_name': 'login.html'}),
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls', namespace='auth')),
     url(r'^admin/', include(admin.site.urls)),

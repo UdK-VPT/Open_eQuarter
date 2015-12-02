@@ -31,26 +31,30 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django.contrib.admin',         # basic django admin functionalities
+    'django.contrib.auth',          # core authentication system
+    'django.contrib.sites',         # site mgmt
+    'django.contrib.contenttypes',  # allows to associate permissions with models
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_jasmine',
-    'crow',
-    'ates',
-    'django_extensions',
+    'django.contrib.staticfiles',   # django staticfiles-finder
+    'django.contrib.gis',           # geo-django extension
+    'django_jasmine',               # used for running jasmine-tests against the js-sources
+    'crow',                         # OeQ-extension
+    'ates',                         # Models for ATES-BuildingDB
+    'django_extensions',            # Enhanced commandline-tools for generating database-visualisations
+    'registration',                 # Django Redux for user registration
+    'bootstrap3',                   # Enables easier usage of bootstrap tags in django templates
 )
 
 JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, 'crow', 'jasmine')
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',             # Handle sessions across requests
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',          # Associate users with requests during sessions
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',   # Logs out user after password change
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -61,7 +65,7 @@ ROOT_URLCONF = 'crow_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
+        'DIRS': [os.path.join(BASE_DIR, 'templates', 'crow_django')]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -95,6 +99,20 @@ DATABASES = {
     }
 }
 DATABASE_ROUTERS = ['ates.routers.AtesRouter']
+
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_ACTIVATION_DAYS = 7
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'app-messages')
+
+SITE_ID = 1
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

@@ -485,25 +485,30 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def __init__(self, progress_model):
         from qgis import utils
-        mole = utils.plugins['mole']
+        standard_workflow = utils.plugins['mole'].standard_workflow
         QtGui.QDockWidget.__init__(self)
         self.setupUi(self)
         self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self._semiopen_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
         self.progress_model = progress_model
-        self.ol_plugin_installed.pressed.connect(mole.handle_ol_plugin_installed)
-        self.pst_plugin_installed.pressed.connect(mole.handle_pst_plugin_installed)
-        self.real_centroid_plugin_installed.pressed.connect(mole.handle_real_centroid_plugin_installed)
-        self.project_created.pressed.connect(mole.handle_project_created)
-        self.project_saved.pressed.connect(mole.handle_project_saved)
-        self.investigationarea_defined.pressed.connect(mole.handle_investigationarea_defined)
-        self.building_outlines_acquired.pressed.connect(mole.handle_building_outlines_acquired)
-        self.building_coordinates_acquired.pressed.connect(mole.handle_building_coordinates_acquired)
-        self.import_ext_selected.pressed.connect(mole.handle_import_ext_selected)
-        self.information_layers_loaded.pressed.connect(mole.handle_information_layers_loaded)
-        self.needle_request_done.pressed.connect(mole.handle_needle_request_done)
-        #self.ol_plugin_installed.connect(QtCore.SIGNAL(_fromUtf8("released()")), plugins['mole'].handle_ol_plugin_installed())
+        self.ol_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('ol_plugin_installed'))
+        self.pst_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('pst_plugin_installed'))
+        self.real_centroid_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('real_centroid_plugin_installed'))
+        self.project_created.pressed.connect(lambda: standard_workflow.do_workstep('project_created'))
+        self.project_saved.pressed.connect(lambda: standard_workflow.do_workstep('project_saved'))
+        self.investigationarea_defined.pressed.connect(lambda: standard_workflow.do_workstep('investigationarea_defined'))
+        self.building_outlines_acquired.pressed.connect(lambda: standard_workflow.do_workstep('building_outlines_acquired'))
+        self.building_coordinates_acquired.pressed.connect(lambda: standard_workflow.do_workstep('building_coordinates_acquired'))
+        self.import_ext_selected.pressed.connect(lambda: standard_workflow.do_workstep('import_ext_selected'))
+        self.information_layers_loaded.pressed.connect(lambda: standard_workflow.do_workstep('information_layers_loaded'))
+        self.needle_request_done.pressed.connect(lambda: standard_workflow.do_workstep('needle_request_done'))
+        self.database_created.pressed.connect(lambda: standard_workflow.do_workstep('database_created'))
+        self.buildings_evaluated.pressed.connect(lambda: standard_workflow.do_workstep('buildings_evaluated'))
+        self.json_export_done.pressed.connect(lambda: standard_workflow.do_workstep('json_export_done'))
+
+        self.process_button_next.clicked.connect(self.call_next_workstep)
+        self.run_button.clicked.connect(self.run_automode)
        # for dropdown_index, list_view in enumerate(self.progress_model.section_views):
        #     self.process_page.addWidget(list_view)
        #     self.active_page_dropdown.addItem(list_view.accessibleName())
@@ -515,7 +520,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
        # # Remove once the ui_main_process_dock was adopted to the new model
        # self.active_page_dropdown.setCurrentIndex(2)
        # self.active_page_dropdown.setCurrentIndex(0)
-
+    '''
     def check_progress_status(self, changed_item):
         # explicitly check the state, since otherwise the next section gets changed, too
         if changed_item.checkState() == 1:
@@ -536,6 +541,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
                 self.active_page_dropdown.setItemData(current_index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex(current_index+1)
 
+    '''
     def go_to_page(self, selection_name):
         for child in self.process_page.children():
             if isinstance(child, QtGui.QListView) and child.accessibleName() == selection_name:
@@ -546,7 +552,6 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         pages = self.process_page.children()
         itemindex = [i.objectName() for i in pages].index(section_name)
         dropdownentry = pages[itemindex].accessibleName()
-        print dropdownentry
         allitems = [self.active_page_dropdown.itemText(i) for i in range(self.active_page_dropdown.count())]
         itemindex = allitems.index(dropdownentry)
         self.active_page_dropdown.setCurrentIndex(itemindex)
@@ -574,8 +579,31 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
                 self.active_page_dropdown.setItemData(index, self._check_mark, QtCore.Qt.DecorationRole)
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
 
+    def switch_to_objects_parent_page(self,object):
+        self.select_page(self.project_created.parent().objectName())
+
+    def switch_to_next_worksteps_page(self):
+        from qgis import utils
+        standard_workflow = utils.plugins['mole'].standard_workflow
+        self.select_page(standard_workflow.next_worksteps_name)
+
+    def call_next_workstep(self):
+        from PyQt4 import QtGui
+        from qgis import utils
+        standard_workflow = utils.plugins['mole'].standard_workflow
+        nextname = standard_workflow.next_worksteps_name()
+        if nextname != None:
+            pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
+            self.select_page(pagename)
+        standard_workflow.next_workstep()
 
 
+    def run_automode(self):
+        from qgis import utils
+        standard_workflow = utils.plugins['mole'].standard_workflow
+        while (not standard_workflow.is_done()) & self.automode.isChecked():
+
+            standard_workflow.next_workstep()
 
 class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
 
@@ -612,6 +640,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.lookup_by_address.clicked.connect(self.location_by_address)
         self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
         self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
+
 
     def apply(self):
         if not issubclass(type(self.location_city), QtGui.QLineEdit):

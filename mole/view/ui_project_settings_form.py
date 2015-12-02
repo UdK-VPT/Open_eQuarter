@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_project_settings_form.ui'
+# Form implementation generated from reading ui file '/Users/wk/Tresors/VPT/Open eQuarter/Development/oeq_git/mole/view/ui_project_settings_form.ui'
 #
-# Created: Mon Sep 28 16:59:08 2015
+# Created: Tue Dec  1 13:10:56 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_project_settings_form(object):
     def setupUi(self, project_settings_form):
         project_settings_form.setObjectName(_fromUtf8("project_settings_form"))
-        project_settings_form.resize(468, 690)
+        project_settings_form.resize(468, 680)
         project_settings_form.setStyleSheet(_fromUtf8("#form QLineEdit {\n"
 "    color: rgb(151, 151, 151,95);\n"
 "}\n"
@@ -202,6 +202,7 @@ class Ui_project_settings_form(object):
         self.retranslateUi(project_settings_form)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), project_settings_form.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), project_settings_form.reject)
+        QtCore.QObject.connect(self.location_postal, QtCore.SIGNAL(_fromUtf8("editingFinished()")), self.lookup_by_address.click)
         QtCore.QMetaObject.connectSlotsByName(project_settings_form)
         project_settings_form.setTabOrder(self.project_name, self.location_city)
         project_settings_form.setTabOrder(self.location_city, self.location_street)

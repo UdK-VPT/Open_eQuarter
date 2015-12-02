@@ -187,7 +187,7 @@ class OlInteraction(object):
         """
         # if the given crs is valid
         if not crs_string.isspace() and QgsCoordinateReferenceSystem().createFromUserInput(crs_string):
-            self.plugin.setMapCrs(QgsCoordinateReferenceSystem(crs_string))
+            self.plugin.setMapCrs(QgsCoordinateReferenceSystem(crs_string, QgsCoordinateReferenceSystem.EpsgCrsId))
 
 
 class RealCentroidInteraction(object):

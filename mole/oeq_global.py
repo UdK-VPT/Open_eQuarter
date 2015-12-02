@@ -180,10 +180,11 @@ from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
 
 
-def wait_for_renderer(timeout=1):
+def OeQ_wait_for_renderer(timeout=1):
     """Block loop until signal emitted, or timeout (ms) elapses."""
     from PyQt4.QtCore import QEventLoop,QTimer
     loop = QEventLoop()
+    timer=QTimer()
     render_result = [True]
 
     iface.mapCanvas().mapCanvasRefreshed.connect(loop.quit)
@@ -193,20 +194,33 @@ def wait_for_renderer(timeout=1):
         loop.quit()
 
     if timeout is not None:
-        QTimer.singleShot(timeout,lambda: timed_out(render_result))
+        timer.singleShot(timeout,lambda: timed_out(render_result))
     loop.exec_()
+
+    iface.mapCanvas().mapCanvasRefreshed.disconnect(loop.quit)
+
+
+    if render_result[0]:
+        print "Rendered"
+    else:
+        print "Rendering timed out"
     return render_result[0]
 
-
+def OeQ_wait(sec):
+    return
+    from PyQt4.QtCore import QEventLoop,QTimer
+    loop = QEventLoop()
+    QTimer.singleShot(sec*1000,loop.quit)
+    loop.exec_()
+    print "Done"
 
 def test(testo):
     from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
     from mole import oeq_global
     urlWithParams = 'url=http://kaart.maaamet.ee/wms/alus&format=image/png&layers=MA-ALUS&styles=&crs=EPSG:3301'
     rlayer = QgsRasterLayer(urlWithParams, 'MA-ALUS', 'wms')
-
     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-    print oeq_global.wait_for_renderer(testo)
+    print oeq_global.OeQ_wait_for_renderer(testo)
 
 
 

@@ -257,7 +257,7 @@ class OeQExtension:
 
     def load_wms(self,capture=True):
         from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
-        from mole.oeq_global import wait_for_renderer
+        from mole.oeq_global import OeQ_wait_for_renderer
         from mole.qgisinteraction.wms_utils import save_wms_extent_as_image
         from mole.qgisinteraction import layer_interaction
         #init progressbar
@@ -269,7 +269,7 @@ class OeQExtension:
         wmslayer='WMS_'+self.layer_name+'_RAW'
         rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-        if not wait_for_renderer(120000):
+        if not OeQ_wait_for_renderer(120000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         #push progressbar
@@ -286,14 +286,20 @@ class OeQExtension:
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         #close progressbar
+        if not OeQ_wait_for_renderer(120000):
+            oeq_global.OeQ_init_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
+            return False
         oeq_global.OeQ_kill_progressbar()
         wmsnode=legend.nodeByLayer(rlayer)[0]
+        #oeq_global.OeQ_wait(1)
+
         if self.category:
             if not legend.nodeExists(self.category):
                 cat=legend.nodeCreateGroup(self.category)
             else:
                 cat=legend.nodeByName(self.category)[0]
             legend.nodeHide(cat)
+            oeq_global.OeQ_wait(0.2)
             #create subcategory group in legend
             if self.subcategory:
                 if not legend.nodeExists(self.subcategory):
@@ -301,10 +307,13 @@ class OeQExtension:
                 else:
                     subcat=legend.nodeByName(self.subcategory)[0]
                 legend.nodeHide(subcat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeMove(wmsnode,'bottom',subcat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(subcat)
             else:
                 legend.nodeMove(wmsnode,'bottom',cat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(cat)
         return wmsnode.layer()
 
@@ -328,8 +337,8 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
 
         #get crs objects
-        crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]))
-        crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]))
+        crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+        crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         #transform extent
         coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
         extent = coord_transformer.transform(extent)
@@ -345,7 +354,7 @@ class OeQExtension:
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
-        if not  oeq_global.wait_for_renderer(120000):
+        if not oeq_global.OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
 
@@ -360,14 +369,15 @@ class OeQExtension:
         wfsnode=wfsnode[0]
 
         wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
-
         oeq_global.OeQ_kill_progressbar()
+
         if self.category:
             if not legend.nodeExists(self.category):
                 cat=legend.nodeCreateGroup(self.category)
             else:
                 cat=legend.nodeByName(self.category)[0]
             legend.nodeHide(cat)
+            oeq_global.OeQ_wait(0.2)
             #create subcategory group in legend
             if self.subcategory:
                 if not legend.nodeExists(self.subcategory):
@@ -375,10 +385,13 @@ class OeQExtension:
                 else:
                     subcat=legend.nodeByName(self.subcategory)[0]
                 legend.nodeHide(subcat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeMove(wfsnode,'bottom',subcat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(subcat)
             else:
                 legend.nodeMove(wfsnode,'bottom',cat)
+                oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(cat)
         return wfsnode.layer()
 
@@ -739,7 +752,7 @@ file_writer.writeRaster(pipe,
 
     def work_out_results(self):
         from mole.qgisinteraction.layer_interaction import fullRemove
-
+        from mole.qgisinteraction import legend
         fullRemove(self.layer_name)
         self.update_colortable()
 
@@ -755,7 +768,7 @@ file_writer.writeRaster(pipe,
             subcat=legend.nodeByName(self.subcategory)[0]
 
         #use the housing layer as a template for the resultlayer
-        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,2,subcat)
+        resultnode=legend.nodeDuplicate(config.housing_layer_name,self.layer_name,None,subcat)
         self.update_colortable()
 
         #copy the required attributes of the datalayer to the resultlayer
@@ -763,6 +776,8 @@ file_writer.writeRaster(pipe,
 
         #add the colortable as style
         resultnode.layer().loadNamedStyle( self.colortable)
+
+        #resultnode=legend.nodeConvertCRS(resultnode,config.default_extent_crs)
 
         #add node entry to the radiogroup of the category
         legend.nodeRadioAdd(resultnode,self.category)
@@ -831,6 +846,7 @@ file_writer.writeRaster(pipe,
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
         vlayer = iface.addVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
+        oeq_global.OeQ_wait_for_renderer(60000)
         #vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         #layer_interaction.add_layer_to_registry(vlayer)
 

@@ -25,12 +25,12 @@ def calculation(self=None, parameters={}):
                     dataset['LENGTH'] = -p / 2 + ((((p / 2) ** 2) - q) ** 0.5)
                 else:
                     dataset['LENGTH'] = -p / 4
-            print 'BLD_ID'
+            #print 'BLD_ID'
 
-            print 'LENGTH'
-            print dataset['LENGTH']
-            print 'AREA'
-            print dataset['AREA']
+            #print 'LENGTH'
+            #print dataset['LENGTH']
+            #print 'AREA'
+            #print dataset['AREA']
 
             dataset['WIDTH'] = float(dataset['AREA']) / float(dataset['LENGTH'])
             l_max = max(dataset['WIDTH'], dataset['LENGTH'])

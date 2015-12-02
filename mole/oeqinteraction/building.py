@@ -4,7 +4,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsFeature
 
 
 def get_address(building_id):
-    googleMapsCrs = QgsCoordinateReferenceSystem(4326)
+    googleMapsCrs = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
     layer = layer_interaction.find_layer_by_name(config.pst_input_layer_name)
     layerCrs = layer.crs()
     print config.pst_input_layer_name

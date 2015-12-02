@@ -69,8 +69,8 @@ def getAddressByCoordinates(latitude,longitude,crs=None):
     # Out: dict of all informations delivered by googlemaps
 
     if crs:
-        sourceCRS=QgsCoordinateReferenceSystem(crs)
-        googleMapsCRS=QgsCoordinateReferenceSystem(4326)
+        sourceCRS=QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
+        googleMapsCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
         transform = QgsCoordinateTransform(sourceCRS, googleMapsCRS).transform
         location=transform(QgsPoint(longitude, latitude))
         latitude=location.y()
@@ -111,8 +111,8 @@ def getCoordinatesByAddress(address,crs=None):
     result = json.load(response)
     #print result['results']
     if crs:
-        targetCRS = QgsCoordinateReferenceSystem(crs)
-        googleMapsCRS = QgsCoordinateReferenceSystem(4326)
+        targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
+        googleMapsCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
         transform = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform
     # try:
     addrlist = []

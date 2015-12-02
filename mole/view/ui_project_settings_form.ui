@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>468</width>
-    <height>690</height>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -538,6 +538,22 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>location_postal</sender>
+   <signal>editingFinished()</signal>
+   <receiver>lookup_by_address</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>363</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>297</y>
     </hint>
    </hints>
   </connection>

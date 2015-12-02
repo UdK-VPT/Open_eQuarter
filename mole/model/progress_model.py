@@ -116,6 +116,9 @@ class ProgressItemsModel:
             with ZipFile(project_file, 'a') as oeq_zip:
                 oeq_zip.writestr('project_info.json', json.dumps(oeq_global.OeQ_project_info))
 
+            with ZipFile(project_file, 'a') as oeq_zip:
+                oeq_zip.writestr('project_info.json', json.dumps(oeq_global.OeQ_project_info))
+
         except (TypeError, AttributeError) as AccessOeqGlobalError:
             print(self.__module__, AccessOeqGlobalError)
 

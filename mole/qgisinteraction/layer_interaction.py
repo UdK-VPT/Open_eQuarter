@@ -64,6 +64,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
         if replace_in_legend:
             QgsMapLayerRegistry.instance().removeMapLayer(vlayer.id())
             rewritten_layer = iface.addVectorLayer(path, layer_name, "ogr")
+            #oeq_global.OeQ_wait_for_renderer(60000)
             if not rewritten_layer.isValid():
                 oeq_global.OeQ_init_warning(title='Write Error!', message='path')
                 return vlayer
@@ -202,6 +203,7 @@ def add_layer_to_registry(layer):
     if layer:
         # add the layer to the layer-legend
         QgsMapLayerRegistry.instance().addMapLayer(layer)
+        #oeq_global.OeQ_wait_for_renderer(60000)
 
 
 def find_layer_by_name(layer_name):

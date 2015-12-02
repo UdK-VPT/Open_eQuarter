@@ -17,8 +17,8 @@
    </size>
   </property>
   <property name="styleSheet">
-   <string notr="true">QStackedWidget QWidget { 
-	text-align: left; 
+   <string notr="true">QStackedWidget QWidget {
+	text-align: left;
 }
 
 QStackedWidget QAbstractButton {
@@ -30,7 +30,7 @@ QStackedWidget QAbstractButton {
 	max-height: 40px;
 	qproperty-icon: url(&quot;:/Controls/icons/openmark.png&quot;) off,
 							url(&quot;:/Controls/icons/checkmark.png&quot;) on ;
-	qproperty-iconSize: 17px; 
+	qproperty-iconSize: 17px;
 	qproperty-flat: true;
 	qproperty-checkable: true;
 }
@@ -180,6 +180,11 @@ QListView {
           <string>Evaluation</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Reports</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -226,7 +231,7 @@ QListView {
        <number>1</number>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="oeq_requirements">
        <property name="enabled">
@@ -348,11 +353,14 @@ QListView {
       </widget>
       <widget class="QWidget" name="oeq_informationsources">
        <property name="accessibleName">
-        <string>Building Shapes</string>
+        <string>Information Sources</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QProcessButton" name="import_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Select Import Extensions</string>
           </property>
@@ -410,7 +418,20 @@ QListView {
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
+         <widget class="QProcessButton" name="database_created">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Create Database</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QProcessButton" name="eval_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Select Evaluation Extensions</string>
           </property>
@@ -418,6 +439,9 @@ QListView {
         </item>
         <item>
          <widget class="QProcessButton" name="disp_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Select Display Extensions</string>
           </property>
@@ -432,6 +456,9 @@ QListView {
         </item>
         <item>
          <widget class="QProcessButton" name="quarter_evaluated">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Evaluate Quarter</string>
           </property>
@@ -455,48 +482,94 @@ QListView {
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="oeq_quarter_evaluation">
+      <widget class="QWidget" name="oeq_reports">
        <property name="accessibleName">
-        <string>Point Sampling</string>
+        <string>Reports</string>
        </property>
        <property name="accessibleDescription">
         <string/>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QProcessButton" name="temp_pointlayer_created_chckBox">
+         <widget class="QProcessButton" name="statistics_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Create a new Pointlayer</string>
+           <string>Create reports of selected buildings</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="editing_temp_pointlayer_started_chckBox">
+         <widget class="QProcessButton" name="building_reports_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Activate the edit mode</string>
+           <string>Create reports of the investigation area</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="points_of_interest_defined_chckBox">
+         <widget class="QProcessButton" name="investigationarea_report_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Add new features to mark the buildings 
-you want to extract information from</string>
+           <string>Create statistics</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="editing_temp_pointlayer_stopped_chckBox">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_export">
+       <property name="accessibleName">
+        <string>Export</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QProcessButton" name="json_export_done">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Deactivate the edit mode</string>
+           <string>Export database as GeoJSON file</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="information_sampled_chckBox">
+         <widget class="QProcessButton" name="mysql_export_done">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Use the point-sampling-tool to extract
-the information</string>
+           <string>Export database as MySQL-Dump</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="graphic_export_done">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Export graphics</string>
           </property>
          </widget>
         </item>
@@ -523,9 +596,12 @@ the information</string>
        <number>5</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QCheckBox" name="automode">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Cancel</string>
+         <string>Automode</string>
         </property>
        </widget>
       </item>
@@ -543,12 +619,48 @@ the information</string>
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="run_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Run</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/icons/arrow_right.png</normaloff>:/Controls/icons/arrow_right.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="process_button_next">
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>Next step</string>
+         <string>Step</string>
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
@@ -630,7 +742,6 @@ the information</string>
   <tabstop>pst_plugin_installed</tabstop>
   <tabstop>real_centroid_plugin_installed</tabstop>
   <tabstop>process_button_next</tabstop>
-  <tabstop>pushButton</tabstop>
   <tabstop>settings_dropdown_btn</tabstop>
   <tabstop>tools_dropdown_btn</tabstop>
   <tabstop>active_page_dropdown</tabstop>
@@ -638,11 +749,7 @@ the information</string>
   <tabstop>building_coordinates_acquired</tabstop>
   <tabstop>eval_ext_selected</tabstop>
   <tabstop>disp_ext_selected</tabstop>
-  <tabstop>temp_pointlayer_created_chckBox</tabstop>
-  <tabstop>editing_temp_pointlayer_started_chckBox</tabstop>
-  <tabstop>points_of_interest_defined_chckBox</tabstop>
-  <tabstop>editing_temp_pointlayer_stopped_chckBox</tabstop>
-  <tabstop>information_sampled_chckBox</tabstop>
+  <tabstop>graphic_export_done</tabstop>
   <tabstop>project_created</tabstop>
   <tabstop>investigationarea_defined</tabstop>
   <tabstop>project_saved</tabstop>
@@ -664,6 +771,22 @@ the information</string>
     <hint type="destinationlabel">
      <x>270</x>
      <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>automode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>run_button</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>183</x>
+     <y>398</y>
     </hint>
    </hints>
   </connection>

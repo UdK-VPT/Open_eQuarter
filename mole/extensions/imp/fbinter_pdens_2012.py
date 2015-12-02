@@ -11,11 +11,10 @@ def calculation(self=None, parameters={}):
                                  parameters['PDENS_a'],
                                  ['PDENS'],
                                  'average')
-    print result['PDENS']['value']
+    #print result['PDENS']['value']
     if oeq_global.isnull(result['PDENS']['value']):
         result['PDENS']['value'] = oeq_global.OeQ_project_info['population_density']
     return result
-
 
 
 import os

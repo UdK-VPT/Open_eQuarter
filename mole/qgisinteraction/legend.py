@@ -236,8 +236,9 @@ def nodeMove(node,position='down',target_node=None):
 
     cloned_node = node.clone()
     target_node.insertChildNode(position, cloned_node)
+    #oeq_global.OeQ_wait_for_renderer(60000)
     node.parent().removeChildNode(node)
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait_for_renderer(60000)
     return cloned_node
 
 
@@ -257,7 +258,8 @@ def nodeExpand(node):
         node = node[0]
     #if nodeIsGroup(node):
     node.setExpanded(True)
-        #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return node.isExpanded()
 
 def nodeCollapse(node):
@@ -273,7 +275,8 @@ def nodeCollapse(node):
         node = node[0]
     #if nodeIsGroup(node):
     node.setExpanded(False)
-        #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return node.isExpanded()
 
 def nodeShow(node):
@@ -289,7 +292,8 @@ def nodeShow(node):
             return None
         node = node[0]
     node.setVisible(Qt.Checked)
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return node.isVisible()
 
 def nodesShow(nodes):
@@ -313,7 +317,8 @@ def nodeHide(node):
             return None
         node = node[0]
     node.setVisible(Qt.Unchecked)
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return node.isVisible()
 
 def nodesHide(nodes):
@@ -467,30 +472,6 @@ def nodeRadioSwitch(node,state=None):
                     nodeHide(nodeitem)
 
 
-'''
-
-import time
-from mole.qgisinteraction import legend
-legend.nodeRadioAdd('Investigation Area','Import')
-legend.nodeRadioAdd('BLD Shapes','Import')
-legend.nodeRadioAdd('Import')
-
-from mole.qgisinteraction.layer_interaction import  fullRemove
-fullRemove('Base Quality')
-time.sleep(1)
-legend.nodeDuplicate('BLD Shapes','Base Quality')
-time.sleep(1)
-legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC','BS_AR','WN_RAT'])
-
-
-
-
-legend.nodeCopyAttributes('BLD Data','Base Quality',['BS_UC'])
-
-
-
-'''
-
 
 def nodeRemove(node,physical=False):
     import os
@@ -539,9 +520,13 @@ def nodeCopy(node,newname=None,position=None,target_node=None):
 
     source_layer = node.layer()
     new_layer = iface.addVectorLayer(source_layer.source(), newname,source_layer.providerType())
+    #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeByLayer(new_layer)[0]
     new_node = nodeMove(new_node,position,target_node)
     QgsMapLayerRegistry.instance().addMapLayer(new_layer, False)
+    #oeq_global.OeQ_wait_for_renderer(60000)
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return new_node
 
 
@@ -567,10 +552,14 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     layer = node.layer()
     # source of the layer
     provider = layer.dataProvider()
+    print "---------------------"
+    print provider.crs().authid()
+    print layer.crs().authid()
+    print "---------------------"
     # creation of the shapefiles:
     pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
     ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
-    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), provider.crs(), "ESRI Shapefile")
+    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), layer.crs(), "ESRI Shapefile")
     #print writer
     outelem = QgsFeature()
     # iterating over the input layer
@@ -581,8 +570,11 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     del writer
     #time.sleep(1)
     newlayer = QgsVectorLayer(pathfile, newname, "ogr")
+
     #print layer.isValid()
     QgsMapLayerRegistry.instance().addMapLayer(newlayer, True)
+    newlayer.setCrs(layer.crs())
+    #oeq_global.OeQ_wait_for_renderer(60000)
     print newlayer.name()
 
 
@@ -598,7 +590,8 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     #position = nodePosition(node,target_node)
     newnode=nodeMove(newnode,position,target_node)
     #time.sleep(1)
-
+    #oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_wait(0.1)
     return newnode
 
 def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID'):
@@ -678,6 +671,7 @@ def nodeCopyAsMemory(node,newname=None,position=None,target_node=None):
     new_layer = QgsVectorLayer( 'Polygon' + '?crs=' + source_layer.crs().authid(), newname, "memory")
     new_layer.setProviderEncoding('System')
     QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeByName(newname)[0]
     new_node = nodeMove(new_node,position,target_node)
     return new_node
@@ -704,13 +698,14 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
         return None
     del writer
     iface.addVectorLayer(os.path.join(path , nodename+'.shp'),nodename, 'ogr')
+    #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeMove(nodename,position,target_node)
     new_layer = new_node.layer()
     dataprovider = new_layer.dataProvider()
     dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
     new_layer.updateFields()
 
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
 
     return new_node
 
@@ -732,12 +727,13 @@ def nodeCreateMemoryLayer(nodename, position='bottom',target_node=None,source="P
     new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
     new_layer.setProviderEncoding('System')
     QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
+    #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeMove(nodename,position,target_node)
     new_layer = new_node.layer()
     dataprovider = new_layer.dataProvider()
     dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
     new_layer.updateFields()
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
 
     return new_node
 
@@ -756,10 +752,11 @@ def nodeSaveMemoryLayer(node , path=None , providertype="ESRI Shapefile"):
         return None
     del writer
     iface.addVectorLayer(os.path.join(path , new_layer_name+'.shp'),new_layer_name, 'ogr')
+    #oeq_global.OeQ_wait_for_renderer(60000)
     target_node = node.parent()
     position = nodePosition(node,target_node)
     new_node = nodeMove(new_layer_name,position,target_node)
-    oeq_global.OeQ_unlockQgis()
+    #oeq_global.OeQ_unlockQgis()
 
     return new_node
 
@@ -805,12 +802,11 @@ def nodeConvertCRSold(node,crs=None):
     import os, subprocess
     os.environ['PATH'] += ":"+"/usr/local/bin"
     from mole import oeq_global
-    from mole.qgisinteraction import legend
     from mole.qgisinteraction import layer_interaction
     if crs == None:
         crs='epsg:4326' #default is WGS84
     if oeq_global.isStringOrUnicode(node):
-        node = legend.nodeByName(node)
+        node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
@@ -822,7 +818,7 @@ def nodeConvertCRSold(node,crs=None):
     src_ext = src_path.split('.')[1]
     tgt_name = src_name+'_tmp'
     tgt_path = os.path.join(src_dir,tgt_name+'.'+src_ext)
-    tgt_crs=QgsCoordinateReferenceSystem(int(crs.split(':')[1]))
+    tgt_crs=QgsCoordinateReferenceSystem(int(crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId)
     bu_name= src_name+'_'+src_crs.split(':')[1]
     bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
     print src_path
@@ -834,6 +830,8 @@ def nodeConvertCRSold(node,crs=None):
     #try:
     print subprocess.call(cmd,shell=True)
     #except:
+    oeq_global.OeQ_wait(3)
+
     try:
         layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
     except:
@@ -850,6 +848,7 @@ def nodeConvertCRSold(node,crs=None):
     #node.parent().removeChildNode(node)
     print bu_path
     iface.addVectorLayer(src_path,name, 'ogr')
+    #oeq_global.OeQ_wait_for_renderer(60000)
     newnode=nodeByName(name)
     if newnode:
             return newnode[0]
@@ -859,7 +858,6 @@ def nodeConvertCRS(node,crs=None):
     import os, subprocess
     os.environ['PATH'] += ":"+"/usr/local/bin"
     from mole import oeq_global
-    from mole.qgisinteraction.legend import *
     from mole.qgisinteraction import layer_interaction
     if crs == None:
         crs='epsg:4326' #default is WGS84
@@ -882,107 +880,150 @@ def nodeConvertCRS(node,crs=None):
     #    return None
     try:
         layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+        oeq_global.OeQ_wait(2)
     except:
         pass
     try:
         layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+        oeq_global.OeQ_wait(2)
     except:
         pass
     try:
         layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+        oeq_global.OeQ_wait(2)
     except:
         pass
     nodeRemove(node)
+    #oeq_global.OeQ_wait_for_renderer(60000)
+
+    #oeq_global.OeQ_wait(1)
     iface.addVectorLayer(src_path,name, 'ogr')
+    #oeq_global.OeQ_wait_for_renderer(60000)
+
     newnode=nodeByName(name)
     if newnode:
+            newnode[0].layer().triggerRepaint()
+            #oeq_global.OeQ_wait_for_renderer(60000)
             return newnode[0]
     return None
 
 
 
-def nodeClipByShapefile(node,clip_path=None,clipped_path=None):
+def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     import os, subprocess
+    from qgis.core import QgsMessageLog
     from mole import oeq_global
-    from mole.qgisinteraction.legend import *
     from mole.qgisinteraction import layer_interaction
+    #add path in case ogr2ogr can not be found
     os.environ['PATH'] += ":"+"/usr/local/bin"
-    if clip_path == None:
+
+    #check if a clippath is given
+    if clip_filepath == None:
         return None
-    clp_path = os.path.join(clip_path)
+
+    #if node is a string get the according node
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
+
+    #source CRS
     src_crs = node.layer().crs().authid()
-    src_lname = node.layer().name()
-    src_path = node.layer().source()
-    src_dir =os.path.dirname(src_path)
-    src_name = os.path.basename(src_path).split('.')[0]
-    src_ext = src_path.split('.')[1]
-    if clipped_path:
-        tgt_name=os.path.basename(clipped_path).split('.')[0]
-        tgt_path=clipped_path
-    else:
-        tgt_name = src_name+'_tmp'
-        tgt_path = os.path.join(src_dir,tgt_name+'.'+src_ext)
+
+
+    src_layer_name = node.layer().name()
+    src_layer_filepath = node.layer().source()
+    src_dir =os.path.dirname(src_layer_filepath)
+    src_name = os.path.basename(src_layer_filepath).split('.')[0]
+    src_ext = src_layer_filepath.split('.')[1]
+
+
     bu_name= src_name+'_before_clip'
     bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
-    subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clp_path, tgt_path, src_path])
+
+
+
+    #remove sourcenode from the qgislegend
     node.parent().removeChildNode(node)
-    #raw_input("Press Enter to terminate.BU")
-    if not clipped_path:
+    #convert original to backup
+    if not target_filepath:
+        #remove older backups
         try:
             layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+            #oeq_global.OeQ_wait(2)
         except:
             pass
-        #raw_input("Press Enter to terminate.SRC->BU")
+        #rename original to backup
         try:
             layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
-        except:
-            pass
-        #raw_input("Press Enter to terminate.TGT->SRC")
-        try:
-            layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+            #oeq_global.OeQ_wait(2)
         except:
             pass
         print bu_path
-        newlayer = iface.addVectorLayer(src_path,src_lname, 'ogr')
+        print clip_filepath
+        print src_layer_filepath
+        #oeq_global.OeQ_wait(5)
+        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])==0):
+            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+            oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
+            return None
+        #oeq_global.OeQ_wait(5)
+        newlayer = iface.addVectorLayer(src_layer_filepath,src_layer_name, 'ogr')
+        #oeq_global.OeQ_wait_for_renderer(60000)
     else:
-        newlayer = iface.addVectorLayer(tgt_path,tgt_name, 'ogr')
-    newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])))
-    newlayer.triggerRepaint()
-    return nodeByLayer(newlayer)[0]
+        target_name = os.path.basename(target_filepath).split('.')[0]
+
+        #check if it is filename or filepath
+        if os.path.basename(target_filepath) == target_filepath:
+            target_filepath=os.path.join(src_dir,target_filepath)
+        target_dir = os.path.dirname(target_filepath)
+        #remove old clip files
+        try:
+            layer_interaction.remove_filegroup(target_dir,target_name,ignore=['qml'])
+            #oeq_global.OeQ_wait(2)
+        except:
+            pass
+        print src_layer_filepath
+        print clip_filepath
+        print target_filepath
+        #do clip by callin ogr2ogr
+        #oeq_global.OeQ_wait(5)
+        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath])==0):
+            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+            oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
+            return None
+        #oeq_global.OeQ_wait(5)
+        newlayer = iface.addVectorLayer(target_filepath,src_layer_name, 'ogr')
+        #oeq_global.OeQ_wait_for_renderer(60000)
+    if not newlayer:
+        QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+target_filepath+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not open layer '"+target_filepath+"' !")
+        return None
+    newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])), QgsCoordinateReferenceSystem.EpsgCrsId)
+    newnode = nodeByLayer(newlayer)
+    if not newnode:
+        QgsMessageLog.logMessage("nodeClipByShapefile : Could not find node for new layer!",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not find node for new layer!")
+        return None
+    return newnode[0]
 
 
-'''
-import mole.extensions as ext
-ext.by_type('wfs')[0].load_wfs()
-from mole.qgisinteraction.legend import *
-nodeConvertCRS('Building Outlines (WFS Capture)','EPSG:32633')
-nodeClipByShapenode('Building Outlines (WFS Capture)','Investigation Area')
-'''
-
-def nodeClipByShapenode(node,clip_node=None,clipped_name=None):
+def nodeClipByShapenode(node,clip_node=None,target_path=None):
     import os, subprocess
     from mole import oeq_global
-    from mole.qgisinteraction import legend
-    os.environ['PATH'] += ":"+"/usr/local/bin"
+    #os.environ['PATH'] += ":"+"/usr/local/bin"
     if oeq_global.isStringOrUnicode(node):
-        node = legend.nodeByName(node)
+        node = nodeByName(node)
         if len(node) == 0:
             return None
         node = node[0]
     if oeq_global.isStringOrUnicode(clip_node):
-        clip_node = legend.nodeByName(clip_node)
+        clip_node = nodeByName(clip_node)
         if len(clip_node) == 0:
             return None
         clip_node = clip_node[0]
-    clipped_path = clip_node.layer().source()
-    if clipped_name:
-        clipped_path=os.path.join(os.path.dirname(clipped_path),clipped_name+'.'+clipped_path.split('.')[1])
-    return nodeClipByShapefile(node,clipped_path)
+    return nodeClipByShapefile(node,clip_node.layer().source(),target_path)
 
 def testlayer():
     nodeCreateGroup('Testgroup1')
@@ -1017,6 +1058,9 @@ def nodeZoomTo(node):
             canvas.zoomByFactor(1.1)
         canvas.setCenter(center)
         canvas.freeze(False)
+        canvas.refresh()
+        #oeq_global.OeQ_wait_for_renderer(60000)
+
 
 
 def nodeGetExtent(node):
@@ -1034,7 +1078,6 @@ def nodeVectorSave(node,filepath=None,crs=None,load=False):
     from qgis.core import QgsCoordinateReferenceSystem,QgsVectorFileWriter
     from qgis.utils import iface
     from mole import oeq_global
-    from mole.qgisinteraction.legend import *
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node: return None
@@ -1044,33 +1087,34 @@ def nodeVectorSave(node,filepath=None,crs=None,load=False):
     if not crs:
         crs=node.layer().crs()
     else:
-        crs = QgsCoordinateReferenceSystem(int(crs.split(':')[1]))
-    QgsVectorFileWriter.writeAsVectorFormat( node.layer(),os.path.join(filepath),'System',crs,'ESRI Shapefile')
+        crs = QgsCoordinateReferenceSystem(int(crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+    QgsVectorFileWriter.writeAsVectorFormat( node.layer(),filepath,'System',crs,'ESRI Shapefile')
     if load:
-        iface.addVectorLayer(os.path.join(filepath),None, 'ogr')
+        iface.addVectorLayer(filepath,None, 'ogr')
+        #oeq_global.OeQ_wait_for_renderer(60000)
 
 def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=True, category = None,subcategory=None,position='bottom'):
     from mole import oeq_global
     from mole.project import config
-    from mole.qgisinteraction import layer_interaction,legend
+    from mole.qgisinteraction import layer_interaction
     from PyQt4.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(node):
-        node = legend.nodeByName(node)
+        node = nodeByName(node)
         if not node:
             oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
             return None
     node = node[0]
     #remove database if necessary
     if overwrite:
-        legend.nodeRemove(database_layer_name,physical=True)
+        nodeRemove(database_layer_name,physical=True)
     #use project reference crs if not given
     if not reference_crs:
         reference_crs = config.measurement_projection
     #generate db from building outline layer
-    db_layer_node = legend.nodeDuplicate(node,database_layer_name)
+    db_layer_node = nodeDuplicate(node,database_layer_name)
     #convert db layer to reference crs
-    db_layer_node = legend.nodeConvertCRS(db_layer_node,reference_crs)
+    db_layer_node = nodeConvertCRS(db_layer_node,reference_crs)
     if not db_layer_node:
         oeq_global.OeQ_init_warning('nodeCreateDatabase :','Could not build database !')
         return None
@@ -1095,23 +1139,23 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
             data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
     #create category group in legend
     if category:
-        if not legend.nodeExists(category):
-            cat=legend.nodeCreateGroup(category,position)
+        if not nodeExists(category):
+            cat=nodeCreateGroup(category,position)
         else:
-            cat=legend.nodeByName(category)[0]
-        legend.nodeHide(cat)
+            cat=nodeByName(category)[0]
+        nodeHide(cat)
         #create subcategory group in legend
         if subcategory:
-            if not legend.nodeExists(subcategory):
-                subcat=legend.nodeCreateGroup(subcategory,'bottom',cat)
+            if not nodeExists(subcategory):
+                subcat=nodeCreateGroup(subcategory,'bottom',cat)
             else:
-                subcat=legend.nodeByName(subcategory)[0]
-            legend.nodeHide(subcat)
-            legend.nodeMove(db_layer_node,'bottom',subcat)
-            legend.nodeCollapse(subcat)
+                subcat=nodeByName(subcategory)[0]
+            nodeHide(subcat)
+            nodeMove(db_layer_node,'bottom',subcat)
+            nodeCollapse(subcat)
         else:
-            legend.nodeMove(db_layer_node,'bottom',cat)
-            legend.nodeCollapse(cat)
+            nodeMove(db_layer_node,'bottom',cat)
+            nodeCollapse(cat)
     return db_layer_node
 
 def nodeCreateBuildingIDs(building_outline_node):
@@ -1125,42 +1169,43 @@ def nodeCreateBuildingIDs(building_outline_node):
     """
     from mole import oeq_global
     from mole.project import config
-    from mole.qgisinteraction import layer_interaction,legend
+    from mole.qgisinteraction import layer_interaction
     from PyQt4.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(building_outline_node):
-        building_outline_node = legend.nodeByName(building_outline_node)
+        building_outline_node = nodeByName(building_outline_node)
         if not building_outline_node:
             oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
             return None
-    building_outline_node = building_outline_node[0]
+        building_outline_node = building_outline_node[0]
 
+    #try:
+    building_outline_layer=building_outline_node.layer()
+    provider = building_outline_layer.dataProvider()
+    building_outline_layer.startEditing()
+
+    provider.addAttributes([QgsField('BLD_ID', QVariant.String)])
+    name_to_index = provider.fieldNameMap()
+    building_index = name_to_index['BLD_ID']
     try:
-        provider = building_outline_node.layer().dataProvider()
-        housing_layer.startEditing()
+        fid_index = name_to_index['FID']
+    except:
+        pass
 
-        provider.addAttribute(QgsField('BLD_ID', QVariant.String))
-        name_to_index = provider.fieldNameMap()
-        building_index = name_to_index['BLD_ID']
-        try:
-            fid_index = name_to_index['FID']
-        except:
-            pass
+    building_id = 0
 
-        building_id = 0
+    for feature in provider.getFeatures():
+        # if oeq_global.isnull(feature.attribute('FID')):
+        # if feature.attribute('BLD_ID') == 0:
+        geometry = feature.geometry()
+        provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
+        building_id += 1
+        # else:
+        # These features are most likely to be duplicates of those that have an FID-entry
+        #    provider.deleteFeatures([feature.id()])
 
-        for feature in provider.getFeatures():
-            # if oeq_global.isnull(feature.attribute('FID')):
-            # if feature.attribute('BLD_ID') == 0:
-            geometry = feature.geometry()
-            provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
-            building_id += 1
-            # else:
-            # These features are most likely to be duplicates of those that have an FID-entry
-            #    provider.deleteFeatures([feature.id()])
-
-        #provider.deleteAttributes([fid_index])
-        return housing_layer.commitChanges()
-    except AttributeError, Error:
-        print(__name__, Error)
-        return False
+    #provider.deleteAttributes([fid_index])
+    return building_outline_layer.commitChanges()
+    #except AttributeError, Error:
+    #    print(__name__, Error)
+    #    return False

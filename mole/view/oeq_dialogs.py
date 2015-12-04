@@ -483,31 +483,31 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
 
 class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
-    def __init__(self, progress_model):
-        from qgis import utils
-        standard_workflow = utils.plugins['mole'].standard_workflow
+    def __init__(self,mole): #, progress_model):
+        #from qgis import utils
+        #standard_workflow = utils.plugins['mole'].standard_workflow
         QtGui.QDockWidget.__init__(self)
         self.setupUi(self)
         self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self._semiopen_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
-        self.progress_model = progress_model
-        self.ol_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('ol_plugin_installed'))
-        self.pst_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('pst_plugin_installed'))
-        self.real_centroid_plugin_installed.pressed.connect(lambda: standard_workflow.do_workstep('real_centroid_plugin_installed'))
-        self.project_created.pressed.connect(lambda: standard_workflow.do_workstep('project_created'))
-        self.project_saved.pressed.connect(lambda: standard_workflow.do_workstep('project_saved'))
-        self.investigationarea_defined.pressed.connect(lambda: standard_workflow.do_workstep('investigationarea_defined'))
-        self.building_outlines_acquired.pressed.connect(lambda: standard_workflow.do_workstep('building_outlines_acquired'))
-        self.building_coordinates_acquired.pressed.connect(lambda: standard_workflow.do_workstep('building_coordinates_acquired'))
-        self.import_ext_selected.pressed.connect(lambda: standard_workflow.do_workstep('import_ext_selected'))
-        self.information_layers_loaded.pressed.connect(lambda: standard_workflow.do_workstep('information_layers_loaded'))
-        self.needle_request_done.pressed.connect(lambda: standard_workflow.do_workstep('needle_request_done'))
-        self.database_created.pressed.connect(lambda: standard_workflow.do_workstep('database_created'))
-        self.buildings_evaluated.pressed.connect(lambda: standard_workflow.do_workstep('buildings_evaluated'))
-        self.json_export_done.pressed.connect(lambda: standard_workflow.do_workstep('json_export_done'))
+        #self.progress_model = progress_model
+        self.ol_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('ol_plugin_installed'))
+        self.pst_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('pst_plugin_installed'))
+        self.real_centroid_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('real_centroid_plugin_installed'))
+        self.project_created.pressed.connect(lambda: mole.standard_workflow.do_workstep('project_created'))
+        self.project_saved.pressed.connect(lambda: mole.standard_workflow.do_workstep('project_saved'))
+        self.investigationarea_defined.pressed.connect(lambda: mole.standard_workflow.do_workstep('investigationarea_defined'))
+        self.building_outlines_acquired.pressed.connect(lambda: mole.standard_workflow.do_workstep('building_outlines_acquired'))
+        self.building_coordinates_acquired.pressed.connect(lambda: mole.standard_workflow.do_workstep('building_coordinates_acquired'))
+        self.import_ext_selected.pressed.connect(lambda: mole.standard_workflow.do_workstep('import_ext_selected'))
+        self.information_layers_loaded.pressed.connect(lambda: mole.standard_workflow.do_workstep('information_layers_loaded'))
+        self.needle_request_done.pressed.connect(lambda: mole.standard_workflow.do_workstep('needle_request_done'))
+        self.database_created.pressed.connect(lambda: mole.standard_workflow.do_workstep('database_created'))
+        self.buildings_evaluated.pressed.connect(lambda: mole.standard_workflow.do_workstep('buildings_evaluated'))
+        self.json_export_done.pressed.connect(lambda: mole.standard_workflow.do_workstep('json_export_done'))
 
-        self.process_button_next.clicked.connect(self.call_next_workstep)
+        self.process_button_next.clicked.connect(lambda: self.call_next_workstep(mole))
         self.run_button.clicked.connect(self.run_automode)
        # for dropdown_index, list_view in enumerate(self.progress_model.section_views):
        #     self.process_page.addWidget(list_view)
@@ -582,20 +582,20 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
     def switch_to_objects_parent_page(self,object):
         self.select_page(self.project_created.parent().objectName())
 
-    def switch_to_next_worksteps_page(self):
-        from qgis import utils
-        standard_workflow = utils.plugins['mole'].standard_workflow
-        self.select_page(standard_workflow.next_worksteps_name)
-
-    def call_next_workstep(self):
+    def switch_to_next_worksteps_page(self,mole):
         from PyQt4 import QtGui
-        from qgis import utils
-        standard_workflow = utils.plugins['mole'].standard_workflow
-        nextname = standard_workflow.next_worksteps_name()
+        nextname = mole.standard_workflow.next_worksteps_name()
         if nextname != None:
             pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
             self.select_page(pagename)
-        standard_workflow.next_workstep()
+
+    def call_next_workstep(self,mole):
+        from PyQt4 import QtGui
+        nextname = mole.standard_workflow.next_worksteps_name()
+        if nextname != None:
+            pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
+            self.select_page(pagename)
+        mole.standard_workflow.next_workstep()
 
 
     def run_automode(self):

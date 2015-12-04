@@ -28,7 +28,7 @@ from PyQt4.QtCore import SIGNAL, Qt, QSettings, QVariant
 
 from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
-from model.progress_model import ProgressItemsModel
+#from model.progress_model import ProgressItemsModel
 from view.oeq_dialogs import (
     Modular_dialog, ProjectSettings_form, ProjectDoesNotExist_dialog,
     ColorPicker_dialog, MainProcess_dock, RequestWmsUrl_dialog, InformationSource_dialog)
@@ -54,7 +54,8 @@ class OpenEQuarterMain:
         # Save reference to the QGIS interface
         self.iface = iface
         ### Monitor the users progress
-        self.progress_items_model = ProgressItemsModel()
+        #self.progress_items_model = ProgressItemsModel()
+        self.initWorkflow()
 
         #enable on the fly projection
         self.iface.mapCanvas().mapSettings().setCrsTransformEnabled(True)
@@ -69,10 +70,11 @@ class OpenEQuarterMain:
         self.information_source_dlg = InformationSource_dialog()
         self.project_does_not_exist_dlg = ProjectDoesNotExist_dialog()
         self.request_wms_url_dlg = RequestWmsUrl_dialog()
+        self.initMainProcessDock()
+        self.load_oeq_project()
         self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
         #self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = Modular_dialog()
-        self.main_process_dock = None
 
         ### Project specific settings
         self.oeq_project = ''
@@ -85,7 +87,68 @@ class OpenEQuarterMain:
         print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
         self.iface.actionShowPythonDialog().trigger()  # in fact it's not show but toggle
 
-        #register worksteps
+    def new_project(self):
+
+        #self.progress_items_model.load_section_models(config.progress_model)
+        #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
+        #sections = self.progress_items_model.section_views
+
+        #for list_view in sections:
+        #    list_view.clicked.connect(self.process_button_clicked)
+
+        import copy
+        oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
+        self.update_workstep_states_in_Gui()
+
+
+    def initGui(self):
+        from qgis.core import QgsProject
+        project =QgsProject.instance()
+        plugin_icon = QIcon(os.path.join(':', oeq_global.OeQ_plugin_path(), 'icons', 'OeQ_plugin_icon.png'))
+        self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
+        self.main_action.triggered.connect(self.run)
+        self.iface.addToolBarIcon(self.main_action)
+        self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
+
+        clipping_icon = QIcon(os.path.join(':', 'Plugin', 'icons', 'scissor.png'))
+        self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
+        self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
+        self.iface.addToolBarIcon(self.clipping_action)
+        self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
+        self.iface.projectRead.connect(self.load_oeq_project)
+        self.iface.newProjectCreated.connect(self.new_project)
+        project.projectSaved.connect(self.save_oeq_project)
+
+        #self.initGui_process_dock()
+
+    def initMainProcessDock(self):
+        self.main_process_dock = MainProcess_dock(self) #self.progress_items_model)
+        #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
+        #sections = self.progress_items_model.section_views
+        #for list_view in sections:
+        #    list_view.clicked.connect(self.process_button_clicked)
+
+        settings_dropdown_menu = QMenu()
+        config_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'config.png'))
+        open_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'open.png'))
+        sources_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'sources.png'))
+        settings_dropdown_menu.addAction(config_icon, 'Project configuration..', self.open_settings)
+        settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.launch_oeq)
+        settings_dropdown_menu.addAction(sources_icon, 'Open source configuration..', self.information_source_dlg.exec_)
+
+        tools_dropdown_menu = QMenu()
+        tools_dropdown_menu.addAction('Color Picker', self.prepare_color_picker)
+        tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
+        tools_dropdown_menu.addAction('Save extent as image',
+                                      lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
+        #tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
+
+        self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
+        self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
+
+
+    def initWorkflow(self):
+                #register worksteps
         from oeq_workflows import OeQ_Workflow,OeQ_WorkStep
         #init standard workflow
         self.standard_workflow=OeQ_Workflow('OeQ_standard','Standard Workflow of Open eQuarter')
@@ -116,65 +179,6 @@ class OpenEQuarterMain:
         #OeQ_Init_Workflows(self)
 
 
-    def new_project(self):
-
-        #self.progress_items_model.load_section_models(config.progress_model)
-        #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
-        #sections = self.progress_items_model.section_views
-
-        #for list_view in sections:
-        #    list_view.clicked.connect(self.process_button_clicked)
-
-        import copy
-        oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
-        self.update_workstep_states_in_Gui()
-
-
-    def initGui(self):
-        plugin_icon = QIcon(os.path.join(':', oeq_global.OeQ_plugin_path(), 'icons', 'OeQ_plugin_icon.png'))
-        self.main_action = QAction(plugin_icon, u"OpenEQuarter-Process", self.iface.mainWindow())
-        self.main_action.triggered.connect(self.run)
-        self.iface.addToolBarIcon(self.main_action)
-        self.iface.addPluginToMenu(u"&OpenEQuarter", self.main_action)
-
-        clipping_icon = QIcon(os.path.join(':', 'Plugin', 'icons', 'scissor.png'))
-        self.clipping_action = QAction(clipping_icon, u"Extract extent from active WMS", self.iface.mainWindow())
-        self.clipping_action.triggered.connect(lambda: self.clip_from_raster(self.iface.activeLayer()))
-        self.iface.addToolBarIcon(self.clipping_action)
-        self.iface.addPluginToMenu(u"&OpenEQuarter", self.clipping_action)
-
-        self.iface.connect(QgsMapLayerRegistry.instance(), SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'),
-                           self.reorder_layers)
-        self.iface.connect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'), self.open_progress)
-        self.iface.connect(self.iface, SIGNAL("newProjectCreated()"), self.new_project)
-        self.iface.connect(QgsProject.instance(), SIGNAL('projectSaved()'), self.progress_items_model.save_oeq_project)
-
-        self.initGui_process_dock()
-
-    def initGui_process_dock(self):
-        self.main_process_dock = MainProcess_dock(self.progress_items_model)
-        #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
-        #sections = self.progress_items_model.section_views
-        #for list_view in sections:
-        #    list_view.clicked.connect(self.process_button_clicked)
-
-        settings_dropdown_menu = QMenu()
-        config_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'config.png'))
-        open_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'open.png'))
-        sources_icon = QIcon(os.path.join(':', 'Controls', 'icons', 'sources.png'))
-        settings_dropdown_menu.addAction(config_icon, 'Project configuration..', self.open_settings)
-        settings_dropdown_menu.addAction(open_icon, 'Open OeQ-Project..', self.open_progress)
-        settings_dropdown_menu.addAction(sources_icon, 'Open source configuration..', self.information_source_dlg.exec_)
-
-        tools_dropdown_menu = QMenu()
-        tools_dropdown_menu.addAction('Color Picker', self.prepare_color_picker)
-        tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
-        tools_dropdown_menu.addAction('Save extent as image',
-                                      lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
-        #tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
-
-        self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
-        self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
     def reorder_layers(self):
         """
@@ -200,18 +204,19 @@ class OpenEQuarterMain:
         #self.run()
         #self.oeq_project_settings_form.show()
 
-    def open_progress(self, doc):
+    def launch_oeq(self):
         progress = os.path.join(oeq_global.OeQ_project_path(), oeq_global.OeQ_project_name() + '.oeq')
-        if os.path.isfile(progress):
-            self.progress_items_model.load_section_models(progress)
-        else:
-            self.progress_items_model.load_section_models(config.progress_model)
+        #if os.path.isfile(progress):
+        #    self.progress_items_model.load_section_models(progress)
+        #else:
+        #    self.progress_items_model.load_section_models(config.progress_model)
 
         if self.main_process_dock.isVisible():
             self.main_process_dock.setVisible(False)
-        self.initGui_process_dock()
+        self.initMainProcessDock()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.update_workstep_states_in_Gui()
+        self.main_process_dock.switch_to_next_worksteps_page(self)
 
 
     def load_wms(self):
@@ -243,14 +248,15 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        from qgis.core import QgsProject
+        project =QgsProject.instance()
         self.iface.removePluginMenu(u"&OpenEQuarter", self.main_action)
         self.iface.removePluginMenu(u"&OpenEQuarter", self.clipping_action)
         self.iface.removeToolBarIcon(self.main_action)
         self.iface.removeToolBarIcon(self.clipping_action)
-        self.main_process_dock.disconnect(QgsMapLayerRegistry.instance(),
-                                          SIGNAL('legendLayersAdded(QList< QgsMapLayer * >)'), self.reorder_layers)
-        self.main_process_dock.disconnect(QgsProject.instance(), SIGNAL('readProject(const QDomDocument &)'),
-                                          self.open_progress)
+        self.iface.projectRead.disconnect(self.load_oeq_project)
+        self.iface.newProjectCreated.disconnect(self.new_project)
+        project.projectSaved.disconnect(self.save_oeq_project)
 
     def create_project_ifNotExists(self):
         """
@@ -417,8 +423,6 @@ class OpenEQuarterMain:
 
     # step 0.0
     def handle_ol_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
         if plugin_exists:
             self.main_process_dock.ol_plugin_installed.setChecked(True)
@@ -428,8 +432,6 @@ class OpenEQuarterMain:
             return False
 
     def check_if_ol_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
         if plugin_exists:
             self.main_process_dock.ol_plugin_installed.setChecked(True)
@@ -440,8 +442,6 @@ class OpenEQuarterMain:
 
     # step 0.1
     def handle_pst_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
         if plugin_exists:
             self.main_process_dock.pst_plugin_installed.setChecked(True)
@@ -451,8 +451,6 @@ class OpenEQuarterMain:
             return False
 
     def check_if_pst_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
         if plugin_exists:
             self.main_process_dock.pst_plugin_installed.setChecked(True)
@@ -463,8 +461,6 @@ class OpenEQuarterMain:
 
     # step 0.2
     def handle_real_centroid_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
         if plugin_exists:
             self.main_process_dock.real_centroid_plugin_installed.setChecked(True)
@@ -474,8 +470,6 @@ class OpenEQuarterMain:
             return False
 
     def check_if_real_centroid_plugin_installed(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
         if plugin_exists:
             self.main_process_dock.real_centroid_plugin_installed.setChecked(True)
@@ -486,13 +480,11 @@ class OpenEQuarterMain:
 
     # step 0.3
     def handle_project_created(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         self.oeq_project_settings_form.show()
         save = self.oeq_project_settings_form.exec_()
         if save:
             self.main_process_dock.project_created.setChecked(True)
-            self.handle_project_saved()
+            #self.handle_project_saved()
         else:
             self.main_process_dock.project_created.setChecked(False)
 
@@ -511,6 +503,7 @@ class OpenEQuarterMain:
 
     def handle_project_saved(self):
         from mole import extensions
+        extensions.load_defaults()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
             extensions.update_all_colortables()
@@ -520,8 +513,6 @@ class OpenEQuarterMain:
         return self.main_process_dock.project_saved.isChecked()
 
     def check_if_project_saved(self):
-        from qgis import utils
-        process_dock = utils.plugins['mole'].main_process_dock
         if oeq_global.OeQ_project_saved():
             self.main_process_dock.project_saved.setChecked(True)
         else:
@@ -683,15 +674,12 @@ class OpenEQuarterMain:
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
         building_outline_ext = building_outline_ext[0]
-        print 'Bin Bereit'
         oeq_global.OeQ_wait(5)
         building_outline_ext.load_wfs()
-        print 'Bin Geladen'
         oeq_global.OeQ_wait(5)
         oeq_global.OeQ_init_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
         building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
         original_crs=building_outlines.layer().crs().authid()
-        print 'Bin Durch'
         self.iface.mapCanvas().freeze(False)
         self.iface.mapCanvas().refresh()
 
@@ -711,6 +699,7 @@ class OpenEQuarterMain:
 
         legend.nodeCreateBuildingIDs(building_outlines)
         #return building_outlines.layer()
+        self.reorder_layers()
         self.main_process_dock.building_outlines_acquired.setChecked(True)
         return True
 
@@ -787,7 +776,7 @@ class OpenEQuarterMain:
 
                 #create group data at bottom of root (if necessary)
 
-                legend.nodeMove(config.open_layers_layer_name,'bottom')
+                self.reorder_layers()
 
                 oeq_global.OeQ_kill_info()
                 source_section = self.progress_items_model.section_views[1]
@@ -826,8 +815,9 @@ class OpenEQuarterMain:
                 original_crs=building_outlines.layer().crs().authid()
 
                 load_message = "Calculate building coordinates from building outlines?"
-                reply = QMessageBox.question(window, 'Building Coordinates', load_message, QMessageBox.No, QMessageBox.Yes)
-                if reply == QMessageBox.No:
+                ask=QMessageBox()
+                reply = ask.question(ask, 'Building Coordinates', "Calculate building coordinates from building outlines?", ask.Yes | ask.No, ask.Yes)
+                if reply == ask.No:
                     dialog=QFileDialog()
                     filepath=dialog.getOpenFileName(None,'Select a shape file that holds the bulding coordinates (.shp):',selectedFilter='*.shp')
                     if filepath:
@@ -849,6 +839,7 @@ class OpenEQuarterMain:
 
             if centroid_layer:
                 legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
+                self.reorder_layers()
                 self.main_process_dock.building_coordinates_acquired.setChecked(True)
                 return self.main_process_dock.building_coordinates_acquired.isChecked()
 
@@ -867,6 +858,7 @@ class OpenEQuarterMain:
 
     def handle_information_layers_loaded(self):
         from mole import extensions
+        from mole.project import config
         from mole.qgisinteraction import legend
         if not self.standard_workflow.all_mandatory_worksteps_done('information_layers_loaded'):
             self.main_process_dock.information_layers_loaded.setChecked(False)
@@ -880,7 +872,7 @@ class OpenEQuarterMain:
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
-
+        self.reorder_layers()
         return self.main_process_dock.information_layers_loaded.isChecked()
 
 
@@ -1110,11 +1102,11 @@ class OpenEQuarterMain:
         return True
     def handle_legend_created(self):
         return self.prepare_color_picker()
-
+    '''
     def pick_color(self):
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
-    '''
+
     def prepare_color_picker(self):
         self.pick_color()
         self.color_picker_dlg.start_colorpicking.clicked.connect(self.pick_color)
@@ -1139,7 +1131,7 @@ class OpenEQuarterMain:
     # step 4.1
     def handle_needle_request_done(self):
         from mole import extensions
-
+        from mole.project import config
         # create data node
         if not legend.nodeExists('Data'):
             cat=legend.nodeCreateGroup('Data')
@@ -1147,6 +1139,7 @@ class OpenEQuarterMain:
             cat=legend.nodeByName('Data')[0]
         #create_database
         #self.create_database(True,'Data')
+        oeq_global.OeQ_init_info('Needle Request:', 'Collecting data... be patient!')
 
         # show import layers
         layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
@@ -1184,9 +1177,11 @@ class OpenEQuarterMain:
                 legend.nodeHide('Import')
 
         if legend.nodeExists(config.pst_output_layer_name):
+            self.reorder_layers()
             self.main_process_dock.needle_request_done.setChecked(True)
         else:
             self.main_process_dock.needle_request_done.setChecked(False)
+        oeq_global.OeQ_kill_info()
         return self.main_process_dock.needle_request_done.isChecked()
 
 
@@ -1202,7 +1197,12 @@ class OpenEQuarterMain:
 
     def handle_database_created(self):
         from mole.qgisinteraction import legend
-        return bool(legend.nodeCreateDatabase(config.housing_layer_name,config.data_layer_name,config.measurement_projection,True,"Data"))
+        oeq_global.OeQ_init_info('Create Database:', 'Generating building records... be patient!')
+
+        result= bool(legend.nodeCreateDatabase(config.housing_layer_name,config.data_layer_name,config.measurement_projection,True,"Data"))
+        self.reorder_layers()
+        oeq_global.OeQ_kill_info()
+        return result
 
     def check_if_database_created(self):
         from mole.project import config
@@ -1216,6 +1216,7 @@ class OpenEQuarterMain:
         # step 4.1
     def handle_buildings_evaluated(self):
         from mole import extensions
+        oeq_global.OeQ_init_info('Building Evaluation:', 'Checking dependencies... be patient!')
         for i in extensions.by_state(True,'Import'):
             i.calculate()
         #extensions.run_active_extensions('Import')
@@ -1225,7 +1226,8 @@ class OpenEQuarterMain:
         #extensions.run_active_extensions('Evaluation')
         success = success & all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Evaluation')])
         legend.nodeHide(config.pst_input_layer_name)
-        print success
+        self.reorder_layers()
+        oeq_global.OeQ_kill_info()
         return success
 
     def check_if_buildings_evaluated(self):
@@ -1489,7 +1491,7 @@ class OpenEQuarterMain:
             return True
         else:
             return False
-    '''
+
     def continue_process(self, autorun=False):
         """
         Call the appropriate handle-function, depending on the progress-step, that has to be executed next.
@@ -1514,7 +1516,7 @@ class OpenEQuarterMain:
 
         QgsProject.instance().setDirty(True)
         first_open_item.setCheckState(progress_state)
-    '''
+
     def XXX_process_button_clicked(self, model_index):
         """
         Call the appropriate handle-function, depending on the QStandardItem which triggered the function call.
@@ -1555,6 +1557,13 @@ class OpenEQuarterMain:
     def run(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
+        if not self.main_process_dock.automode.isChecked():
+            self.standard_workflow.do_workstep('project_created')
+            self.standard_workflow.do_workstep('project_saved')
+            self.standard_workflow.do_workstep('investigationarea_defined')
+        else:
+            while not self.standard_workflow.is_done():
+                self.main_process_dock.call_next_workstep(self)
         return True
         if self.main_process_dock.automode.isChecked():
             while not self.standard_workflow.is_done(): pass
@@ -1565,6 +1574,35 @@ class OpenEQuarterMain:
                 if self.handle_project_saved():
                     self.handle_investigationarea_defined()
         return True
+
+    def save_oeq_project(self):
+        import os,pickle
+        from mole.oeq_global import OeQ_project_info,OeQ_ExtensionRegistry
+        project = {'project_info':OeQ_project_info,
+                   'extension_registry':OeQ_ExtensionRegistry}
+        project_path = oeq_global.OeQ_project_path()
+        project_name = oeq_global.OeQ_project_name()
+        project_file = os.path.join(project_path, project_name + '.oeq')
+        if os.path.exists(project_file):
+             os.remove(project_file)
+        pickle.dump(project, open(project_file, 'wb'),protocol=2)
+
+    def load_oeq_project(self):
+        import os,pickle
+        from mole import oeq_global
+        from mole import extensions
+        project_path = oeq_global.OeQ_project_path()
+        project_name = oeq_global.OeQ_project_name()
+        project_file = os.path.join(project_path, project_name + '.oeq')
+        if os.path.exists(project_file):
+            project=pickle.load(open(project_file, 'rb'))
+            print project
+            oeq_global.OeQ_project_info = project['project_info']
+            oeq_global.OeQ_ExtensionRegistry = project['extension_registry']
+            self.reorder_layers()
+            legend.nodeZoomTo(config.investigation_shape_layer_name)
+            self.launch_oeq()
+            #extensions.load()
 
     '''
         if not oeq_global.OeQ_project_saved():
@@ -1604,3 +1642,9 @@ class OpenEQuarterMain:
         next_open_item = self.progress_items_model.check_prerequisites_for(last_step_name)
         next_open_item.setCheckState(is_done)
     '''
+
+
+
+
+
+

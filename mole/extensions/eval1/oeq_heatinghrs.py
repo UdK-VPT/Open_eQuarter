@@ -14,8 +14,8 @@ def calculation(self=None, parameters={}):
     # factor for golden rule
     dataset = {'HHRS':NULL}
     dataset.update(parameters)
-    print [dataset[i] for i in dataset.keys()]
-    print oeq_global.OeQ_project_info['heating_degree_days']
+    #print [dataset[i] for i in dataset.keys()]
+    #print oeq_global.OeQ_project_info['heating_degree_days']
     dataset['HHRS']=float(oeq_global.OeQ_project_info['heating_degree_days']) * 24
 
     result = {}

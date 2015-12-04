@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/Users/wk/Tresors/VPT/Open eQuarter/Development/oeq_git/mole/view/ui_main_process_dock.ui'
 #
-# Created: Tue Dec  1 11:08:02 2015
+# Created: Fri Dec  4 15:22:46 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -264,7 +264,7 @@ class Ui_MainProcess_dock(object):
         self.button_layout.setSpacing(5)
         self.button_layout.setObjectName(_fromUtf8("button_layout"))
         self.automode = QtGui.QCheckBox(self.dockWidgetContents)
-        self.automode.setEnabled(False)
+        self.automode.setEnabled(True)
         self.automode.setObjectName(_fromUtf8("automode"))
         self.button_layout.addWidget(self.automode)
         spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

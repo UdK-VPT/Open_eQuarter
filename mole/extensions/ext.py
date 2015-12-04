@@ -195,7 +195,7 @@ class OeQExtension:
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
       #  print defcolortable
         if defcolortable:
-            print defcolortable[0].colortable
+            #print defcolortable[0].colortable
             return defcolortable[0].colortable
         return None
 
@@ -618,13 +618,19 @@ file_writer.writeRaster(pipe,
         return req
 
     def needs_evaluation(self,required=None):
+        from mole.qgisinteraction import legend
         if not required:
             required = self.required()
         if not self.last_calculation:
+            self.last_calculation=None
+            return True
+        if not legend.nodeExists(self.layer_name):
+            self.last_calculation=None
             return True
         for ext in required:
             if ext.last_calculation:
                 if self.last_calculation < ext.last_calculation:
+                    self.last_calculation=None
                     return True
         return False
 
@@ -664,7 +670,7 @@ file_writer.writeRaster(pipe,
         if (not source_layer) | (not target_layer):
             print "layer not found in calculate"
             print source_layer
-            print target_layer
+            #print target_layer
         source_layer =source_layer[0]
         target_layer = target_layer[0]
 
@@ -813,7 +819,7 @@ file_writer.writeRaster(pipe,
                 rci.calculate_accuracy(polygon, centroid_layer)
                 layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
                 #self.reorder_layers()
-                print centroid_layer.name()
+               # print centroid_layer.name()
                 legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
                 #source_section = self.progress_items_model.section_views[1]
                 #section_model = source_section.model()

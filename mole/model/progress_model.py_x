@@ -30,21 +30,21 @@ class ProgressItemsModel:
         """
         try:
             dir_entries = ZipFile(path).namelist()
-            print dir_entries
+            #print dir_entries
             section_files = filter(lambda entry: entry.startswith('section') and entry.endswith('.json'), dir_entries)
-            print section_files
+            #print section_files
             views = []
             for json_section in section_files:
                 with ZipFile(path, 'r') as oeq_zip:
                     data = oeq_zip.read(json_section)
                     json_data = json.loads(data)
-                    print json_data
+                    #print json_data
                 step_items = QListView()
                 step_items.setItemDelegate(QProcessViewDelegate(step_items))
                 step_items.setAccessibleName(json_data['section_name']+':'+json_data['description'])
                 step_items.setGridSize(QSize(320,40))
                 step_items.setSpacing(5)
-                print step_items
+                #print step_items
                 section_model = QStandardItemModel(step_items)
 
                 for step in json_data['steplist']:
@@ -70,11 +70,11 @@ class ProgressItemsModel:
                     oeq_global.OeQ_project_info[key] = json_data[key]
 
         except IOError, FileNotFoundError:
-            print(self.__module__, FileNotFoundError)
+            #print(self.__module__, FileNotFoundError)
         from mole.extensions import load
 
         load()
-        print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
+        #print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
 
 
 
@@ -123,8 +123,8 @@ class ProgressItemsModel:
             print(self.__module__, AccessOeqGlobalError)
 
         extensions.save()
-        print 'Save Project'
-        print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
+        #print 'Save Project'
+        #print [i.layer_name for i in oeq_global.OeQ_ExtensionRegistry]
 
 
     def check_prerequisites_for(self, step_name):

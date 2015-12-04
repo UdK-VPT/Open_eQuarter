@@ -200,10 +200,10 @@ def OeQ_wait_for_renderer(timeout=1):
     iface.mapCanvas().mapCanvasRefreshed.disconnect(loop.quit)
 
 
-    if render_result[0]:
-        print "Rendered"
-    else:
-        print "Rendering timed out"
+    #if render_result[0]:
+    #    print "Rendered"
+    #else:
+    #    print "Rendering timed out"
     return render_result[0]
 
 def OeQ_wait(sec):
@@ -212,7 +212,7 @@ def OeQ_wait(sec):
     loop = QEventLoop()
     QTimer.singleShot(sec*1000,loop.quit)
     loop.exec_()
-    print "Done"
+    #print "Done"
 
 def test(testo):
     from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
@@ -220,7 +220,7 @@ def test(testo):
     urlWithParams = 'url=http://kaart.maaamet.ee/wms/alus&format=image/png&layers=MA-ALUS&styles=&crs=EPSG:3301'
     rlayer = QgsRasterLayer(urlWithParams, 'MA-ALUS', 'wms')
     QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-    print oeq_global.OeQ_wait_for_renderer(testo)
+    #print oeq_global.OeQ_wait_for_renderer(testo)
 
 
 

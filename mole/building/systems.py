@@ -62,7 +62,7 @@ class component_direction:
             insol -= float(self.inclination) / 90 * (component_direction.insolation_def['down'] - insol)
         return round(insol, 0)
 
-
+'''
 for i in [0, 90, 180, 270]:
     k = component_direction('s', -10)
     print '--------'
@@ -73,3 +73,4 @@ for i in [0, 90, 180, 270]:
     print k.rsi()
     print k.rse()
     print k.insolation()
+'''

@@ -39,8 +39,8 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
             no_timeout -= 1
         #dest_filename=os.path.splitext(filename)[0]
         dest_filename=filename.replace("_RAW","")
-        print filename
-        print dest_filename
+        #print filename
+        #print dest_filename
         #dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
         referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, current_crs.authid(), current_extent)
 

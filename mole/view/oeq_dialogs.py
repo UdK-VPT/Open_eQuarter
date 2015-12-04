@@ -121,12 +121,12 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
                 type = line_edit.objectName()
                 source_path = line_edit.text()
                 break
-        print "register information"
+        ##print "register information"
 
         if extension_name != self.placeholder:
-            print "update information"
+            #print "update information"
             if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
-                print "found"
+                #print "found"
                 extensions.by_name(extension_name)[0].update(
                     field_id=field_id,
                     source_type=type,
@@ -135,7 +135,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
                     active=self.stateBox.isChecked())
 
         else:
-            print "new information"
+            #print "new information"
             extension = extensions.OeQExtension(
                 category='Import',
                 field_id=field_id,
@@ -436,14 +436,14 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             else:
                 ext = ext[0]
                 ltu_file = ext.colortable
-                print ext.colortable
-            print ltu_file
+                #print ext.colortable
+            #print ltu_file
             if ltu_file != None:
                 if os.path.isfile(os.path.join(ltu_file)):
                     self.color_entry_manager.read_color_map_from_qml(os.path.join(ltu_file))
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
-            print config.open_layers_layer_name
+            #print config.open_layers_layer_name
             legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
         #oeq_global.QeQ_current_work_layer = layer
         #layer_interaction.move_layer_to_position(iface, layer, 0)
@@ -452,7 +452,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         legend.nodeExitSolo()
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
-            print config.open_layers_layer_name
+            #print config.open_layers_layer_name
             legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
 
 
@@ -654,7 +654,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
                 oeq_global.OeQ_project_info[key] = field.text()
 
     def show(self):
-        print oeq_global.OeQ_project_info
+        #print oeq_global.OeQ_project_info
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
             if key == 'description':
@@ -667,7 +667,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
             field.setText(unicode(u''))
-        print 'resetted'
+        #print 'resetted'
 
     def text_changed(self, input_field):
         if input_field.text() != self.defaults[input_field.objectName()]:

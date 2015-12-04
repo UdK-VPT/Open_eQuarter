@@ -6,7 +6,7 @@ import numpy as np
 import oeqLookuptable as oeq
 def get(*xin):
 
-    print xin
+    #print xin
     l_lookup = oeq.lookuptable(
 [0,3.5,
 1849,2.898,
@@ -183,5 +183,5 @@ def get(*xin):
 2020,0.26,
 2021,0.26,
 10000,0.2])
-    print l_lookup.lookup(xin)
+    #print l_lookup.lookup(xin)
     return(l_lookup.lookup(xin))

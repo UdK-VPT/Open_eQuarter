@@ -185,7 +185,7 @@ class OeQ_Workflow:
             self.state=self.find_current_workstep()
         if self.state == len(self.worksteps):
             return None
-        print self.worksteps[self.state]
+        #print self.worksteps[self.state]
         if self.do_workstep(self.worksteps[self.state]):
             self.state+=1
             return True
@@ -201,7 +201,7 @@ class OeQ_Workflow:
             self.state=self.find_current_workstep()
         if self.state == len(self.worksteps):
             return None
-        print self.worksteps[self.state]
+        #print self.worksteps[self.state]
         return self.worksteps[self.state]
 
 

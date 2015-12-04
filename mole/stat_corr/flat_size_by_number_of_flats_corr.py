@@ -15,4 +15,4 @@ def get(*xin):
 
     return dict(FLT_AREA_AVG=FLT_AREA_AVG.lookup(*xin))
 
-print get(100)
+#print get(100)

@@ -228,22 +228,7 @@ class OeQExtension:
             else:
                 self.colortable = None
         return self.colortable
-        '''
-            if not os.path.exists(ct_project):
-                self.colortable = None
-            elif os.path.isfile(ct_project):
-                self.colortable = ct_project
-            else:
-                self.colortable = None
-                if ct_default != None:
-                    print ct_default
-                    print type(ct_default)
-                    if not os.path.exists(ct_default):
-                        self.colortable = None
-                    elif os.path.isfile(ct_default):
-                        copyfile(ct_default, ct_project)
-                        self.colortable = ct_project
-            '''
+
 
     def inspect(self):
         attrs = ['extension_name', 'extension_id', 'description', 'layer_name', 'layer_id', 'category', 'source',

@@ -111,16 +111,16 @@ def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
     import os
     os.environ['PATH'] += ":"+"/usr/local/bin"
     tgt_files=filter(lambda x: x.startswith(filenamebase+'.'),os.listdir(path))
-    print tgt_files
+    #print tgt_files
     if ext:
         tgt_files=filter(lambda x: x.split('.')[1] in ext , tgt_files)
-    print tgt_files
+    #print tgt_files
     if ignore:
         tgt_files=filter(lambda x: not x.split('.')[1]  in ignore , tgt_files)
-    print tgt_files
+    #print tgt_files
     for i in tgt_files:
             try:
-                print i
+                #print i
                 os.remove(os.path.join(path,i))
                 os.wait()
             except:
@@ -131,20 +131,20 @@ def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
     import os
     os.environ['PATH'] += ":"+"/usr/local/bin"
     src_files=filter(lambda x: x.startswith(filenamebase+'.'),os.listdir(path))
-    print src_files
+    #print src_files
     if ext:
         src_files=filter(lambda x: x.split('.')[1] in ext , src_files)
-    print src_files
+    #print src_files
     if ignore:
         src_files=filter(lambda x: not x.split('.')[1]  in ignore , src_files)
-    print src_files
-    print [newfilenamebase+'.'+i.split('.')[1] for i in src_files]
+    #print src_files
+    #print [newfilenamebase+'.'+i.split('.')[1] for i in src_files]
     tgt_files=[[i,newfilenamebase+'.'+i.split('.')[1]] for i in src_files]
-    print tgt_files
+    #print tgt_files
     for i in tgt_files:
             try:
-                print i[0]
-                print i[1]
+                #print i[0]
+                #print i[1]
                 os.rename(os.path.join(path,i[0]),os.path.join(path,i[1]))
                 os.wait()
             except:
@@ -733,10 +733,10 @@ def colors_match_feature(color_quadriple, feature, field_name):
     :return: If the quadriple matches
     :rtype: bool
     """
-    print 'COLOR MATCH'
-    print color_quadriple
-    print feature
-    print field_name
+    #print 'COLOR MATCH'
+    #print color_quadriple
+    #print feature
+    #print field_name
     match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
             and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
             and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))

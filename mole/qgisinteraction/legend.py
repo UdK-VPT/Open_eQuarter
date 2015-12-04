@@ -285,7 +285,7 @@ def nodeShow(node):
     :param node:    Node to show
     :return:        visibility state
     """
-    print node
+    #print node
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node:
@@ -552,10 +552,10 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     layer = node.layer()
     # source of the layer
     provider = layer.dataProvider()
-    print "---------------------"
-    print provider.crs().authid()
-    print layer.crs().authid()
-    print "---------------------"
+    #print "---------------------"
+    #print provider.crs().authid()
+    #print layer.crs().authid()
+    #print "---------------------"
     # creation of the shapefiles:
     pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
     ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
@@ -575,7 +575,7 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     QgsMapLayerRegistry.instance().addMapLayer(newlayer, True)
     newlayer.setCrs(layer.crs())
     #oeq_global.OeQ_wait_for_renderer(60000)
-    print newlayer.name()
+    #print newlayer.name()
 
 
     newnode = nodeByName(newlayer.name())
@@ -664,10 +664,10 @@ def nodeCopyAsMemory(node,newname=None,position=None,target_node=None):
                 return None
             target_node = target_node[0]
     source_layer = node.layer()
-    print source_layer.name()
-    print source_layer.source()
-    print source_layer.providerType() + u'?crs=' + source_layer.crs().authid()
-    print newname
+    #print source_layer.name()
+    #print source_layer.source()
+    #print source_layer.providerType() + u'?crs=' + source_layer.crs().authid()
+    #print newname
     new_layer = QgsVectorLayer( 'Polygon' + '?crs=' + source_layer.crs().authid(), newname, "memory")
     new_layer.setProviderEncoding('System')
     QgsMapLayerRegistry.instance().addMapLayer(new_layer, True)
@@ -821,14 +821,14 @@ def nodeConvertCRSold(node,crs=None):
     tgt_crs=QgsCoordinateReferenceSystem(int(crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId)
     bu_name= src_name+'_'+src_crs.split(':')[1]
     bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
-    print src_path
-    print tgt_path
-    print src_crs
-    print crs
+    #print src_path
+    #print tgt_path
+    #print src_crs
+    #print crs
     cmd = ' '.join(["ogr2ogr", "-f","'ESRI Shapefile'","-s_srs",src_crs,"-t_srs",crs,"'"+tgt_path+"'","'"+src_path+"'"])
-    print cmd
+    #print cmd
     #try:
-    print subprocess.call(cmd,shell=True)
+    subprocess.call(cmd,shell=True)
     #except:
     oeq_global.OeQ_wait(3)
 
@@ -846,7 +846,7 @@ def nodeConvertCRSold(node,crs=None):
     except:
         pass
     #node.parent().removeChildNode(node)
-    print bu_path
+    #print bu_path
     iface.addVectorLayer(src_path,name, 'ogr')
     #oeq_global.OeQ_wait_for_renderer(60000)
     newnode=nodeByName(name)
@@ -960,9 +960,9 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             #oeq_global.OeQ_wait(2)
         except:
             pass
-        print bu_path
-        print clip_filepath
-        print src_layer_filepath
+        #print bu_path
+        #print clip_filepath
+        #print src_layer_filepath
         #oeq_global.OeQ_wait(5)
         if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])==0):
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
@@ -984,9 +984,9 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             #oeq_global.OeQ_wait(2)
         except:
             pass
-        print src_layer_filepath
-        print clip_filepath
-        print target_filepath
+        #print src_layer_filepath
+        #print clip_filepath
+        #print target_filepath
         #do clip by callin ogr2ogr
         #oeq_global.OeQ_wait(5)
         if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath])==0):
@@ -1051,7 +1051,7 @@ def nodeZoomTo(node):
         center =canvas.center()
         #canvas.zoomByFactor(1.1)
         #limit scale to openstreetmap min
-        print canvas.scale()
+        #print canvas.scale()
         if canvas.scale() < 1700/1.1:
             canvas.zoomScale(1700)
         else:

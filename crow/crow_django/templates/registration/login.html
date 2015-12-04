@@ -28,6 +28,10 @@
         margin: 0 auto 1.25rem auto;
     }
 
+    #login p:last-of-type {
+        max-width: 25rem;
+    }
+
     #login form {
         margin: 0 auto;
         max-width: 25rem;
@@ -43,17 +47,16 @@
         display: block;
         background-color: rgba(0, 0, 0, 0.55);
     }
-
 {% endblock %}
 
 {% block content %}
 <div id="overlay"></div>
 <div id="login">
-    <h1>Login</h1>
+    <h1>Login required</h1>
     {% if form.errors %}
-        <p>Your username and password didn't match. Please try again.</p>
+        <p>An error occured when trying to login!</p>
     {% endif %}
-    <form method="post" action="{% url 'auth:login' %}">
+    <form method="post" action="{% url 'auth_login' %}">
         {% csrf_token %}
         {% bootstrap_form form layout='inline' %}
         {% buttons %}
@@ -63,5 +66,7 @@
         <input type="hidden" name="next" value="/" />
         {% endbuttons %}
     </form>
+    <p>Don't have an account yet? <a href="{% url 'registration_register' %}">Register.</a></p>
+
 </div>
 {% endblock %}

@@ -828,7 +828,8 @@ def nodeConvertCRSold(node,crs=None):
     cmd = ' '.join(["ogr2ogr", "-f","'ESRI Shapefile'","-s_srs",src_crs,"-t_srs",crs,"'"+tgt_path+"'","'"+src_path+"'"])
     #print cmd
     #try:
-    process = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    #it is necessary
+    process = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     print process.stdout.read()
 
     #subprocess.call(cmd,shell=True)
@@ -971,7 +972,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #    QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
         #    oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #    return None
-        process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         print process.stdout.read()
         #oeq_global.OeQ_wait(5)
         newlayer = iface.addVectorLayer(src_layer_filepath,src_layer_name, 'ogr')
@@ -998,7 +999,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #    QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
         #    oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #    return None
-        process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         print process.stdout.read()
 
         #oeq_global.OeQ_wait(5)

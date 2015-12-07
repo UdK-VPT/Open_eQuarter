@@ -353,8 +353,10 @@ class OeQExtension:
             oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
             return None
         wfsnode=wfsnode[0]
+        print "USS2"
 
         wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
+        print "USS3"
 
         oeq_global.OeQ_kill_progressbar()
         #return

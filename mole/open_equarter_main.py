@@ -43,6 +43,8 @@ from mole.project import config
 from mole.stat_util.building_evaluation import evaluate_building
 from mole import oeq_global
 
+
+
 def do_print():
     pass
 
@@ -555,7 +557,7 @@ class OpenEQuarterMain:
         #self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
         #self.iface.mapCanvas().mapRenderer().setDestinationCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[1])))
 
-        self.zoom_to_default_extent()
+
         # remove if necessary
         layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
         layer_interaction.fullRemove(config.investigation_shape_layer_name)
@@ -564,6 +566,7 @@ class OpenEQuarterMain:
 
         investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
                                                                       config.project_crs)
+        self.zoom_to_default_extent()
         if investigation_area is not None:
             investigation_area.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', config.investigation_shape_layer_style))
             oeq_global.OeQ_wait(5)
@@ -646,7 +649,7 @@ class OpenEQuarterMain:
         if not self.standard_workflow.all_mandatory_worksteps_done('building_outlines_acquired'):
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
-        self.iface.mapCanvas().freeze()
+        #self.iface.mapCanvas().freeze()
         legend.nodeZoomTo(config.investigation_shape_layer_name)
         building_outline_ext=extensions.by_layername(config.housing_layer_name,active=True)
         if not building_outline_ext:
@@ -654,15 +657,18 @@ class OpenEQuarterMain:
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
         building_outline_ext = building_outline_ext[0]
-        oeq_global.OeQ_wait(5)
+        #oeq_global.OeQ_wait(5)
+        print "EX1"
         building_outline_ext.load_wfs()
-        oeq_global.OeQ_wait(5)
+        #oeq_global.OeQ_wait(5)
+        print "EX2"
         oeq_global.OeQ_init_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
+        print "EX3"
         building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
-        original_crs=building_outlines.layer().crs().authid()
-        self.iface.mapCanvas().freeze(False)
-        self.iface.mapCanvas().refresh()
-
+        #original_crs=building_outlines.layer().crs().authid()
+        #self.iface.mapCanvas().freeze(False)
+        #self.iface.mapCanvas().refresh()
+        print "EX3"
         #oeq_global.OeQ_init_info("Converting Building Outlines:", "'"+config.measurement_projection+"'")
         #print "convert"
         #oeq_global.OeQ_wait(5)
@@ -676,6 +682,7 @@ class OpenEQuarterMain:
         #layer_interaction.edit_housing_layer_attributes(building_outlines.layer())
         #building_outlines=legend.nodeConvertCRS(building_outlines,original_crs)
         #oeq_global.OeQ_wait(5)
+        print "EX4"
 
         legend.nodeCreateBuildingIDs(building_outlines)
         #return building_outlines.layer()

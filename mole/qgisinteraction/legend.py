@@ -21,6 +21,22 @@ from mole import oeq_global
 from mole.project import config
 import os
 
+import sys
+if sys.platform.startswith("win"):
+    # Don't display the Windows GPF dialog if the invoked program dies.
+    # See comp.os.ms-windows.programmer.win32
+    #  How to suppress crash notification dialog?, Jan 14,2004 -
+#     Raymond Chen's response [1]
+
+    import ctypes
+    SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
+    ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    subprocess_flags = CREATE_NO_WINDOW
+else:
+    subprocess_flags = 0
+
+
+
 
 def nodeIsLayer(node):
     """nodeIsLayer: Checks, weather node represents a Layer
@@ -936,7 +952,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
 
     #source CRS
     src_crs = node.layer().crs().authid()
-
+    print "EXS1"
 
     src_layer_name = node.layer().name()
     src_layer_filepath = node.layer().source()
@@ -953,17 +969,20 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     #remove sourcenode from the qgislegend
     node.parent().removeChildNode(node)
     #convert original to backup
+    print "EXS2"
     if not target_filepath:
         #remove older backups
         try:
             layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
             #oeq_global.OeQ_wait(2)
+            print "EXS3"
         except:
             pass
         #rename original to backup
         try:
             layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
             #oeq_global.OeQ_wait(2)
+            print "EXS4"
         except:
             pass
         #print bu_path
@@ -974,9 +993,15 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #    QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
         #    oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #    return None
+        print "EXS5"
         try:
-            process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            print process.stdout.read()
+            cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path]
+            #print "EXS6"
+            pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            #print "EXS7"
+            sts= pipe.wait()
+            print sts
+            print pipe.stdout.read()
         except:
             oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #oeq_global.OeQ_wait(5)
@@ -984,7 +1009,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #oeq_global.OeQ_wait_for_renderer(60000)
     else:
         target_name = os.path.basename(target_filepath).split('.')[0]
-
+        print "EXS8"
         #check if it is filename or filepath
         if os.path.basename(target_filepath) == target_filepath:
             target_filepath=os.path.join(src_dir,target_filepath)
@@ -1004,17 +1029,26 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #    QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
         #    oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #    return None
+        from sarge import Capture, run
         try:
-            process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            print process.stdout.read()
+            #print "EXS9"
+            cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath]
+            #process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            #print "EXS7"
+            sts= pipe.wait()
+            print sts
+            print pipe.stdout.read()
+
         except:
             oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
         #oeq_global.OeQ_wait(5)
         newlayer = iface.addVectorLayer(target_filepath,src_layer_name, 'ogr')
         #oeq_global.OeQ_wait_for_renderer(60000)
+    print "EXS DDDDDDDOOOOOONNNNNEEEEE"
     if not newlayer:
-        QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+target_filepath+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not open layer '"+target_filepath+"' !")
+        QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+str(target_filepath)+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")
         return None
     newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])), QgsCoordinateReferenceSystem.EpsgCrsId)
     newnode = nodeByLayer(newlayer)

@@ -354,8 +354,9 @@ class OeQExtension:
         wfsnode=wfsnode[0]
 
         wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
+
         oeq_global.OeQ_kill_progressbar()
-        return
+        #return
         if self.category:
             if not legend.nodeExists(self.category):
                 cat=legend.nodeCreateGroup(self.category)

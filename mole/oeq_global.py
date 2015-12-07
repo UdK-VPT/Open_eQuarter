@@ -210,6 +210,8 @@ def OeQ_wait_for_file(filepath,timeout=10000):
     """Block loop until signal emitted, or timeout (ms) elapses."""
     from PyQt4.QtCore import QEventLoop,QTimer
     from os.path import isfile
+    if isfile(filepath):
+        return True
     loop = QEventLoop()
     timer=QTimer()
     file_result = [True]

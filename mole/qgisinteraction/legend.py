@@ -890,30 +890,28 @@ def nodeConvertCRS(node,crs=None):
     bu_name= src_name+'_'+src_crs.split(':')[1]
     bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
     nodeVectorSave(node,tgt_path,crs)
+    oeq_global.OeQ_wait_for_file(tgt_path)
+    nodeRemove(node)
     #    return None
     try:
         layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
-        oeq_global.OeQ_wait(2)
+
     except:
         pass
     try:
         layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
-        oeq_global.OeQ_wait(2)
+        oeq_global.OeQ_wait_for_file(bu_name)
     except:
         pass
+
     try:
         layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
-        oeq_global.OeQ_wait(2)
+        oeq_global.OeQ_wait_for_file(src_path)
     except:
         pass
-    nodeRemove(node)
-    #oeq_global.OeQ_wait_for_renderer(60000)
-
-    #oeq_global.OeQ_wait(1)
-    oeq_global.OeQ_wait_for_file(src_path)
 
     iface.addVectorLayer(src_path,name, 'ogr')
-    #oeq_global.OeQ_wait_for_renderer(60000)
+    oeq_global.OeQ_wait_for_renderer()
 
     newnode=nodeByName(name)
     if newnode:
@@ -974,7 +972,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         try:
             layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
             #oeq_global.OeQ_wait(2)
-
+            oeq_global.OeQ_wait_for_file(bu_name)
         except:
             pass
         if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path],stdout=subprocess.PIPE,stderr=subprocess.PIPE)==0):
@@ -982,24 +980,8 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
             return None
         oeq_global.OeQ_wait_for_file(src_layer_filepath)
-
-        #print "EXS5"
-        #try:
-        #    print clip_filepath
-        #    print src_layer_filepath
-        #    print bu_path
-        #    cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path]
-        #    #print "EXS6"
-        # #   pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        #    #print "EXS7"
-        #    sts= pipe.wait()
-        #    print sts
-        #    print pipe.stdout.read()
-        #except:
-        #    oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
-        #oeq_global.OeQ_wait(5)
         newlayer = iface.addVectorLayer(src_layer_filepath,src_layer_name, 'ogr')
-        #oeq_global.OeQ_wait_for_renderer(60000)
+        oeq_global.OeQ_wait_for_renderer()
     else:
         target_name = os.path.basename(target_filepath).split('.')[0]
         #check if it is filename or filepath
@@ -1022,25 +1004,8 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
             return None
         oeq_global.OeQ_wait_for_file(target_filepath)
-
-        #try:
-            #print "EXS9"
-        #    print clip_filepath
-        #    print target_filepath
-        #    print src_layer_filepath
-        #    cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath]
-        #    #process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        #   pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        #    #print "EXS7"
-        #    sts= pipe.wait()
-        #    print sts
-        #   print pipe.stdout.read()
-
-        #except:
-        #    oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
-        #oeq_global.OeQ_wait(5)
         newlayer = iface.addVectorLayer(target_filepath,src_layer_name, 'ogr')
-        #oeq_global.OeQ_wait_for_renderer(60000)
+        oeq_global.OeQ_wait_for_renderer()
     if not newlayer:
         QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+str(target_filepath)+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
         oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")

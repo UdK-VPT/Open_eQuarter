@@ -88,6 +88,7 @@ class OpenEQuarterMain:
         self.iface.actionShowPythonDialog().trigger()
         #print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
         self.iface.actionShowPythonDialog().trigger()  # in fact it's not show but toggle
+        print "Hello this is Open eQuarter"
 
     def new_project(self):
 

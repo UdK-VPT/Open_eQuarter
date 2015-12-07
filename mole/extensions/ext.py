@@ -356,6 +356,13 @@ class OeQExtension:
         print "USS2"
 
         wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
+        if not wfsnode:
+            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
+            return None
+
+        print wfsnode
+        print wfsnode.layer()
+        print wfsnode.layer().name()
         print "USS3"
 
         oeq_global.OeQ_kill_progressbar()
@@ -366,7 +373,6 @@ class OeQExtension:
             else:
                 cat=legend.nodeByName(self.category)[0]
             legend.nodeHide(cat)
-            oeq_global.OeQ_wait(0.2)
             #create subcategory group in legend
             if self.subcategory:
                 if not legend.nodeExists(self.subcategory):
@@ -374,9 +380,7 @@ class OeQExtension:
                 else:
                     subcat=legend.nodeByName(self.subcategory)[0]
                 legend.nodeHide(subcat)
-                oeq_global.OeQ_wait(0.2)
                 legend.nodeMove(wfsnode,'bottom',subcat)
-                oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(subcat)
             else:
                 legend.nodeMove(wfsnode,'bottom',cat)

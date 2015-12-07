@@ -983,6 +983,9 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #    return None
         print "EXS5"
         try:
+            print clip_filepath
+            print src_layer_filepath
+            print bu_path
             cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path]
             #print "EXS6"
             pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -1020,6 +1023,9 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         from sarge import Capture, run
         try:
             #print "EXS9"
+            print clip_filepath
+            print target_filepath
+            print src_layer_filepath
             cmd = ["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath]
             #process = subprocess.Popen(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             pipe = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

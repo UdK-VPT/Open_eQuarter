@@ -180,7 +180,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
 
 
-def OeQ_wait_for_renderer(timeout=1):
+def OeQ_wait_for_renderer(timeout=10000):
     """Block loop until signal emitted, or timeout (ms) elapses."""
     from PyQt4.QtCore import QEventLoop,QTimer
     loop = QEventLoop()
@@ -205,6 +205,35 @@ def OeQ_wait_for_renderer(timeout=1):
     #else:
     #    print "Rendering timed out"
     return render_result[0]
+
+def OeQ_wait_for_file(filepath,timeout=10000):
+    """Block loop until signal emitted, or timeout (ms) elapses."""
+    from PyQt4.QtCore import QEventLoop,QTimer
+    from os.path import isfile
+    loop = QEventLoop()
+    timer=QTimer()
+    file_result = [True]
+    #
+    def check_file(testpath):
+
+        if isfile(testpath):
+            timer.stop()
+            loop.quit()
+    #
+    timer.timeout.connect(lambda: check_file(filepath))
+    timer.setSingleShot(False)
+    timer.start(500)
+    #
+    def timed_out(file_result_flag):
+        file_result_flag[0]=False
+        loop.quit()
+    #
+    if timeout >500:
+        timer.singleShot(timeout,lambda: timed_out(file_result))
+    loop.exec_()
+    return file_result[0]
+
+
 
 def OeQ_wait(sec):
     return

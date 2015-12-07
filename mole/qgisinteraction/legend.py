@@ -572,6 +572,7 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
              outelem.setAttributes(elem.attributes())
              writer.addFeature(outelem)
     del writer
+    oeq_global.OeQ_wait_for_file(pathfile)
     #time.sleep(1)
     newlayer = QgsVectorLayer(pathfile, newname, "ogr")
 
@@ -701,6 +702,7 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
         oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
         return None
     del writer
+    oeq_global.OeQ_wait_for_file(os.path.join(path , nodename+'.shp'))
     iface.addVectorLayer(os.path.join(path , nodename+'.shp'),nodename, 'ogr')
     #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeMove(nodename,position,target_node)
@@ -755,6 +757,7 @@ def nodeSaveMemoryLayer(node , path=None , providertype="ESRI Shapefile"):
         oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , new_layer_name+'.shp'))
         return None
     del writer
+    oeq_global.OeQ_wait_for_file(os.path.join(path , new_layer_name+'.shp'))
     iface.addVectorLayer(os.path.join(path , new_layer_name+'.shp'),new_layer_name, 'ogr')
     #oeq_global.OeQ_wait_for_renderer(60000)
     target_node = node.parent()
@@ -907,6 +910,8 @@ def nodeConvertCRS(node,crs=None):
     #oeq_global.OeQ_wait_for_renderer(60000)
 
     #oeq_global.OeQ_wait(1)
+    oeq_global.OeQ_wait_for_file(src_path)
+
     iface.addVectorLayer(src_path,name, 'ogr')
     #oeq_global.OeQ_wait_for_renderer(60000)
 
@@ -976,6 +981,8 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
             oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
             return None
+        oeq_global.OeQ_wait_for_file(src_layer_filepath)
+
         #print "EXS5"
         #try:
         #    print clip_filepath
@@ -1014,6 +1021,8 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
             oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
             return None
+        oeq_global.OeQ_wait_for_file(target_filepath)
+
         #try:
             #print "EXS9"
         #    print clip_filepath

@@ -338,11 +338,12 @@ class OeQExtension:
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        oeq_global.OeQ_wait_for_file(wfsfilepath)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
-        if not oeq_global.OeQ_wait_for_renderer(60000):
+        if not oeq_global.OeQ_wait_for_renderer():
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
-
+        print "USS1"
         if not wfsLayer.isValid():
             oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
             return None
@@ -837,8 +838,9 @@ file_writer.writeRaster(pipe,
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
+        oeq_global.OeQ_wait_for_file(pst_output_layer)
         vlayer = iface.addVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
-        oeq_global.OeQ_wait_for_renderer(60000)
+        oeq_global.OeQ_wait_for_renderer()
         #vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         #layer_interaction.add_layer_to_registry(vlayer)
 

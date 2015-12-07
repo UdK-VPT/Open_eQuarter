@@ -339,6 +339,7 @@ class OeQExtension:
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
+        return
         if not oeq_global.OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False

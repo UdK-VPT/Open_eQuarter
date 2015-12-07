@@ -1161,10 +1161,10 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
             else:
                 subcat=nodeByName(subcategory)[0]
             nodeHide(subcat)
-            nodeMove(db_layer_node,'bottom',subcat)
+            db_layer_node=nodeMove(db_layer_node,'bottom',subcat)
             nodeCollapse(subcat)
         else:
-            nodeMove(db_layer_node,'bottom',cat)
+            db_layer_node=nodeMove(db_layer_node,'bottom',cat)
             nodeCollapse(cat)
     return db_layer_node
 

@@ -293,11 +293,11 @@ class OeQExtension:
                     subcat=legend.nodeByName(self.subcategory)[0]
                 legend.nodeHide(subcat)
                 oeq_global.OeQ_wait(0.2)
-                legend.nodeMove(wmsnode,'bottom',subcat)
+                wmsnode=legend.nodeMove(wmsnode,'bottom',subcat)
                 oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(subcat)
             else:
-                legend.nodeMove(wmsnode,'bottom',cat)
+                wmsnode=legend.nodeMove(wmsnode,'bottom',cat)
                 oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(cat)
         return wmsnode.layer()
@@ -372,20 +372,21 @@ class OeQExtension:
                 cat=legend.nodeCreateGroup(self.category)
             else:
                 cat=legend.nodeByName(self.category)[0]
-            legend.nodeHide(cat)
+            #legend.nodeHide(cat)
             #create subcategory group in legend
             if self.subcategory:
                 if not legend.nodeExists(self.subcategory):
                     subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
                 else:
                     subcat=legend.nodeByName(self.subcategory)[0]
-                legend.nodeHide(subcat)
-                legend.nodeMove(wfsnode,'bottom',subcat)
+                #legend.nodeHide(subcat)
+                wfsnode=legend.nodeMove(wfsnode,'bottom',subcat)
                 legend.nodeCollapse(subcat)
             else:
-                legend.nodeMove(wfsnode,'bottom',cat)
-                oeq_global.OeQ_wait(0.2)
+                wfsnode=legend.nodeMove(wfsnode,'bottom',cat)
                 legend.nodeCollapse(cat)
+                legend.nodeHide(cat)
+        print "USS4"
         return wfsnode.layer()
 
 

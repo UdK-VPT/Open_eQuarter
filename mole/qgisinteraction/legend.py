@@ -487,7 +487,9 @@ def nodeRemove(node,physical=False):
         if len(node) == 0:
             return None
         node = node[0]
-    return layer_interaction.remove_layer(node.layer(),physical=physical)
+    result = layer_interaction.remove_layer(node.layer(),physical=physical)
+    oeq_global.OeQ_wait(0.5)
+    return result
 
 
 
@@ -861,7 +863,7 @@ def nodeConvertCRSold(node,crs=None):
     #node.parent().removeChildNode(node)
     #print bu_path
     iface.addVectorLayer(src_path,name, 'ogr')
-    oeq_global.OeQ_wait_for_renderer(60000)
+    oeq_global.OeQ_wait_for_renderer()
     newnode=nodeByName(name)
     if newnode:
             return newnode[0]
@@ -937,7 +939,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     src_layer_filepath = node.layer().source()
     #remove sourcenode from the qgislegend
     nodeRemove(node)
-    oeq_global.OeQ_wait(3)
+
 
     src_dir =os.path.dirname(src_layer_filepath)
     src_name = os.path.basename(src_layer_filepath).split('.')[0]

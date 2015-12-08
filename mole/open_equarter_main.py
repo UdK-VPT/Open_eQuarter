@@ -270,9 +270,10 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        from PyQt4.QtCore import QFileInfo
+        from mole import oeq_global
         from PyQt4.QtGui import QFileDialog,QMessageBox
         import shutil
+        import os
         if not project_interaction.project_exists():
             # prompt the user to save the project
             self.project_does_not_exist_dlg.show()
@@ -280,11 +281,12 @@ class OpenEQuarterMain:
 
             if yes_to_save:
                 dialog=QFileDialog()
-                path=dialog.getExistingDirectory(None,'Navigate to the directory you want project \"'+ oeq_global.OeQ_project_info['project_name'] + '\" to be stored in:')
+                #path=dialog.getExistingDirectory(None,'Navigate to the directory you want project \"'+ oeq_global.OeQ_project_info['project_name'] + '\" to be stored in:')
+                path = QFileDialog.getSaveFileName(None,"Save project'"+oeq_global.OeQ_project_info['project_name']+"' as:",os.path.normpath(os.path.join("~/",oeq_global.OeQ_project_info['project_name'])))
                 if path:
-                    project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'].replace (" ", "_"))
-                    project_file = oeq_global.OeQ_project_info['project_name'].replace (" ", "_")+'.qgs'
-                    project_file =  project_file
+                    oeq_global.OeQ_project_info['project_name'] = os.path.basename(path).replace (" ", "_")
+                    project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'])
+                    project_file = oeq_global.OeQ_project_info['project_name']+'.qgs'
                     if os.path.exists(project_dir):
                         if [i.endswith('.qgs') for i in os.listdir(project_dir)]:
                             ask=QMessageBox()
@@ -981,4 +983,59 @@ class OpenEQuarterMain:
             legend.nodeZoomTo(config.investigation_shape_layer_name)
             self.launch_oeq()
             #extensions.load()
+
+    def export_database_to_json(self,fileName=None):
+        from mole.qgisinteraction import legend
+        from mole.project import config
+        from mole import oeq_global
+        from qgis.core import QgsVectorFileWriter
+        import os
+        database= legend.nodeByName(config.data_layer_name)
+        if  database:
+            database = database[0]
+            if not fileName:
+                fileName = QFileDialog.getSaveFileName(None,"Save Database as GeoJSON:",os.path.join(oeq_global.OeQ_project_path(),oeq_global.OeQ_project_name()+"_db.geojson"),"*.geojson")
+            if fileName:
+                QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'GeoJson')
+                return fileName
+        else:
+            print "No Database available!"
+        return None
+
+
+    def export_database_to_csv(self,fileName=None):
+        from mole.qgisinteraction import legend
+        from mole.project import config
+        from mole import oeq_global
+        from qgis.core import QgsVectorFileWriter
+        import os
+        database= legend.nodeByName(config.data_layer_name)
+        if  database:
+            database = database[0]
+            if not fileName:
+                fileName = QFileDialog.getSaveFileName(None,"Save Database as GeoJSON:",os.path.join(oeq_global.OeQ_project_path(),oeq_global.OeQ_project_name()+"_db.csv"),"*.csv")
+            if fileName:
+                QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'CSV')
+                return fileName
+        else:
+            print "No Database available!"
+        return None
+
+    def export_database_to_sqlite(self,fileName=None):
+        from mole.qgisinteraction import legend
+        from mole.project import config
+        from mole import oeq_global
+        from qgis.core import QgsVectorFileWriter
+        import os
+        database= legend.nodeByName(config.data_layer_name)
+        if  database:
+            database = database[0]
+            if not fileName:
+                fileName = QFileDialog.getSaveFileName(None,"Save Database as SQLite:",os.path.join(oeq_global.OeQ_project_path(),oeq_global.OeQ_project_name()+"_db.sqlite"),"*.sqlite")
+            if fileName:
+                QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'SQLite')
+                return fileName
+        else:
+            print "No Database available!"
+        return None
 

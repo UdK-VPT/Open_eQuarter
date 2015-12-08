@@ -185,6 +185,11 @@ QListView {
           <string>Reports</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Export</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -546,7 +551,7 @@ QListView {
         <item>
          <widget class="QProcessButton" name="json_export_done">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Export database as GeoJSON file</string>
@@ -554,22 +559,22 @@ QListView {
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="mysql_export_done">
+         <widget class="QProcessButton" name="sqlite_export_done">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
-           <string>Export database as MySQL-Dump</string>
+           <string>Export database as SQLite file</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProcessButton" name="graphic_export_done">
+         <widget class="QProcessButton" name="csv_export_done">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
-           <string>Export graphics</string>
+           <string>Export database as CSV file</string>
           </property>
          </widget>
         </item>
@@ -749,7 +754,7 @@ QListView {
   <tabstop>building_coordinates_acquired</tabstop>
   <tabstop>eval_ext_selected</tabstop>
   <tabstop>disp_ext_selected</tabstop>
-  <tabstop>graphic_export_done</tabstop>
+  <tabstop>csv_export_done</tabstop>
   <tabstop>project_created</tabstop>
   <tabstop>investigationarea_defined</tabstop>
   <tabstop>project_saved</tabstop>

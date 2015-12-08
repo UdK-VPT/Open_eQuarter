@@ -254,7 +254,7 @@ class OeQExtension:
         wmslayer='WMS_'+self.layer_name+'_RAW'
         rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-        if not OeQ_wait_for_renderer(120000):
+        if not OeQ_wait_for_renderer():
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         #push progressbar
@@ -271,7 +271,7 @@ class OeQExtension:
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         #close progressbar
-        if not OeQ_wait_for_renderer(120000):
+        if not OeQ_wait_for_renderer():
             oeq_global.OeQ_init_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
             return False
         oeq_global.OeQ_kill_progressbar()
@@ -338,7 +338,7 @@ class OeQExtension:
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-        oeq_global.OeQ_wait_for_file(wfsfilepath)
+        #oeq_global.OeQ_wait_for_file(wfsfilepath)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
         if not oeq_global.OeQ_wait_for_renderer():
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
@@ -845,7 +845,7 @@ file_writer.writeRaster(pipe,
         psti.set_input_layer(config.pst_input_layer_name)
         abbreviations = psti.select_and_rename_files_for_sampling()
         pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
-        oeq_global.OeQ_wait_for_file(pst_output_layer)
+        #oeq_global.OeQ_wait_for_file(pst_output_layer)
         vlayer = iface.addVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
         oeq_global.OeQ_wait_for_renderer()
         #vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
@@ -861,7 +861,7 @@ file_writer.writeRaster(pipe,
         legend.nodeHide('Import')
 
         # unlock
-        oeq_global.OeQ_unlockQgis()
+        #oeq_global.OeQ_unlockQgis()
         return 2
 
 

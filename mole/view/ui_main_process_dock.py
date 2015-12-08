@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/Users/wk/Tresors/VPT/Open eQuarter/Development/oeq_git/mole/view/ui_main_process_dock.ui'
 #
-# Created: Fri Dec  4 15:22:46 2015
+# Created: Tue Dec  8 16:35:36 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -106,6 +106,7 @@ class Ui_MainProcess_dock(object):
         self.horizontalLayout_3.addItem(spacerItem1)
         self.active_page_dropdown = QtGui.QComboBox(self.dockWidgetContents)
         self.active_page_dropdown.setObjectName(_fromUtf8("active_page_dropdown"))
+        self.active_page_dropdown.addItem(_fromUtf8(""))
         self.active_page_dropdown.addItem(_fromUtf8(""))
         self.active_page_dropdown.addItem(_fromUtf8(""))
         self.active_page_dropdown.addItem(_fromUtf8(""))
@@ -245,17 +246,17 @@ class Ui_MainProcess_dock(object):
         self.verticalLayout_41 = QtGui.QVBoxLayout(self.oeq_export)
         self.verticalLayout_41.setObjectName(_fromUtf8("verticalLayout_41"))
         self.json_export_done = QProcessButton(self.oeq_export)
-        self.json_export_done.setEnabled(False)
+        self.json_export_done.setEnabled(True)
         self.json_export_done.setObjectName(_fromUtf8("json_export_done"))
         self.verticalLayout_41.addWidget(self.json_export_done)
-        self.mysql_export_done = QProcessButton(self.oeq_export)
-        self.mysql_export_done.setEnabled(False)
-        self.mysql_export_done.setObjectName(_fromUtf8("mysql_export_done"))
-        self.verticalLayout_41.addWidget(self.mysql_export_done)
-        self.graphic_export_done = QProcessButton(self.oeq_export)
-        self.graphic_export_done.setEnabled(False)
-        self.graphic_export_done.setObjectName(_fromUtf8("graphic_export_done"))
-        self.verticalLayout_41.addWidget(self.graphic_export_done)
+        self.sqlite_export_done = QProcessButton(self.oeq_export)
+        self.sqlite_export_done.setEnabled(True)
+        self.sqlite_export_done.setObjectName(_fromUtf8("sqlite_export_done"))
+        self.verticalLayout_41.addWidget(self.sqlite_export_done)
+        self.csv_export_done = QProcessButton(self.oeq_export)
+        self.csv_export_done.setEnabled(True)
+        self.csv_export_done.setObjectName(_fromUtf8("csv_export_done"))
+        self.verticalLayout_41.addWidget(self.csv_export_done)
         spacerItem7 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_41.addItem(spacerItem7)
         self.process_page.addWidget(self.oeq_export)
@@ -317,8 +318,8 @@ class Ui_MainProcess_dock(object):
         MainProcess_dock.setTabOrder(self.building_outlines_acquired, self.building_coordinates_acquired)
         MainProcess_dock.setTabOrder(self.building_coordinates_acquired, self.eval_ext_selected)
         MainProcess_dock.setTabOrder(self.eval_ext_selected, self.disp_ext_selected)
-        MainProcess_dock.setTabOrder(self.disp_ext_selected, self.graphic_export_done)
-        MainProcess_dock.setTabOrder(self.graphic_export_done, self.project_created)
+        MainProcess_dock.setTabOrder(self.disp_ext_selected, self.csv_export_done)
+        MainProcess_dock.setTabOrder(self.csv_export_done, self.project_created)
         MainProcess_dock.setTabOrder(self.project_created, self.investigationarea_defined)
         MainProcess_dock.setTabOrder(self.investigationarea_defined, self.project_saved)
 
@@ -332,6 +333,7 @@ class Ui_MainProcess_dock(object):
         self.active_page_dropdown.setItemText(2, _translate("MainProcess_dock", "Information Sources", None))
         self.active_page_dropdown.setItemText(3, _translate("MainProcess_dock", "Evaluation", None))
         self.active_page_dropdown.setItemText(4, _translate("MainProcess_dock", "Reports", None))
+        self.active_page_dropdown.setItemText(5, _translate("MainProcess_dock", "Export", None))
         self.process_page.setAccessibleName(_translate("MainProcess_dock", "jkiiuuu", None))
         self.oeq_requirements.setAccessibleName(_translate("MainProcess_dock", "Requirements", None))
         self.ol_plugin_installed.setText(_translate("MainProcess_dock", "Check if \'OpenLayers\' Plugin is available", None))
@@ -359,8 +361,8 @@ class Ui_MainProcess_dock(object):
         self.investigationarea_report_created.setText(_translate("MainProcess_dock", "Create statistics", None))
         self.oeq_export.setAccessibleName(_translate("MainProcess_dock", "Export", None))
         self.json_export_done.setText(_translate("MainProcess_dock", "Export database as GeoJSON file", None))
-        self.mysql_export_done.setText(_translate("MainProcess_dock", "Export database as MySQL-Dump", None))
-        self.graphic_export_done.setText(_translate("MainProcess_dock", "Export graphics", None))
+        self.sqlite_export_done.setText(_translate("MainProcess_dock", "Export database as SQLite file", None))
+        self.csv_export_done.setText(_translate("MainProcess_dock", "Export database as CSV file", None))
         self.automode.setText(_translate("MainProcess_dock", "Automode", None))
         self.run_button.setText(_translate("MainProcess_dock", "Run", None))
         self.process_button_next.setText(_translate("MainProcess_dock", "Step", None))

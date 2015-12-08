@@ -505,7 +505,9 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         self.needle_request_done.pressed.connect(lambda: mole.standard_workflow.do_workstep('needle_request_done'))
         self.database_created.pressed.connect(lambda: mole.standard_workflow.do_workstep('database_created'))
         self.buildings_evaluated.pressed.connect(lambda: mole.standard_workflow.do_workstep('buildings_evaluated'))
-        self.json_export_done.pressed.connect(lambda: mole.standard_workflow.do_workstep('json_export_done'))
+        self.json_export_done.pressed.connect(mole.export_database_to_json)
+        self.sqlite_export_done.pressed.connect(mole.export_database_to_sqlite)
+        self.csv_export_done.pressed.connect(mole.export_database_to_csv)
 
         self.process_button_next.clicked.connect(lambda: self.call_next_workstep(mole))
         self.run_button.clicked.connect(self.run_automode)

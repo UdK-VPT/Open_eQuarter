@@ -947,10 +947,6 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     bu_name= src_name+'_before_clip'
     bu_path = os.path.join(src_dir,bu_name+'.'+src_ext)
 
-
-
-
-    im
     #convert original to backup
 
     if not target_filepath:

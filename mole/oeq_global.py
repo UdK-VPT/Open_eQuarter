@@ -238,7 +238,6 @@ def OeQ_wait_for_file(filepath,timeout=10000):
 
 
 def OeQ_wait(sec):
-    return
     from PyQt4.QtCore import QEventLoop,QTimer
     loop = QEventLoop()
     QTimer.singleShot(sec*1000,loop.quit)

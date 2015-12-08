@@ -284,7 +284,7 @@ class OeQExtension:
             else:
                 cat=legend.nodeByName(self.category)[0]
             legend.nodeHide(cat)
-            oeq_global.OeQ_wait(0.2)
+            #oeq_global.OeQ_wait(0.2)
             #create subcategory group in legend
             if self.subcategory:
                 if not legend.nodeExists(self.subcategory):
@@ -292,13 +292,13 @@ class OeQExtension:
                 else:
                     subcat=legend.nodeByName(self.subcategory)[0]
                 legend.nodeHide(subcat)
-                oeq_global.OeQ_wait(0.2)
+                #oeq_global.OeQ_wait(0.2)
                 wmsnode=legend.nodeMove(wmsnode,'bottom',subcat)
-                oeq_global.OeQ_wait(0.2)
+                #oeq_global.OeQ_wait(0.2)
                 legend.nodeCollapse(subcat)
             else:
                 wmsnode=legend.nodeMove(wmsnode,'bottom',cat)
-                oeq_global.OeQ_wait(0.2)
+                #.OeQ_wait(0.2)
                 legend.nodeCollapse(cat)
         return wmsnode.layer()
 

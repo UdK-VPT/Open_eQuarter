@@ -569,7 +569,7 @@ class OpenEQuarterMain:
         self.zoom_to_default_extent()
         if investigation_area is not None:
             investigation_area.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', config.investigation_shape_layer_style))
-            oeq_global.OeQ_wait(5)
+            #oeq_global.OeQ_wait(5)
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
             legend.nodeSetActive(config.investigation_shape_layer_name)
 

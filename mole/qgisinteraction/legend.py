@@ -843,7 +843,7 @@ def nodeConvertCRSold(node,crs=None):
         oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
     #subprocess.call(cmd,shell=True)
     #except:
-    oeq_global.OeQ_wait(3)
+    #oeq_global.OeQ_wait(3)
 
     try:
         layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
@@ -893,22 +893,11 @@ def nodeConvertCRS(node,crs=None):
     oeq_global.OeQ_wait_for_file(tgt_path)
     nodeRemove(node)
     #    return None
-    try:
-        layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
-
-    except:
-        pass
-    try:
-        layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
-        oeq_global.OeQ_wait_for_file(bu_name)
-    except:
-        pass
-
-    try:
-        layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
-        oeq_global.OeQ_wait_for_file(src_path)
-    except:
-        pass
+    layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
+    layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+    oeq_global.OeQ_wait_for_file(bu_name)
+    layer_interaction.rename_filegroup(src_dir,tgt_name,src_name,ignore=['qml'])
+    oeq_global.OeQ_wait_for_file(src_path)
 
     iface.addVectorLayer(src_path,name, 'ogr')
     oeq_global.OeQ_wait_for_renderer()
@@ -946,6 +935,10 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
 
     src_layer_name = node.layer().name()
     src_layer_filepath = node.layer().source()
+    #remove sourcenode from the qgislegend
+    nodeRemove(node)
+    oeq_global.OeQ_wait(3)
+
     src_dir =os.path.dirname(src_layer_filepath)
     src_name = os.path.basename(src_layer_filepath).split('.')[0]
     src_ext = src_layer_filepath.split('.')[1]
@@ -956,8 +949,8 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
 
 
 
-    #remove sourcenode from the qgislegend
-    node.parent().removeChildNode(node)
+
+    im
     #convert original to backup
 
     if not target_filepath:

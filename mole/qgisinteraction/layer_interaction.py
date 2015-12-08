@@ -108,6 +108,7 @@ def delete_layer_files(layer):
                         os.remove(os.path.join(path, file))
 
 def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
+    from qgis.core import QgsMessageLog
     import os
     os.environ['PATH'] += ":"+"/usr/local/bin"
     tgt_files=filter(lambda x: x.startswith(filenamebase+'.'),os.listdir(path))
@@ -119,14 +120,15 @@ def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
         tgt_files=filter(lambda x: not x.split('.')[1]  in ignore , tgt_files)
     #print tgt_files
     for i in tgt_files:
+        if os.path.exists(os.path.join(path,i)):
             try:
                 #print i
                 os.remove(os.path.join(path,i))
-                os.wait()
+               # os.wait()
             except:
-                QgsMessageLog.logMessage("remove_filegroup : Could not remove '"+str(os.path.join(path,i))+"' !", QgsMessageLog.CRITICAL)
+                QgsMessageLog.logMessage("remove_filegroup : Could not remove '"+str(os.path.join(path,i))+"' !",'Error in remove_filegroup', QgsMessageLog.CRITICAL)
                 oeq_global.OeQ_init_error("remove_filegroup :","Could not remove '"+str(os.path.join(path,i))+"' !")
-                return None
+                #return None
     return tgt_files
 
 def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
@@ -145,15 +147,16 @@ def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
     tgt_files=[[i,newfilenamebase+'.'+i.split('.')[1]] for i in src_files]
     #print tgt_files
     for i in tgt_files:
+        if os.path.exists(os.path.join(path,i[0])):
             try:
                 #print i[0]
                 #print i[1]
                 os.rename(os.path.join(path,i[0]),os.path.join(path,i[1]))
-                os.wait()
+               # os.wait()
             except:
-                QgsMessageLog.logMessage("rename_filegroup : Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !", QgsMessageLog.CRITICAL)
+                QgsMessageLog.logMessage("rename_filegroup : Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !",'Error in rename_filegroup', QgsMessageLog.CRITICAL)
                 oeq_global.OeQ_init_error("rename_filegroup :","Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !")
-                return None
+                #return None
     return tgt_files
 
 def remove_layer(layer,physical=False):

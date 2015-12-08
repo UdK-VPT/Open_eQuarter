@@ -962,22 +962,13 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
 
     if not target_filepath:
         #remove older backups
-        try:
-            layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
-            #oeq_global.OeQ_wait(2)
-
-        except:
-            pass
+        layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
         #rename original to backup
-        try:
-            layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
-            #oeq_global.OeQ_wait(2)
-            oeq_global.OeQ_wait_for_file(bu_name)
-        except:
-            pass
+        layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
+        oeq_global.OeQ_wait_for_file(bu_name)
         if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])==0):
-            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-            oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
+            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc(1) !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+            oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(1) !")
             return None
         oeq_global.OeQ_wait_for_file(src_layer_filepath)
         newlayer = iface.addVectorLayer(src_layer_filepath,src_layer_name, 'ogr')
@@ -989,32 +980,23 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             target_filepath=os.path.join(src_dir,target_filepath)
         target_dir = os.path.dirname(target_filepath)
         #remove old clip files
-        try:
-            layer_interaction.remove_filegroup(target_dir,target_name,ignore=['qml'])
-            #oeq_global.OeQ_wait(2)
-        except:
-            pass
-        #print src_layer_filepath
-        #print clip_filepath
-        #print target_filepath
-        #do clip by callin ogr2ogr
-        #oeq_global.OeQ_wait(5)
+        layer_interaction.remove_filegroup(target_dir,target_name,ignore=['qml'])
         if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath])==0):
-            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-            oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
+            QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc(2) !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
+            oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(2) !")
             return None
         oeq_global.OeQ_wait_for_file(target_filepath)
         newlayer = iface.addVectorLayer(target_filepath,src_layer_name, 'ogr')
         oeq_global.OeQ_wait_for_renderer()
     if not newlayer:
         QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+str(target_filepath)+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")
+        oeq_global.OeQ_init_error('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")
         return None
     newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])), QgsCoordinateReferenceSystem.EpsgCrsId)
     newnode = nodeByLayer(newlayer)
     if not newnode:
         QgsMessageLog.logMessage("nodeClipByShapefile : Could not find node for new layer!",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-        oeq_global.OeQ_init_warning('nodeClipByShapefile :',"Could not find node for new layer!")
+        oeq_global.OeQ_init_error('nodeClipByShapefile :',"Could not find node for new layer!")
         return None
     return newnode[0]
 

@@ -107,3 +107,5 @@ target/
 .Rproj.user
 .DS_Store
 *.brackets*
+.Rhistory
+*.sqlite3

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+Logout
+{% endblock %}
+
+
+{% block style_css %}
+#register {
+z-index: 50;
+position: fixed;
+top: 30%;
+left: 50%;
+transform: translateX(-50%);
+
+min-width: 29rem;
+max-width: 31.2rem;
+margin: 0 auto;
+padding: 1.85rem 0 2.5rem 0;
+background-color: rgb(235, 235, 235);
+border-radius: 7px;
+border: 1px solid rgb(127, 127, 127);
+}
+
+#register h1 {
+font-size: 220%;
+}
+
+#register h1, #register p {
+max-width: 25rem;
+margin: 0 auto 1.25rem auto;
+}
+{% endblock %}
+
+
+
+{% block content %}
+<div id="register">
+    <h1>Goodbye.</h1>
+    <p>You are logged out now.</p>
+    <p><a href="{% url 'auth_login' %}">Login.</a></p>
+</div>
+{% endblock %}

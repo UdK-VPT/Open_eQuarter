@@ -1,0 +1,129 @@
+{% load i18n %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if request.user.is_authenticated %}Logged In{% else %}Not Logged In{% endif %}</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="http://openlayers.org/en/v3.11.2/build/ol.js" type="text/javascript"></script>
+    <style type="text/css">
+        html, body {
+        height: 100%;
+        }
+
+        body {
+        background-color: rgba(0, 0, 0, 0.5)
+        }
+
+        #login {
+        background-color: rgb(70, 70, 70);
+        height: 80px;
+        }
+
+        #login form {
+        text-align: center;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+        }
+
+        #register {
+        position: relative;
+        top: 30%;
+        transform: translateY(-30%);
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 30px 0 40px 0;
+        background-color: rgb(235, 235, 235);
+        border-radius: 7px;
+        }
+
+        #register h1 {
+        font-size: 230%;
+        max-width: 400px;
+        margin: 0 auto 20px auto;
+        }
+
+        #register form {
+        margin: 0 auto;
+        max-width: 400px;
+        }
+
+        #map {
+        position: absolute;
+        top: 50px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        z-index: -2;
+        }
+
+        #overlay {
+        position: absolute;
+        top: 50px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        z-index: -1;
+        display: block;
+        background-color: rgba(0, 0, 0, 0.55);
+        }
+    </style>
+</head>
+<body class="{% if request.user.is_authenticated %}logged-in{% else %}logged-out{% endif %}">
+
+{% if request.user.is_authenticated %}
+<a href="/accounts/logout/" class="pull-right">Logout</a>
+{% if request.user.first_name or request.user.last_name %}
+{{ request.user.first_name }} {{ request.user.last_name }}
+{% else %}
+{{ request.user.username }}
+{% endif %}
+{% if request.user.profile.account_verified %} (verified) {% else %} (unverified) {% endif %}
+
+{% else %}
+<div id="login" class="navbar-top">
+<form method="post" action="/accounts/login/" class="form-inline">
+    {% csrf_token %}
+    {% include "bootstrap_form.html" with form=login_form %}
+    <input type="submit" class="btn btn-default" value="{% trans 'Log in' %}" />
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+</div>
+<div id="register">
+<h1>Sign up</h1>
+<form method="post" action="/accounts/register/">
+    {% csrf_token %}
+    {% include "bootstrap_form.html" with form=reg_form %}
+    <input type="submit" class="btn btn-default" value="{% trans 'Sign up' %}" />
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+</div>
+<div id="map"></div>
+<div id="overlay"></div>
+{% endif %}
+
+<script type="text/javascript">
+
+    var openStreetMap = new ol.layer.Tile({
+        source: new ol.source.OSM({
+            projection: 'EPSG:3857'
+        })
+    });
+    openStreetMap.set('name', 'Open Street Map');
+
+    var MAP = new ol.Map({
+        layers: [openStreetMap],
+        target: 'map',
+        view: new ol.View({
+            center: [1492977, 6855322],
+            zoom: 6
+        })
+    });
+</script>
+</body>
+</html>

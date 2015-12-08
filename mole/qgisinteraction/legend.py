@@ -975,7 +975,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
             oeq_global.OeQ_wait_for_file(bu_name)
         except:
             pass
-        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path],stdout=subprocess.PIPE,stderr=subprocess.PIPE)==0):
+        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])==0):
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
             oeq_global.OeQ_init_warning('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
             return None

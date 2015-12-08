@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Open eQuarter - {% if request.user.is_authenticated %}Logged in{% else %}Login or register{% endif %}</title>
+    <title>Open eQuarter - {% block title %}{% endblock %}</title>
     {% load staticfiles %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />

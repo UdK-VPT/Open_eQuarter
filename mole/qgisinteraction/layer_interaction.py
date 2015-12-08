@@ -147,15 +147,15 @@ def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
     tgt_files=[[i,newfilenamebase+'.'+i.split('.')[1]] for i in src_files]
     #print tgt_files
     for i in tgt_files:
-        if os.path.exists(os.path.join(path,i[0])):
-            try:
+        #if os.path.exists(os.path.join(path,i[0])):
+            #try:
                 #print i[0]
                 #print i[1]
                 os.rename(os.path.join(path,i[0]),os.path.join(path,i[1]))
                # os.wait()
-            except:
-                QgsMessageLog.logMessage("rename_filegroup : Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !",'Error in rename_filegroup', QgsMessageLog.CRITICAL)
-                oeq_global.OeQ_init_error("rename_filegroup :","Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !")
+            #except:
+               # QgsMessageLog.logMessage("rename_filegroup : Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !",'Error in rename_filegroup', QgsMessageLog.CRITICAL)
+                #oeq_global.OeQ_init_error("rename_filegroup :","Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !")
                 #return None
     return tgt_files
 

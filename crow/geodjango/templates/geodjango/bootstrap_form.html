@@ -1,0 +1,16 @@
+{% load form_filters %}
+
+{% for field in form %}
+    {{ field.errors }}
+    <input class="form-control"
+           id="{{ field.id_for_label }}"
+           {% if field.field.max_length %}
+           maxlength="{{ field.field.max_length }}"
+           {% endif %}
+           name="{{ field.name }}"
+           type="{{ field|field_type }}"
+           placeholder="{{ field.label }}">
+    {% if field.help_text %}
+    <p class="help">{{ field.help_text|safe }}</p>
+    {% endif %}
+{% endfor %}

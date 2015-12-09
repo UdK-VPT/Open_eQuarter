@@ -787,7 +787,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
-        self.found_locations = googlemaps.getAddressByCoordinates(lat, lon, crs)
+        self.found_locations = googlemaps.getBuildingLocationDataByCoordinates(lon, lat, crs)
         if len(self.found_locations) == 1:
             self.update_form(1)
         elif len(self.found_locations) > 1:

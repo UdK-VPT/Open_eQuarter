@@ -60,7 +60,7 @@ import json
 
 
 # Get the postal adress for the specified coordinates
-def getAddressByCoordinates(latitude,longitude,crs=None):
+def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
 
     # In: Latitude
     #     Longitude
@@ -87,6 +87,11 @@ def getAddressByCoordinates(latitude,longitude,crs=None):
         geom = addrrecord['geometry']
         dataset['latitude'] = geom['location']['lat']
         dataset['longitude'] = geom['location']['lng']
+        if crs:
+            transform2 = QgsCoordinateTransform(googleMapsCRS,sourceCRS).transform
+            location2=transform2(QgsPoint(dataset['longitude'], dataset['latitude']))
+            dataset['latitude']=location2.y()
+            dataset['longitude']=location2.x()
         addrlist.append(complete_google_dataset(dataset))
     return addrlist
     # except:
@@ -149,13 +154,12 @@ def complete_google_dataset(dataset):
 
 # Get the postal adress for the specified BLD_ID
 # (QeQ Specific Building Identifier thoughout all tables)
-def getAdressByBLD_ID(building_id):
-
+def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     # In: BLD_ID
     #     Target Coordinate Reference System as EPSG Code
-
     # Out: dict of all informations delivered by googlemaps
-
+    from mole.qgisinteraction import legend
+    from mole.project import config
     layer = legend.nodeByName(config.pst_input_layer_name)
     if not layer: return None
     layer = layer[0].layer()
@@ -164,4 +168,16 @@ def getAdressByBLD_ID(building_id):
     building=filter(lambda x: x.attribute('BLD_ID')==str(building_id), provider.getFeatures())
     if len(building)==0: return None
     geom = building[0].geometry()
-    return getAddressByCoordinates(geom.asPoint().y(),geom.asPoint().x(), layerEPSG)
+    result = getBuildingLocationDataByCoordinates(geom.asPoint().x(), geom.asPoint().y(), layerEPSG)
+    for i in result:
+        i.update({'crs':authid()})
+    return result
+
+def getBuildingCoordinateByBLD_ID(building_id, crs=None):
+    from mole.qgisinteraction import legend
+    from mole.project import config
+    adress=getBuildingLocationDataByBLD_ID(building_id)
+    if adress:
+        adress = adress[0]
+
+    return {'latitude':adress['latitude'],'longitude':adress['longitude'],'crs': QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId).authid()}

@@ -80,14 +80,17 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
 
 #remove a layer including all files
 def fullRemove(layer_name=None, layer_id=None):
+    import os
     if layer_id is None:
         thelayer = find_layer_by_name(layer_name)
     else:
         thelayer = find_layer_by_id(layer_id)
     if thelayer is not None:
         layer_name = thelayer.name()
+        layer_source= thelayer.source()
         QgsMapLayerRegistry.instance().removeMapLayer(thelayer.id())
-        delete_layer_files(layer_name)
+        remove_filegroup(os.path.dirname(layer_source),os.path.basename(layer_source).split('.')[0],ignore=['qml'])
+        #delete_layer_files(layer_name)
     oeq_global.OeQ_unlockQgis()
 
 def delete_layer_files(layer):
@@ -615,7 +618,6 @@ def init_building_geometries(housing_layer):
             geometry = feature.geometry()
             values = {area_index: geometry.area(), perimeter_index: geometry.length()}
             provider.changeAttributeValues({feature.id(): values})
-            building_id += 1
             # else:
             # These features are most likely to be duplicates of those that have an FID-entry
             #    provider.deleteFeatures([feature.id()])
@@ -665,7 +667,68 @@ def init_building_ids(housing_layer):
         print(__name__, Error)
         return False
 
+def init_building_adress(housing_layer):
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
+    try:
+        provider = housing_layer.dataProvider()
+        housing_layer.startEditing()
 
+        provider.addAttributes([QgsField('BLD_LAT1', QVariant.Double),
+        QgsField('BLD_LON1', QVariant.Double),
+        QgsField('BLD_LAT2', QVariant.Double),
+        QgsField('BLD_LON2', QVariant.Double),
+        QgsField('BLD_CRS', QVariant.Double),
+        QgsField('BLD_NUM', QVariant.String),
+        QgsField('BLD_STR', QVariant.String),
+        QgsField('BLD_CTY', QVariant.String),
+        QgsField('BLD_COD', QVariant.String),
+        QgsField('BLD_CTR', QVariant.String)])
+        name_to_index = provider.fieldNameMap()
+        lat1_index = name_to_index['BLD_LAT1']
+        lon1_index = name_to_index['BLD_LON1']
+        lat2_index = name_to_index['BLD_LAT2']
+        lon2_index = name_to_index['BLD_LON2']
+        crs_index = name_to_index['BLD_CRS']
+        num_index = name_to_index['BLD_NUM']
+        str_index = name_to_index['BLD_STR']
+        cty_index = name_to_index['BLD_CTY']
+        cod_index = name_to_index['BLD_COD']
+        ctr_index = name_to_index['BLD_CTR']
+
+        for feature in provider.getFeatures():
+            geometry = feature.geometry()
+            bdata=googlemaps.getBuildingLocationDataByCoordinates(geometry.x(),geometry.y(),housing_layer.crs().authid())
+            if bdata:
+                bdata=bdata[0]
+                values = {lat1_index: geometry.x(),
+                          lon1_index: geometry.y(),
+                          lat2_index: bdata['latitude'],
+                          lon2_index: bdata['longitude'],
+                          crs_index:housing_layer.crs().authid(),
+                          num_index:bdata['street_number'],
+                          str_index:bdata['route'],
+                          cod_index:bdata['postal_code'],
+                          cty_index:bdata['administrative_area_level_1'],
+                          ctr_index:bdata['country'],
+                          }
+            else:
+                values = {lat1_index: geometry.x(),
+                          lon1_index: geometry.y()}
+            provider.changeAttributeValues({feature.id(): values})
+
+            provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
+            building_id += 1
+        return housing_layer.commitChanges()
+    except AttributeError, Error:
+        print(__name__, Error)
+        return False
 
 
 def add_parameter_info_to_layer(color_dict, field_name, layer):

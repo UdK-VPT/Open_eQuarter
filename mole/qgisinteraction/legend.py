@@ -1192,3 +1192,77 @@ def nodeCreateBuildingIDs(building_outline_node):
     #except AttributeError, Error:
     #    print(__name__, Error)
     #    return False
+
+def nodeGetBuildingData(building_coordinates_node):
+    """
+    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Delete duplicate features and finally remove the FID-field
+    :param housing_layer: The layer whose attribute-table shall be edited
+    :type housing_layer: QgsVectorLayer
+    :return: If the changes were commited
+    :rtype: bool
+    """
+    from mole import oeq_global
+    from mole.webinteraction import googlemaps
+    from PyQt4.QtCore import QVariant
+    #get node for building_outline if only layer name is given
+    if oeq_global.isStringOrUnicode(building_coordinates_node):
+        building_coordinates_node = nodeByName(building_coordinates_node)
+        if not building_coordinates_node:
+            oeq_global.OeQ_init_warning('nodeGetBuildingData :','No building coordinates !')
+            return None
+        building_coordinates_node = building_coordinates_node[0]
+
+    building_coordinates_layer=building_coordinates_node.layer()
+    crs=int(building_coordinates_layer.crs().authid().split(':')[1])
+    provider = building_coordinates_layer.dataProvider()
+    building_coordinates_layer.startEditing()
+
+    provider.addAttributes([QgsField('BLD_LAT1', QVariant.Double),
+                QgsField('BLD_LON1', QVariant.Double),
+                QgsField('BLD_LAT2', QVariant.Double),
+                QgsField('BLD_LON2', QVariant.Double),
+                QgsField('BLD_CRS', QVariant.Double),
+                QgsField('BLD_NUM', QVariant.String),
+                QgsField('BLD_STR', QVariant.String),
+                QgsField('BLD_CTY', QVariant.String),
+                QgsField('BLD_COD', QVariant.String),
+                QgsField('BLD_CTR', QVariant.String)])
+
+    name_to_index = provider.fieldNameMap()
+    lat1_index = name_to_index['BLD_LAT1']
+    lon1_index = name_to_index['BLD_LON1']
+    lat2_index = name_to_index['BLD_LAT2']
+    lon2_index = name_to_index['BLD_LON2']
+    crs_index = name_to_index['BLD_CRS']
+    num_index = name_to_index['BLD_NUM']
+    str_index = name_to_index['BLD_STR']
+    cty_index = name_to_index['BLD_CTY']
+    cod_index = name_to_index['BLD_COD']
+    ctr_index = name_to_index['BLD_CTR']
+
+    for feature in provider.getFeatures():
+        geometry = feature.geometry()
+        #print geometry.asPoint().x()
+        #print geometry.asPoint().y()
+        #print crs
+        bdata=googlemaps.getBuildingLocationDataByCoordinates(geometry.asPoint().x(),geometry.asPoint().y(),crs)
+        #print bdata
+        if bdata:
+            bdata=bdata[0]
+            values = {lat1_index: geometry.asPoint().x(),
+                      lon1_index: geometry.asPoint().y(),
+                      lat2_index: bdata['latitude'],
+                      lon2_index: bdata['longitude'],
+                      crs_index:crs,
+                      num_index:bdata['street_number'],
+                      str_index:bdata['route'],
+                      cod_index:bdata['postal_code'],
+                      cty_index:bdata['administrative_area_level_1'],
+                      ctr_index:bdata['country'],
+                      }
+        else:
+            values = {lat1_index: geometry.asPoint().x(),
+                      lon1_index: geometry.asPoint().y()}
+        provider.changeAttributeValues({feature.id(): values})
+    return building_coordinates_layer.commitChanges()

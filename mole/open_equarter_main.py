@@ -511,7 +511,7 @@ class OpenEQuarterMain:
 
     def handle_project_saved(self):
         from mole import extensions
-        extensions.load_defaults()
+        #extensions.load_defaults()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
             extensions.update_all_colortables()
@@ -837,7 +837,10 @@ class OpenEQuarterMain:
         layerstoshow += ([i.layer_name for i in extensions.by_category('Import',extensions.by_state(True))])
         legend.nodesShow(layerstoshow)
         input_node=legend.nodeByName(config.pst_input_layer_name)
+
         if input_node:
+            for i in extensions.by_type('wms',category='Import',active=True):
+                legend.nodeShow(i.layer_name)
             #get original crs (necessary because qgis does not deal with epsg:3857 very well, but sets it to epsg:54004)
             source_crs=input_node[0].layer().crs()
 
@@ -867,7 +870,11 @@ class OpenEQuarterMain:
                 legend.nodeCollapse('Import')
                 legend.nodeHide('Import')
 
+            for i in extensions.by_type('wms',category='Import',active=True):
+                legend.nodeHide(i.layer_name)
+
         if legend.nodeExists(config.pst_output_layer_name):
+            legend.nodeGetBuildingData(legend.nodeByName(config.pst_output_layer_name)[0])
             self.reorder_layers()
             self.main_process_dock.needle_request_done.setChecked(True)
         else:
@@ -979,6 +986,9 @@ class OpenEQuarterMain:
             #print project
             oeq_global.OeQ_project_info = project['project_info']
             oeq_global.OeQ_ExtensionRegistry = project['extension_registry']
+            for ext in oeq_global.OeQ_ExtensionRegistry:
+                ext.update_colortable(True)
+            oeq_global.OeQ_ExtensionsLoaded = True
             self.reorder_layers()
             legend.nodeZoomTo(config.investigation_shape_layer_name)
             self.launch_oeq()

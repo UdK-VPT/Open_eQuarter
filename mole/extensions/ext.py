@@ -618,9 +618,17 @@ file_writer.writeRaster(pipe,
         if not self.last_calculation:
             self.last_calculation=None
             return True
-        if not legend.nodeExists(self.layer_name):
+        if (self.show_results!=None) & (not legend.nodeExists(self.layer_name)):
             self.last_calculation=None
             return True
+
+        outnode=legend.nodeByName(self.layer_out)
+        if outnode:
+            outlayer=outnode[0].layer()
+            for par in self.get_par_out():
+                if outlayer.fieldNameIndex(par)<0:
+                    self.last_calculation=None
+                    return True
         for ext in required:
             if ext.last_calculation:
                 if self.last_calculation < ext.last_calculation:
@@ -928,14 +936,14 @@ def by_extension_id(extension_id=None, category=None, active=None, registry=None
 
 
 
-def load_defaults():
+def XXload_defaults():
     import copy
     oeq_global.OeQ_ExtensionRegistry = copy.deepcopy(oeq_global.OeQ_ExtensionDefaultRegistry)
     for ext in oeq_global.OeQ_ExtensionRegistry:
         ext.update_colortable(True)
     oeq_global.OeQ_ExtensionsLoaded = True
 
-def load():
+def XXload():
     project_path = oeq_global.OeQ_project_path()
     project_name = oeq_global.OeQ_project_name()
     registry_file = os.path.join(project_path, project_name + '.xreg')
@@ -948,18 +956,18 @@ def load():
             print(self.__module__, FileNotFoundError)
 
     else:
-        load_defaults()
+        XXload_defaults()
     if oeq_global.OeQ_ExtensionRegistry == []:
-        load_defaults()
+        XXload_defaults()
     for ext in oeq_global.OeQ_ExtensionRegistry:
         ext.update_colortable(True)
 
 
-def save():
+def XXsave():
     project_path = oeq_global.OeQ_project_path()
     project_name = oeq_global.OeQ_project_name()
     if not oeq_global.OeQ_project_saved():
-        load_defaults()
+        XXload_defaults()
     update_all_colortables()
     registry_file = os.path.join(project_path, project_name + '.xreg')
     try:

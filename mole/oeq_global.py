@@ -22,6 +22,7 @@ OeQ_project_info = {
     'description': u'The aim of this project, is to analyse a quarter.',
     'location_city': u'City or street',
     'location_city_short': u'City',
+    'location_street': u'Street',
     'location_postal': u'Postal',
     'location_lon': u'Lon',
     'location_lat': u'Lat',

@@ -285,17 +285,18 @@ class OpenEQuarterMain:
                 path = QFileDialog.getSaveFileName(None,"Save project'"+oeq_global.OeQ_project_info['project_name']+"' as:",os.path.normpath(os.path.join("~/",oeq_global.OeQ_project_info['project_name'])))
                 if path:
                     oeq_global.OeQ_project_info['project_name'] = os.path.basename(path).replace (" ", "_")
-                    project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'])
+                    #project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'])
+                    project_dir = path
                     project_file = oeq_global.OeQ_project_info['project_name']+'.qgs'
                     if os.path.exists(project_dir):
                         if [i.endswith('.qgs') for i in os.listdir(project_dir)]:
                             ask=QMessageBox()
-                            reply = ask.question(ask, 'Open eQuarter Alert', "Project exists! Do you want to overwrite?", ask.Yes | ask.No, ask.No)
+                            reply = ask.question(ask, 'Open eQuarter Alert', "Project seems to exist! Do you want to overwrite?", ask.Yes | ask.No, ask.No)
                             if reply == ask.No: return False
                         else:
                             ask=QMessageBox()
-                            ask.question(ask, 'Open eQuarter Alert', "Directory exists, but does not contain a QGIS project! \n Rename your project!", ask.Ok, ask.Ok)
-                            return False
+                            ask.question(ask, 'Open eQuarter Alert', "Directory exists, but does not contain a QGIS project! \n Do you want to overwrite?", ask.Yes | ask.No, ask.No)
+                            if reply == ask.No: return False
                         shutil.rmtree(project_dir, ignore_errors=True)
                     os.makedirs(project_dir)
                     QgsProject.instance().setFileName(os.path.join(project_dir,project_file))
@@ -344,6 +345,7 @@ class OpenEQuarterMain:
         canvas.setExtent(extent)
         canvas.refresh()
 
+    '''
     def set_project_crsx(self, crs):
         """
         Set the project crs to the given crs and do a re-projection to keep the currently viewed extent focused
@@ -374,6 +376,7 @@ class OpenEQuarterMain:
 
             canvas.setExtent(extent)
             canvas.refresh()
+    '''
 
     def get_project_crs(self):
         """
@@ -514,7 +517,7 @@ class OpenEQuarterMain:
         #extensions.load_defaults()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
-            extensions.update_all_colortables()
+            extensions.copy_extensions_to_project()
             self.main_process_dock.project_saved.setChecked(True)
         else:
             self.main_process_dock.project_saved.setChecked(False)
@@ -838,6 +841,10 @@ class OpenEQuarterMain:
         legend.nodesShow(layerstoshow)
         input_node=legend.nodeByName(config.pst_input_layer_name)
 
+        #reset import extensions
+        for i in extensions.by_state(True,category='Import'):
+            i.reset_calculation_state()
+
         if input_node:
             for i in extensions.by_type('wms',category='Import',active=True):
                 legend.nodeShow(i.layer_name)
@@ -859,6 +866,7 @@ class OpenEQuarterMain:
             vlayer.setCrs(source_crs)
             #resultnode=legend.nodeConvertCRS(config.pst_output_layer_name,config.default_extent_crs)
             resultnode=legend.nodeByName(vlayer.name())
+
             if resultnode:
                 resultnode = resultnode[0]
                 #move to data
@@ -1013,6 +1021,9 @@ class OpenEQuarterMain:
         return None
 
 
+    #QgsVectorLayer, QString, QString, QgsCoordinateReferenceSystem, QString driverName="ESRI Shapefile", bool onlySelected=False, QString errorMessage=None, QStringList datasourceOptions=QStringList(), QStringList layerOptions=QStringList(), bool skipAttributeCreation=False, QString newFilename=None, QgsVectorFileWriter.SymbologyExport symbologyExport=QgsVectorFileWriter.NoSymbology, float symbologyScale=1, QgsRectangle filterExtent=None)
+
+
     def export_database_to_csv(self,fileName=None):
         from mole.qgisinteraction import legend
         from mole.project import config
@@ -1023,9 +1034,9 @@ class OpenEQuarterMain:
         if  database:
             database = database[0]
             if not fileName:
-                fileName = QFileDialog.getSaveFileName(None,"Save Database as GeoJSON:",os.path.join(oeq_global.OeQ_project_path(),oeq_global.OeQ_project_name()+"_db.csv"),"*.csv")
+                fileName = QFileDialog.getSaveFileName(None,"Save Database as TAB-delimited CSV-File:",os.path.join(oeq_global.OeQ_project_path(),oeq_global.OeQ_project_name()+"_db.csv"),"*.csv")
             if fileName:
-                QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'CSV')
+                QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'CSV', False, "", "", ["SEPARATOR=SEMICOLON"])
                 return fileName
         else:
             print "No Database available!"
@@ -1048,4 +1059,6 @@ class OpenEQuarterMain:
         else:
             print "No Database available!"
         return None
+
+
 

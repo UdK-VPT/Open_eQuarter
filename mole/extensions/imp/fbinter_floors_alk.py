@@ -23,7 +23,7 @@ def calculation(self=None, parameters={}):
                              parameters['FLRS_B'],
                              parameters['FLRS_a'],
                              ['FLOORS'],
-                             'average')
+                             mode='average')
     print result['FLOORS']['value']
     if oeq_global.isnull(result['FLOORS']['value']):
         result['FLOORS']['value'] = 3.5

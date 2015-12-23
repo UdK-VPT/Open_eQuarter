@@ -254,7 +254,7 @@ class OeQExtension:
         wmslayer='WMS_'+self.layer_name+'_RAW'
         rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-        if not OeQ_wait_for_renderer():
+        if not OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         #push progressbar
@@ -271,7 +271,7 @@ class OeQExtension:
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         #close progressbar
-        if not OeQ_wait_for_renderer():
+        if not OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
             return False
         oeq_global.OeQ_kill_progressbar()
@@ -340,7 +340,7 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
         #oeq_global.OeQ_wait_for_file(wfsfilepath)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
-        if not oeq_global.OeQ_wait_for_renderer():
+        if not oeq_global.OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         print "USS1"
@@ -648,6 +648,9 @@ file_writer.writeRaster(pipe,
                     return True
         return False
 
+    def reset_calculation_state(self):
+        self.last_calculation=None
+
     # extensions.by_category('Import')[1].calculate()
     def calculate(self):
         from qgis import utils
@@ -936,14 +939,16 @@ def by_extension_id(extension_id=None, category=None, active=None, registry=None
 
 
 
-def XXload_defaults():
+#load extensions to project and update colortables
+def copy_extensions_to_project():
     import copy
     oeq_global.OeQ_ExtensionRegistry = copy.deepcopy(oeq_global.OeQ_ExtensionDefaultRegistry)
     for ext in oeq_global.OeQ_ExtensionRegistry:
         ext.update_colortable(True)
     oeq_global.OeQ_ExtensionsLoaded = True
 
-def XXload():
+'''
+def load_extensions_from_project(): #mi
     project_path = oeq_global.OeQ_project_path()
     project_name = oeq_global.OeQ_project_name()
     registry_file = os.path.join(project_path, project_name + '.xreg')
@@ -956,9 +961,9 @@ def XXload():
             print(self.__module__, FileNotFoundError)
 
     else:
-        XXload_defaults()
+        copy_extensions_to_project()
     if oeq_global.OeQ_ExtensionRegistry == []:
-        XXload_defaults()
+        copy_extensions_to_project()
     for ext in oeq_global.OeQ_ExtensionRegistry:
         ext.update_colortable(True)
 
@@ -967,7 +972,7 @@ def XXsave():
     project_path = oeq_global.OeQ_project_path()
     project_name = oeq_global.OeQ_project_name()
     if not oeq_global.OeQ_project_saved():
-        XXload_defaults()
+        copy_extensions_to_project()
     update_all_colortables()
     registry_file = os.path.join(project_path, project_name + '.xreg')
     try:
@@ -975,6 +980,7 @@ def XXsave():
             pickle.dump(oeq_global.OeQ_ExtensionRegistry, output, pickle.HIGHEST_PROTOCOL)
     except IOError, FileNotFoundError:
         print(self.__module__, FileNotFoundError)
+'''
 
 def run_active_extensions(category=None):
     for extension in by_state(True, category):

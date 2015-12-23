@@ -1115,7 +1115,7 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
             #get geometry
             geometry = feat.geometry()
             attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
-                               data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']) * 100.0,
+                               data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']),
                                data_layer_provider.fieldNameIndex('FLOORS'): 3.5,
                                data_layer_provider.fieldNameIndex('AREA'): geometry.area(),
                                data_layer_provider.fieldNameIndex('PERIMETER'): geometry.length()}

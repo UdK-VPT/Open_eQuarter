@@ -697,9 +697,10 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
     def set_municipal_data(self):
         self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(self.location_postal.text().encode('utf8')) , self.municipal_information.municipal_db)
-        self.municipals = filter(lambda x :  x['NAME'].encode('utf8').startswith(self.location_city.text().encode('utf8')) , self.municipal_information.municipal_db)
+        self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0].encode('utf8') == self.location_city.text().split()[0].encode('utf8') , self.municipal_information.municipal_db)
+
         if len(self.municipals) > 0:
-            pop_dens = '{}'.format(self.municipals[0]['POP_DENS'])
+            pop_dens = int('{}'.format(self.municipals[0]['POP_DENS']))
             avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
         else:
             pop_dens = config.default_population_density
@@ -751,7 +752,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
                     self.location_city.currentIndexChanged.connect(self.get_location_from_web)
          elif oeq_global.isEmpty(self.location_postal.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_city.text())):
             city = self.location_city.text()
-            self.municipals = filter(lambda x :  x['NAME'].startswith(city) , self.municipal_information.municipal_db)
+            self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0] == city.split()[0].split(',')[0] , self.municipal_information.municipal_db)
             if len(self.municipals) > 0:
                 if len(self.municipals) ==  1:
                     self.lineedit_city_layout()
@@ -787,6 +788,8 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
+        if crs:
+            crs=int(crs[5:])
         self.found_locations = googlemaps.getBuildingLocationDataByCoordinates(lon, lat, crs)
         if len(self.found_locations) == 1:
             self.update_form(1)

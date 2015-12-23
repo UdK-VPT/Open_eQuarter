@@ -10,7 +10,7 @@ def calculation(self=None, parameters={}):
                              parameters['YOC_B'],
                              parameters['YOC_a'],
                              ['YOC'],
-                             'average')
+                             mode='average')
     print result['YOC']['value']
     if oeq_global.isnull(result['YOC']['value']):
         result['YOC']['value'] = oeq_global.OeQ_project_info['average_build_year']

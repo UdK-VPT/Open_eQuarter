@@ -41,7 +41,7 @@ extension = OeQExtension(
     layer_out=config.data_layer_name,
     active=True,
     show_results=['WL_QTC'],
-    description=u"Calculate the contemporary Transmission Heat Loss of the Building's baseplate",
+    description=u"Calculate the contemporary Transmission Heat Loss through the Building's wall",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

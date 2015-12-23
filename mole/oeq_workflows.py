@@ -172,7 +172,10 @@ class OeQ_Workflow:
         '''
         ws = self.get_workstep(name)
         if ws:
-            return ws.is_done()
+            if ws.is_done():
+                return True
+        if self.state > self.find_current_workstep():
+            self.state = self.find_current_workstep()
         return False
 
     def next_workstep(self,check_current=True):

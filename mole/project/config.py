@@ -48,8 +48,21 @@ data_layer_name = 'BLD Data'
 
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
-color_match_tolerance = 80
+color_match_tolerance = 30
 
+# export directory
+export_dir = "export"
+# templates:
+report_template_dir = "html"
+report_dir = "reports"
+# project definitions report
+project_definitions_tpl = "project_def_report.html"
+# building report dir
+building_report_dir = report_dir+"/buildings"
+# building report
+building_report_tpl = "building_report.html"
+# project report
+project_report_tpl = "project_report.html"
 
 ### Default paths
 plugin_dir = os.path.dirname(mole.__file__)

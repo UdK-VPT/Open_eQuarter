@@ -16,23 +16,19 @@
     <edittype widgetv2type="TextEdit" name="BLD_ID">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="ACHL">
+    <edittype widgetv2type="TextEdit" name="AHDP">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="ACHL" forceraster="0" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
+  <renderer-v2 attr="AHDP" forceraster="0" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
-      <range render="true" symbol="0" lower="0.000000" upper="20000.000000" label="               &lt; 20000 kWh/a"/>
-      <range render="true" symbol="1" lower="20000.000000" upper="40000.000000" label="   20000  -  40000 kWh/a"/>
-      <range render="true" symbol="2" lower="40000.000000" upper="60000.000000" label="   40000  -  60000 kWh/a"/>
-      <range render="true" symbol="3" lower="60000.000000" upper="80000.000000" label="   60000  -  80000 kWh/a"/>
-      <range render="true" symbol="4" lower="80000.000000" upper="100000.000000" label="   80000 - 100000 kWh/a"/>
-      <range render="true" symbol="5" lower="100000.000000" upper="120000.000000" label=" 100000 - 120000 kWh/a"/>
-      <range render="true" symbol="6" lower="120000.000000" upper="140000.000000" label=" 120000 - 140000 kWh/a"/>
-      <range render="true" symbol="7" lower="140000.000000" upper="160000.000000" label=" 140000 - 160000 kWh/a"/>
-      <range render="true" symbol="8" lower="160000.000000" upper="180000.000000" label=" 160000 - 180000 kWh/a"/>
-      <range render="true" symbol="9" lower="180000.000000" upper="200000.000000" label=" 180000 - 200000 kWh/a"/>
-      <range render="true" symbol="10" lower="200000.000000" upper="100000000.000000" label="             > 200000 kWh/a"/>
+      <range render="true" symbol="0" lower="0.000000" upper="50.000000" label="         &lt; 50 kWh/(m2a)"/>
+      <range render="true" symbol="1" lower="50.000000" upper="75.000000" label="   50  -  75 kWh/(m2a)"/>
+      <range render="true" symbol="2" lower="75.000000" upper="125.000000" label="   75 - 125 kWh/(m2a)"/>
+      <range render="true" symbol="3" lower="125.000000" upper="175.000000" label=" 125 - 175 kWh/(m2a)"/>
+      <range render="true" symbol="4" lower="175.000000" upper="250.000000" label=" 175 - 250 kWh/(m2a)"/>
+      <range render="true" symbol="5" lower="250.000000" upper="325.000000" label=" 250 - 325 kWh/(m2a)"/>
+      <range render="true" symbol="6" lower="325.000000" upper="100000.000000" label="       > 325 kWh/(m2a)"/>
     </ranges>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
@@ -53,22 +49,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="40,165,41,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="10">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="172,32,30,255"/>
+          <prop k="color" v="30,195,36,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -83,7 +64,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="26,210,33,255"/>
+          <prop k="color" v="97,230,25,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -98,7 +79,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="66,231,27,255"/>
+          <prop k="color" v="255,224,19,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -113,7 +94,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="4">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="160,227,23,255"/>
+          <prop k="color" v="236,91,25,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -128,7 +109,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="5">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,224,19,255"/>
+          <prop k="color" v="208,28,28,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -143,52 +124,7 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="6">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="243,144,22,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="7">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="232,65,26,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="8">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="216,27,28,255"/>
-          <prop k="joinstyle" v="bevel"/>
-          <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="0,0,0,255"/>
-          <prop k="outline_style" v="solid"/>
-          <prop k="outline_width" v="0.26"/>
-          <prop k="outline_width_unit" v="MM"/>
-          <prop k="style" v="solid"/>
-        </layer>
-      </symbol>
-      <symbol alpha="1" clip_to_extent="1" type="fill" name="9">
-        <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="194,29,29,255"/>
+          <prop k="color" v="172,32,30,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
@@ -259,7 +195,7 @@
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/drawLabels" value="true"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="HLAP"/>
+    <property key="labeling/fieldName" value="AHDP"/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
@@ -278,7 +214,7 @@
     <property key="labeling/fontWeight" value="50"/>
     <property key="labeling/fontWordSpacing" value="0"/>
     <property key="labeling/formatNumbers" value="true"/>
-    <property key="labeling/isExpression" value="true"/>
+    <property key="labeling/isExpression" value="false"/>
     <property key="labeling/labelOffsetInMapUnits" value="true"/>
     <property key="labeling/labelOffsetMapUnitMaxScale" value="0"/>
     <property key="labeling/labelOffsetMapUnitMinScale" value="0"/>

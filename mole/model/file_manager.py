@@ -229,7 +229,15 @@ class ColorEntryManager:
             qml_par = get_parNames(qml_tree)
             qml_rng = get_ranges(qml_tree)
             qml_abr = get_abrev(qml_tree)
+            for i in qml_rng.keys():
+                print i
+                print qml_rng[i]
             for i in qml_col.keys():
+                print i
+                print qml_col[i]
+                print qml_rng[i][0]
+                print qml_rng[i][1]
+
                 result_dict[qml_col[i]] = [qml_par[i], qml_rng[i][0], qml_rng[i][1]]
 
             if len(qml_abr) > 0:

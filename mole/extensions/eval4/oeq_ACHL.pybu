@@ -12,7 +12,7 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'LIV_AR': NULL}
+    dataset = {'ACHL': NULL}
     dataset.update(parameters)
 
     #print '------'
@@ -24,8 +24,9 @@ def calculation(self=None, parameters={}):
     #print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
 
 
-    if not oeq_global.isnull([dataset['LIV_AR']]):
-        dataset['ACHL']= 40 * dataset['LIV_AR'] #kWh/a
+    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'], dataset['HHRS']]):
+        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8 * 0.8 #20% Construction, 20 % floors and stairs
+        dataset['ACHL']= 20 * living_area *float(dataset['HHRS'])/1000
 
     #print qtp_total/living_area
     #print '------'
@@ -47,12 +48,12 @@ extension = OeQExtension(
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     field_id='ACHL',
     source_type='none',
-    par_in=['LIV_AR'],
+    par_in=['AREA','FLOORS','HHRS'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,
     show_results=['ACHL'],
-    description=u"Calculate Air Change Heat loss",
+    description=u"Calculate Air Change Heat loss per Living Area",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

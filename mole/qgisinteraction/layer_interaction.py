@@ -66,7 +66,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
             rewritten_layer = iface.addVectorLayer(path, layer_name, "ogr")
             #oeq_global.OeQ_wait_for_renderer(60000)
             if not rewritten_layer.isValid():
-                oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+                oeq_global.OeQ_push_warning(title='Write Error!', message='path')
                 return vlayer
             if style != None:
                 add_style_to_layer(style, rewritten_layer)
@@ -75,7 +75,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
                 rewritten_layer.commitChanges()
             return rewritten_layer
         else:
-            oeq_global.OeQ_init_warning(title='Write Error!', message='path')
+            oeq_global.OeQ_push_warning(title='Write Error!', message='path')
             return vlayer
 
 #remove a layer including all files
@@ -125,7 +125,7 @@ def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
                 os.remove(os.path.join(path,i))
             except:
                 QgsMessageLog.logMessage("remove_filegroup : Could not remove '"+str(os.path.join(path,i))+"' !",'Error in remove_filegroup', QgsMessageLog.CRITICAL)
-                oeq_global.OeQ_init_error("remove_filegroup :","Could not remove '"+str(os.path.join(path,i))+"' !")
+                oeq_global.OeQ_push_error("remove_filegroup :","Could not remove '"+str(os.path.join(path,i))+"' !")
                 return None
     return tgt_files
 
@@ -145,7 +145,7 @@ def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
                 os.rename(os.path.join(path,i[0]),os.path.join(path,i[1]))
             except:
                 QgsMessageLog.logMessage("rename_filegroup : Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !",'Error in rename_filegroup', QgsMessageLog.CRITICAL)
-                oeq_global.OeQ_init_error("rename_filegroup :","Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !")
+                oeq_global.OeQ_push_error("rename_filegroup :","Could not rename '"+str(os.path.join(path,i[0]))+"' to '"+str(os.path.join(path,i[1]))+"' !")
                 return None
     return tgt_files
 

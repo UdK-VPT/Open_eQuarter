@@ -246,19 +246,19 @@ class OeQExtension:
         from mole.qgisinteraction.wms_utils import save_wms_extent_as_image
         from mole.qgisinteraction import layer_interaction
         #init progressbar
-        progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+        progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Loading WMS-Map "' + self.layer_name + '"!',
                                                               maxcount=3)
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         wmslayer='WMS_'+self.layer_name+'_RAW'
         rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         if not OeQ_wait_for_renderer(60000):
-            oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
+            oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         #push progressbar
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
         path = save_wms_extent_as_image(wmslayer)
         try:
@@ -267,14 +267,14 @@ class OeQExtension:
             pass
 
         #push progressbar
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
         #close progressbar
         if not OeQ_wait_for_renderer(60000):
-            oeq_global.OeQ_init_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
+            oeq_global.OeQ_push_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
             return False
-        oeq_global.OeQ_kill_progressbar()
+        oeq_global.OeQ_pop_progressbar(progressbar)
         wmsnode=legend.nodeByLayer(rlayer)[0]
         #oeq_global.OeQ_wait(1)
 
@@ -316,10 +316,10 @@ class OeQExtension:
             extent= legend.nodeGetExtent(config.investigation_shape_layer_name)
 
         #init progressbar
-        progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+        progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Loading WFS-Map "' + self.layer_name + '"!',
                                                               maxcount=3)
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #get crs objects
         crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
@@ -329,44 +329,36 @@ class OeQExtension:
         extent = coord_transformer.transform(extent)
         #load wfs
         wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
+
         #push progressbar
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         if not wfsLayer.isValid():
-            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not load WFS-Map "' + self.source + '"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not load WFS-Map "' + self.source + '"!')
             return None
 
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         #oeq_global.OeQ_wait_for_file(wfsfilepath)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
         if not oeq_global.OeQ_wait_for_renderer(60000):
-            oeq_global.OeQ_init_warning(self.extension_id + ':','Loading Data timed out!')
+            oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
             return False
-        print "USS1"
         if not wfsLayer.isValid():
-            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
             return None
         wfsnode=legend.nodeByLayer(wfsLayer)
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         if not wfsnode:
-            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
             return None
         wfsnode=wfsnode[0]
-        print "USS2"
-
         wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
         if not wfsnode:
-            oeq_global.OeQ_init_error(u'Extension "' + self.extension_name + '":', u'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
             return None
 
-        print wfsnode
-        print wfsnode.layer()
-        print wfsnode.layer().name()
-        print "USS3"
-
-        oeq_global.OeQ_kill_progressbar()
-        #return
+        oeq_global.OeQ_pop_progressbar(progressbar)
         if self.category:
             if not legend.nodeExists(self.category):
                 cat=legend.nodeCreateGroup(self.category)
@@ -386,7 +378,6 @@ class OeQExtension:
                 wfsnode=legend.nodeMove(wfsnode,'bottom',cat)
                 legend.nodeCollapse(cat)
                 legend.nodeHide(cat)
-        print "USS4"
         return wfsnode.layer()
 
 
@@ -558,10 +549,10 @@ file_writer.writeRaster(pipe,
                 oeqMain.color_picker_dlg.color_entry_manager.read_color_map_from_qml(self.colortable)
                 color_dict = oeqMain.color_picker_dlg.color_entry_manager.layer_values_map[self.layer_name]
 
-                progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+                progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Decoding colors in "' + self.layer_in + '"!',
                                                               maxcount=len(color_dict) * source_layer.featureCount())
-                progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+                progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
             #    print color_dict
                 for color_key in color_dict.keys():
                     color_quadriple = color_key[5:-1].split(',')
@@ -574,7 +565,7 @@ file_writer.writeRaster(pipe,
                     add_attributes_if_not_exists(source_layer, attributes)
 
                     for feat in source_provider.getFeatures():
-                        # progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+                        # progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
                         if colors_match_feature(color_quadriple, feat, self.field_id):
                             result = {self.field_id + '_P': {'type': QVariant.String,
                                                              'value': color_dict[color_key][0]},
@@ -588,13 +579,14 @@ file_writer.writeRaster(pipe,
                                 attributevalues.update({source_provider.fieldNameIndex(i): result[i]['value']})
 
                             source_provider.changeAttributeValues({feat.id(): attributevalues})
-                        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
-        oeq_global.OeQ_kill_progressbar()
+                        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+                oeq_global.OeQ_pop_progressbar(progressbar)
         legend.nodeRestoreVisibility(self.layer_in)
         #time.sleep(0.5)
 
 
     def required(self):
+        from qgis.core import QgsMessageLog
         req=[]
         all_suppliers=filter(lambda ext: ext != self, by_state(True))
         #if self.category != 'Import':
@@ -606,7 +598,8 @@ file_writer.writeRaster(pipe,
                         #print supplier[0].extension_id
                         req.insert(0, supplier[0])
                 else:
-                    print str(self.extension_id)+' can not find a supplier found for "'+str(ipar)+'"'
+                    QgsMessageLog.logMessage('Can not find a supplier found for "'+str(ipar)+'"','Warning in '+str(self.extension_id) + ':', QgsMessageLog.CRITICAL)
+                    #oeq_global.OeQ_push_warning(str(self.extension_id) + ':','can not find a supplier found for "'+str(ipar)+'"')
         #print self.extension_id + ' needs:'
         #print [e.extension_id for e in req]
         return req
@@ -662,10 +655,11 @@ file_writer.writeRaster(pipe,
         #check wether a evaluation function is defined
         if self.evaluator == None: return
         #self.calculate_required()
-
+        baritem=oeq_global.OeQ_push_info(u'Extension "' + self.extension_name + '":','Searching for mandatory predecessors')
         required = self.required()
         for ext in required:
             ext.calculate()
+        oeq_global.OeQ_pop_info(baritem)
         if not self.needs_evaluation(required):
             return
 
@@ -673,9 +667,7 @@ file_writer.writeRaster(pipe,
         source_layer = legend.nodeByName(self.layer_in)
         target_layer = legend.nodeByName(self.layer_out)
         if (not source_layer) | (not target_layer):
-            print "layer not found in calculate"
-            print source_layer
-            #print target_layer
+            oeq_global.OeQ_push_warning(str(self.extension_id) + ':','Sourcelayer "'+self.layer_in+'" not found in calculate()')
         source_layer =source_layer[0]
         target_layer = target_layer[0]
 
@@ -698,10 +690,10 @@ file_writer.writeRaster(pipe,
             add_attributes_if_not_exists(target_layer, self.par_out_as_attributes())
 
         #init progressbar
-        progressbar = oeq_global.OeQ_init_progressbar(u'Extension "' + self.extension_name + '":',
+        progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                       u'Updating layer "' + self.layer_out + '" from "' + self.layer_in + '"!',
                                                       maxcount=source_layer.featureCount())
-        progress_counter = oeq_global.OeQ_push_progressbar(progressbar, 0)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #do calculation feature by feature
         for srcFeat in source_layer.getFeatures():
@@ -712,7 +704,7 @@ file_writer.writeRaster(pipe,
             for par in self.par_in:
                 #check whether anptut parameter exists in source attributes
                 if source_layer.fieldNameIndex(par) < 0:
-                    oeq_global.OeQ_init_warning('Extension "' + self.extension_name + '":',
+                    oeq_global.OeQ_push_warning('Extension "' + self.extension_name + '":',
                                                 'Layer "' + self.layer_in + '" has no attribute "' + par + '"!')
                     return None
 
@@ -747,7 +739,7 @@ file_writer.writeRaster(pipe,
             target_provider.changeAttributeValues({tgtFeat.id(): attributevalues})
 
             #trigger pogressbar
-            progress_counter = oeq_global.OeQ_push_progressbar(progressbar, progress_counter)
+            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
         #restore visibility states
         legend.nodeRestoreVisibility(self.layer_in)
@@ -756,7 +748,7 @@ file_writer.writeRaster(pipe,
         #if any result shall be visualized
         if self.show_results:
             self.work_out_results()
-        oeq_global.OeQ_kill_progressbar()
+        oeq_global.OeQ_pop_progressbar(progressbar)
         self.last_calculation=datetime.datetime.now()
        #time.sleep(0.5)
 

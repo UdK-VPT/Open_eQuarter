@@ -12,32 +12,28 @@ def calculation(self=None, parameters={}):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'AVR': NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['AREA'] , dataset['HEIGHT'] , dataset['BS_AR'] , dataset['RF_AR'] , dataset['WL_AR'] , dataset['WN_AR']]):
-        volume = float(dataset['AREA']) * float(dataset['HEIGHT'])
-        env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
-        dataset['AVR']=env_area/volume
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    if not oeq_global.isnull([parameters['VOLUME'] , parameters['ENV_AR']]):
+         avr=float(parameters['ENV_AR'])/float(parameters['VOLUME'])
+    else:
+        avr = NULL
+    return {'AVR': {'type': QVariant.Double,
+                           'value': avr}}
+
 
 
 extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='General',
+    subcategory='Geometry',
     extension_name='AV Ratio',
     layer_name= 'AV Ratio',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     field_id='AVR',
-    source_type='none',
-    par_in=['BS_AR','RF_AR','WL_AR','WN_AR','AREA','HEIGHT'],
+    source_type='layer',
+    par_in=['VOLUME','ENV_AR'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,

@@ -24,7 +24,7 @@ def get_plugin_ifexists(plugin_name):
         plugin = utils.plugins[plugin_name]
         return plugin
     except KeyError:
-        oeq_global.OeQ_init_warning(title="Mandatory Plugins: ", message="Please install Plugin '" + plugin_name + "' ")
+        oeq_global.OeQ_push_warning(title="Mandatory Plugins: ", message="Please install Plugin '" + plugin_name + "' ")
         return None
 
 class PstInteraction(object):

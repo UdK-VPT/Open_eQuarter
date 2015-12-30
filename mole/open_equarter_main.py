@@ -586,12 +586,12 @@ class OpenEQuarterMain:
             button.destroyed.connect(loop.quit)
             widget.layout().addWidget(button)
 
-            self.iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING,duration = 3600)
+            baritem=self.iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING,duration = 3600)
 
             loop.exec_()
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
             oeq_global.QeQ_enableDialogAfterAddingFeature()
-            oeq_global.OeQ_kill_warning()
+            oeq_global.OeQ_pop_warning(baritem)
             if confirmed[0]:
                 if legend.nodeExists(config.investigation_shape_layer_name):
                     investigation_area_node=legend.nodeByName(config.investigation_shape_layer_name)
@@ -658,36 +658,31 @@ class OpenEQuarterMain:
         legend.nodeZoomTo(config.investigation_shape_layer_name)
         building_outline_ext=extensions.by_layername(config.housing_layer_name,active=True)
         if not building_outline_ext:
-            oeq_global.OeQ_init_warning("No import extension for Building Outlines", "Load geometries or define them on a new Vectorlayer named '"+config.housing_layer_name+"' !")
+            oeq_global.OeQ_push_warning("No import extension for Building Outlines", "Load geometries or define them on a new Vectorlayer named '"+config.housing_layer_name+"' !")
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
         building_outline_ext = building_outline_ext[0]
         #oeq_global.OeQ_wait(5)
-        print "EX1"
         building_outline_ext.load_wfs()
         #oeq_global.OeQ_wait(5)
-        print "EX2"
-        oeq_global.OeQ_init_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
-        print "EX3"
+        baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
         building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
         #original_crs=building_outlines.layer().crs().authid()
         #self.iface.mapCanvas().freeze(False)
         #self.iface.mapCanvas().refresh()
-        print "EX3"
-        #oeq_global.OeQ_init_info("Converting Building Outlines:", "'"+config.measurement_projection+"'")
+        #oeq_global.OeQ_push_info("Converting Building Outlines:", "'"+config.measurement_projection+"'")
         #print "convert"
         #oeq_global.OeQ_wait(5)
         #building_outlines=legend.nodeConvertCRS(building_outlines,config.measurement_projection)
-        oeq_global.OeQ_kill_info()
+        oeq_global.OeQ_pop_info(baritem)
 
-        #oeq_global.OeQ_init_info("Calculating basic geometries of Building Outlines:", "'"+config.housing_layer_name+"'")
+        #oeq_global.OeQ_push_info("Calculating basic geometries of Building Outlines:", "'"+config.housing_layer_name+"'")
         if not building_outlines:
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
         #layer_interaction.edit_housing_layer_attributes(building_outlines.layer())
         #building_outlines=legend.nodeConvertCRS(building_outlines,original_crs)
         #oeq_global.OeQ_wait(5)
-        print "EX4"
 
         legend.nodeCreateBuildingIDs(building_outlines)
         #return building_outlines.layer()
@@ -833,7 +828,7 @@ class OpenEQuarterMain:
             cat=legend.nodeByName('Data')[0]
         #create_database
         #self.create_database(True,'Data')
-        oeq_global.OeQ_init_info('Needle Request:', 'Collecting data... be patient!')
+        baritem=oeq_global.OeQ_push_info('Needle Request:', 'Collecting data... be patient!')
 
         # show import layers
         layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
@@ -887,7 +882,7 @@ class OpenEQuarterMain:
             self.main_process_dock.needle_request_done.setChecked(True)
         else:
             self.main_process_dock.needle_request_done.setChecked(False)
-        oeq_global.OeQ_kill_info()
+        oeq_global.OeQ_pop_info(baritem)
         return self.main_process_dock.needle_request_done.isChecked()
 
 
@@ -903,11 +898,11 @@ class OpenEQuarterMain:
 
     def handle_database_created(self):
         from mole.qgisinteraction import legend
-        oeq_global.OeQ_init_info('Create Database:', 'Generating building records... be patient!')
+        baritem=oeq_global.OeQ_push_info('Create Database:', 'Generating building records... be patient!')
 
         result= bool(legend.nodeCreateDatabase(config.housing_layer_name,config.data_layer_name,config.measurement_projection,True,"Data"))
         self.reorder_layers()
-        oeq_global.OeQ_kill_info()
+        oeq_global.OeQ_pop_info(baritem)
         return result
 
     def check_if_database_created(self):
@@ -922,7 +917,7 @@ class OpenEQuarterMain:
         # step 4.1
     def handle_buildings_evaluated(self):
         from mole import extensions
-        oeq_global.OeQ_init_info('Building Evaluation:', 'Checking dependencies... be patient!')
+        baritem=oeq_global.OeQ_push_info('Extension "Building Evaluation":', 'Checking dependencies... be patient!')
         for i in extensions.by_state(True,'Import'):
             i.calculate()
         #extensions.run_active_extensions('Import')
@@ -933,7 +928,7 @@ class OpenEQuarterMain:
         success = success & all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Evaluation')])
         legend.nodeHide(config.pst_input_layer_name)
         self.reorder_layers()
-        oeq_global.OeQ_kill_info()
+        oeq_global.OeQ_pop_info(baritem)
         return success
 
     def check_if_buildings_evaluated(self):

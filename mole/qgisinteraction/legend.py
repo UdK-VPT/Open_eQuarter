@@ -701,7 +701,7 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
     new_layer.setProviderEncoding('System')
     writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , nodename+'.shp'), "System", new_layer.crs(), providertype)
     if writer != QgsVectorFileWriter.NoError:
-        oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
+        oeq_global.OeQ_push_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
         return None
     del writer
     oeq_global.OeQ_wait_for_file(os.path.join(path , nodename+'.shp'))
@@ -756,7 +756,7 @@ def nodeSaveMemoryLayer(node , path=None , providertype="ESRI Shapefile"):
     new_layer_name = new_layer.name()
     writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , new_layer_name+'.shp'), "System", new_layer.crs(), providertype)
     if writer != QgsVectorFileWriter.NoError:
-        oeq_global.OeQ_init_error(title='Write Error:', message=os.path.join(path , new_layer_name+'.shp'))
+        oeq_global.OeQ_push_error(title='Write Error:', message=os.path.join(path , new_layer_name+'.shp'))
         return None
     del writer
     oeq_global.OeQ_wait_for_file(os.path.join(path , new_layer_name+'.shp'))
@@ -842,7 +842,7 @@ def nodeConvertCRSold(node,crs=None):
         process = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         print process.stdout.read()
     except:
-        oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
+        oeq_global.OeQ_push_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
     #subprocess.call(cmd,shell=True)
     #except:
     #oeq_global.OeQ_wait(3)
@@ -851,7 +851,7 @@ def nodeConvertCRSold(node,crs=None):
         layer_interaction.remove_filegroup(src_dir,bu_name,ignore=['qml'])
     except:
         pass
-    print bu_path
+    #print bu_path
     try:
         layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
     except:
@@ -919,7 +919,6 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     from mole import oeq_global
     from mole.qgisinteraction import layer_interaction
     #add path in case ogr2ogr can not be found
-    os.environ['PATH'] += ":"+"/usr/local/bin"
 
     #check if a clippath is given
     if clip_filepath == None:
@@ -957,9 +956,10 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         #rename original to backup
         layer_interaction.rename_filegroup(src_dir,src_name,bu_name,ignore=['qml'])
         oeq_global.OeQ_wait_for_file(bu_name)
-        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])==0):
+        ret=subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, src_layer_filepath, bu_path])
+        if ret!=0:
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc(1) !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-            oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(1) !")
+            oeq_global.OeQ_push_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(1) !")
             return None
         oeq_global.OeQ_wait_for_file(src_layer_filepath)
         newlayer = iface.addVectorLayer(src_layer_filepath,src_layer_name, 'ogr')
@@ -972,22 +972,23 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
         target_dir = os.path.dirname(target_filepath)
         #remove old clip files
         layer_interaction.remove_filegroup(target_dir,target_name,ignore=['qml'])
-        if not (subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath])==0):
+        ret = subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile","-clipsrc", clip_filepath, target_filepath, src_layer_filepath])
+        if ret!=0:
             QgsMessageLog.logMessage("nodeClipByShapefile : ogr2ogr failed to run -clipsrc(2) !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-            oeq_global.OeQ_init_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(2) !")
+            oeq_global.OeQ_push_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc(2) !")
             return None
         oeq_global.OeQ_wait_for_file(target_filepath)
         newlayer = iface.addVectorLayer(target_filepath,src_layer_name, 'ogr')
         oeq_global.OeQ_wait_for_renderer()
     if not newlayer:
         QgsMessageLog.logMessage("nodeClipByShapefile : Could not open layer '"+str(target_filepath)+"' !",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-        oeq_global.OeQ_init_error('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")
+        oeq_global.OeQ_push_error('nodeClipByShapefile :',"Could not open layer '"+str(target_filepath)+"' !")
         return None
     newlayer.setCrs(QgsCoordinateReferenceSystem(int(src_crs.split(':')[1])), QgsCoordinateReferenceSystem.EpsgCrsId)
     newnode = nodeByLayer(newlayer)
     if not newnode:
         QgsMessageLog.logMessage("nodeClipByShapefile : Could not find node for new layer!",'Error in nodeClipByShapefile', QgsMessageLog.CRITICAL)
-        oeq_global.OeQ_init_error('nodeClipByShapefile :',"Could not find node for new layer!")
+        oeq_global.OeQ_push_error('nodeClipByShapefile :',"Could not find node for new layer!")
         return None
     return newnode[0]
 
@@ -1085,7 +1086,7 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node:
-            oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
+            oeq_global.OeQ_push_warning('nodeCreateDatabase :','No building outlines !')
             return None
     node = node[0]
     #remove database if necessary
@@ -1099,7 +1100,7 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
     #convert db layer to reference crs
     db_layer_node = nodeConvertCRS(db_layer_node,reference_crs)
     if not db_layer_node:
-        oeq_global.OeQ_init_warning('nodeCreateDatabase :','Could not build database !')
+        oeq_global.OeQ_push_warning('nodeCreateDatabase :','Could not build database !')
         return None
     #create attributes
     db_layer = db_layer_node.layer()
@@ -1158,7 +1159,7 @@ def nodeCreateBuildingIDs(building_outline_node):
     if oeq_global.isStringOrUnicode(building_outline_node):
         building_outline_node = nodeByName(building_outline_node)
         if not building_outline_node:
-            oeq_global.OeQ_init_warning('nodeCreateDatabase :','No building outlines !')
+            oeq_global.OeQ_push_warning('nodeCreateDatabase :','No building outlines !')
             return None
         building_outline_node = building_outline_node[0]
 
@@ -1209,7 +1210,7 @@ def nodeGetBuildingData(building_coordinates_node):
     if oeq_global.isStringOrUnicode(building_coordinates_node):
         building_coordinates_node = nodeByName(building_coordinates_node)
         if not building_coordinates_node:
-            oeq_global.OeQ_init_warning('nodeGetBuildingData :','No building coordinates !')
+            oeq_global.OeQ_push_warning('nodeGetBuildingData :','No building coordinates !')
             return None
         building_coordinates_node = building_coordinates_node[0]
 

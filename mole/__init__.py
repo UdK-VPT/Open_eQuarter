@@ -20,6 +20,11 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
+#add the gdal_path to the environment
+import platform
+import os
+if platform.system() == 'Darwin':
+    os.environ['PATH'] += ":"+"/Library/Frameworks/GDAL.framework/Versions/1.11/Programs"
 
 def classFactory(iface):
     # load OpenEQuarterMain class from file open_equarter_main

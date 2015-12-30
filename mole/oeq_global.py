@@ -72,7 +72,7 @@ def OeQ_project_saved():
     #return OeQ_project_name() != ''
 
 
-def OeQ_init_progressbar(title='Be patient!', message='Background calculations are going on...', timeout=0,
+def OeQ_push_progressbar(title='Be patient!', message='Background calculations are going on...', timeout=0,
                          maxcount=100):
     widget = iface.messageBar().createMessage(title, message)
 
@@ -84,55 +84,71 @@ def OeQ_init_progressbar(title='Be patient!', message='Background calculations a
     widget.layout().addWidget(progressbarwidget)
 
     # pass the progress bar to the message Bar
-    iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
+    baritem=iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
     OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
-    return progressbarwidget
+    return {'widget':progressbarwidget,'baritem':baritem}
 
 
-def OeQ_push_progressbar(progressbarwidget, progress_counter):
+def OeQ_update_progressbar(progressbar, progress_counter):
     progress_counter = progress_counter + 1
-    progressbarwidget.setValue(progress_counter)
+    progressbar['widget'].setValue(progress_counter)
     OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
     return progress_counter
 
 
-def OeQ_kill_progressbar():
-    iface.messageBar().clearWidgets()
+def OeQ_pop_progressbar(progressbar=None):
+    if not progressbar:
+        iface.messageBar().clearWidgets()
+    else:
+        iface.messageBar().popWidget(progressbar['baritem'])
 
 
-def OeQ_init_info(title='Be patient!', message='Background calculations are going on...'):
+def OeQ_push_info(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
+    return widget
     #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
-def OeQ_kill_info():
-    iface.messageBar().clearWidgets()
+def OeQ_pop_info(baritem=None):
+    if not baritem:
+        iface.messageBar().clearWidgets()
+    else:
+        iface.messageBar().popWidget(baritem)
 
 
-def OeQ_init_warning(title='Be patient!', message='Background calculations are going on...'):
+def OeQ_push_warning(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
+    return widget
     #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
-def OeQ_kill_warning():
-    iface.messageBar().clearWidgets()
+def OeQ_pop_warning(baritem=None):
+    if not baritem:
+        iface.messageBar().clearWidgets()
+    else:
+        iface.messageBar().popWidget(baritem)
 
 
-def OeQ_init_error(title='Be patient!', message='Background calculations are going on...'):
+def OeQ_push_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().CRITICAL)
+    return widget
     #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
-def OeQ_kill_error():
-    iface.messageBar().clearWidgets()
+def OeQ_pop_error(baritem=None):
+    if not baritem:
+        iface.messageBar().clearWidgets()
+    else:
+        iface.messageBar().popWidget(baritem)
+
 
 
 def isnull(value):
@@ -211,6 +227,10 @@ def OeQ_wait_for_file(filepath,timeout=10000):
     """Block loop until signal emitted, or timeout (ms) elapses."""
     from PyQt4.QtCore import QEventLoop,QTimer
     from os.path import isfile
+    import platform
+    import os
+    if platform.system() == 'Darwin':
+        return True
     if isfile(filepath):
         return True
     loop = QEventLoop()

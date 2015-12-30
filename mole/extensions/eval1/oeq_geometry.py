@@ -13,7 +13,7 @@ def calculation(self=None, parameters={}):
     from PyQt4.QtCore import QVariant
     # factor for golden rule
     dataset = {'AREA': NULL, 'PERIMETER': NULL, 'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL, 'FLOORS': NULL,
-               'PDENS': NULL,'YOC':NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
+               'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
     dataset.update(parameters)
     #print parameters
     if (not oeq_global.isnull(dataset['AREA'])):
@@ -66,22 +66,22 @@ def calculation(self=None, parameters={}):
         if (not oeq_global.isnull(dataset['HEIGHT'])):
             dataset['FLOORS'] = floor(dataset['HEIGHT'] / 3.3)
         else:
-            if (not oeq_global.isnull(dataset['PDENS'])):
-                dataset['FLOORS'] = ceil(float(dataset['PDENS'] / 4000))
+            if (not oeq_global.isnull(parameters['PDENS'])):
+                dataset['FLOORS'] = ceil(float(parameters['PDENS'] / 4000))
                 dataset['HEIGHT'] = dataset['FLOORS'] * 3.3
     else:
         if (oeq_global.isnull(dataset['HEIGHT'])):
             dataset['HEIGHT'] = dataset['FLOORS'] * 3.3
     #print type(dataset['YOC'])
     #print dataset['YOC']
-    if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(dataset['YOC'])):
+    if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(parameters['YOC'])):
        # try:
-       dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(dataset['YOC'])
+       dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(parameters['YOC'])
         #except:
         #    pass
 
-    if oeq_global.isnull(dataset['WL_COM']) & (not oeq_global.isnull(dataset['PDENS'])):
-        dataset['WL_COM']=common_walls_by_population_density_corr.get(dataset['PDENS'])
+    if oeq_global.isnull(dataset['WL_COM']) & (not oeq_global.isnull(parameters['PDENS'])):
+        dataset['WL_COM']=common_walls_by_population_density_corr.get(parameters['PDENS'])
 
     if oeq_global.isnull(dataset['BS_AR']) & (not oeq_global.isnull(dataset['AREA'])):
         dataset['BS_AR']=dataset['AREA']
@@ -112,7 +112,7 @@ def calculation(self=None, parameters={}):
 extension = OeQExtension(
     extension_id=__name__,
     category='Evaluation',
-    subcategory='General',
+    subcategory='Geometry',
     extension_name='Building Dimensions',
     layer_name= 'Dimensions',
     field_id='DIM',

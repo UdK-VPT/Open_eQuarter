@@ -54,7 +54,7 @@ class OeQ_WorkStep:
         :return: None
         '''
         from mole import oeq_global
-        oeq_global.OeQ_init_error(u"Workstep '"+self.name+ "': ", u'Execution failed!')
+        oeq_global.OeQ_push_error(u"Workstep '"+self.name+ "': ", u'Execution failed!')
 
     def wait_default(self):
         '''

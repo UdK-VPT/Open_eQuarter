@@ -163,7 +163,7 @@ class ColorEntryManager:
                     # ["lowLim"]=entry[2]
                     # ["highLim"]=entry[3]
                     out_ranges += qml_range(cnt, out_dict[entry][1], out_dict[entry][2], None)
-                    print rgba
+                    #print rgba
                     out_symbols += qml_symbol(cnt, rgba[0], rgba[1], rgba[2], rgba[3])
                     out_properties += qml_property("ParName" + str(cnt), out_dict[entry][0])
                     cnt += 1
@@ -229,14 +229,14 @@ class ColorEntryManager:
             qml_par = get_parNames(qml_tree)
             qml_rng = get_ranges(qml_tree)
             qml_abr = get_abrev(qml_tree)
-            for i in qml_rng.keys():
-                print i
-                print qml_rng[i]
+            #for i in qml_rng.keys():
+                #print i
+                #print qml_rng[i]
             for i in qml_col.keys():
-                print i
-                print qml_col[i]
-                print qml_rng[i][0]
-                print qml_rng[i][1]
+                #print i
+                #print qml_col[i]
+                #print qml_rng[i][0]
+                #print qml_rng[i][1]
 
                 result_dict[qml_col[i]] = [qml_par[i], qml_rng[i][0], qml_rng[i][1]]
 

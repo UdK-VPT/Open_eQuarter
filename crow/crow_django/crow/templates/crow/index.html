@@ -37,12 +37,15 @@
                         <h4 class="panel-title">
                             <a id="layersMenu" data-toggle="collapse" data-target="#layerstack-collapse" href="#layers">
                                 <i class="fa fa-list-alt"></i>
-                                Layers
+                                Layers ({{ layer_list.items | length }})
                             </a>
                         </h4>
                     </div>
                     <div class="panel-collapse collapse in" id="layerstack-collapse">
                         <div id="layerStack" class="panel-body list-group" role="group">
+                            {% for name, features in layer_list.items %}
+                            <a class="list-group-item">{{ name }} ({{ features | length }})</a>
+                            {% endfor %}
                         </div>
                     </div>
                 </div><!-- /.panel panel-default -->

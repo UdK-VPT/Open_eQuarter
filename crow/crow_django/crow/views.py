@@ -1,8 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.contrib.auth.forms import AuthenticationForm
-from django.template.context_processors import csrf
-from registration.forms import RegistrationForm
+
+from models import OeQLayer
 
 # Create your views here.
 def login_register(request):
@@ -11,4 +10,9 @@ def login_register(request):
 # Create your views here.
 @login_required
 def home_page(request):
-    return render(request, 'crow/index.html')
+    layer_list = {}
+    feature_list = OeQLayer.objects.all()
+    layer_list['Heinrichstr'] = feature_list
+    return render(request, 'crow/index.html', {'layer_list': layer_list})
+
+

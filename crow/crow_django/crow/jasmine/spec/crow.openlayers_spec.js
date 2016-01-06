@@ -54,8 +54,12 @@ define(['crow-openlayers', 'openlayers'], function(CrowOpenlayers, ol){
 
                 CrowOL.addStyle(style);
                 expect(CrowOL.styleCache).toContain(style);
+            });
 
-
+            it('should have a layer-tree which contains a list and the order of the layers, which are currently loaded',
+             function (){
+                var layerTree = CrowOL.layerTree;
+                expect(layerTree).toBeDefined();
             });
 
         });

@@ -28,7 +28,6 @@
     <li><a href="http://udk-vpt.github.io/Open_eQuarter/">Github page</a></li>
 {% endblock %}
 {% block content %}
-    <div id="map"></div>
     <div class="row main-row">
         <div class="col-sm-4 col-md-3 sidebar sidebar-left pull-left">
             <div class="panel-group">
@@ -36,7 +35,6 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a id="layersMenu" data-toggle="collapse" data-target="#layerstack-collapse" href="#layers">
-                                <i class="fa fa-list-alt"></i>
                                 Layers ({{ layer_list.items | length }})
                             </a>
                         </h4>
@@ -45,6 +43,7 @@
                         <div id="layerStack" class="panel-body list-group" role="group">
                             {% for name, features in layer_list.items %}
                             <a class="list-group-item">{{ name }} ({{ features | length }})</a>
+                            
                             {% endfor %}
                         </div>
                     </div>

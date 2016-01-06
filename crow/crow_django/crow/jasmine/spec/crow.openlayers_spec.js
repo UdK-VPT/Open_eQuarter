@@ -1,4 +1,4 @@
-define(['crow-openlayers', 'openlayers'], function(CrowOpenlayers, ol){
+define(['crow-openlayers', 'crow-layertree', 'openlayers'], function(CrowOpenlayers, CrowLayerTree, ol){
 
     describe('Crow Openlayers Module test -', function () {
 
@@ -56,10 +56,9 @@ define(['crow-openlayers', 'openlayers'], function(CrowOpenlayers, ol){
                 expect(CrowOL.styleCache).toContain(style);
             });
 
-            it('should have a layer-tree which contains a list and the order of the layers, which are currently loaded',
-             function (){
+            it('should have a layer-tree', function (){
                 var layerTree = CrowOL.layerTree;
-                expect(layerTree).toBeDefined();
+                expect(layerTree).toEqual(CrowLayerTree());
             });
 
         });

@@ -15,7 +15,8 @@ require.config({
 
         // local modules
         'crow-openlayers': 'js/crow.openlayers',
-        'crow-googlemaps': 'js/crow.googlemaps'
+        'crow-googlemaps': 'js/crow.googlemaps',
+        'crow-layertree': 'js/crow.layertree'
     },
 
     shim : {

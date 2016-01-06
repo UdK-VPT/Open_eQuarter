@@ -1,5 +1,6 @@
-define(['openlayers'], function () {
-    var ol = require('openlayers');
+define(['openlayers', 'crow-layertree'], function () {
+    var ol = require('openlayers'),
+        layerTree = require('crow-layertree');
 
     var STYLE,
         STYLE_CACHE,
@@ -49,6 +50,8 @@ define(['openlayers'], function () {
         });
 
         this.styleCache = [];
+
+        this.layerTree = new layerTree();
 
         CrowOL.prototype.addStyle = function (style) {
             this.styleCache.push(style);

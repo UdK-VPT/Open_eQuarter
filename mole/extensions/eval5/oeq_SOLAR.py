@@ -11,20 +11,16 @@ def calculation(self=None, parameters={}):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    ratio_solar_available=0.5
-    ratio_solar_installable=0.5
-    solar_earnings_per_sqm=450.0
+    ratio_solar_installable=0.6
+    solar_earnings_per_sqm=350.0
 
-    dataset = {'SOLAR':NULL,'SOLIAR': NULL,'SOLHE': NULL,'SOLHEL': NULL,'SOLCRT': NULL}
-    dataset.update(parameters)
+    dataset = {'SOLIAR': NULL,'SOLHE': NULL,'SOLHEL': NULL,'SOLCRT': NULL}
 
-    if not oeq_global.isnull([dataset['AHDP'], dataset['RF_AR'],dataset['LIV_AR']]):
-        dataset['SOLAR']=float(dataset['RF_AR']) * float(ratio_solar_available)
-        dataset['SOLIAR']=float(dataset['SOLAR'])*float(ratio_solar_installable)
+    if not oeq_global.isnull([parameters['AHDP'], parameters['FR_AR'],parameters['LIV_AR']]):
+        dataset['SOLIAR']=float(parameters['FR_AR'])*float(ratio_solar_installable)
         dataset['SOLHE']=solar_earnings_per_sqm * float(dataset['SOLIAR'])
-        dataset['SOLHEL']=dataset['SOLHE']/float(dataset['LIV_AR'])
-        dataset['SOLCRT']=float(dataset['SOLHEL'])/float(dataset['AHDP'])*100
+        dataset['SOLHEL']=dataset['SOLHE']/float(parameters['LIV_AR'])
+        dataset['SOLCRT']=float(dataset['SOLHEL'])/float(parameters['AHDP'])*100
 
     result = {}
     for i in dataset.keys():
@@ -42,7 +38,7 @@ extension = OeQExtension(
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     field_id='SOLCRT',
     source_type='none',
-    par_in=['AHDP','RF_AR','LIV_AR'],
+    par_in=['AHDP','FR_AR','LIV_AR'],
     layer_in=config.data_layer_name,
     layer_out=config.data_layer_name,
     active=True,

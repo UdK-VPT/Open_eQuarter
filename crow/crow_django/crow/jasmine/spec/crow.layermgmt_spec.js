@@ -26,6 +26,7 @@ define(['crow-layermgmt', 'openlayers'], function () {
                 LayerTree.add(layer);
                 layerList = LayerTree.layers;
                 expect(layerList.length).toEqual(1);
+                expect(layerList).toContain(layer);
             });
         });
 

@@ -1,5 +1,5 @@
 from django.contrib.gis import admin
-from models import Buildings, Materials, Quarters, SurfacesRaw, Usageprofiles, Vectors
+from ates.models import Buildings, Materials, Quarters, SurfacesRaw, Usageprofiles, Vectors
 
 admin.site.register(Buildings)
 admin.site.register(Materials)

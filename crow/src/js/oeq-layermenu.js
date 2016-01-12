@@ -129,6 +129,7 @@ define([
     $(document).ready(limitProperties);
     $(window).resize(limitProperties);
 
+    // Copied (except for map manipulation)
     function lookupAddress() {
         var address = $('#addressLookup input:first').val();
         $.ajax({

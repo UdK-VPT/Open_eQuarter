@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib.gis import admin
-from registration.backends.default import urls as redux_urls
+
 
 from views import home_page
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include(redux_urls)),
+    url(r'^accounts/', include('registration.backends.default.urls', namespace='redux')),
+    url(r'^accounts/', include('django.contrib.auth.urls', namespace='auth')),
     url(r'^$', home_page, name='home'),
 ]

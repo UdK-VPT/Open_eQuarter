@@ -1,4 +1,4 @@
-define(['crow-openlayers', 'crow-layertree', 'openlayers'], function(CrowOpenlayers, CrowLayerTree, ol){
+define(['crow-openlayers', 'crow-layermgmt', 'openlayers'], function(CrowOpenlayers, CrowLayerMgmt, ol){
 
     describe('Crow Openlayers Module test -', function () {
 
@@ -17,7 +17,7 @@ define(['crow-openlayers', 'crow-layertree', 'openlayers'], function(CrowOpenlay
             });
         });
 
-        describe('CrowOL - unittest object', function() {
+        describe('Unittest - CrowOL object', function() {
             var CrowOL,
                 mapTarget = 'my-div';
 
@@ -58,7 +58,7 @@ define(['crow-openlayers', 'crow-layertree', 'openlayers'], function(CrowOpenlay
 
             it('should have a layer-tree', function (){
                 var layerTree = CrowOL.layerTree;
-                expect(layerTree).toEqual(CrowLayerTree());
+                expect(layerTree).toEqual(new CrowLayerMgmt.LayerTree());
             });
 
         });

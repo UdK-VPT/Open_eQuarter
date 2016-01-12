@@ -1,6 +1,6 @@
-define(['openlayers', 'crow-layertree'], function () {
+define(['openlayers', 'crow-layermgmt'], function () {
     var ol = require('openlayers'),
-        layerTree = require('crow-layertree');
+        layerMgmt = require('crow-layermgmt');
 
     var STYLE,
         STYLE_CACHE,
@@ -51,7 +51,7 @@ define(['openlayers', 'crow-layertree'], function () {
 
         this.styleCache = [];
 
-        this.layerTree = new layerTree();
+        this.layerTree = new layerMgmt.LayerTree();
 
         CrowOL.prototype.addStyle = function (style) {
             this.styleCache.push(style);
@@ -59,5 +59,5 @@ define(['openlayers', 'crow-layertree'], function () {
 
     };
 
-    return { CrowOL: CrowOL};
+    return { CrowOL: CrowOL };
 });

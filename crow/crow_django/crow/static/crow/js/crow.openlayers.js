@@ -51,7 +51,7 @@ define(['openlayers', 'crow-layermgmt'], function () {
 
         this.styleCache = [];
 
-        this.layerTree = new layerMgmt.LayerTree();
+        this.layerTree = new layerMgmt.LayerTree(this.map);
 
         CrowOL.prototype.addStyle = function (style) {
             this.styleCache.push(style);

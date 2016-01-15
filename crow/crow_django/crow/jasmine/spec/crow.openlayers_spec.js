@@ -58,7 +58,7 @@ define(['crow-openlayers', 'crow-layermgmt', 'openlayers'], function(CrowOpenlay
 
             it('should have a layer-tree', function (){
                 var layerTree = CrowOL.layerTree;
-                expect(layerTree).toEqual(new CrowLayerMgmt.LayerTree());
+                expect(layerTree).toEqual(new CrowLayerMgmt.LayerTree(CrowOL.map));
             });
 
         });

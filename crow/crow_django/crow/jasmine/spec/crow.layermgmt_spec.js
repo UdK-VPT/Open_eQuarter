@@ -26,7 +26,22 @@ define(['crow-layermgmt', 'openlayers'], function () {
                 LayerTree.add(layer);
                 layerList = LayerTree.layers;
                 expect(layerList.length).toEqual(1);
-                expect(layerList).toContain(layer);
+                expect(layerList[0].olLayer).toEqual(layer);
+            });
+
+            it('should name the layer as "Unnamed" if no name was passed when adding the layer', function () {
+                layer = new ol.layer.Vector();
+                LayerTree.add(layer);
+                addedLayer = LayerTree.layers[0];
+                expect(addedLayer.name).toEqual('Unnamed');
+            });
+
+            it('should add the layers name, if given', function () {
+                layer = new ol.layer.Vector();
+                name = 'LayerName';
+                LayerTree.add(layer, name);
+                addedLayer = LayerTree.layers[0];
+                expect(addedLayer.name).toEqual(name);
             });
         });
 

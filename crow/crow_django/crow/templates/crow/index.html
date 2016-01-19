@@ -43,17 +43,25 @@
                         <div id="layerStack" class="panel-body list-group" role="group">
                             {% for name, features in layer_list.items %}
                             <a class="list-group-item">{{ name }} ({{ features | length }})</a>
-                            <script type="text/javascript">
-                                requirejs(['openlayers'], function(ol){
+                            <script type="text/javascript" defer>
+                                requirejs(['openlayers', 'domReady!'], function(ol){
                                     var format = new ol.format.WKT();
                                     var feature = format.readFeature('{{ features.first.geom.wkt }}');
-                                    feature.getGeometry().transform('EPSG:4326', 'EPSG:{{ features.first.geom.srid }}');
+                                    feature.getGeometry().transform('EPSG:{{ features.first.geom.srid }}', 'EPSG:3857');
                                     vector = new ol.layer.Vector({
                                         source: new ol.source.Vector({
                                             features: [feature]
                                         })
                                     });
-                                })
+
+                                    var checkExist = setInterval(function() {
+                                       if (CrowOL) {
+                                          CrowOL.layerTree.add(vector, '{{ name }}');
+                                          console.log('Added Layer');
+                                          clearInterval(checkExist);
+                                       }
+                                    }, 100); // check every 100ms
+                                });
                             </script>
                             {% endfor %}
                         </div>

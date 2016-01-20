@@ -12,7 +12,7 @@ class AtesRouter(object):
         return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
-        "Allow any relation if a both models in ates app"
+        "Allow any relation if both models are in ates app"
         if obj1._meta.app_label == 'ates' and obj2._meta.app_label == 'ates':
             return True
         # Allow if neither is ates app

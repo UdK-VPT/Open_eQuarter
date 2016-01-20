@@ -1,7 +1,16 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
 
+
+class Layer(models.Model):
+    name = models.CharField(max_length=254)
+
+    def features(self):
+        return OeQLayer.objects.filter(layer=self)
+
+
 class OeQLayer(models.Model):
+    layer = models.ForeignKey(Layer)
     gml_id = models.CharField(max_length=254, null=True)
     spatial_na = models.CharField(max_length=254, null=True)
     spatial_al = models.CharField(max_length=254, null=True)

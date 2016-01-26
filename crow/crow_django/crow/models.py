@@ -10,7 +10,7 @@ class Layer(models.Model):
 
 
 class OeQLayer(models.Model):
-    layer = models.ForeignKey(Layer)
+    layer = models.ForeignKey(Layer, null=True)
     gml_id = models.CharField(max_length=254, null=True)
     spatial_na = models.CharField(max_length=254, null=True)
     spatial_al = models.CharField(max_length=254, null=True)

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from crow.models import OeQLayer
+from crow.models import Layer
 
 # Create your views here.
 def login_register(request):
@@ -10,9 +10,6 @@ def login_register(request):
 # Create your views here.
 @login_required
 def home_page(request):
-    layer_list = {}
-    feature_list = OeQLayer.objects.all()
-    layer_list['Heinrichstr'] = feature_list
-    return render(request, 'crow/index.html', {'layer_list': layer_list})
+    return render(request, 'crow/index.html', {'layers': Layer.objects.all()})
 
 

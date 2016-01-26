@@ -14,10 +14,11 @@
     </ul>
 </li>
 <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-globe"></i>Choose layer...<b class="caret"></b></a>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-globe"></i>Add layer...<b class="caret"></b></a>
     <ul class="dropdown-menu">
-        <li><a href="#">Project 1</a></li>
-        <li><a href="#">Project 2</a></li>
+        {% for layer in layers %}
+            <li><a href="#">{{ layer.name }} ({{ layer.features | length }})</a></li>
+        {% endfor %}
     </ul>
 </li>
 <li><a href="#" class="btn-file"><i class="glyphicon glyphicon-folder-open"></i>Load layer...<input type="file"></a></li>
@@ -48,16 +49,16 @@
                     </div>
                     <div class="panel-collapse collapse in" id="layerstack-collapse">
                         <div id="layerStack" class="panel-body list-group" role="group">
-                            {% for name, features in layer_list.items %}
+                            {% for layer in layers %}
                             <script type="text/javascript" defer>
                                 requirejs(['openlayers', 'domReady!'], function(ol){
                                     var format = new ol.format.WKT();
                                     var feature;
                                     var featureList = [];
 
-                                    {% for feature in features %}
+                                    {% for feature in layer.features %}
                                         var feature = format.readFeature('{{ feature.geom.wkt }}');
-                                        feature.getGeometry().transform('EPSG:{{ features.first.geom.srid }}', 'EPSG:3857');
+                                        feature.getGeometry().transform('EPSG:{{ feature.geom.srid }}', 'EPSG:3857');
                                         featureList.push(feature);
                                     {% endfor %}
                                     vector = new ol.layer.Vector({
@@ -68,7 +69,7 @@
 
                                     var checkExist = setInterval(function() {
                                        if (CrowOL) {
-                                          CrowOL.layerTree.add(vector, '{{ name }}');
+                                          CrowOL.layerTree.add(vector, '{{ layer.name }}');
                                           clearInterval(checkExist);
                                        }
                                     }, 100); // check every 100ms
@@ -86,7 +87,7 @@
                                         <i class="glyphicon glyphicon-screenshot"></i>
                                     </button>
                                 </span>
-                                &nbsp; {{ name }} ({{ features | length }})
+                                &nbsp; {{ layer.name }} ({{ layer.features | length }})
 
                                 <span class="pull-right">
                                     <button type="button" class="btn btn-xs btn-primary">

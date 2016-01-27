@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from crow.models import Layer, OeQLayer, Comment
 
@@ -38,3 +39,5 @@ class LayerModelTest(TestCase):
         self.assertEqual(saved_comment.layer, layer)
         self.assertEqual(saved_comment.author, user)
         self.assertEqual(saved_comment.text, 'This is a comment')
+        self.assertLessEqual(comment.date_created, timezone.now(), 'The comment has to be created in the past')
+

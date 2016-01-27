@@ -1,10 +1,10 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
+from django.conf import settings
 
 
 class Layer(models.Model):
     name = models.CharField(max_length=254)
-    comment = models.TextField(null=True)
 
     def features(self):
         return OeQLayer.objects.filter(layer=self)
@@ -135,3 +135,9 @@ oeq_layer_mapping = {
     'soliar' : 'SOLIAR',
     'geom' : 'MULTIPOLYGON',
 }
+
+
+class Comment(models.Model):
+    author = models.OneToOneField(settings.AUTH_USER_MODEL)
+    layer = models.ForeignKey(Layer)
+    text = models.TextField(null=False, default='')

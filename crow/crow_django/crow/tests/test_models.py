@@ -1,6 +1,7 @@
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 
-from crow.models import Layer, OeQLayer
+from crow.models import Layer, OeQLayer, Comment
 
 
 class LayerModelTest(TestCase):
@@ -20,12 +21,20 @@ class LayerModelTest(TestCase):
         self.assertEqual(saved_layer.name, 'Heinrichstraße')
         self.assertEqual(saved_layer.features()[0], saved_oeq_layer)
 
-    def test_commenting_a_layer(self):
+    def test_creating_a_comment(self):
         layer = Layer()
-        layer.name = 'Heinrichstraße'
-        layer.comment = 'This is a comment'
+        layer.name = 'Commented'
         layer.save()
+        User = get_user_model()
+        user = User.objects.create_user(username='Commenter', password='Test')
 
-        saved_layer = Layer.objects.first()
-        self.assertEqual(layer.comment, 'This is a comment')
+        comment = Comment()
+        comment.author = user
+        comment.layer = layer
+        comment.text = 'This is a comment'
+        comment.save()
 
+        saved_comment = Comment.objects.first()
+        self.assertEqual(saved_comment.layer, layer)
+        self.assertEqual(saved_comment.author, user)
+        self.assertEqual(saved_comment.text, 'This is a comment')

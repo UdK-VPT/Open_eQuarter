@@ -20,3 +20,12 @@ class LayerModelTest(TestCase):
         self.assertEqual(saved_layer.name, 'Heinrichstraße')
         self.assertEqual(saved_layer.features()[0], saved_oeq_layer)
 
+    def test_commenting_a_layer(self):
+        layer = Layer()
+        layer.name = 'Heinrichstraße'
+        layer.comment = 'This is a comment'
+        layer.save()
+
+        saved_layer = Layer.objects.first()
+        self.assertEqual(layer.comment, 'This is a comment')
+

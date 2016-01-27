@@ -4,6 +4,7 @@ from django.contrib.gis.db import models
 
 class Layer(models.Model):
     name = models.CharField(max_length=254)
+    comment = models.TextField(null=True)
 
     def features(self):
         return OeQLayer.objects.filter(layer=self)

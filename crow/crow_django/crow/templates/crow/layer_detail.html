@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load bootstrap3 %}
+
 {% block title %}
 {{ layer.name }} details
 {% endblock %}
@@ -55,5 +57,11 @@
 <div id="overlay"></div>
 <div id="login">
     <h1>{{ layer.name }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_table }}
+        <input type="submit" value="Add comment">
+    </form>
+
 </div>
 {% endblock %}

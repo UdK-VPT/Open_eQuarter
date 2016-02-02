@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.generic import DetailView
 from django.shortcuts import render
 
 from crow.models import Layer
@@ -13,3 +14,5 @@ def home_page(request):
     return render(request, 'crow/index.html', {'layers': Layer.objects.all()})
 
 
+class LayerDetail(DetailView):
+    model = Layer

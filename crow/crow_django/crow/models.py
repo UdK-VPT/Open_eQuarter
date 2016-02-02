@@ -9,6 +9,9 @@ class Layer(models.Model):
     def features(self):
         return OeQLayer.objects.filter(layer=self)
 
+    def __str__(self):
+        return self.name
+
 
 class OeQLayer(models.Model):
     layer = models.ForeignKey(Layer, null=True)

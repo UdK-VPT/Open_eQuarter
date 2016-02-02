@@ -17,7 +17,9 @@ class CommentFormTest(TestCase):
     def test_valid_data(self):
         form = CommentForm({
             'text': 'This is a comment',
-        }, author=self.user, layer=self.layer)
+        },
+            author=self.user,
+            layer=self.layer)
 
         self.assertTrue(form.is_valid())
 

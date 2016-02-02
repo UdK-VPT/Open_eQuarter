@@ -1,7 +1,8 @@
 # This is an auto-generated Django model module created by ogrinspect.
+from django.core.urlresolvers import reverse
 from django.contrib.gis.db import models
-from django.conf import settings
 from django.utils import timezone
+from django.conf import settings
 
 class Layer(models.Model):
     name = models.CharField(max_length=254)
@@ -12,6 +13,8 @@ class Layer(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('layer_detail', kwargs={'pk': self.pk})
 
 class OeQLayer(models.Model):
     layer = models.ForeignKey(Layer, null=True)

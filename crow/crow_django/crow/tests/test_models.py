@@ -47,3 +47,6 @@ class LayerModelTest(TestCase):
         self.assertEqual(saved_comment.text, 'This is a comment')
         self.assertLessEqual(comment.date_created, timezone.now(), 'The comment has to be created in the past')
 
+    def test_get_absolute_url(self):
+        layer = self.create_layer_with_name('Absolute url')
+        self.assertIsNotNone(layer.get_absolute_url())

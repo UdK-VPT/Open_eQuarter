@@ -4,17 +4,22 @@ from django.contrib.gis.db import models
 from django.utils import timezone
 from django.conf import settings
 
+
 class Layer(models.Model):
     name = models.CharField(max_length=254)
 
     def features(self):
         return OeQLayer.objects.filter(layer=self)
 
+    def comments(self):
+        return Comment.objects.filter(layer=self)
+
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
         return reverse('layer_detail', kwargs={'pk': self.pk})
+
 
 class OeQLayer(models.Model):
     layer = models.ForeignKey(Layer, null=True)

@@ -13,6 +13,19 @@ class LayerModelTest(TestCase):
         layer.save()
         return layer
 
+    def create_user_with_name(self, name):
+        User = get_user_model()
+        user = User.objects.create_user(username=name, password='Test')
+        return user
+
+    def create_comment_on_layer(self, layer, user, text):
+        comment = Comment()
+        comment.author = user
+        comment.layer = layer
+        comment.text = text
+        comment.save()
+        return comment
+
     def test_string_represenation(self):
         layer = self.create_layer_with_name('Name as String')
         self.assertEqual(str(layer), 'Name as String')
@@ -32,14 +45,8 @@ class LayerModelTest(TestCase):
 
     def test_creating_a_comment(self):
         layer = self.create_layer_with_name('Commented')
-        User = get_user_model()
-        user = User.objects.create_user(username='Commenter', password='Test')
-
-        comment = Comment()
-        comment.author = user
-        comment.layer = layer
-        comment.text = 'This is a comment'
-        comment.save()
+        user = self.create_user_with_name('Commenter')
+        comment = self.create_comment_on_layer(layer, user, 'This is a comment')
 
         saved_comment = Comment.objects.first()
         self.assertEqual(saved_comment.layer, layer)
@@ -49,23 +56,47 @@ class LayerModelTest(TestCase):
 
     def test_creating_multiple_comments_by_same_user(self):
         layer = self.create_layer_with_name('Commented')
-        User = get_user_model()
-        user = User.objects.create_user(username='Commenter', password='Test')
-
-        comment1 = Comment()
-        comment1.author = user
-        comment1.layer = layer
-        comment1.text = 'This is a first comment'
-        comment1.save()
-
-        comment2 = Comment()
-        comment2.author = user
-        comment2.layer = layer
-        comment2.text = 'This is a second comment'
-        comment2.save()
+        user = self.create_user_with_name('Commenter')
+        comment1 = self.create_comment_on_layer(layer, user, 'This is a first comment')
+        comment2 = self.create_comment_on_layer(layer, user, 'This is a second comment')
 
         saved_comments = Comment.objects.all()
         self.assertEqual(len(saved_comments), 2)
+
+    def test_creating_n_comments_by_different_users(self):
+        layer = self.create_layer_with_name('Commented')
+        n = 3
+
+        for i in range(1, n+1):
+            user = self.create_user_with_name('Commenter{}'.format(i))
+            self.create_comment_on_layer(layer, user, 'This is comment number {}'.format(i))
+
+        saved_comments = Comment.objects.all()
+        self.assertEqual(len(saved_comments), n)
+
+    def test_saving_and_retrieving_a_comment(self):
+        layer = self.create_layer_with_name('Commented')
+        user = self.create_user_with_name('Commenter')
+        self.create_comment_on_layer(layer, user, 'This is a comment')
+
+        self.assertEqual(len(layer.comments()), 1)
+
+    def test_retrieving_comments_from_different_layers(self):
+        layer1 = self.create_layer_with_name('Layer')
+        layer2 = self.create_layer_with_name('Layer')
+        user1 = self.create_user_with_name('Commenter1')
+        user2 = self.create_user_with_name('Commenter2')
+
+        self.create_comment_on_layer(layer1, user1, 'Comm1')
+        self.create_comment_on_layer(layer1, user1, 'Comm2')
+        self.create_comment_on_layer(layer1, user2, 'Comm3')
+        self.create_comment_on_layer(layer1, user1, 'Comm4')
+
+        self.create_comment_on_layer(layer2, user2, 'Comm1')
+        self.create_comment_on_layer(layer2, user2, 'Comm2')
+
+        self.assertEqual(len(layer1.comments()), 4)
+        self.assertEqual(len(layer2.comments()), 2)
 
     def test_get_absolute_url(self):
         layer = self.create_layer_with_name('Absolute url')

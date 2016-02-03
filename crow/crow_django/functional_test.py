@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 from django.test import LiveServerTestCase
 
 
@@ -15,7 +16,7 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def test_can_view_an_open_layers_map(self):
+    def test_can_register_a_new_user(self):
         # The GIS community has heard of a new tool to analyse a quarter.
         # Mr. Leo Graphy opens his webbrowser and opens the url.
         self.browser.get(self.live_server_url)
@@ -61,3 +62,102 @@ class NewVisitorTest(LiveServerTestCase):
 
         # The user is forwarded to a page, which confirms the registration
         self.assertIn('Open eQuarter - Success!', self.browser.title)
+
+
+class RegisteredUserTest(LiveServerTestCase):
+
+    fixtures = [
+        'fixtures/crow_django.json',
+    ]
+
+    def setUp(self):
+        # self.browser = webdriver.Firefox()
+        # Headless test using phantomjs driver
+        self.browser = webdriver.PhantomJS('phantomjs')
+
+        # The browsers window-size is set to a desktop resolution
+        self.browser.set_window_size(1024, 768)
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_can_login_a_registerd_user(self):
+
+        # The GIS community has heard of a new tool to analyse a quarter.
+        # Mr. Leo Graphy just registered as a new user and activated his account already
+        # He opens his browser again and navigates back to the website
+        self.browser.get(self.live_server_url)
+        self.assertIn('Open eQuarter - Login', self.browser.title)
+
+        # The login form is still available to enter his username and password
+        login_username = self.browser.find_element_by_id('id_username')
+        login_password = self.browser.find_element_by_id('id_password')
+
+        login_username.send_keys('LeoGraphy')
+        login_password.send_keys('LeoPW1234')
+
+        buttons = self.browser.find_elements_by_tag_name('button')
+        login_btn = list(filter(lambda button: button.get_attribute('value') == 'login', buttons))[0]
+        login_btn.click()
+
+        # Leo has a typo in his password and sees an error message
+        error_box = self.browser.find_element_by_class_name('alert-danger')
+        self.assertIn('Please enter a correct username and password. Note that both fields may be case-sensitive.', error_box.text)
+
+
+        # The username is still displayed
+        # He corrects his typo and finally logs himself in to the new website
+        login_username = self.browser.find_element_by_id('id_username')
+        login_password = self.browser.find_element_by_id('id_password')
+
+        login_username.clear()
+        login_username.send_keys('LeoGraphy')
+        login_password.send_keys('LeosPW1234')
+
+        buttons = self.browser.find_elements_by_tag_name('button')
+        login_btn = list(filter(lambda button: button.get_attribute('value') == 'login', buttons))[0]
+        login_btn.click()
+
+        # His login was successful, hence his username is visible in the browsers title
+        self.assertIn('Open eQuarter - LeoGraphy', self.browser.title)
+
+        # A header navigation-bar is displayed, which shows the clickable companies logo as a first entry
+        navigation_bar = self.browser.find_element_by_tag_name('nav')
+        logo_link = navigation_bar.find_element_by_tag_name('a')
+        logo = logo_link.find_element_by_tag_name('img')
+        self.assertTrue(logo.get_attribute('src'))
+
+        # A dropdown menu is visible in the navigation bar, where Mr. G can chose a project
+        dropdown = navigation_bar.find_element_by_class_name('dropdown')
+        dropdown_link = dropdown.find_element_by_tag_name('a')
+        self.assertIn('Choose project', dropdown_link.text,
+                      'Choose project - dropdown not found, found {} instead.'.format(dropdown_link.text))
+
+        # Another link is found, which enables the user to load a layer
+        navigation_ul = navigation_bar.find_element_by_css_selector('ul:first-child')
+        open_button_link = navigation_ul.find_element_by_class_name('btn-file')
+        self.assertIn('Load layer', open_button_link.text,
+                      'Load layer - button not found, found {} instead'.format(open_button_link.text))
+
+        # A first layer is already loaded and displayed in the layer-stack
+        layer = self.browser.find_element_by_partial_link_text('Heinrich')
+        self.assertIsNotNone(layer)
+
+        # A dropdown-menu is displayed, having his user-name as title
+        lis = navigation_bar.find_elements_by_tag_name('li')
+        dropdowns = list(filter(lambda li: li.get_attribute('class') == 'dropdown', lis))
+        self.assertIn('LeoGraphy', dropdowns[-1].text)
+
+        # Once the dropdown is clicked, a logout button becomes visible
+        dropdown_lnk = self.browser.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/a')
+        dropdown_lnk.click()
+        logout_btn = self.browser.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/ul/li[4]/a')
+        driver = self.browser
+        WebDriverWait(driver, 10).until(lambda driver: driver.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/ul/li[4]/a').is_displayed())
+        self.assertTrue(logout_btn.is_displayed())
+        logout_btn.click()
+
+        # Leo had a nice first impression, he logs out and closes his browser to tell his colleagues about the site.
+        logout_btn.click()
+        goodbye = self.browser.find_element_by_tag_name('h1')
+        self.assertIn('Goodbye.', goodbye.text)

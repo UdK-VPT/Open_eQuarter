@@ -7,6 +7,7 @@ from crow.views import home_page
 from crow.models import Layer
 from crow.forms import EMPTY_COMMENT_ERROR
 
+
 class HomePageTest(TestCase):
 
     def test_root_url_resolves_to_home_page(self):

@@ -57,10 +57,13 @@
 <div id="overlay"></div>
 <div id="login">
     <h1>{{ layer.name }}</h1>
+    {% if form.errors %}
+        <p>{{ form.errors }}</p>
+    {% endif %}
     <form method="post">
         {% csrf_token %}
-        {{ form.as_table }}
-        <input type="submit" value="Add comment">
+        {% bootstrap_form form layout='inline' %}
+        <input type="submit" class="btn btn-primary" value="Add comment" />
     </form>
 
 </div>

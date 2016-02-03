@@ -144,7 +144,7 @@ oeq_layer_mapping = {
 
 
 class Comment(models.Model):
-    author = models.OneToOneField(settings.AUTH_USER_MODEL)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
     layer = models.ForeignKey(Layer)
     text = models.TextField(null=False, default='')
     date_created = models.DateTimeField(default=timezone.now)

@@ -32,3 +32,23 @@ class CommentFormTest(TestCase):
         form = CommentForm({}, author=self.user, layer=self.layer)
         self.assertFalse(form.is_valid())
         self.assertIn("Please add a comment.", form.errors['text'])
+
+    def test_if_multiple_comments_can_be_added_by_same_user(self):
+         form1 = CommentForm({
+             'text': 'This is a first comment',
+         },
+             author=self.user,
+             layer=self.layer,
+         )
+         form1.save()
+
+         form2 = CommentForm({
+             'text': 'This is a second comment',
+         },
+             author=self.user,
+             layer=self.layer,
+         )
+         form2.save()
+
+         saved_comments = Comment.objects.all()
+         self.assertEqual(len(saved_comments), 2)

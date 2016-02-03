@@ -47,6 +47,26 @@ class LayerModelTest(TestCase):
         self.assertEqual(saved_comment.text, 'This is a comment')
         self.assertLessEqual(comment.date_created, timezone.now(), 'The comment has to be created in the past')
 
+    def test_creating_multiple_comments_by_same_user(self):
+        layer = self.create_layer_with_name('Commented')
+        User = get_user_model()
+        user = User.objects.create_user(username='Commenter', password='Test')
+
+        comment1 = Comment()
+        comment1.author = user
+        comment1.layer = layer
+        comment1.text = 'This is a first comment'
+        comment1.save()
+
+        comment2 = Comment()
+        comment2.author = user
+        comment2.layer = layer
+        comment2.text = 'This is a second comment'
+        comment2.save()
+
+        saved_comments = Comment.objects.all()
+        self.assertEqual(len(saved_comments), 2)
+
     def test_get_absolute_url(self):
         layer = self.create_layer_with_name('Absolute url')
         self.assertIsNotNone(layer.get_absolute_url())

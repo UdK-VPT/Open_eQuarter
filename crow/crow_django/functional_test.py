@@ -1,8 +1,8 @@
 from selenium import webdriver
-import unittest
+from django.test import LiveServerTestCase
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
 
     def setUp(self):
         # self.browser = webdriver.Firefox()
@@ -18,7 +18,7 @@ class NewVisitorTest(unittest.TestCase):
     def test_can_view_an_open_layers_map(self):
         # The GIS community has heard of a new tool to analyse a quarter.
         # Mr. Leo Graphy opens his webbrowser and opens the url.
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # He expects to find a page where he can logins
         self.assertIn('Open eQuarter - Login', self.browser.title)
@@ -61,28 +61,3 @@ class NewVisitorTest(unittest.TestCase):
 
         # The user is forwarded to a page, which confirms the registration
         self.assertIn('Open eQuarter - Success!', self.browser.title)
-
-
-        # # A header navigation-bar is displayed, which shows the clickable companies logo as a first entry
-        # navigation_bar = self.browser.find_element_by_tag_name('nav')
-        # logo_link = navigation_bar.find_element_by_tag_name('a')
-        # logo = logo_link.find_element_by_tag_name('img')
-        # self.assertTrue(logo.get_attribute('src'))
-        #
-        # # A dropdown menu is visible in the navigation bar, where Mr. G can chose a project
-        # dropdown = navigation_bar.find_element_by_class_name('dropdown')
-        # dropdown_link = dropdown.find_element_by_tag_name('a')
-        # self.assertIn('Choose project', dropdown_link.text,
-        #               'Choose project - dropdown not found, found {} instead.'.format(dropdown_link.text))
-        #
-        # # Another link is found, which enables the user to load a layer
-        # navigation_ul = navigation_bar.find_element_by_css_selector('ul:first-child')
-        # open_button_link = navigation_ul.find_element_by_class_name('btn-file')
-        # self.assertIn('Open layer', open_button_link.text,
-        #               'Open layer - button not found, found {} instead'.format(open_button_link.text))
-
-        self.fail('Finish the test')
-
-
-if __name__ == '__main__':
-    unittest.main()

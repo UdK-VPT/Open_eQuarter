@@ -20,8 +20,8 @@ class AtesRouter(object):
             return True
         return False
 
-    def allow_migrate(self, db, model):
-        if db == 'atesdb' or model._meta.app_label == "ates":
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
+        if db == 'atesdb' or app_label == "ates":
             return False # we're not using syncdb on our legacy database
         else: # but all other models/databases are fine
             return True

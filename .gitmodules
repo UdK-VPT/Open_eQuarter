@@ -1,3 +1,0 @@
-[submodule "crow/crow_django/jasmine"]
-	path = crow/crow_django/jasmine
-	url = https://github.com/firstdayofjune/django-jasmine.git

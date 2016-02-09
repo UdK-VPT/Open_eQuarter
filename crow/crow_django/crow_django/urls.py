@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from jasmine.django_jasmine import urls as jasmine_urls
+from django_jasmine import urls as jasmine_urls
 
 
 urlpatterns = [

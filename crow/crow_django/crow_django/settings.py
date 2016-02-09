@@ -39,7 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',   # django staticfiles-finder
     'django.contrib.gis',           # geo-django extension
-    'jasmine',               # used for running jasmine-tests against the js-sources
+    'django_jasmine',               # used for running jasmine-tests against the js-sources
     'crow',                         # OeQ-extension
     'ates',                         # Models for ATES-BuildingDB
     'django_extensions',            # Enhanced commandline-tools for generating database-visualisations

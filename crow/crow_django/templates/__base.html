@@ -3,24 +3,28 @@
 
 <html>
 <head>
-    <title>Open eQuarter - {% block title %}{% endblock %}</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="{% static 'crow/css/layout.css' %}" />
-    <link rel="stylesheet" href="{% static 'crow/css/oeq.css' %}" />
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'crow/icons/OeQ_logo_favicon.ico' %}">
-    <script type="text/javascript" src="{% static 'crow/libs/require/require.js' %}"></script>
-    <script type="text/javascript" src="{% static 'crow/common.js' %}"></script>
-    <script>
-        require(['jquery', 'bootstrap', 'js/init']);
-    </script>
-    <style type="text/css">
-        {% block style_css %}
-        {% endblock %}
-    </style>
+    <title>
+        {% block title %}Open eQuarter{% endblock %}
+    </title>
+    {% block meta_tags %}
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    {% endblock %}
+    {% block stylesheets %}
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="{% static 'crow/css/layout.css' %}" />
+        <link rel="stylesheet" href="{% static 'crow/css/oeq.css' %}" />
+        <link rel="shortcut icon" type="image/x-icon" href="{% static 'crow/icons/OeQ_logo_favicon.ico' %}">
+    {% endblock %}
+    {% block javascript %}
+        <script type="text/javascript" src="{% static 'crow/libs/require/require.js' %}"></script>
+        <script type="text/javascript" src="{% static 'crow/common.js' %}"></script>
+        <script>
+            require(['jquery', 'bootstrap', 'js/init']);
+        </script>
+    {% endblock %}
 </head>
 <body>
 <div class="container-fluid">

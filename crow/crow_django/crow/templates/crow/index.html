@@ -1,8 +1,9 @@
-{% extends 'base.html' %}
+{% extends '__base.html' %}
 {% load staticfiles %}
 
 {% block title %}
-{% if user.is_authenticated %}{{ user.username }}{% else %}Login or register{% endif %}
+    {{ block.super }} -
+    {% if user.is_authenticated %}{{ user.username }}{% else %}Login or register{% endif %}
 {% endblock title %}
 
 {% block navitems_left %}

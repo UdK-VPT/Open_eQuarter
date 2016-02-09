@@ -1,0 +1,60 @@
+{% extends "__base.html" %}
+
+{% block stylesheets %}
+    {{ block.super }}
+
+    <style type="text/css">
+        #box_center {
+            z-index: 50;
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+
+            min-width: 29rem;
+            max-width: 31.2rem;
+            margin: 0 auto;
+            padding: 1.85rem 0 2.5rem 0;
+            background-color: rgb(235, 235, 235);
+            border-radius: 7px;
+        }
+
+        #box_center h1 {
+            font-size: 230%;
+            max-width: 25rem;
+            margin: 0 auto 1.25rem auto;
+        }
+
+        #box_center p {
+            max-width: 28rem;
+            margin: 0 auto 1.25rem auto;
+        }
+
+        #box_center p:last-of-type {
+            max-width: 25rem;
+        }
+
+        #box_center form {
+            margin: 0 auto;
+            max-width: 25rem;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 40px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            z-index: 50;
+            display: block;
+            background-color: rgba(0, 0, 0, 0.55);
+        }
+    </style>
+{% endblock %}{# / stylesheet #}
+{% block content %}
+    {{ block.super }}
+    <div id="overlay"></div>
+    <div id="box_center">
+        {% block box_center %}{% endblock %}
+    </div>
+{% endblock %}

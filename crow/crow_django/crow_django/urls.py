@@ -15,12 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django_jasmine import urls as django_jasmine
+from jasmine.django_jasmine import urls as jasmine_urls
 
 
 urlpatterns = [
     url(r'^', include('crow.urls')),
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^jasmine/', include(django_jasmine)),
+    url(r'^jasmine/', include(jasmine_urls)),
 ]

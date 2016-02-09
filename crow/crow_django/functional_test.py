@@ -1,6 +1,6 @@
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
 from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -9,6 +9,7 @@ class NewVisitorTest(LiveServerTestCase):
         # self.browser = webdriver.Firefox()
         # Headless test using phantomjs driver
         self.browser = webdriver.PhantomJS('phantomjs')
+        self.browser.implicitly_wait(3)
 
         # The browsers window-size is set to a desktop resolution
         self.browser.set_window_size(1024, 768)
@@ -64,7 +65,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Open eQuarter - Success!', self.browser.title)
 
 
-class RegisteredUserTest(LiveServerTestCase):
+class RegisteredUserTest(StaticLiveServerTestCase):
 
     fixtures = [
         'fixtures/crow_django.json',
@@ -74,6 +75,7 @@ class RegisteredUserTest(LiveServerTestCase):
         # self.browser = webdriver.Firefox()
         # Headless test using phantomjs driver
         self.browser = webdriver.PhantomJS('phantomjs')
+        self.browser.implicitly_wait(3)
 
         # The browsers window-size is set to a desktop resolution
         self.browser.set_window_size(1024, 768)
@@ -150,12 +152,10 @@ class RegisteredUserTest(LiveServerTestCase):
 
         # Once the dropdown is clicked, a logout button becomes visible
         dropdown_lnk = self.browser.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/a')
-        dropdown_lnk.click()
+        logout_btn = dropdown_lnk.click()
         logout_btn = self.browser.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/ul/li[4]/a')
-        driver = self.browser
-        WebDriverWait(driver, 10).until(lambda driver: driver.find_element_by_xpath('//*[@id="main-navbar"]/ul[2]/li[2]/ul/li[4]/a').is_displayed())
         self.assertTrue(logout_btn.is_displayed())
-        logout_btn.click()
+        self.assertIn('Logout', logout_btn.text)
 
         # Leo had a nice first impression, he logs out and closes his browser to tell his colleagues about the site.
         logout_btn.click()

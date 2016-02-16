@@ -3,7 +3,7 @@ from django.contrib.gis.utils import LayerMapping
 from crow.models import Layer, OeQLayer, oeq_layer_mapping
 
 
-def run(shp_location='../../../../OeQ_Unters/Heinrich.shp', verbose=True):
+def run(shp_location='../../layers/Heinrich_db.shp', verbose=True):
 
     try:
         shp = os.path.abspath(os.path.join(os.path.dirname(__file__), shp_location))

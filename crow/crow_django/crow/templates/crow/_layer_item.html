@@ -23,7 +23,7 @@
             }, 100); // check every 100ms
         });
     </script>
-    <a class="list-group-item">
+    <div class="list-group-item">
         <span class="pull-left">
             <button type="button" class="btn btn-xs btn-danger" onclick="CrowOL.map.removeLayer(vector);">
                 <i class="glyphicon glyphicon-trash"></i>
@@ -38,6 +38,9 @@
         &nbsp; {{ layer.name }} ({{ layer.features | length }})
 
         <span class="pull-right">
+            <a class="btn btn-xs btn-primary" href="{{ layer.get_absolute_url }}" title="Details">
+                <i class="glyphicon glyphicon-comment"></i>
+            </a>
             <button type="button" class="btn btn-xs btn-primary">
                 <i class="glyphicon glyphicon-arrow-up"></i>
             </button>
@@ -45,4 +48,4 @@
                 <i class="glyphicon glyphicon-arrow-down"></i>
             </button>
         </span>
-    </a>
+    </div>

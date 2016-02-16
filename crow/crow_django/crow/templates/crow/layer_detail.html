@@ -1,62 +1,12 @@
-{% extends "base.html" %}
+{% extends "__l_centered_overlay.html" %}
 {% load bootstrap3 %}
 
 {% block title %}
-{{ layer.name }} details
+    {{ block.super }} - {{ layer.name }} details
 {% endblock %}
 
-{% block style_css %}
-    #login {
-        z-index: 50;
-        position: fixed;
-        top: 30%;
-        left: 50%;
-        transform: translateX(-50%);
-
-        min-width: 29rem;
-        max-width: 31.2rem;
-        margin: 0 auto;
-        padding: 1.85rem 0 2.5rem 0;
-        background-color: rgb(235, 235, 235);
-        border-radius: 7px;
-    }
-
-    #login h1 {
-        font-size: 230%;
-        max-width: 25rem;
-        margin: 0 auto 1.25rem auto;
-    }
-
-    #login p {
-        max-width: 28rem;
-        margin: 0 auto 1.25rem auto;
-    }
-
-    #login p:last-of-type {
-        max-width: 25rem;
-    }
-
-    #login form {
-        margin: 0 auto;
-        max-width: 25rem;
-    }
-
-    #overlay {
-        position: absolute;
-        top: 40px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-        z-index: 50;
-        display: block;
-        background-color: rgba(0, 0, 0, 0.55);
-    }
-{% endblock %}
-
-{% block content %}
-<div id="overlay"></div>
-<div id="login">
-    <h1>{{ layer.name }}</h1>
+{% block box_center %}
+  <h1>{{ layer.name }}</h1>
     {% if form.errors %}
         <p>{{ form.errors }}</p>
     {% endif %}
@@ -65,6 +15,4 @@
         {% bootstrap_form form layout='inline' %}
         <input type="submit" class="btn btn-primary" value="Add comment" />
     </form>
-
-</div>
 {% endblock %}

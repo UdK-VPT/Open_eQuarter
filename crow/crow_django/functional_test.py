@@ -64,6 +64,10 @@ class NewVisitorTest(LiveServerTestCase):
         # The user is forwarded to a page, which confirms the registration
         self.assertIn('Open eQuarter - Success!', self.browser.title)
 
+        # he is also informed about the successful registration and that he received an email-verification
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('A confirmation e-mail has been sent to your email-address.', body_text)
+
 
 class RegisteredUserTest(StaticLiveServerTestCase):
 

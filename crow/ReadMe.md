@@ -1,7 +1,7 @@
 #Open eQuarter - Crow
 ##An open source project developed at the Berlin University of the Arts.
 
-### What it is
+### Description
 Crow is a Web Application built on the python [django framework](http://djangoproject.com), which enables researchers to transfer their results, created by using the QGIS-mole plugin, into a database and to request and update these results using a (mobile) web browser.
 
 ### Installation

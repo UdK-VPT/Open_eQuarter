@@ -1,0 +1,24 @@
+{% extends "__l_centered_overlay.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+    {{ block.super }} - Login
+{% endblock %}
+
+{% block box_center %}
+    <h1>Login required</h1>
+    {% if form.errors %}
+        <p>An error occured when trying to login!</p>
+    {% endif %}
+    <form method="post" action="{% url 'auth_login' %}">
+        {% csrf_token %}
+        {% bootstrap_form form layout='inline' %}
+        {% buttons %}
+        <button type="submit" class="btn btn-primary" value="login">
+            Login
+        </button>
+        <input type="hidden" name="next" value="/" />
+        {% endbuttons %}
+    </form>
+    <p>Don't have an account yet? <a href="{% url 'registration_register' %}">Register.</a></p>
+{% endblock %}

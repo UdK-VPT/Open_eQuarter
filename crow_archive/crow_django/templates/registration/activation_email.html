@@ -1,0 +1,14 @@
+{% load url from future %}
+<h1>Hello,</h1>
+<br>
+<p>Thanks for your registration at {{ site.name }}<br>
+<br>
+To complete your registration, please follow the link below:<br>
+http://{{ site.domain }}{% url "registration_activate" activation_key=activation_key %}<br>
+<br>
+Attention: This link will expire in {{ expiration_days }} days!<br>
+<br>
+<br>
+If you do not know, why you are receiving this email, you can simply ignore it.<br>
+The account will be deleted, if it is not activated within the next {{ expiration_days }} days.</p>
+

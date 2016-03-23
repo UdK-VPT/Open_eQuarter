@@ -1,0 +1,12 @@
+{% extends '__l_centered.html' %}
+{% load bootstrap3 %}
+
+{% block title %}
+    {{ block.super }} - Registration complete
+{% endblock %}
+
+{% block box_center %}
+    <h1>Registration complete!</h1>
+    <p>Your account has been successfully activated. You can now start using our website.</p>
+    <p><a href="{% url 'auth_login' %}">Login.</a></p>
+{% endblock %}

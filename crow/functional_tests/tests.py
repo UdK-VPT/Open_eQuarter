@@ -1,5 +1,5 @@
 from django.test import LiveServerTestCase
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+#from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 class NewVisitorTest(LiveServerTestCase):
 
     def setUp(self):
-        # self.browser = webdriver.Firefox()
+        #self.browser = webdriver.Firefox()
         # Headless test using phantomjs driver
         self.browser = webdriver.PhantomJS('phantomjs')
         self.browser.implicitly_wait(3)
@@ -26,7 +26,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.get(self.live_server_url)
 
         # The service is only available to registerd users, therefore a login-form is displayed
-        self.assertIn('Open eQuarter - Crow - Login', self.browser.title)
+        self.assertIn('Open eQuarter - Crow', self.browser.title)
         #TODO check for form
 
         # He does not have an account, so he clicks the "Sign up" button to create one
@@ -54,3 +54,4 @@ class NewVisitorTest(LiveServerTestCase):
         # An additional site-bar appears, with a list of available layers. So far the list is empty, but a nice '+'-button clearly invites him to add a new layer to the project.
 
         # Since he does not know what layer to add, he logs out for a short break and to prepare the first layer to upload.
+        self.fail('Finish test')

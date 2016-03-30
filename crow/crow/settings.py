@@ -27,15 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-### Application definition
+# Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     # Required by allauth
     'django.contrib.sites', 
     # Third party apps
+    'django.contrib.gis',
     'rest_framework',
     'rest_framework.authtoken',
     # REST authentication, needed for login
@@ -48,12 +48,12 @@ INSTALLED_APPS = [
     'mole',
 ]
 
-## Application specific settings
+"""Configure installed apps"""
 # keep user logged in after password change
 LOGOUT_ON_PASSWORD_CHANGE = False
 # Set a site-id for django.contrib.sites to work
 SITE_ID = 1
-###
+"""/Configure installed apps"""
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',

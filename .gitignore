@@ -109,3 +109,4 @@ target/
 *.brackets*
 .Rhistory
 *.sqlite3
+ghostdriver.log

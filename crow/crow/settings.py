@@ -27,26 +27,37 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
+### Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Required by allauth
+    'django.contrib.sites', 
+    # Third party apps
+    'rest_framework',
+    'rest_framework.authtoken',
+    # REST authentication, needed for login
+    'rest_auth',
+    # REST user registration
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
+    # Internal apps
+    'mole',
 ]
+
+## Application specific settings
+# keep user logged in after password change
+LOGOUT_ON_PASSWORD_CHANGE = False
+# Set a site-id for django.contrib.sites to work
+SITE_ID = 1
+###
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 

@@ -29,7 +29,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Open eQuarter - Crow - Login', self.browser.title)
         #TODO check for form
 
-        # He does not have an account, so he clicks the "Sign up" button to create on
+        # He does not have an account, so he clicks the "Sign up" button to create one
 
         # He notices that, though the page did not refresh, a "Sign up" form became visible
 

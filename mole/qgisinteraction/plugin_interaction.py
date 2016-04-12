@@ -59,7 +59,7 @@ class PstInteraction(object):
                 # drop down menu, listing all available layers
 
 
-    def select_and_rename_files_for_sampling(self):
+    def select_and_rename_files_for_sampling(self,sample_fields):
         """
         Select all available layers for the point sampling and rename multiple occurrences of the same name.
         Prepend an index, to separate the layers and append the information, which color value is displayed.
@@ -91,13 +91,14 @@ class PstInteraction(object):
             layer_name = table_text[0]
             band_name = table_text[1]
             layer = find_layer_by_name(layer_name)
-
+            ext=extensions.by_layername(layer_name, 'Import')
+            if ext:
+                print "Test: "+ext[0].layer_name
             # Check if the layer was already used
             if last_name != layer_name:
                 last_name = layer_name
                 prefix += 1
                 RGBa_index = 0
-
 
             if (layer.name() == config.housing_layer_name and
                     (band_name.startswith('AREA') or band_name.startswith('PERIMETER') or band_name.startswith('BLD_ID'))):
@@ -114,17 +115,25 @@ class PstInteraction(object):
                 except IndexError as IError:
                     RGBa_index = 0
                     print(self.__module__, 'IndexError when appending the RGBa-Appendix: {}'.format(IError))
-                if extensions.by_layername(layer_name, 'Import') == []:
-                    export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+                if ext:
+                    export_name = ext[0].field_id + '_' + rgba
                 else:
-                    export_name = extensions.by_layername(layer_name, 'Import')[0].field_id + '_' + rgba
+                    export_name = '{:02d}{}_{}'.format(prefix, layer_name[0:6], rgba)
+
 
                 replacement_map[layer_name] = export_name[:-2]
                 # Change the text in the table, so the pst can manage its model accordingly/appropriately
                 table.item(table_index, 1).setText(export_name)
-            else:
-                sample_list.setItemSelected(sample_list.item(i), False)
                 continue
+            elif ext:
+                if band_name.startswith(tuple(ext[0].field_rename.keys())):
+                    if ext[0].field_rename[band_name]:
+                        table.item(table_index, 1).setText(ext[0].field_rename[band_name])
+                        continue
+                elif band_name.startswith(tuple(ext[0].par_in)):
+                    continue
+            sample_list.setItemSelected(sample_list.item(i), False)
+
 
         return replacement_map
 

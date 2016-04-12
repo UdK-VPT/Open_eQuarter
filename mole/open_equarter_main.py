@@ -663,10 +663,10 @@ class OpenEQuarterMain:
             return False
         building_outline_ext = building_outline_ext[0]
         #oeq_global.OeQ_wait(5)
-        building_outline_ext.load_wfs()
+        building_outlines=building_outline_ext.load_wfs()
         #oeq_global.OeQ_wait(5)
-        baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
-        building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
+        #baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
+        #building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
         #original_crs=building_outlines.layer().crs().authid()
         #self.iface.mapCanvas().freeze(False)
         #self.iface.mapCanvas().refresh()
@@ -674,9 +674,10 @@ class OpenEQuarterMain:
         #print "convert"
         #oeq_global.OeQ_wait(5)
         #building_outlines=legend.nodeConvertCRS(building_outlines,config.measurement_projection)
-        oeq_global.OeQ_pop_info(baritem)
+        #oeq_global.OeQ_pop_info(baritem)
 
         #oeq_global.OeQ_push_info("Calculating basic geometries of Building Outlines:", "'"+config.housing_layer_name+"'")
+        #building_outlines=legend.nodeByName(building_outlines.name)
         if not building_outlines:
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
@@ -772,7 +773,10 @@ class OpenEQuarterMain:
         for i in extensions.by_type('wms',category='Import',active=True):
             i.load_wms()
             #return True
-        if all([legend.nodeExists(i.layer_name) for i in extensions.by_type('wms',category='Import',active=True)]):
+        for i in extensions.by_type('wfs',category='Import',active=True):
+            i.load_wfs()
+            #return True
+        if all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
@@ -783,7 +787,7 @@ class OpenEQuarterMain:
     def check_if_information_layers_loaded(self):
         from mole import extensions
         from mole.qgisinteraction import legend
-        if all([legend.nodeExists(i.layer_name) for i in extensions.by_type('wms',category='Import',active=True)]):
+        if all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
@@ -818,7 +822,7 @@ class OpenEQuarterMain:
 
 
     # step 4.1
-    def handle_needle_request_done(self):
+    def handle_needle_request_done(self):                #DOES NOT CAPTURE WFS!
         from mole import extensions
         from mole.project import config
         # create data node
@@ -832,7 +836,9 @@ class OpenEQuarterMain:
 
         # show import layers
         layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
-        layerstoshow += ([i.layer_name for i in extensions.by_category('Import',extensions.by_state(True))])
+        layerstoshow += ([i.layer_name for i in extensions.by_category('Basic',extensions.by_state(True))])
+        layerstoshow += ([i.layer_name for i in extensions.by_category('Import', extensions.by_state(True))])
+
         legend.nodesShow(layerstoshow)
         input_node=legend.nodeByName(config.pst_input_layer_name)
 
@@ -841,8 +847,10 @@ class OpenEQuarterMain:
             i.reset_calculation_state()
 
         if input_node:
+            sample_fields=[]
             for i in extensions.by_type('wms',category='Import',active=True):
                 legend.nodeShow(i.layer_name)
+                sample_fields.append({'layername':i.layer_name,'fieldnames':i.par_in})
             #get original crs (necessary because qgis does not deal with epsg:3857 very well, but sets it to epsg:54004)
             source_crs=input_node[0].layer().crs()
 
@@ -853,7 +861,7 @@ class OpenEQuarterMain:
             #run point sampling tool
             psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
             psti.set_input_layer(config.pst_input_layer_name)
-            abbreviations = psti.select_and_rename_files_for_sampling()
+            abbreviations = psti.select_and_rename_files_for_sampling(sample_fields)
             pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
             vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
             layer_interaction.add_layer_to_registry(vlayer)

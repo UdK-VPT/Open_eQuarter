@@ -4,6 +4,9 @@ from qgis.core import NULL
 from mole.project import config
 
 def calculation(self=None, parameters={}):
+#    print self.extension_name()
+#    self.layer_in=self.load_wfs().name
+#    print self.layer_in
     return {}
 
 
@@ -13,7 +16,7 @@ from mole.extensions import OeQExtension
 from mole.project import config
 extension = OeQExtension(
     extension_id=__name__,
-    category='Import',
+    category='Basic',
     subcategory='WFS',
     extension_name='Building Outlines (ALK, WFS)',
     field_id='',   #used for point sampling tool

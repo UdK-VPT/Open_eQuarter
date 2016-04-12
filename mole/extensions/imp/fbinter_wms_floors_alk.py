@@ -45,7 +45,7 @@ extension = OeQExtension(
     layer_name='Floors (WMS Capture)',
     layer_in=config.pst_output_layer_name,
     layer_out=config.data_layer_name,
-    active=True,
+    active=False,
     description=u'',
     source='crs=EPSG:4326&dpiMode=7&format=image/png&layers=2&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/alk_gebaeude',
     source_crs='EPSG:4326',

@@ -45,6 +45,7 @@ class OeQExtension:
                  layer_in=None,
                  par_out=None,
                  layer_out=None,
+                 field_rename=None,
                  colortable=None,
                  show_results=False,
                  evaluation_method=average,
@@ -94,6 +95,8 @@ class OeQExtension:
             self.layer_out = config.data_layer_name
         else:
             self.layer_out = layer_out
+        self.field_rename = field_rename
+
         #if colortable != None:
         #     if not os.path.exists(colortable):
         #        colortable = None
@@ -120,6 +123,7 @@ class OeQExtension:
                layer_in=None,
                par_out=None,
                layer_out=None,
+               field_rename=None,
                show_results=None,
                colortable=None,
                evaluation_method=None,
@@ -140,6 +144,7 @@ class OeQExtension:
         if par_in != None: self.par_in = par_in
         if layer_in != None: self.layer_in = layer_in
         if par_out != None: self.par_out = par_out
+        if field_rename != None: self.field_rename = field_rename
         if layer_out != None: self.layer_out = layer_out
         if colortable != None: self.colortable = colortable
         if show_results != None: self.show_results = show_results
@@ -359,6 +364,12 @@ class OeQExtension:
             return None
 
         oeq_global.OeQ_pop_progressbar(progressbar)
+        baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+self.layer_name+"'")
+        wfsnode=legend.nodeClipByShapenode(wfsnode,config.investigation_shape_layer_name)
+        oeq_global.OeQ_pop_info(baritem)
+
+
+
         if self.category:
             if not legend.nodeExists(self.category):
                 cat=legend.nodeCreateGroup(self.category)
@@ -378,7 +389,8 @@ class OeQExtension:
                 wfsnode=legend.nodeMove(wfsnode,'bottom',cat)
                 legend.nodeCollapse(cat)
                 legend.nodeHide(cat)
-        return wfsnode.layer()
+        return wfsnode
+        #return wfsnode
 
 
 

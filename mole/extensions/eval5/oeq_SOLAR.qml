@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="2.10.1-Pisa" minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+<qgis version="2.12.1-Lyon" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
     <edittype widgetv2type="TextEdit" name="gml_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
@@ -13,15 +13,6 @@
     <edittype widgetv2type="TextEdit" name="spatial_ty">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="id">
-      <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="AREA">
-      <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="PERIMETER">
-      <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-    </edittype>
     <edittype widgetv2type="TextEdit" name="BLD_ID">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
@@ -29,656 +20,153 @@
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="SOLCRT" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
+  <renderer-v2 attr="SOLCRT" forceraster="0" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
-      <range render="true" symbol="0" lower="0.000000" upper="10.000000" label=" 0.0 - 10.0 "/>
-      <range render="true" symbol="1" lower="10.000000" upper="20.000000" label=" 10.0 - 20.0 "/>
-      <range render="true" symbol="2" lower="20.000000" upper="30.000000" label=" 20.0 - 30.0 "/>
-      <range render="true" symbol="3" lower="30.000000" upper="40.000000" label=" 30.0 - 40.0 "/>
-      <range render="true" symbol="4" lower="40.000000" upper="50.000000" label=" 40.0 - 50.0 "/>
-      <range render="true" symbol="5" lower="50.000000" upper="60.000000" label=" 50.0 - 60.0 "/>
-      <range render="true" symbol="6" lower="60.000000" upper="100.000000" label="> 60.0  "/>
+      <range render="true" symbol="0" lower="0.000000" upper="10.000000" label="        &lt; 10.0 %"/>
+      <range render="true" symbol="1" lower="10.000000" upper="20.000000" label=" 10.0 - 20.0 %"/>
+      <range render="true" symbol="2" lower="20.000000" upper="30.000000" label=" 20.0 - 30.0 %"/>
+      <range render="true" symbol="3" lower="30.000000" upper="40.000000" label=" 30.0 - 40.0 %"/>
+      <range render="true" symbol="4" lower="40.000000" upper="50.000000" label=" 40.0 - 50.0 %"/>
+      <range render="true" symbol="5" lower="50.000000" upper="60.000000" label=" 50.0 - 60.0 %"/>
+      <range render="true" symbol="6" lower="60.000000" upper="100.000000" label="       > 60.0  %"/>
     </ranges>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="255,255,212,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="153,52,4,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="1">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="254,229,165,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="195,42,9,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="2">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="254,195,108,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="229,75,22,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="3">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="color" v="254,153,41,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="4">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="229,114,23,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="252,195,100,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="5">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="195,80,10,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="253,225,87,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="6">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
-          <prop k="color" v="153,52,4,255"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
+          <prop k="color" v="255,244,1,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
     </symbols>
     <source-symbol>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
-          <prop k="border_width_map_unit_scale" v="0,0"/>
+          <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="color" v="129,36,84,255"/>
           <prop k="joinstyle" v="bevel"/>
           <prop k="offset" v="0,0"/>
-          <prop k="offset_map_unit_scale" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="0,0,0,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.26"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
-          <effect enabled="0" type="effectStack">
-            <effect type="dropShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="outerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-            <effect type="drawSource">
-              <prop k="blend_mode" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="1"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerShadow">
-              <prop k="blend_mode" v="13"/>
-              <prop k="blur_level" v="10"/>
-              <prop k="color" v="0,0,0,255"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="offset_angle" v="135"/>
-              <prop k="offset_distance" v="2"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="offset_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0"/>
-            </effect>
-            <effect type="innerGlow">
-              <prop k="blend_mode" v="0"/>
-              <prop k="blur_level" v="3"/>
-              <prop k="color_type" v="0"/>
-              <prop k="draw_mode" v="2"/>
-              <prop k="enabled" v="0"/>
-              <prop k="single_color" v="255,255,255,255"/>
-              <prop k="spread" v="2"/>
-              <prop k="spread_unit" v="MM"/>
-              <prop k="spread_unit_scale" v="0,0"/>
-              <prop k="transparency" v="0.5"/>
-            </effect>
-          </effect>
         </layer>
       </symbol>
     </source-symbol>
     <colorramp type="gradient" name="[source]">
-      <prop k="color1" v="255,255,212,255"/>
+      <prop k="color1" v="255,244,1,255"/>
       <prop k="color2" v="153,52,4,255"/>
       <prop k="discrete" v="0"/>
-      <prop k="stops" v="0.25;254,217,142,255:0.5;254,153,41,255:0.75;217,95,14,255"/>
+      <prop k="stops" v="0.25;252,216,130,255:0.5;254,153,41,255:0.75;217,37,13,255"/>
     </colorramp>
-    <invertedcolorramp value="0"/>
+    <invertedcolorramp value="1"/>
     <mode name="pretty"/>
     <rotation/>
     <sizescale scalemethod="diameter"/>
     <labelformat format=" %1 - %2 " trimtrailingzeroes="false" decimalplaces="1"/>
-    <effect enabled="0" type="effectStack">
-      <effect type="dropShadow">
-        <prop k="blend_mode" v="13"/>
-        <prop k="blur_level" v="10"/>
-        <prop k="color" v="0,0,0,255"/>
-        <prop k="draw_mode" v="2"/>
-        <prop k="enabled" v="0"/>
-        <prop k="offset_angle" v="135"/>
-        <prop k="offset_distance" v="2"/>
-        <prop k="offset_unit" v="MM"/>
-        <prop k="offset_unit_scale" v="0,0"/>
-        <prop k="transparency" v="0"/>
-      </effect>
-      <effect type="outerGlow">
-        <prop k="blend_mode" v="0"/>
-        <prop k="blur_level" v="3"/>
-        <prop k="color_type" v="0"/>
-        <prop k="draw_mode" v="2"/>
-        <prop k="enabled" v="0"/>
-        <prop k="single_color" v="255,255,255,255"/>
-        <prop k="spread" v="2"/>
-        <prop k="spread_unit" v="MM"/>
-        <prop k="spread_unit_scale" v="0,0"/>
-        <prop k="transparency" v="0.5"/>
-      </effect>
-      <effect type="drawSource">
-        <prop k="blend_mode" v="0"/>
-        <prop k="draw_mode" v="2"/>
-        <prop k="enabled" v="1"/>
-        <prop k="transparency" v="0"/>
-      </effect>
-      <effect type="innerShadow">
-        <prop k="blend_mode" v="13"/>
-        <prop k="blur_level" v="10"/>
-        <prop k="color" v="0,0,0,255"/>
-        <prop k="draw_mode" v="2"/>
-        <prop k="enabled" v="0"/>
-        <prop k="offset_angle" v="135"/>
-        <prop k="offset_distance" v="2"/>
-        <prop k="offset_unit" v="MM"/>
-        <prop k="offset_unit_scale" v="0,0"/>
-        <prop k="transparency" v="0"/>
-      </effect>
-      <effect type="innerGlow">
-        <prop k="blend_mode" v="0"/>
-        <prop k="blur_level" v="3"/>
-        <prop k="color_type" v="0"/>
-        <prop k="draw_mode" v="2"/>
-        <prop k="enabled" v="0"/>
-        <prop k="single_color" v="255,255,255,255"/>
-        <prop k="spread" v="2"/>
-        <prop k="spread_unit" v="MM"/>
-        <prop k="spread_unit_scale" v="0,0"/>
-        <prop k="transparency" v="0.5"/>
-      </effect>
-    </effect>
   </renderer-v2>
+  <labeling type="simple"/>
   <customproperties>
     <property key="labeling" value="pal"/>
     <property key="labeling/addDirectionSymbol" value="false"/>
@@ -705,8 +193,10 @@
     <property key="labeling/distInMapUnits" value="false"/>
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
+    <property key="labeling/drawLabels" value="false"/>
     <property key="labeling/enabled" value="false"/>
     <property key="labeling/fieldName" value="SOLCRT"/>
+    <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value=".SF NS Text"/>
@@ -740,6 +230,8 @@
     <property key="labeling/multilineHeight" value="1"/>
     <property key="labeling/namedStyle" value=""/>
     <property key="labeling/obstacle" value="true"/>
+    <property key="labeling/obstacleFactor" value="1"/>
+    <property key="labeling/obstacleType" value="0"/>
     <property key="labeling/placeDirectionSymbol" value="0"/>
     <property key="labeling/placement" value="1"/>
     <property key="labeling/placementFlags" value="0"/>
@@ -821,6 +313,8 @@
     <property key="labeling/wrapChar" value=""/>
     <property key="labeling/xOffset" value="0"/>
     <property key="labeling/yOffset" value="0"/>
+    <property key="variableNames" value="_fields_"/>
+    <property key="variableValues" value=""/>
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
@@ -848,17 +342,22 @@
     <selectedonly on=""/>
   </labelattributes>
   <SingleCategoryDiagramRenderer diagramType="Pie">
-    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="-4.65661e-10">
+    <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" sizeType="MM" minScaleDenominator="0">
       <fontProperties description=".SF NS Text,13,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
   <DiagramLayerSettings yPosColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" showAll="1"/>
-  <editform></editform>
+  <editform>.</editform>
   <editforminit/>
   <featformsuppress>0</featformsuppress>
-  <annotationform></annotationform>
+  <annotationform>.</annotationform>
   <editorlayout>generatedlayout</editorlayout>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions/>
+  <conditionalstyles>
+    <rowstyles/>
+    <fieldstyles/>
+  </conditionalstyles>
 </qgis>

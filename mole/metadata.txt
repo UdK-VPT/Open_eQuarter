@@ -12,7 +12,7 @@
 name=Open eQuarter
 qgisMinimumVersion=2.4
 description=The plugin automates the setup for investigating an area. QGIS may tell you, the plugin is fualty. Ignore, keep the plugin and simply restart QGIS. That's it. Will be fixed in the next version.
-version=0.9
+version=0.99
 author=Werner Kaul & Kim Gülle / Open eQuarter Team UdK-Berlin
 email=firstdayofjune@users.noreply.github.com
 

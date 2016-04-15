@@ -1,0 +1,51 @@
+    <script type="text/javascript" defer>
+        requirejs(['openlayers', 'domReady!'], function(ol){
+            var format = new ol.format.WKT();
+            var feature;
+            var featureList = [];
+
+            {% for feature in layer.features %}
+                var feature = format.readFeature('{{ feature.geom.wkt }}');
+                feature.getGeometry().transform('EPSG:{{ feature.geom.srid }}', 'EPSG:3857');
+                featureList.push(feature);
+            {% endfor %}
+            vector = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: featureList
+                })
+            });
+
+            var checkExist = setInterval(function() {
+               if (CrowOL) {
+                  CrowOL.layerTree.add(vector, '{{ layer.name }}');
+                  clearInterval(checkExist);
+               }
+            }, 100); // check every 100ms
+        });
+    </script>
+    <div class="list-group-item">
+        <span class="pull-left">
+            <button type="button" class="btn btn-xs btn-danger" onclick="CrowOL.map.removeLayer(vector);">
+                <i class="glyphicon glyphicon-trash"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-primary" onclick="vector.setVisible(!vector.getVisible()); $(this).toggleClass('btn-primary'); $(this).toggleClass('btn-default'); var i = $(this).find('i'); i.toggleClass('glyphicon-eye-close'); i.toggleClass('glyphicon-eye-open')">
+                <i class="glyphicon glyphicon-eye-close"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-primary" onclick="var map = CrowOL.map; map.getView().fit(vector.getSource().getExtent(), map.getSize());">
+                <i class="glyphicon glyphicon-screenshot"></i>
+            </button>
+        </span>
+        &nbsp; {{ layer.name }} ({{ layer.features | length }})
+
+        <span class="pull-right">
+            <a class="btn btn-xs btn-primary" href="{{ layer.get_absolute_url }}" title="Details">
+                <i class="glyphicon glyphicon-comment"></i>
+            </a>
+            <button type="button" class="btn btn-xs btn-primary">
+                <i class="glyphicon glyphicon-arrow-up"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-primary">
+                <i class="glyphicon glyphicon-arrow-down"></i>
+            </button>
+        </span>
+    </div>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <title>Crow Jasmine Spec Runner</title>
+
+    <link rel="shortcut icon" type="image/png" href="{% static 'crow/libs/jasmine/jasmine_favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'crow/libs/jasmine/jasmine.css' %}">
+    <script type="text/javascript" src="{% static 'crow/libs/require/require.js' %}"></script>
+    <script type="text/javascript" src="{% static 'crow/common.js' %}"></script>
+
+    {# source files as defined in crow/jasmine/files.json #}
+    {% for url in suite.js_files %}
+        <script src="{{ url }}"></script>
+    {% endfor %}
+
+    {# static files as defined in crow/jasmine/files.json #}
+    {% for url in suite.static_files %}
+        <script src="{{ STATIC_URL }}{{ url }}"></script>
+    {% endfor %}
+
+    <script>
+        require(['jasmine-boot'], function () {
+            require([
+                {% for file in files %}
+                    '{% url "jasmine_test" file %}',
+                {% endfor %}
+            ], function(){
+                //trigger Jasmine
+                window.onload();
+            })
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

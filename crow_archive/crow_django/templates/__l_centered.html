@@ -1,0 +1,38 @@
+{% extends "__base.html" %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <style type="text/css">
+       #box_center {
+            z-index: 50;
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+
+            min-width: 29rem;
+            max-width: 31.2rem;
+            margin: 0 auto;
+            padding: 1.85rem 0 2.5rem 0;
+            background-color: rgb(235, 235, 235);
+            border-radius: 7px;
+            border: 1px solid rgb(127, 127, 127);
+        }
+
+        #box_center h1 {
+            font-size: 220%;
+        }
+
+        #box_center h1, #box_center p {
+            max-width: 25rem;
+            margin: 0 auto 1.25rem auto;
+        }
+    </style>
+{% endblock %}{# / stylesheet #}
+
+{% block content %}
+    {{ block.super }}
+    <div id="box_center">
+        {% block box_center %}{% endblock %}
+    </div>
+{% endblock %}

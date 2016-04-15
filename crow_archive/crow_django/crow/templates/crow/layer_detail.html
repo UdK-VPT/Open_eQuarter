@@ -1,0 +1,57 @@
+{% extends "__l_centered_overlay.html" %}
+{% load bootstrap3 %}
+
+{% block title %}
+    {{ block.super }} - {{ layer.name }} details
+{% endblock %}
+
+{% block box_center %}
+  <h1>{{ layer.name }}</h1>
+  {% if layer.comments %}
+    <h2 style="margin-left: 20px; font-size: 150%;">Comments</h2>
+    <style type="text/css">
+        .commentary {
+            margin: 0 30px 0 20px;
+        }
+
+        .commentary::after {
+            height: 1px;
+            width: 70%;
+            display: block;
+            margin: -5px auto 10px;
+            content: '';
+            border-bottom: 1px solid;
+        }
+
+        .commentary:last-of-type::after {
+            border: none;
+        }
+
+        .date {
+            display: inline-block;
+        }
+
+        .author {
+            display: inline-block;
+            float: right;
+            margin-right: 20px;
+        }
+
+    </style>
+    {% for comment in layer.comments %}
+        <div class="commentary">
+            <p class="date">{{ comment.date_created }}</p>
+            <p class="author">{{ comment.author }}</p>
+            <p class="text">{{ comment.text }}</p>
+        </div>
+    {% endfor %}
+  {% endif %}
+    {% if form.errors %}
+        <p>{{ form.errors }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form layout='inline' %}
+        <input type="submit" class="btn btn-primary" value="Add comment" />
+    </form>
+{% endblock %}

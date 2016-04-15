@@ -1,0 +1,13 @@
+Hello,
+
+Thanks for your registration at {{ site.name }}
+
+To complete your registration, please follow the link below:
+http://{{ site.domain }}{% url "registration_activate" activation_key=activation_key %}
+
+Attention: This link will expire in {{ expiration_days }} days!
+
+
+If you do not know, why you are receiving this email, you can simply ignore it.
+The account will be deleted, if it is not activated within the next {{ expiration_days }} days.
+

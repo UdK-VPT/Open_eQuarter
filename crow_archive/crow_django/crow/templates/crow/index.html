@@ -1,0 +1,90 @@
+{% extends '__base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    {{ block.super }} -
+    {% if user.is_authenticated %}{{ user.username }}{% else %}Login or register{% endif %}
+{% endblock title %}
+
+{% block navitems_left %}
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-book"></i>Choose project...<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        <li><a href="#">Project 1</a></li>
+        <li><a href="#">Project 2</a></li>
+    </ul>
+</li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-globe"></i>Add layer...<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        {% for layer in layers %}
+            <li><a href="#">{{ layer.name }} ({{ layer.features | length }})</a></li>
+        {% endfor %}
+    </ul>
+</li>
+<li><a href="#" class="btn-file"><i class="glyphicon glyphicon-folder-open"></i>Load layer...<input type="file"></a></li>
+
+<form id="addressLookup" action="" class="navbar-form navbar-left" role="search">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Lookup address...">
+                <span class="input-group-btn">
+        <button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-search"></i></button>
+    </span>
+    </div>
+</form>
+{% endblock %}
+{% block navitems_right %}
+    <li><a href="http://udk-vpt.github.io/Open_eQuarter/">Github page</a></li>
+{% endblock %}
+{% block content %}
+    <div class="row main-row">
+        <div class="col-sm-4 col-md-3 sidebar sidebar-left pull-left">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a id="layersMenu" data-toggle="collapse" data-target="#layerstack-collapse" href="#layers">
+                                Layers ({{ layers | length }})
+                            </a>
+                        </h4>
+                    </div>
+                    <div class="panel-collapse collapse in" id="layerstack-collapse">
+                        <div id="layerStack" class="panel-body list-group" role="group">
+                            {% for layer in layers %}
+                                {% include "crow/_layer_item.html" with layer=layer %}
+                            {% empty %}
+                                No layers opened yet.
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div><!-- /.panel panel-default -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-target="#properties" href="#properties">
+                                <i class="fa fa-list-alt"></i>
+                                Properties
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="properties" class="panel-collapse collapse in">
+                        <div id="dataSheet" class="panel-body">
+                            <p>Click a feature to display its properties.</p>
+                        </div>
+                    </div>
+                </div><!-- /.panel panel-default -->
+            </div><!-- /.panel-group sidebar-body -->
+        </div><!-- /.panel-group sidebar-left -->
+    </div><!-- /.row main-row -->
+    <div class="row footer-row center-block" id="commentary">
+        <div class="input-group">
+            <span class="input-group-addon">@</span>
+            <input type="text" class="form-control" placeholder="Add a comment...">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">Save</button>
+                </span>
+        </div>
+    </div>
+</div><!-- /.container-fluid -->
+
+{% endblock %}

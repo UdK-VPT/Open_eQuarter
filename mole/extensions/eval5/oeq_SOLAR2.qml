@@ -25,11 +25,11 @@
     <edittype widgetv2type="TextEdit" name="BLD_ID">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="SOLCRT">
+    <edittype widgetv2type="TextEdit" name="SOLHEL">
       <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
     </edittype>
   </edittypes>
-  <renderer-v2 attr="SOLCRT" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
+  <renderer-v2 attr="SOLHEL" symbollevels="0" type="graduatedSymbol" graduatedMethod="GraduatedColor">
     <ranges>
       <range render="true" symbol="0" lower="0.000000" upper="10.000000" label="   0.0 - 10.0 kWh/(a.m2)"/>
       <range render="true" symbol="1" lower="10.000000" upper="20.000000" label=" 10.0 - 20.0 kWh/(a.m2)"/>
@@ -706,7 +706,7 @@
     <property key="labeling/distMapUnitMaxScale" value="0"/>
     <property key="labeling/distMapUnitMinScale" value="0"/>
     <property key="labeling/enabled" value="false"/>
-    <property key="labeling/fieldName" value="SOLCRT"/>
+    <property key="labeling/fieldName" value="SOLHEL"/>
     <property key="labeling/fontBold" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value=".SF NS Text"/>

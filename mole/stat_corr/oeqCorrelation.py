@@ -1,4 +1,9 @@
-from math import log
+try:
+    from numpy import log
+    numpy = True
+except:
+    from math import log
+    numpy = False
 
 class correlation:
   def __init__(self,const=0,a=0,b=0,c=0,d=0,mode="lin"):
@@ -12,7 +17,10 @@ class correlation:
   def lookup(self,*args):
   # args = [float(x) for x in args]
     if self.mode == "log":
-      args = [log(x) for x in args]
+      if numpy:
+        args = args = log(args)
+      else:
+        args = [log(x) for x in args]
     ret = [self.const + self.a*x + self.b*x**2 + self.c*x**3 + self.d*x**4  for x in args]
     if len(ret) == 1: return ret[0]#
     else: return ret

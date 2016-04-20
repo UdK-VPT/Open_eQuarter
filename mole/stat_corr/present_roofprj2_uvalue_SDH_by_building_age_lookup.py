@@ -3,7 +3,7 @@
 
 import math
 import numpy as np
-import oeqLookuptable as oeq
+from . import oeqLookuptable as oeq
 def get(*xin):
 
 

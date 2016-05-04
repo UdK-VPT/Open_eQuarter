@@ -248,7 +248,7 @@ class OeQExtension:
     def load_wms(self,capture=True):
         from qgis.core import QgsRasterLayer,QgsMapLayerRegistry
         from mole.oeq_global import OeQ_wait_for_renderer
-        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image
+        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image,getWmsLegendUrl
         from mole.qgisinteraction import layer_interaction
         #init progressbar
         progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
@@ -262,9 +262,11 @@ class OeQExtension:
         if not OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
             return False
-        #push progressbar
-        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
+        legendURL = getWmsLegendUrl(rlayer)
+
+            #push progressbar
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         path = save_wms_extent_as_image(wmslayer)
         try:
             layer_interaction.remove_layer(rlayer,physical=True)
@@ -275,6 +277,9 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         rlayer = QgsRasterLayer(path, self.layer_name)
         QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+        print legendURL
+        rlayer.setLegendUrl(legendURL)
+
         #close progressbar
         if not OeQ_wait_for_renderer(60000):
             oeq_global.OeQ_push_warning(self.extension_id + ':','Reloading WMS-Capture timed out!')
@@ -669,11 +674,13 @@ file_writer.writeRaster(pipe,
         #self.calculate_required()
         baritem=oeq_global.OeQ_push_info(u'Extension "' + self.extension_name + '":','Searching for mandatory predecessors')
         required = self.required()
+        if not self.needs_evaluation(required):
+            oeq_global.OeQ_pop_info(baritem)
+            return
         for ext in required:
             ext.calculate()
         oeq_global.OeQ_pop_info(baritem)
-        if not self.needs_evaluation(required):
-            return
+
 
         #get source and target nodes
         source_layer = legend.nodeByName(self.layer_in)

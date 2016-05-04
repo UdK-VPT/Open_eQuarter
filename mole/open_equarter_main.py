@@ -45,6 +45,7 @@ from mole import oeq_global
 
 
 
+
 def do_print():
     pass
 
@@ -194,10 +195,11 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        legend.nodeMove(config.investigation_shape_layer_name,'top')
-        legend.nodeMove(config.housing_coordinate_layer_name,1)
-        legend.nodeMove(config.housing_layer_name,2)
-        legend.nodeMove(config.open_layers_layer_name,'bottom')
+        root_node = QgsProject.instance().layerTreeRoot()
+        legend.nodeMove(config.investigation_shape_layer_name,'top',root_node)
+        legend.nodeMove(config.housing_coordinate_layer_name,1,root_node)
+        legend.nodeMove(config.housing_layer_name,2,root_node)
+        legend.nodeMove(config.open_layers_layer_name,'bottom',root_node)
 
 
 
@@ -787,7 +789,8 @@ class OpenEQuarterMain:
     def check_if_information_layers_loaded(self):
         from mole import extensions
         from mole.qgisinteraction import legend
-        if all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]):
+        infolayernames = extensions.by_state(True,'Import')
+        if (len(infolayernames) > 0) & all([legend.nodeExists(i.layer_name) for i in infolayernames]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
@@ -941,8 +944,8 @@ class OpenEQuarterMain:
 
     def check_if_buildings_evaluated(self):
         from mole import extensions
-        if (all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]) &
-                all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Evaluation')])):
+        evallayernames = extensions.by_state(True, 'Evaluation')
+        if (len(evallayernames) > 0) & (all([legend.nodeExists(i.layer_name) for i in evallayernames])):
             self.main_process_dock.buildings_evaluated.setChecked(True)
         else:
             self.main_process_dock.buildings_evaluated.setChecked(False)

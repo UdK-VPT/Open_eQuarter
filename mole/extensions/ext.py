@@ -250,6 +250,8 @@ class OeQExtension:
         from mole.oeq_global import OeQ_wait_for_renderer
         from mole.qgisinteraction.wms_utils import save_wms_extent_as_image,getWmsLegendUrl
         from mole.qgisinteraction import layer_interaction
+        # remove old files
+        layer_interaction.fullRemove(self.layer_name)
         #init progressbar
         progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Loading WMS-Map "' + self.layer_name + '"!',
@@ -324,7 +326,8 @@ class OeQExtension:
         #check whether extent is defined, if not use investigationarea extent
         if not extent:
             extent= legend.nodeGetExtent(config.investigation_shape_layer_name)
-
+        # remove old files
+        layer_interaction.fullRemove(self.layer_name)
         #init progressbar
         progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Loading WFS-Map "' + self.layer_name + '"!',
@@ -337,14 +340,23 @@ class OeQExtension:
         #transform extent
         coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
         extent = coord_transformer.transform(extent)
+        # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
+        # so we the current messagebar item
+        current_msgb= iface.messageBar().currentItem()
         #load wfs
         wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
-
-        #push progressbar
+        # windows might throw a warning here, as is does not adopt the CRS from the WFS source
+        # so the current baritem gets  immediately removed if is not the the one before loading
+        if iface.messageBar().currentItem() != current_msgb:
+            iface.messageBar().popWidget()
+        # push progressbar
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         if not wfsLayer.isValid():
-            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not load WFS-Map "' + self.source + '"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
+                                      u'Could not load WFS-Map "' + self.source + '"!')
             return None
+        wfsLayer.setCrs(crsDest)
+
 
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
@@ -898,6 +910,12 @@ def by_category(category=None, registry=None):
         return registry
     return filter(lambda ext: ext.category == category, registry)
 
+def by_subcategory(subcategory=None, registry=None):
+    if registry == None:
+        registry = oeq_global.OeQ_ExtensionRegistry
+    if subcategory == None:
+        return registry
+    return filter(lambda ext: ext.subcategory == subcategory, registry)
 
 def by_state(active=None, category=None, registry=None):
     registry = by_category(category, registry)
@@ -1007,3 +1025,20 @@ def update_all_colortables(overwrite=True):
     for ext in by_state(overwrite):
         ext.update_colortable()
 
+def get_tree(show=False):
+    categories=sorted(list(set([i.category for i in by_category()])))
+    ext_tree=[]
+    for i in categories:
+        subcategories = sorted(list(set([cat.subcategory for cat in by_category(i)])))
+        branch=[]
+        for j in subcategories:
+            branch.append(by_subcategory(j))
+        ext_tree.append(branch)
+    if show:
+        for i in ext_tree:
+            print i[0][0].category
+            for j in i:
+                print " > " + j[0].subcategory
+                for k in j:
+                    print " > " + " > " + k.extension_name
+    return ext_tree

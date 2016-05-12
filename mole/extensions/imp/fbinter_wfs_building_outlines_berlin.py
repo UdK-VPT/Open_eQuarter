@@ -12,7 +12,7 @@ def calculation(self=None, parameters={}):
 extension = OeQExtension(
     extension_id=__name__,
     category='Basic',
-    subcategory='Data',
+    subcategory='File',
     field_id='OUTL',
     par_in=[],
     par_out=['PERIMETER'],

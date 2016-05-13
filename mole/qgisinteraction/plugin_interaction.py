@@ -92,8 +92,8 @@ class PstInteraction(object):
             band_name = table_text[1]
             layer = find_layer_by_name(layer_name)
             ext=extensions.by_layername(layer_name, 'Import')
-            if ext:
-                print "Test: "+ext[0].layer_name
+            #if ext:
+            #    print "Test: "+ext[0].layer_name
             # Check if the layer was already used
             if last_name != layer_name:
                 last_name = layer_name

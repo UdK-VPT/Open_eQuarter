@@ -118,10 +118,7 @@ class OeQ_Workflow:
         self.description=description
         self.registry=registry
         self.worksteps=worksteps
-        self.state=state
 
-    def reset(self):
-        self.state=0
 
     def register_workstep(self,workstep):
         '''
@@ -159,10 +156,8 @@ class OeQ_Workflow:
         :name: Name of the workstep
         :return: True if exists
         '''
-        ws = self.get_workstep(name)
-        if ws:
-            return ws.do()
-        return False
+        return self.get_workstep(name).do()
+
 
     def workstep_is_done(self,name):
         '''
@@ -170,67 +165,55 @@ class OeQ_Workflow:
         :name: Name of the workstep
         :return: True if exists
         '''
-        ws = self.get_workstep(name)
-        if ws:
-            if ws.is_done():
-                return True
-        if self.state > self.find_current_workstep():
-            self.state = self.find_current_workstep()
-        return False
+        return self.get_workstep(name).is_done()
 
-    def next_workstep(self,check_current=True):
+
+    def do_next_workstep(self, check_current=True):
         '''
         Check if workstep exists in OeQ_Registry
         :return: True if exists
         '''
+        return self.do_workstep(self.worksteps[self.next_workstep_index()])
 
-        if check_current:
-            self.state=self.find_current_workstep()
-        if self.state == len(self.worksteps):
-            return None
-        #print self.worksteps[self.state]
-        if self.do_workstep(self.worksteps[self.state]):
-            self.state+=1
-            return True
-        return False
 
-    def next_worksteps_name(self,check_current=True):
+    def next_workstep_name(self,check_current=True):
         '''
         Check if workstep exists in OeQ_Registry
         :return: True if exists
         '''
-
-        if check_current:
-            self.state=self.find_current_workstep()
-        if self.state == len(self.worksteps):
-            return None
-        #print self.worksteps[self.state]
-        return self.worksteps[self.state]
+        nws = self.next_workstep_index()
+        if nws < 0:
+            return ""
+        return self.worksteps[nws]
 
 
-    def find_current_workstep(self):
+
+    def current_workstep_index(self):
         '''
         Check if workstep exists in OeQ_Registry
         :name: Name of the workstep
         :return: True if exists
         '''
-        self.state=0
-        for i in self.worksteps:
-            ws = self.get_workstep(i)
-            if ws.is_done():
-                self.state +=1
-            else:
-                break
-        return self.state
+        ws = [self.get_workstep(i).is_done() for i in self.worksteps]
+        if all(ws):
+            return len(self.worksteps)-1
+        return ws.index(False)-1
+
+    def next_workstep_index(self):
+        '''
+        Check if workstep exists in OeQ_Registry
+        :name: Name of the workstep
+        :return: True if exists
+        '''
+        ws = [self.get_workstep(i).is_done() for i in self.worksteps]
+        if all(ws):
+            return -1
+        return ws.index(False)
+
 
     def all_mandatory_worksteps_done(self,name,check_current=True):
-        if check_current:
-            self.state=self.find_current_workstep()
-        if self.state == len(self.worksteps):
-            return True
-        if self.worksteps.index(name)<=self.state:
-            return True
-        return False
+        return self.next_workstep_index() >= self.worksteps.index(name)
+
 
 
 
@@ -246,9 +229,8 @@ class OeQ_Workflow:
         return False
 
     def is_done(self):
-        if self.state == len(self.worksteps):
-            return True
-        return False
+       # print self.next_workstep_name()
+        return self.next_workstep_index() == -1
 
     def append_workstep(self,name):
         if self.workstep_exists(name):

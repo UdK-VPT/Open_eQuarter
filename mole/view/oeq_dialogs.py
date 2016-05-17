@@ -510,7 +510,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
         self.csv_export_done.pressed.connect(mole.export_database_to_csv)
 
         self.process_button_next.clicked.connect(lambda: self.call_next_workstep(mole))
-        self.run_button.clicked.connect(self.run_automode)
+        self.run_button.clicked.connect(lambda: self.run_automode(mole))
        # for dropdown_index, list_view in enumerate(self.progress_model.section_views):
        #     self.process_page.addWidget(list_view)
        #     self.active_page_dropdown.addItem(list_view.accessibleName())
@@ -586,26 +586,25 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def switch_to_next_worksteps_page(self,mole):
         from PyQt4 import QtGui
-        nextname = mole.standard_workflow.next_worksteps_name()
-        if nextname != None:
+        nextname = mole.standard_workflow.next_workstep_name()
+        if bool(nextname):
             pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
             self.select_page(pagename)
 
     def call_next_workstep(self,mole):
         from PyQt4 import QtGui
-        nextname = mole.standard_workflow.next_worksteps_name()
-        if nextname != None:
-            pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
-            self.select_page(pagename)
-        mole.standard_workflow.next_workstep()
+        if mole.standard_workflow.is_done():
+            return False
+        self.switch_to_next_worksteps_page(mole)
+        return mole.standard_workflow.do_next_workstep()
 
 
-    def run_automode(self):
+
+    def run_automode(self,mole):
         from qgis import utils
-        standard_workflow = utils.plugins['mole'].standard_workflow
-        while (not standard_workflow.is_done()) & self.automode.isChecked():
-
-            standard_workflow.next_workstep()
+        while (not mole.standard_workflow.is_done()) & self.automode.isChecked():
+            self.call_next_workstep(mole)
+        self.automode.setChecked(False)
 
 class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
 

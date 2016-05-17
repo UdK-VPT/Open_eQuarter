@@ -53,16 +53,9 @@ def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_outpu
     return filename
 
 def getWmsLegendUrl(layer): #Very quick and very dirty
-    m=layer.metadata()
-    m=m.split('LegendURLs')
-    for i in m:
-        k=i.split("image/gif")
-        if (type(k) is type([])) & (len(k) > 1): break
-        k=i.split("image/jpg")
-        if (type(k) is type([])) & (len(k) > 1): break
-    if (type(k) is not type([])) | (len(k) < 2): return None
-    k=k[1].split("http")
-    if (type(k) is not type([])) | (len(k) < 2): return None
-    url='http'+k[1].split('<')[0]
+    url = None
+    try:
+        url="http" +layer.metadata().split('LegendURLs')[1].split("image/")[1].split("http")[1].split("<")[0]
+    except: pass
     return url
-    #open_url(url,new=2) #2 means Open in a new TAB if possible
+

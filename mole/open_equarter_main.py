@@ -45,6 +45,7 @@ from mole import oeq_global
 
 
 
+
 def do_print():
     pass
 
@@ -194,10 +195,11 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        legend.nodeMove(config.investigation_shape_layer_name,'top')
-        legend.nodeMove(config.housing_coordinate_layer_name,1)
-        legend.nodeMove(config.housing_layer_name,2)
-        legend.nodeMove(config.open_layers_layer_name,'bottom')
+        root_node = QgsProject.instance().layerTreeRoot()
+        legend.nodeMove(config.investigation_shape_layer_name,'top',root_node)
+        legend.nodeMove(config.housing_coordinate_layer_name,1,root_node)
+        legend.nodeMove(config.housing_layer_name,2,root_node)
+        legend.nodeMove(config.open_layers_layer_name,'bottom',root_node)
 
 
 
@@ -689,7 +691,8 @@ class OpenEQuarterMain:
         #return building_outlines.layer()
         self.reorder_layers()
         self.main_process_dock.building_outlines_acquired.setChecked(True)
-        return True
+        self.standard_workflow.do_workstep('building_coordinates_acquired')
+        return self.main_process_dock.building_outlines_acquired.isChecked()
 
     def check_if_building_outlines_acquired(self):
             from mole.project import config
@@ -781,13 +784,16 @@ class OpenEQuarterMain:
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
         self.reorder_layers()
+        self.standard_workflow.do_workstep('needle_request_done')
+        self.standard_workflow.do_workstep('database_created')
         return self.main_process_dock.information_layers_loaded.isChecked()
 
 
     def check_if_information_layers_loaded(self):
         from mole import extensions
         from mole.qgisinteraction import legend
-        if all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]):
+        infolayernames = extensions.by_state(True,'Import')
+        if (len(infolayernames) > 0) & all([legend.nodeExists(i.layer_name) for i in infolayernames]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
@@ -905,10 +911,14 @@ class OpenEQuarterMain:
 
 
     def handle_database_created(self):
+        from mole import extensions
         from mole.qgisinteraction import legend
         baritem=oeq_global.OeQ_push_info('Create Database:', 'Generating building records... be patient!')
 
         result= bool(legend.nodeCreateDatabase(config.housing_layer_name,config.data_layer_name,config.measurement_projection,True,"Data"))
+        if result:
+            for i in extensions.by_state(True,'Evaluation'):
+                i.last_calculation = None
         self.reorder_layers()
         oeq_global.OeQ_pop_info(baritem)
         return result
@@ -929,20 +939,27 @@ class OpenEQuarterMain:
         for i in extensions.by_state(True,'Import'):
             i.calculate()
         #extensions.run_active_extensions('Import')
-        success = all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')])
         for i in extensions.by_state(True,'Evaluation'):
             i.calculate()
         #extensions.run_active_extensions('Evaluation')
-        success = success & all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Evaluation')])
+        #import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
+        #evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
+        #if all([legend.nodeExists(i.layer_name) for i in import_layer_names]) & all([legend.nodeExists(i.layer_name) for i in evaluation_layer_names]):
+        if all([not i.needs_evaluation() for i in extensions.by_state(True, 'Evaluation')]) & all([not i.needs_evaluation() for i in extensions.by_state(True,'Import')]):
+            self.main_process_dock.buildings_evaluated.setChecked(True)
+        else:
+            self.main_process_dock.buildings_evaluated.setChecked(False)
         legend.nodeHide(config.pst_input_layer_name)
         self.reorder_layers()
         oeq_global.OeQ_pop_info(baritem)
-        return success
+        return self.main_process_dock.buildings_evaluated.isChecked()
 
     def check_if_buildings_evaluated(self):
         from mole import extensions
-        if (all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]) &
-                all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Evaluation')])):
+        #import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
+        #evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
+        #if all([legend.nodeExists(i.layer_name) for i in import_layer_names]) & all([legend.nodeExists(i.layer_name) for i in evaluation_layer_names]):
+        if all([not i.needs_evaluation() for i in extensions.by_state(True, 'Evaluation')]) & all([not i.needs_evaluation() for i in extensions.by_state(True, 'Import')]):
             self.main_process_dock.buildings_evaluated.setChecked(True)
         else:
             self.main_process_dock.buildings_evaluated.setChecked(False)
@@ -1064,4 +1081,16 @@ class OpenEQuarterMain:
         return None
 
 
+    '''
+from mole import extensions
+from mole.qgisinteraction import legend
+import_layer_names= filter(lambda x: bool(x.layer_name), extensions.by_state(True,'Import'))
+success = all([legend.nodeExists(i.layer_name) for i in import_layer_names])
+import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
+evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
+if all([legend.nodeExists(i.layer_name) for i in import_layer_names]) & all([legend.nodeExists(i.layer_name) for i in evaluation_layer_names]):
+    self.main_process_dock.buildings_evaluated.setChecked(True)
+else:
+    self.main_process_dock.buildings_evaluated.setChecked(False)
 
+'''

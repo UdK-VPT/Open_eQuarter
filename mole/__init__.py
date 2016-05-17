@@ -28,8 +28,5 @@ if platform.system() == 'Darwin':
 
 def classFactory(iface):
     # load OpenEQuarterMain class from file open_equarter_main
-    print('Hallo Urvater')
-
-
     from open_equarter_main import OpenEQuarterMain
     return OpenEQuarterMain(iface)

@@ -18,7 +18,7 @@ class correlation:
   # args = [float(x) for x in args]
     if self.mode == "log":
       if numpy:
-        args = args = log(args)
+        args = log(args)
       else:
         args = [log(x) for x in args]
     ret = [self.const + self.a*x + self.b*x**2 + self.c*x**3 + self.d*x**4  for x in args]

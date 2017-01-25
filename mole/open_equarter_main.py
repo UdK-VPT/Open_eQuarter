@@ -197,8 +197,8 @@ class OpenEQuarterMain:
         """
         root_node = QgsProject.instance().layerTreeRoot()
         legend.nodeMove(config.investigation_shape_layer_name,'top',root_node)
-        legend.nodeMove(config.housing_coordinate_layer_name,1,root_node)
-        legend.nodeMove(config.housing_layer_name,2,root_node)
+        legend.nodeMove(config.building_coordinate_layer_name, 1, root_node)
+        legend.nodeMove(config.building_outline_layer_name, 2, root_node)
         legend.nodeMove(config.open_layers_layer_name,'bottom',root_node)
 
 
@@ -314,10 +314,9 @@ class OpenEQuarterMain:
         :return True if the layer is available:
         :rtype bool:
         """
-        for layer in QgsMapLayerRegistry.instance().mapLayers():
-            if 'OpenLayers_plugin_layer' in layer:
-                return True
-
+        from mole.qgisinteraction.legend import nodeExists
+        if nodeExists('OpenLayers_plugin_layer'):
+            return True
         return False
 
     def zoom_to_default_extent(self):
@@ -493,6 +492,7 @@ class OpenEQuarterMain:
 
     # step 0.3
     def handle_project_created(self):
+        oeq_global.OeQ_pop_status()
         self.oeq_project_settings_form.show()
         save = self.oeq_project_settings_form.exec_()
         if save:
@@ -500,8 +500,12 @@ class OpenEQuarterMain:
             #self.handle_project_saved()
         else:
             self.main_process_dock.project_created.setChecked(False)
-
-        return self.main_process_dock.project_created.isChecked()
+        result = self.main_process_dock.project_created.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="Project was succesfully created!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not create Project!")
+        return result
             #self.handle_project_saved()
             #return self.create_project_ifNotExists()
 
@@ -517,13 +521,20 @@ class OpenEQuarterMain:
     def handle_project_saved(self):
         from mole import extensions
         #extensions.load_defaults()
+        oeq_global.OeQ_pop_status()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
             extensions.copy_extensions_to_project()
             self.main_process_dock.project_saved.setChecked(True)
         else:
             self.main_process_dock.project_saved.setChecked(False)
-        return self.main_process_dock.project_saved.isChecked()
+        result = self.main_process_dock.project_saved.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="Project was succesfully saved!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not save Project!")
+        return result
+
 
     def check_if_project_saved(self):
         if oeq_global.OeQ_project_saved():
@@ -534,10 +545,13 @@ class OpenEQuarterMain:
 
 
 
+
     # step 1.0
     def handle_investigationarea_defined(self):
         from PyQt4.QtCore import QEventLoop
         from qgis.gui import QgsMessageBar
+        oeq_global.OeQ_pop_status()
+        result = False
         if not self.standard_workflow.all_mandatory_worksteps_done('investigationarea_defined'):
             self.main_process_dock.investigationarea_defined.setChecked(False)
             return False
@@ -601,11 +615,21 @@ class OpenEQuarterMain:
                         investigation_area_node=investigation_area_node[0]
                         if investigation_area_node.layer().featureCount():
                             legend.nodeZoomTo(config.investigation_shape_layer_name)
+                            legend.nodeHide(config.open_layers_layer_name)
                             self.main_process_dock.investigationarea_defined.setChecked(True)
-                            return self.main_process_dock.investigationarea_defined.isChecked()
-            layer_interaction.fullRemove(config.investigation_shape_layer_name)
-            self.main_process_dock.investigationarea_defined.setChecked(False)
-            return self.main_process_dock.investigationarea_defined.isChecked()
+                            result = self.main_process_dock.investigationarea_defined.isChecked()
+            else:
+                layer_interaction.fullRemove(config.investigation_shape_layer_name)
+                self.main_process_dock.investigationarea_defined.setChecked(False)
+
+            result = self.main_process_dock.investigationarea_defined.isChecked()
+
+            if result:
+                oeq_global.OeQ_push_status(message="Investigation Area was succesfully defined!")
+            else:
+                oeq_global.OeQ_push_status(message="Investigation Area definition failed!")
+            return result
+
 
 
     def confirm_selection_of_investigation_area(self,loop_quit,confirmed):
@@ -653,50 +677,40 @@ class OpenEQuarterMain:
         from mole import oeq_global
         from mole.qgisinteraction import legend
         from mole.project import config
+        oeq_global.OeQ_pop_status()
         if not self.standard_workflow.all_mandatory_worksteps_done('building_outlines_acquired'):
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
         #self.iface.mapCanvas().freeze()
+        legend.nodeHide(config.open_layers_layer_name)
         legend.nodeZoomTo(config.investigation_shape_layer_name)
-        building_outline_ext=extensions.by_layername(config.housing_layer_name,active=True)
+        building_outline_ext=extensions.by_layername(config.building_outline_layer_name, active=True)
         if not building_outline_ext:
-            oeq_global.OeQ_push_warning("No import extension for Building Outlines", "Load geometries or define them on a new Vectorlayer named '"+config.housing_layer_name+"' !")
+            oeq_global.OeQ_push_warning("No import extension for Building Outlines", "Load geometries or define them on a new Vectorlayer named '" + config.building_outline_layer_name + "' !")
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
-        building_outline_ext = building_outline_ext[0]
-        #oeq_global.OeQ_wait(5)
-        building_outlines=building_outline_ext.load_wfs()
-        #oeq_global.OeQ_wait(5)
-        #baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+config.housing_layer_name+"'")
-        #building_outlines=legend.nodeClipByShapenode(config.housing_layer_name,config.investigation_shape_layer_name)
-        #original_crs=building_outlines.layer().crs().authid()
-        #self.iface.mapCanvas().freeze(False)
-        #self.iface.mapCanvas().refresh()
-        #oeq_global.OeQ_push_info("Converting Building Outlines:", "'"+config.measurement_projection+"'")
-        #print "convert"
-        #oeq_global.OeQ_wait(5)
-        #building_outlines=legend.nodeConvertCRS(building_outlines,config.measurement_projection)
-        #oeq_global.OeQ_pop_info(baritem)
 
-        #oeq_global.OeQ_push_info("Calculating basic geometries of Building Outlines:", "'"+config.housing_layer_name+"'")
-        #building_outlines=legend.nodeByName(building_outlines.name)
+        building_outline_ext = building_outline_ext[0]
+        building_outline_ext.process()
+
+        building_outlines=legend.nodeByName(config.building_outline_layer_name)
         if not building_outlines:
             self.main_process_dock.building_outlines_acquired.setChecked(False)
             return False
-        #layer_interaction.edit_housing_layer_attributes(building_outlines.layer())
-        #building_outlines=legend.nodeConvertCRS(building_outlines,original_crs)
-        #oeq_global.OeQ_wait(5)
 
-        legend.nodeCreateBuildingIDs(building_outlines)
-        #return building_outlines.layer()
         self.reorder_layers()
         self.main_process_dock.building_outlines_acquired.setChecked(True)
-        self.standard_workflow.do_workstep('building_coordinates_acquired')
-        return self.main_process_dock.building_outlines_acquired.isChecked()
+        #self.standard_workflow.do_workstep('building_coordinates_acquired')
+        result = self.main_process_dock.building_outlines_acquired.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="Building Outlines succesfully aquired!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not aquire Building Outlines!")
+        return result
 
     def check_if_building_outlines_acquired(self):
             from mole.project import config
-            if legend.nodeExists(config.housing_layer_name):
+            if legend.nodeExists(config.building_outline_layer_name):
                 self.main_process_dock.building_outlines_acquired.setChecked(True)
             else:
                 self.main_process_dock.building_outlines_acquired.setChecked(False)
@@ -705,60 +719,45 @@ class OpenEQuarterMain:
 
     # step 2.2
     def handle_building_coordinates_acquired(self):
+        from mole import extensions
+        from mole import oeq_global
+        from mole.qgisinteraction import legend
         from qgis.core import QgsCoordinateReferenceSystem
         window = self.iface.mainWindow()
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
         #oeq_global.OeQ_unlockQgis()
+        oeq_global.OeQ_pop_status()
+        if not self.standard_workflow.all_mandatory_worksteps_done('building_coordinates_acquired'):
+            self.main_process_dock.building_coordinates_acquired.setChecked(False)
+            return False
+        building_coordinate_ext = extensions.by_layername(config.building_coordinate_layer_name, active=True)
+        if not building_coordinate_ext:
+            oeq_global.OeQ_push_warning("No import extension for Building Outlines",
+                                        "Load geometries or define them on a new Vectorlayer named '" + config.building_coordinate_layer_name + "' !")
+            self.main_process_dock.building_coordinates_acquired.setChecked(False)
+            return False
+        building_coordinate_ext[0].process()
 
-        if self.standard_workflow.all_mandatory_worksteps_done('building_coordinates_acquired'):
-            centroid_layer=None
-            original_crs=None
-            layer_interaction.fullRemove(config.pst_input_layer_name)
+        building_coordinates = legend.nodeByName(config.building_coordinate_layer_name)
+        if not building_coordinates:
+            self.main_process_dock.building_coordinates_acquired.setChecked(False)
+            return False
 
-            #get building outlines
-            building_outlines = legend.nodeByName(config.housing_layer_name)
-            if building_outlines:
-                building_outlines = building_outlines[0]
 
-                original_crs=building_outlines.layer().crs().authid()
-
-                load_message = "Calculate building coordinates from building outlines?"
-                ask=QMessageBox()
-                reply = ask.question(ask, 'Building Coordinates', "Calculate building coordinates from building outlines?", ask.Yes | ask.No, ask.Yes)
-                if reply == ask.No:
-                    dialog=QFileDialog()
-                    filepath=dialog.getOpenFileName(None,'Select a shape file that holds the bulding coordinates (.shp):',selectedFilter='*.shp')
-                    if filepath:
-                        centroid_layer=layer_interaction.load_layer_from_disk(filepath)
-                        if centroid_layer:
-                            centroid_layer.setName(config.pst_input_layer_name)
-
-                else:
-                    rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
-                    polygon = config.housing_layer_name
-                    output = os.path.join(oeq_global.OeQ_project_path(), config.pst_input_layer_name + '.shp')
-                    centroid_layer = rci.create_centroids(polygon, output)
-
-                    if centroid_layer.isValid():
-                        layer_interaction.add_layer_to_registry(centroid_layer)
-                        centroid_layer.setCrs(QgsCoordinateReferenceSystem(int(original_crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId))
-                        rci.calculate_accuracy(building_outlines.layer(), centroid_layer)
-                        layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
-
-            if centroid_layer:
-                legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
-                self.reorder_layers()
-                self.main_process_dock.building_coordinates_acquired.setChecked(True)
-                return self.main_process_dock.building_coordinates_acquired.isChecked()
-
-        self.main_process_dock.building_coordinates_acquired.setChecked(False)
-        return self.main_process_dock.building_coordinates_acquired.isChecked()
+        self.reorder_layers()
+        self.main_process_dock.building_coordinates_acquired.setChecked(True)
+        result = self.main_process_dock.building_coordinates_acquired.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="Building Coordinates succesfully aquired!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not aquire Building Coordinates!")
+        return result
 
 
 
     def check_if_building_coordinates_acquired(self):
         from mole.project import config
-        if legend.nodeExists(config.pst_input_layer_name):
+        if legend.nodeExists(config.building_coordinate_layer_name):
             self.main_process_dock.building_coordinates_acquired.setChecked(True)
         else:
             self.main_process_dock.building_coordinates_acquired.setChecked(False)
@@ -768,17 +767,20 @@ class OpenEQuarterMain:
         from mole import extensions
         from mole.project import config
         from mole.qgisinteraction import legend
+        oeq_global.OeQ_pop_status()
         if not self.standard_workflow.all_mandatory_worksteps_done('information_layers_loaded'):
             self.main_process_dock.information_layers_loaded.setChecked(False)
             return False
         legend.nodeZoomTo(config.investigation_shape_layer_name)
 
-        for i in extensions.by_type('wms',category='Import',active=True):
-            i.load_wms()
+        for i in extensions.by_extension_type("information",active=True):
+            i.load()
+            i.preflight()
+            legend.nodeHide(i.layer_name)
             #return True
-        for i in extensions.by_type('wfs',category='Import',active=True):
-            i.load_wfs()
-            #return True
+        #for i in extensions.by_type('wfs',category='Import',active=True):
+        #    i.load_wfs()
+        #    #return True
         if all([legend.nodeExists(i.layer_name) for i in extensions.by_state(True,'Import')]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
         else:
@@ -786,12 +788,19 @@ class OpenEQuarterMain:
         self.reorder_layers()
         self.standard_workflow.do_workstep('needle_request_done')
         self.standard_workflow.do_workstep('database_created')
-        return self.main_process_dock.information_layers_loaded.isChecked()
+
+        result = self.main_process_dock.information_layers_loaded.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="All Information Layers succesfully aquired!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not aquire all Information Layers!")
+        return result
 
 
     def check_if_information_layers_loaded(self):
         from mole import extensions
         from mole.qgisinteraction import legend
+
         infolayernames = extensions.by_state(True,'Import')
         if (len(infolayernames) > 0) & all([legend.nodeExists(i.layer_name) for i in infolayernames]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
@@ -829,6 +838,9 @@ class OpenEQuarterMain:
 
     # step 4.1
     def handle_needle_request_done(self):                #DOES NOT CAPTURE WFS!
+        self.main_process_dock.needle_request_done.setChecked(True)
+        return self.main_process_dock.needle_request_done.isChecked()
+        '''
         from mole import extensions
         from mole.project import config
         # create data node
@@ -841,12 +853,12 @@ class OpenEQuarterMain:
         baritem=oeq_global.OeQ_push_info('Needle Request:', 'Collecting data... be patient!')
 
         # show import layers
-        layerstoshow = [config.investigation_shape_layer_name,config.pst_input_layer_name]
+        layerstoshow = [config.investigation_shape_layer_name, config.building_coordinate_layer_name]
         layerstoshow += ([i.layer_name for i in extensions.by_category('Basic',extensions.by_state(True))])
         layerstoshow += ([i.layer_name for i in extensions.by_category('Import', extensions.by_state(True))])
-
         legend.nodesShow(layerstoshow)
-        input_node=legend.nodeByName(config.pst_input_layer_name)
+
+        input_node=legend.nodeByName(config.building_coordinate_layer_name)
 
         #reset import extensions
         for i in extensions.by_state(True,category='Import'):
@@ -861,15 +873,15 @@ class OpenEQuarterMain:
             source_crs=input_node[0].layer().crs()
 
             #remove point sampling layer
-            layer_interaction.fullRemove(layer_name=config.pst_output_layer_name)
+            layer_interaction.fullRemove(layer_name=config.sample_layer_name)
 
 
             #run point sampling tool
             psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
-            psti.set_input_layer(config.pst_input_layer_name)
+            psti.set_input_layer(config.building_coordinate_layer_name)
             abbreviations = psti.select_and_rename_files_for_sampling(sample_fields)
-            pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.pst_output_layer_name)
-            vlayer = QgsVectorLayer(pst_output_layer, config.pst_output_layer_name,"ogr")
+            pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.sample_layer_name)
+            vlayer = QgsVectorLayer(pst_output_layer, config.sample_layer_name, "ogr")
             layer_interaction.add_layer_to_registry(vlayer)
             #set original crs (necessary because qgis does not deal with epsg:3857 very well, but sets it to epsg:54004)
             vlayer.setCrs(source_crs)
@@ -890,38 +902,41 @@ class OpenEQuarterMain:
             for i in extensions.by_type('wms',category='Import',active=True):
                 legend.nodeHide(i.layer_name)
 
-        if legend.nodeExists(config.pst_output_layer_name):
-            legend.nodeGetBuildingData(legend.nodeByName(config.pst_output_layer_name)[0])
+        if legend.nodeExists(config.sample_layer_name):
+            legend.nodeGetBuildingData(legend.nodeByName(config.sample_layer_name)[0])
             self.reorder_layers()
             self.main_process_dock.needle_request_done.setChecked(True)
         else:
             self.main_process_dock.needle_request_done.setChecked(False)
         oeq_global.OeQ_pop_info(baritem)
         return self.main_process_dock.needle_request_done.isChecked()
-
+        '''
 
 
     def check_if_needle_request_done(self):
+        self.main_process_dock.needle_request_done.setChecked(True)
+        return self.main_process_dock.needle_request_done.isChecked()
+        '''
         from mole.project import config
-        if legend.nodeExists(config.pst_output_layer_name):
+        if legend.nodeExists(config.sample_layer_name):
             self.main_process_dock.needle_request_done.setChecked(True)
         else:
             self.main_process_dock.needle_request_done.setChecked(False)
         return self.main_process_dock.needle_request_done.isChecked()
-
+        '''
 
     def handle_database_created(self):
         from mole import extensions
         from mole.qgisinteraction import legend
         baritem=oeq_global.OeQ_push_info('Create Database:', 'Generating building records... be patient!')
-
-        result= bool(legend.nodeCreateDatabase(config.housing_layer_name,config.data_layer_name,config.measurement_projection,True,"Data"))
-        if result:
-            for i in extensions.by_state(True,'Evaluation'):
-                i.last_calculation = None
+        #extensions.by_layername(config.building_outline_layer_name)[0].createDatabase()
+        #result= bool(legend.nodeCreateDatabase(config.building_outline_layer_name, config.data_layer_name, config.project_crs, True, "Data"))
+        #if result:
+         #   for i in extensions.by_state(True,'Evaluation'):
+         #       i.reset_calculation_state()
         self.reorder_layers()
         oeq_global.OeQ_pop_info(baritem)
-        return result
+        return True
 
     def check_if_database_created(self):
         from mole.project import config
@@ -935,12 +950,16 @@ class OpenEQuarterMain:
         # step 4.1
     def handle_buildings_evaluated(self):
         from mole import extensions
+        oeq_global.OeQ_pop_status()
+        oeq_global.OeQ_wait_for_renderer()
         baritem=oeq_global.OeQ_push_info('Extension "Building Evaluation":', 'Checking dependencies... be patient!')
+        for i in extensions.by_type('information',active=True,):
+            i.process()
         for i in extensions.by_state(True,'Import'):
-            i.calculate()
+            i.process()
         #extensions.run_active_extensions('Import')
         for i in extensions.by_state(True,'Evaluation'):
-            i.calculate()
+            i.process()
         #extensions.run_active_extensions('Evaluation')
         #import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
         #evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
@@ -949,10 +968,17 @@ class OpenEQuarterMain:
             self.main_process_dock.buildings_evaluated.setChecked(True)
         else:
             self.main_process_dock.buildings_evaluated.setChecked(False)
-        legend.nodeHide(config.pst_input_layer_name)
+        legend.nodeHide(config.building_coordinate_layer_name)
         self.reorder_layers()
         oeq_global.OeQ_pop_info(baritem)
-        return self.main_process_dock.buildings_evaluated.isChecked()
+
+        result = self.main_process_dock.buildings_evaluated.isChecked()
+        if result:
+            oeq_global.OeQ_push_status(message="All buildings succesfully evaluated!")
+        else:
+            oeq_global.OeQ_push_status(message="Could not evaluate all buildings!")
+        return result
+
 
     def check_if_buildings_evaluated(self):
         from mole import extensions
@@ -1015,7 +1041,7 @@ class OpenEQuarterMain:
             oeq_global.OeQ_project_info = project['project_info']
             oeq_global.OeQ_ExtensionRegistry = project['extension_registry']
             for ext in oeq_global.OeQ_ExtensionRegistry:
-                ext.update_colortable(True)
+                ext.copy_default_colortable_to_project(True)
             oeq_global.OeQ_ExtensionsLoaded = True
             self.reorder_layers()
             legend.nodeZoomTo(config.investigation_shape_layer_name)

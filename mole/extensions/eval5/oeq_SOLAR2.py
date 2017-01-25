@@ -7,7 +7,7 @@ from mole.project import config
 from mole.extensions import OeQExtension
 from mole.stat_corr import contemporary_base_uvalue_by_building_age_lookup
 
-def calculation(self=None, parameters={}):
+def calculation(self=None, parameters={},feature = None):
     return {}
 
 
@@ -22,8 +22,8 @@ extension = OeQExtension(
     field_id='SOLHEL',
     source_type='none',
     par_in=['SOLHEL'],
-    layer_in=config.data_layer_name,
-    layer_out=config.data_layer_name,
+    sourcelayer_name=config.data_layer_name,
+    targetlayer_name=config.data_layer_name,
     active=True,
     show_results=['SOLHEL'],
     description=u"Calculation of the Solar Heat Earning",

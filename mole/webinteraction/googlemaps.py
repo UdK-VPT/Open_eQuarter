@@ -53,7 +53,7 @@
 # Import the PyQt and QGIS libraries
 from mole.qgisinteraction import layer_interaction
 from mole.project import config
-from qgis.core import *
+from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint
 import urllib
 import urllib2
 import json
@@ -160,17 +160,18 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     # Out: dict of all informations delivered by googlemaps
     from mole.qgisinteraction import legend
     from mole.project import config
-    layer = legend.nodeByName(config.pst_input_layer_name)
+    layer = legend.nodeByName(config.building_coordinate_layer_name)
     if not layer: return None
     layer = layer[0].layer()
     layerEPSG=int(layer.crs().authid()[5:])
     provider=layer.dataProvider()
-    building=filter(lambda x: x.attribute('BLD_ID')==str(building_id), provider.getFeatures())
+    building=filter(lambda x: x.attribute(config.building_id_key)==str(building_id), provider.getFeatures())
     if len(building)==0: return None
     geom = building[0].geometry()
     result = getBuildingLocationDataByCoordinates(geom.asPoint().x(), geom.asPoint().y(), layerEPSG)
-    for i in result:
-        i.update({'crs':authid()})
+    if bool(crs):
+        for i in result:
+            i.update({'crs':crs.authid()})
     return result
 
 def getBuildingCoordinateByBLD_ID(building_id, crs=None):

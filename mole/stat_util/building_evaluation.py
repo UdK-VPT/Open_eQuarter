@@ -27,8 +27,8 @@ def evaluate_building(population_density,
   solar_earnings_per_sqm=300
   average_heat_demand_per_sqm=120
 
-  print "AREA"
-  print area
+  #print "AREA"
+  #print area
   if isnull(area): 
     return {"YOC":NULL,
                 "POP_DENS": NULL,
@@ -85,8 +85,8 @@ def evaluate_building(population_density,
                 }
 
   dimensions=bld_geometry.dimensions(area,perimeter,length)
-  print 'YOC'
-  print year_of_construction
+  #print 'YOC'
+  #print year_of_construction
   if isnull(floors):
     floors=5
   if isnull(height):

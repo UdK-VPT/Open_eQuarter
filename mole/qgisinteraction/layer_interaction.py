@@ -9,6 +9,8 @@ from string import find
 from mole.project import config
 from mole.qgisinteraction import legend
 from mole import oeq_global
+import numpy as np
+import math
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -562,12 +564,12 @@ def edit_housing_layer_attributes(housing_layer):
 
         attributes = [QgsField('AREA', QVariant.Double),
                       QgsField('PERIMETER', QVariant.Double),
-                      QgsField('BLD_ID', QVariant.String)]
+                      QgsField(config.building_id_key, QVariant.String)]
         provider.addAttributes(attributes)
         name_to_index = provider.fieldNameMap()
         area_index = name_to_index['AREA']
         perimeter_index = name_to_index['PERIMETER']
-        building_index = name_to_index['BLD_ID']
+        building_index = name_to_index[config.building_id_key]
         try:
             fid_index = name_to_index['FID']
         except:
@@ -577,7 +579,7 @@ def edit_housing_layer_attributes(housing_layer):
 
         for feature in provider.getFeatures():
             # if oeq_global.isnull(feature.attribute('FID')):
-            # if feature.attribute('BLD_ID') == 0:
+            # if feature.attribute(config.building_id_key) == 0:
             geometry = feature.geometry()
             values = {area_index: geometry.area(), perimeter_index: geometry.length(),
                       building_index: '{}'.format(building_id)}
@@ -614,7 +616,7 @@ def init_building_geometries(housing_layer):
         perimeter_index = name_to_index['PERIMETER']
         for feature in provider.getFeatures():
             # if oeq_global.isnull(feature.attribute('FID')):
-            # if feature.attribute('BLD_ID') == 0:
+            # if feature.attribute(config.building_id_key) == 0:
             geometry = feature.geometry()
             values = {area_index: geometry.area(), perimeter_index: geometry.length()}
             provider.changeAttributeValues({feature.id(): values})
@@ -641,9 +643,9 @@ def init_building_ids(housing_layer):
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
 
-        provider.addAttribute(QgsField('BLD_ID', QVariant.String))
+        provider.addAttribute(QgsField(config.building_id_key, QVariant.String))
         name_to_index = provider.fieldNameMap()
-        building_index = name_to_index['BLD_ID']
+        building_index = name_to_index[config.building_id_key]
         try:
             fid_index = name_to_index['FID']
         except:
@@ -653,7 +655,7 @@ def init_building_ids(housing_layer):
 
         for feature in provider.getFeatures():
             # if oeq_global.isnull(feature.attribute('FID')):
-            # if feature.attribute('BLD_ID') == 0:
+            # if feature.attribute(config.building_id_key) == 0:
             geometry = feature.geometry()
             provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
             building_id += 1
@@ -830,3 +832,324 @@ def zoomToActiveLayer():
     canvas = iface.mapCanvas()
     extent = vLayer.extent()
     canvas.setExtent(extent)
+
+
+
+# Sample Tools
+
+
+from mole.qgisinteraction import legend
+from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint, QgsRectangle, QgsFeatureRequest, QgsGeometry, QgsCoordinateTransform, QgsRaster, NULL
+from PyQt4.QtCore import QVariant
+
+def transform_geometry_to_pointlist(geometry=None):
+    """
+          Transforms geometries of Type QgsPoint,QgsPolyline,QgsPolygon to a list of it's vertices as QgsPoints,.
+          :param geometry: Geometry to transform
+          :type geometry: QgsGeometry
+          :return: Vertices
+          :rtype: list of QgsPoints
+          """
+    def isPoint(x):
+        """
+            Submethod, checks if geometry x is a Point
+            :param x: geometry
+            :type x: QgsGeometry
+            :return: True/False
+            :rtype: Boolean
+            """
+        try:
+            return (not isLine(x)) & (not isPolygon(x)) & (type(x.asPoint()) == type(QgsPoint()))
+        except:
+            return False
+    def isLine(x):
+        """
+            Submethod, checks if geometry x is a Line
+            :param x: geometry
+            :type x: QgsGeometry
+            :return: True/False
+            :rtype: Boolean
+            """
+        try:
+            return type(x.asPolyline()[0]) == type(QgsPoint())
+        except:
+            return False
+    def isPolygon(x):
+        """
+            Submethod, checks if geometry x is a Polygon
+            :param x: geometry
+            :type x: QgsGeometry
+            :return: True/False
+            :rtype: Boolean
+            """
+        try:
+            return type(x.asPolygon()[0][0]) == type(QgsPoint())
+        except:
+            return False
+    pointlist =[]
+    if isPoint(geometry):
+        pointlist = [geometry.asPoint()]
+    elif isLine(geometry):
+        pointlist = geometry.asPolyline()
+    elif isPolygon(geometry):
+        pointlist = geometry.asPolygon()[0]
+    return pointlist
+
+
+def sampleContainers(layer=None, geometry=None, crs = None):
+    """
+        Gets the surrounding Polygons on layer 'layer' for a geometry object with corresponding CRS.
+        :param layer: The layer on which the polygons reside
+        :type layer: QgsVectorLayer
+        :param geometry: Geometry to find the containers of
+        :type geometry: QgsGeometry
+        :param crs: Coordinate Reference System for the given geometry
+        :type crs: QgsCoordinateReferenceSystem
+        :return: Found Containers
+        :rtype: list
+        """
+    containers =[]
+    pointlist = transform_geometry_to_pointlist(geometry)
+    transformation = QgsCoordinateTransform(crs, layer.crs())
+    for feature in layer.getFeatures():
+        if all([feature.geometry().contains(transformation.transform(point)) for point in pointlist]):
+            containers.append(feature)
+    return containers
+
+def sampleDataFromVectorLayerByFeature(feature, data_layer_name, field_list=[] , feature_crs = None):
+    """
+        Gets data form surrounding Polygons on Data Layer for the geometries found on Enquire Layer.
+        :param feature: Enquiring feature
+        :type feature: QgsFeature
+        :param data_layer_name: Name of the Data Layer shown QGIS Legend
+        :type data_layer_name: string
+        :param field_list: List of fields to get from surrounding polygons found on Data Layer
+        :type field_list: list of strings
+        :param feature_crs: Coordinate Reference System of the feature
+        :type feature_crs: QgsCoordinateReferenceSystem
+        :return: True/False depending on found data
+        :rtype: boolean
+        """
+    result = True
+    enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
+    enquire_provider = enquire_layer.dataProvider()
+    data_layer = legend.nodeByName(data_layer_name)[0].layer()
+    fieldnames = [j.name() for j in data_layer.pendingFields()]
+    fieldnames =filter(lambda nam: nam in field_list, fieldnames)
+    for nam in fieldnames:
+        if not nam in [a.name() for a in enquire_layer.fields()]:
+            enquire_provider.addAttributes([QgsField(nam, QVariant.String)])
+    enquire_layer.updateFields()
+    enquire_layer.startEditing()
+    containers = sampleContainers(data_layer, feature.geometry(), feature_crs)
+    result = None
+    if bool(containers):
+        container = containers[0]
+        result =[]
+        for nam in fieldnames:
+            #print nam
+            result.append({str(nam):container[str(nam)]})
+    return result
+
+def sampleDataFromVectorLayer(enquire_layer_name, data_layer_name, field_list=[]):
+    """
+        Gets data form surrounding Polygons on Data Layer for the geometries found on Enquire Layer.
+        :param enquire_layer_name: Name of the Layer shown QGIS Legend on which the enquiring geometries reside
+        :type enquire_layer_name: string
+        :param data_layer_name: Name of the Data Layer shown QGIS Legend
+        :type data_layer_name: string
+        :param field_list: List of fields to get from surrounding polygons found on Data Layer
+        :type field_list: list of strings
+        :return: True/False depending on found data
+        :rtype: boolean
+        """
+    result = True
+    enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
+    enquire_provider = enquire_layer.dataProvider()
+    data_layer = legend.nodeByName(data_layer_name)[0].layer()
+    fieldnames = [j.name() for j in data_layer.pendingFields()]
+    fieldnames =filter(lambda nam: nam in field_list, fieldnames)
+    for nam in fieldnames:
+        if not nam in [a.name() for a in enquire_layer.fields()]:
+            enquire_provider.addAttributes([QgsField(nam, QVariant.String)])
+    enquire_layer.updateFields()
+    enquire_layer.startEditing()
+    for enquirer in enquire_layer.getFeatures():
+        containers = sampleContainers(data_layer, enquirer.geometry(), enquire_layer.crs())
+        result = result & bool(containers)
+        if bool(containers):
+            container = containers[0]
+            for nam in fieldnames:
+                #print nam
+                enquirer[str(nam)] = container[str(nam)]
+                enquire_layer.updateFeature(enquirer)
+
+    enquire_layer.commitChanges()
+    return result
+
+
+def sampleColor(raster_layer=None, geometry=None, crs = None, fieldnames = [], blur = 0):
+    """
+    Gets the color at a point or the average of the colors of the vertices of a geometry from layer 'raster_layer' with corresponding CRS.
+    :param raster_layer: The layer from where the color value shall be picked from
+    :type raster_layer: QgsVectorLayer
+    :param geometry: Geometry to get the color values for
+    :type geometry: QgsGeometry
+    :param crs: Coordinate Reference System for the given geometry
+    :type crs: QgsCoordinateReferenceSystem
+    :param crs: Coordinate Reference System for the given geometry
+    :type crs: QgsCoordinateReferenceSystem
+    :param fieldnames: get_color normally returns a dict like {1:255.0,2:49.5,...). If fieldnames are defined, they are replacing the default keys 1,2,...
+    :type fieldnames: list of strings
+    :param blur: if defined the result will be found as average of the vertices and some  points surrounding in a distance of 'blur'
+    :type blur: float
+    :return: Found Colors
+    :rtype: dict of found color values
+    """
+    colorlist = []
+    color = {}
+    if crs == None: crs = raster_layer.crs()
+    pointlist = transform_geometry_to_pointlist(geometry)
+    blury_point_list = []
+    if blur > 0:
+        for point in pointlist:
+            blury_point_list.append(point)
+            blury_point_list.append(QgsPoint(point.x() + blur, point.y() + blur))
+            blury_point_list.append(QgsPoint(point.x() + blur, point.y() - blur))
+            blury_point_list.append(QgsPoint(point.x() - blur, point.y() - blur))
+            blury_point_list.append(QgsPoint(point.x() - blur, point.y() + blur))
+        pointlist = blury_point_list
+    transformation = QgsCoordinateTransform(crs, raster_layer.crs())
+    col_keys =[]
+    for point in pointlist:
+        ident = raster_layer.dataProvider().identify(transformation.transform(point), QgsRaster.IdentifyFormatValue)
+        if ident.isValid():
+            colres = ident.results()
+            col_keys = [str(k) for k in colres.keys()]
+            if bool(fieldnames):
+                col_keys = fieldnames[0:len(col_keys)]
+            if color == {}:
+                color = dict(zip([str(k) for k in col_keys], [NULL] * len(col_keys)))  # color indizieren
+            if all(co != NULL for co in colres.values()):
+                colorlist.append(dict(zip([str(k) for k in col_keys], colres.values())))
+    if bool(colorlist):
+        for i in col_keys:
+            color[i]= int(np.mean([c[i] for c in colorlist]))
+    return color
+
+def sampleColorsFromRasterLayer(enquire_layer_name,raster_layer_name, fieldnames = [], blur = 0):
+    """
+    Gets the colors at the geometry vertices from layer 'raster_layer' with corresponding CRS.:param layer: The layer on which the polygons reside
+    :type layer: QgsVectorLayer
+    :param geometry: Geometry to find the containers of
+    :type geometry: QgsGeometry
+    :param crs: Coordinate Reference System for the given geometry
+    :type crs: QgsCoordinateReferenceSystem
+    :return: Found Containers
+    :rtype: list
+    """
+    result = True
+    enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
+    enquire_provider = enquire_layer.dataProvider()
+    raster_layer = legend.nodeByName(raster_layer_name)[0].layer()
+    testenquire = enquire_layer.getFeatures().next()
+    field_keys = sampleColor(raster_layer, testenquire.geometry()).keys()
+    if bool(fieldnames):
+        field_keys = fieldnames[0:len(field_keys)]
+    for nam in field_keys:
+        if not str(nam) in [a.name() for a in enquire_layer.fields()]:
+            enquire_provider.addAttributes([QgsField(str(nam), QVariant.String)])
+    enquire_layer.updateFields()
+    enquire_layer.startEditing()
+    for enquirer in enquire_layer.getFeatures():
+        color = sampleColor(raster_layer, enquirer.geometry(), enquire_layer.crs(), fieldnames = field_keys, blur = blur)
+        result = result & all(co != NULL for co in color.values())
+        for i in color.keys():
+            enquirer[str(i)] = color[str(i)]
+            enquire_layer.updateFeature(enquirer)
+    enquire_layer.commitChanges()
+
+def sampleColorFromRasterLayerByFeature(feature,raster_layer_name, fieldnames = [], feature_crs = None, blur = 0):
+    """
+    Gets the colors at the geometry vertices from layer 'raster_layer' with corresponding CRS.:param layer: The layer on which the polygons reside
+    :type layer: QgsVectorLayer
+    :param geometry: Geometry to find the containers of
+    :type geometry: QgsGeometry
+    :param crs: Coordinate Reference System for the given geometry
+    :type crs: QgsCoordinateReferenceSystem
+    :return: Found Containers
+    :rtype: list
+    """
+    result = None
+    raster_layer = legend.nodeByName(raster_layer_name)[0].layer()
+    color = sampleColor(raster_layer, feature.geometry(), feature_crs)
+    field_keys = [str(k) for k in range(1,len(color)+1)]
+    #print field_keys
+    if bool(fieldnames):
+        field_keys = fieldnames[0:len(field_keys)]
+        print
+    color = sampleColor(raster_layer, feature.geometry(), feature_crs, fieldnames = field_keys, blur = blur)
+    #print color
+    return color
+
+def createCentroidLayer(polygon_layer_name, centroid_layer_name, forced=False):
+    '''
+    Create Polygon centroids that are reliably inside
+    :param polygon_layer_name: Name of the polygon layer
+    :type: string
+    :param centroid_layer_name: Name of the new centroid layer
+    :type: string
+    :param forced: Force regeneration of centroids
+    :type: boolean
+    :return: Centroid Layer or None
+    :rtype: QgsVectorLayer
+
+    '''
+    import os
+    from mole import oeq_global
+    from mole.project import config
+    from mole.qgisinteraction import plugin_interaction,legend,layer_interaction
+    # check if centroid layer exists
+    if legend.nodeExists(centroid_layer_name):
+        #force rebuild?
+        if forced:
+            #remove centroid layer
+            legend.nodeRemove(centroid_layer_name,True)
+        else:
+            return legend.nodeByName(centroid_layer_name)[0].layer()
+    # init plugin communication
+    rci = plugin_interaction.RealCentroidInteraction(config.real_centroid_plugin_name)
+    output = os.path.join(oeq_global.OeQ_project_path(), centroid_layer_name + '.shp')
+    centroid_layer = rci.create_centroids(polygon_layer_name, output)
+    if centroid_layer.isValid():
+        layer_interaction.add_layer_to_registry(centroid_layer)
+        polygon_layer = legend.nodeByName(polygon_layer_name)
+        #if not failed
+        if bool(polygon_layer):
+            polygon_layer = polygon_layer[0].layer()
+            rci.calculate_accuracy(polygon_layer, centroid_layer)
+            layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
+            legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
+            #source_section = self.progress_items_model.section_views[1]
+            #section_model = source_section.model()
+            #project_item = section_model.findItems("Load building coordinates")[0]
+            #project_item.setCheckState(2)
+            #time.sleep(0.1)
+            #self.handle_load_raster_maps()
+            return centroid_layer
+    return None
+
+
+
+#getColorsFromRasterLayer('BLD Centroids','Population Density (WMS Capture)',fieldnames = ['R','G','B','a'], blur = 3)
+
+
+
+#getDataFromVectorLayer('BLD Centroids','BLD Shapes',[uconfig.building_id_key])
+#getDataFromVectorLayer('Ohne Titel','BLD Shapes',[uconfig.building_id_key])
+#getDataFromVectorLayer('Krose','BLD Shapes',[uconfig.building_id_key])
+
+
+#getColorsFromRasterLayer('BLD Centroids','Population Density (WMS Capture)')
+
+

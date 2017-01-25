@@ -49,6 +49,7 @@ class PstInteraction(object):
         if len(layernode) == 0:
             return None
         in_layer = self.pst_dialog.inSample
+        #print in_layer
         index = in_layer.findText(layer_name)
         in_layer.setCurrentIndex(index)
         #if layer_name is not None and not layer_name.isspace():
@@ -57,6 +58,9 @@ class PstInteraction(object):
 
         #    if layer_available:
                 # drop down menu, listing all available layers
+
+
+
 
 
     def select_and_rename_files_for_sampling(self,sample_fields):
@@ -100,8 +104,8 @@ class PstInteraction(object):
                 prefix += 1
                 RGBa_index = 0
 
-            if (layer.name() == config.housing_layer_name and
-                    (band_name.startswith('AREA') or band_name.startswith('PERIMETER') or band_name.startswith('BLD_ID'))):
+            if (layer.name() == config.building_outline_layer_name and
+                    (band_name.startswith('AREA') or band_name.startswith('PERIMETER') or band_name.startswith(config.building_id_key))):
                 continue
             elif (layer.type() == QgsMapLayer.RasterLayer and
                   layer.rasterType() == QgsRasterLayer.Multiband and
@@ -126,12 +130,14 @@ class PstInteraction(object):
                 table.item(table_index, 1).setText(export_name)
                 continue
             elif ext:
-                if band_name.startswith(tuple(ext[0].field_rename.keys())):
-                    if ext[0].field_rename[band_name]:
-                        table.item(table_index, 1).setText(ext[0].field_rename[band_name])
+                # NEW fieldname ist nicht klar
+                if ext[0].field_rename is not None:
+                    if band_name.startswith(tuple(ext[0].field_rename.keys())):
+                        if ext[0].field_rename[band_name]:
+                            table.item(table_index, 1).setText(ext[0].field_rename[band_name])
+                            continue
+                    elif band_name.startswith(tuple(ext[0].par_in)):
                         continue
-                elif band_name.startswith(tuple(ext[0].par_in)):
-                    continue
             sample_list.setItemSelected(sample_list.item(i), False)
 
 
@@ -143,7 +149,7 @@ class PstInteraction(object):
         else:
             delete_layer_files(layer_name)
             full_path = path.join(path_to_layer, layer_name + '.shp')
-            self.set_input_layer(config.pst_input_layer_name)
+            self.set_input_layer(config.building_coordinate_layer_name)
             self.pst_dialog.sampling(full_path)
             return full_path
 
@@ -219,6 +225,7 @@ class RealCentroidInteraction(object):
             print(KError, 'The realcentroid plugin has not been found by the given name "{}"'.format(plugin_name))
 
     def create_centroids(self, polygon_name, path_to_output_shape):
+        from mole import oeq_global
         self.plugin.dlg.showEvent(QtCore.QEvent.Show)
         polygon_combobox = self.plugin.dlg.ui.layerBox
 
@@ -238,6 +245,7 @@ class RealCentroidInteraction(object):
         if file_info.exists():
             layer_name = file_info.completeBaseName()
             output_layer = QgsVectorLayer(path_to_output_shape,layer_name, "ogr")
+            oeq_global.OeQ_wait(0.5)
             return output_layer
         else:
             return None
@@ -306,3 +314,8 @@ class RealCentroidInteraction(object):
         ix = line_start.x() + u * (line_end.x() - line_start.x())
         iy = line_start.y() + u * (line_end.y() - line_start.y())
         return QgsPoint(ix,iy)
+
+
+
+
+

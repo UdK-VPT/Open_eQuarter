@@ -488,7 +488,7 @@ def nodeRemove(node,physical=False):
             return None
         node = node[0]
     result = layer_interaction.remove_layer(node.layer(),physical=physical)
-    oeq_global.OeQ_wait(0.5)
+    oeq_global.OeQ_wait(0.3)
     return result
 
 
@@ -601,7 +601,7 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     #oeq_global.OeQ_wait(0.1)
     return newnode
 
-def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID'):
+def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = config.building_id_key):
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node: return None
@@ -633,10 +633,8 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = 'BLD_ID
     target_layer.startEditing()
     target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
     target_field_ids = [[i for i,x in enumerate(target_field_names) if x == fieldname][0] for fieldname in fieldnames_to_copy]
-    target_features = target_layer.dataProvider().getFeatures()
-    for feature in target_features:
-        source_features = source_layer.dataProvider().getFeatures()
-        source_feature = filter( lambda x : x[indexfield] == feature[indexfield], source_features)
+    for feature in target_layer.dataProvider().getFeatures():
+        source_feature = filter( lambda x : x[indexfield] == feature[indexfield], source_layer.dataProvider().getFeatures())
         if  not source_feature: continue
         source_feature = source_feature[0]
         attr = dict(zip(target_field_ids,[source_feature[x] for x in fieldnames_to_copy]))
@@ -699,6 +697,10 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
         crs = config.project_crs
     new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
     new_layer.setProviderEncoding('System')
+    #test
+    dataprovider = new_layer.dataProvider()
+    dataprovider.addAttributes([QgsField(indexfieldname, QVariant.Int)])
+    new_layer.updateFields()
     writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , nodename+'.shp'), "System", new_layer.crs(), providertype)
     if writer != QgsVectorFileWriter.NoError:
         oeq_global.OeQ_push_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
@@ -709,9 +711,9 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
     #oeq_global.OeQ_wait_for_renderer(60000)
     new_node = nodeMove(nodename,position,target_node)
     new_layer = new_node.layer()
-    dataprovider = new_layer.dataProvider()
-    dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
-    new_layer.updateFields()
+    #dataprovider = new_layer.dataProvider()
+    #dataprovider.addAttributes([QgsField(indexfieldname,  QVariant.Int)])
+    #new_layer.updateFields()
 
     #oeq_global.OeQ_unlockQgis()
 
@@ -1093,8 +1095,8 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
     if overwrite:
         nodeRemove(database_layer_name,physical=True)
     #use project reference crs if not given
-    if not reference_crs:
-        reference_crs = config.measurement_projection
+    if not bool(reference_crs):
+        reference_crs = config.project_crs
     #generate db from building outline layer
     db_layer_node = nodeDuplicate(node,database_layer_name)
     #convert db layer to reference crs
@@ -1102,25 +1104,6 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
     if not db_layer_node:
         oeq_global.OeQ_push_warning('nodeCreateDatabase :','Could not build database !')
         return None
-    #create attributes
-    db_layer = db_layer_node.layer()
-    attributes = [QgsField('AREA', QVariant.Double),
-                  QgsField('PERIMETER', QVariant.Double),
-                  QgsField('YOC', QVariant.Double),
-                  QgsField('PDENS', QVariant.Double),
-                  QgsField('FLOORS', QVariant.Double)]
-    layer_interaction.add_attributes_if_not_exists(db_layer, attributes)
-    data_layer_provider= db_layer.dataProvider()
-    #set attributes for all features
-    for feat in data_layer_provider.getFeatures():
-            #get geometry
-            geometry = feat.geometry()
-            attributevalues = {data_layer_provider.fieldNameIndex('YOC'): float(oeq_global.OeQ_project_info['average_build_year']),
-                               data_layer_provider.fieldNameIndex('PDENS'): float(oeq_global.OeQ_project_info['population_density']),
-                               data_layer_provider.fieldNameIndex('FLOORS'): 3.5,
-                               data_layer_provider.fieldNameIndex('AREA'): geometry.area(),
-                               data_layer_provider.fieldNameIndex('PERIMETER'): geometry.length()}
-            data_layer_provider.changeAttributeValues({feat.id(): attributevalues})
     #create category group in legend
     if category:
         if not nodeExists(category):
@@ -1141,6 +1124,58 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
             db_layer_node=nodeMove(db_layer_node,'bottom',cat)
             nodeCollapse(cat)
     return db_layer_node
+
+
+def nodeCreateSampleLayer(node, sample_layer_name, reference_crs=None, overwrite=True, category=None,
+                       subcategory=None, position='bottom'):
+    from mole import oeq_global
+    from mole.project import config
+    from mole.qgisinteraction import layer_interaction
+    from PyQt4.QtCore import QVariant
+    # get node for building_outline if only layer name is given
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node:
+            oeq_global.OeQ_push_warning('nodeCreateSampleLayer :', 'No building coordinates !')
+            return None
+    node = node[0]
+    # remove database if necessary
+    if overwrite:
+        nodeRemove(sample_layer_name, physical=True)
+    # use project reference crs if not given
+    if not reference_crs:
+        reference_crs = config.project_crs
+    # generate samplelayer from building coordinates layer
+    sample_layer_node = nodeDuplicate(node, sample_layer_name)
+    # convert db layer to reference crs
+    sample_layer_node = nodeConvertCRS(sample_layer_node, reference_crs)
+    if not sample_layer_node:
+        oeq_global.OeQ_push_warning('nodeCreateSampleLayer :', 'Could not build samplelayer !')
+        return None
+
+    #create category group in legend
+    if category:
+        if not nodeExists(category):
+            cat=nodeCreateGroup(category,position)
+        else:
+            cat=nodeByName(category)[0]
+        nodeHide(cat)
+        #create subcategory group in legend
+        if subcategory:
+            if not nodeExists(subcategory):
+                subcat=nodeCreateGroup(subcategory,'bottom',cat)
+            else:
+                subcat=nodeByName(subcategory)[0]
+            nodeHide(subcat)
+            sample_layer_node=nodeMove(sample_layer_node,'bottom',subcat)
+            nodeCollapse(subcat)
+        else:
+            sample_layer_node=nodeMove(sample_layer_node,'bottom',cat)
+            nodeCollapse(cat)
+    return sample_layer_node
+
+#legend.nodeCreateSampleLayer('BLD Centroids', 'Sample Results', reference_crs=None, overwrite=True, category='Data',subcategory=None, position='bottom')
+
 
 def nodeCreateBuildingIDs(building_outline_node):
     """
@@ -1165,12 +1200,33 @@ def nodeCreateBuildingIDs(building_outline_node):
 
     #try:
     building_outline_layer=building_outline_node.layer()
-    provider = building_outline_layer.dataProvider()
     building_outline_layer.startEditing()
+    # NEW
+    attributes = [QgsField(config.building_id_key, QVariant.String),
+                  QgsField('AREA', QVariant.Double),
+                  QgsField('PERIMETER', QVariant.Double)]
+    layer_interaction.add_attributes_if_not_exists(building_outline_layer, attributes)
+    provider= building_outline_layer.dataProvider()
+    #set attributes for all features
+    building_id = 0
+    for feat in provider.getFeatures():
+            #get geometry
+            geometry = feat.geometry()
+            attributevalues = {building_outline_layer.fieldNameIndex(config.building_id_key): '{}'.format(building_id),
+                               building_outline_layer.fieldNameIndex('AREA'): geometry.area(),
+                               building_outline_layer.fieldNameIndex('PERIMETER'): geometry.length()}
+            provider.changeAttributeValues({feat.id(): attributevalues})
+            building_id += 1
 
-    provider.addAttributes([QgsField('BLD_ID', QVariant.String)])
+
+
+    # END NEW
+
+
+    '''
+    provider.addAttributes([QgsField(config.building_id_key, QVariant.String)])
     name_to_index = provider.fieldNameMap()
-    building_index = name_to_index['BLD_ID']
+    building_index = name_to_index[config.building_id_key]
     try:
         fid_index = name_to_index['FID']
     except:
@@ -1180,14 +1236,14 @@ def nodeCreateBuildingIDs(building_outline_node):
 
     for feature in provider.getFeatures():
         # if oeq_global.isnull(feature.attribute('FID')):
-        # if feature.attribute('BLD_ID') == 0:
+        # if feature.attribute(config.building_id_key) == 0:
         geometry = feature.geometry()
         provider.changeAttributeValues({feature.id(): {building_index: '{}'.format(building_id)}})
         building_id += 1
         # else:
         # These features are most likely to be duplicates of those that have an FID-entry
         #    provider.deleteFeatures([feature.id()])
-
+    '''
     #provider.deleteAttributes([fid_index])
     return building_outline_layer.commitChanges()
     #except AttributeError, Error:

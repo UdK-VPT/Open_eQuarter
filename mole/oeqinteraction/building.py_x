@@ -12,7 +12,7 @@ def get_address(building_id):
     print layerCrs.authid()
     transform = QgsCoordinateTransform(layerCrs, googleMapsCrs).transform
     provider = layer.dataProvider()
-    building = filter(lambda x: x.attribute('BLD_ID') == str(building_id), provider.getFeatures())
+    building = filter(lambda x: x.attribute(config.building_id_key) == str(building_id), provider.getFeatures())
     if len(building) == 0: return None
     geom = building[0].geometry()
     # if geom.vectorType() == QGis.Point:

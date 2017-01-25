@@ -8,8 +8,18 @@ from .ext import *
 
 from mole import oeq_global
 
-oeq_global.OeQ_ExtensionsLoaded = True
+#oeq_global.OeQ_ExtensionsLoaded = True
+'''
+from imp import *
+from exp import *
+from eval1 import *
+from eval2 import *
+from eval3 import *
+from eval4 import *
+from eval5 import *
 
+OeQ_ExtensionsLoaded = True
+'''
 # Do not remove this imports
 # They are necessary to dynamically load and register the extensions
 #from ext import *

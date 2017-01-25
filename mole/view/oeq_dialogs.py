@@ -444,7 +444,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
             #print config.open_layers_layer_name
-            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
+            legend.nodeInitSolo([config.investigation_shape_layer_name, config.building_outline_layer_name, oeq_global.QeQ_current_work_layer.name(), config.open_layers_layer_name])
         #oeq_global.QeQ_current_work_layer = layer
         #layer_interaction.move_layer_to_position(iface, layer, 0)
 
@@ -453,7 +453,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
             #print config.open_layers_layer_name
-            legend.nodeInitSolo([config.investigation_shape_layer_name,config.housing_layer_name,oeq_global.QeQ_current_work_layer.name(),config.open_layers_layer_name])
+            legend.nodeInitSolo([config.investigation_shape_layer_name, config.building_outline_layer_name, oeq_global.QeQ_current_work_layer.name(), config.open_layers_layer_name])
 
 
 
@@ -703,7 +703,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             avg_yoc = '{}'.format(self.municipals[0]['AVG_YOC'])
         else:
             pop_dens = config.default_population_density
-            avg_yoc = config.default_average_build_year
+            avg_yoc = config.default_construction_year
         self.average_build_year.setText(str(avg_yoc))
         self.population_density.setText(str(pop_dens))
 

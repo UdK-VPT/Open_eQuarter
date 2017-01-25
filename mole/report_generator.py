@@ -44,11 +44,11 @@ def write_building_reports(bld_ids=[],reporttemplate=None):
         building_list = database.layer().getFeatures()
     output = []
     for building in building_list:
-        if (not bld_ids) | (building['BLD_ID'] in bld_ids):
+        if (not bld_ids) | (building[config.building_id_key] in bld_ids):
             tpl =template
             for field in [i.name() for i in database.layer().fields()]:
                 tpl.replace('!!!'+field+'!!!',str(building[field]))
-            rh=open(os.path.join(rep_path,"BLD_"+building['BLD_ID']+'.html'),'w')
+            rh=open(os.path.join(rep_path,"BLD_"+building[config.building_id_key]+'.html'),'w')
             rh.write(tpl)
             rh.close()
             output.append(tpl)
@@ -89,7 +89,7 @@ def write_project_definitions_report():
              'IA_LATMIN':str(extent.yMinimum()),
              'IA_LATMAX':str(extent.xMaximum()),
              'IA_CRS':p_info['location_crs'],
-             'PRJ_YOC':p_info['average_build_year'],
+             'PRJ_YOC':p_info['average_construction_year'],
              'PRJ_PDENS':p_info['population_density'],
              'PRJ_HDD':p_info['heating_degree_days']}
     for field in project_info.keys():

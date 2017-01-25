@@ -57,6 +57,7 @@ from mole.project import config
 import urllib
 import urllib2
 import json
+from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint
 
 
 # Get the postal adress for the specified coordinates
@@ -67,8 +68,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     #     Corresponding Coordinate Reference System as EPSG Code
 
     # Out: dict of all informations delivered by googlemaps
-    from mole import config
-    if crs:
+    if bool(crs):
         sourceCRS=QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
         googleMapsCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
         transform = QgsCoordinateTransform(sourceCRS, googleMapsCRS).transform
@@ -87,7 +87,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
         geom = addrrecord['geometry']
         dataset['latitude'] = geom['location']['lat']
         dataset['longitude'] = geom['location']['lng']
-        if crs:
+        if  bool(crs):
             transform2 = QgsCoordinateTransform(googleMapsCRS,sourceCRS).transform
             location2=transform2(QgsPoint(dataset['longitude'], dataset['latitude']))
             dataset['latitude']=location2.y()
@@ -116,10 +116,7 @@ def getCoordinatesByAddress(address,crs=None):
     response = urllib2.urlopen(url)
     result = json.load(response)
     #print result['results']
-    if crs:
-        targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
-        googleMapsCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transform = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform
+
     # try:
     addrlist = []
     for addrrecord in result:
@@ -127,7 +124,9 @@ def getCoordinatesByAddress(address,crs=None):
         dataset['latitude'] = addrrecord['lat']
         dataset['longitude'] = addrrecord['lon']
         if crs:
-            location = transform(QgsPoint(dataset['longitude'], dataset['latitude']))
+            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
+            googleMapsCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
+            location = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform(QgsPoint(dataset['longitude'], dataset['latitude']))
             dataset['latitude'] = location.y()
             dataset['longitude'] = location.x()
         addrlist.append(complete_google_dataset(dataset))
@@ -135,8 +134,17 @@ def getCoordinatesByAddress(address,crs=None):
     #    return []
     return addrlist
 
+def complete_google_dataset(dataset):
+    mandatory_keys = [u'street_number', u'locality', u'sublocality_level_1', u'route', 'longitude', u'postal_code',
+                      u'administrative_area_level_1', u'country', 'latitude'u'sublocality_level_2']
+    for i in mandatory_keys:
+        if not i in dataset.keys():
+            dataset.update({i: ''})
+    zip_city = ' '.join(filter(bool, [dataset['postal_code'], dataset['locality']]))
+    dataset['formatted_location'] = ', '.join(filter(bool, [dataset['route'], zip_city, dataset['country']]))
+    return dataset
 
-def getCoordinatesByAddressTest(address):
+def getCoordinatesByAddressTest(address,crs=None):
     import urllib
     import urllib2
     import json
@@ -158,7 +166,7 @@ def getCoordinatesByAddressTest(address):
         dataset['latitude'] = addrrecord['lat']
         dataset['longitude'] = addrrecord['lon']
         print dataset
-        if crs:
+        #if crs:
         #    location = transform(QgsPoint(dataset['longitude'], dataset['latitude']))
         #    dataset['latitude'] = location.y()
          #   dataset['longitude'] = location.x()
@@ -187,7 +195,7 @@ def translate_to_google_location_dataset(dataset):
         dataset.update({u'town':dataset[u'state']})
 
 
-    for i in mandatory_keys:
+    for i in translation_table.keys():
         if not i in dataset.keys():
             dataset.update({i: ''})
     zip_city = ' '.join(filter(bool, [dataset['postal_code'], dataset['locality']]))
@@ -207,17 +215,17 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     # Out: dict of all informations delivered by googlemaps
     from mole.qgisinteraction import legend
     from mole.project import config
-    layer = legend.nodeByName(config.pst_input_layer_name)
+    layer = legend.nodeByName(config.building_coordinate_layer_name)
     if not layer: return None
     layer = layer[0].layer()
     layerEPSG=int(layer.crs().authid()[5:])
     provider=layer.dataProvider()
-    building=filter(lambda x: x.attribute('BLD_ID')==str(building_id), provider.getFeatures())
+    building=filter(lambda x: x.attribute(config.building_id_key)==str(building_id), provider.getFeatures())
     if len(building)==0: return None
     geom = building[0].geometry()
     result = getBuildingLocationDataByCoordinates(geom.asPoint().x(), geom.asPoint().y(), layerEPSG)
     for i in result:
-        i.update({'crs':authid()})
+        i.update({'crs':crs.authid()})
     return result
 
 def getBuildingCoordinateByBLD_ID(building_id, crs=None):

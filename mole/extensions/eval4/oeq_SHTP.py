@@ -7,7 +7,7 @@ from mole.project import config
 from mole.extensions import OeQExtension
 from mole.stat_corr import contemporary_base_uvalue_by_building_age_lookup
 
-def calculation(self=None, parameters={}):
+def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
@@ -38,8 +38,8 @@ extension = OeQExtension(
     field_id='HTP',
     source_type='none',
     par_in=['BS_AR','RF_AR','WL_AR','WN_AR','BS_UP','RF_UP','WL_UP','WN_UP'],
-    layer_in=config.data_layer_name,
-    layer_out=config.data_layer_name,
+    sourcelayer_name=config.data_layer_name,
+    targetlayer_name=config.data_layer_name,
     active=True,
     show_results=['HTP'],
     description=u"Calculate the present Transmission Heat Coefficient of the Building",

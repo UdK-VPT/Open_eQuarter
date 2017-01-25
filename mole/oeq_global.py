@@ -145,8 +145,11 @@ def OeQ_push_status(title='Status: ', message='Complete'):
 
 def OeQ_pop_status():
     global OeQ_StatusWidget
-    if OeQ_StatusWidget:
-        iface.messageBar().popWidget(OeQ_StatusWidget)
+    if bool(OeQ_StatusWidget):
+        try:
+            iface.messageBar().popWidget(OeQ_StatusWidget)
+        except:
+            pass
 
 
 

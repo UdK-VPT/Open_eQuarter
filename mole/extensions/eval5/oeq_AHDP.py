@@ -11,25 +11,13 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'AHDP': NULL}
-    dataset.update(parameters)
 
- #   print '------'
- #   print dataset['HLAP']
-
-    if not oeq_global.isnull([dataset['HLAP']]):
-        dataset['AHDP']= float(dataset['HLAP']) + 40.0 * 0.8
+    ahdp = NULL
+    if not oeq_global.isnull([parameters['HLAP']]):
+        ahdp= float(parameters['HLAP']) + 40.0 * 0.8
         # Air Change Heatloss for standard Rooms 40kWh/m2a nach Geiger Lüftung im Wohnungsbau
         # 20% of the Total Area are used for stairs and floors
-
-
-  #  print '------'
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    return {'AHDP': {'type': QVariant.Double, 'value': ahdp}}
 
 
 extension = OeQExtension(

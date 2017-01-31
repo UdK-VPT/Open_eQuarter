@@ -16,6 +16,7 @@ def preflight(self=None):
     from qgis.core import QgsField
     from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists
     from mole.oeq_global import OeQ_get_bld_id
+
     layer = self.layer()
     #print layer.name()
     if layer == None:
@@ -34,9 +35,31 @@ def preflight(self=None):
     provider.deleteFeatures(to_remove)
 
     # in the Berlin Hausumringe WFS there are additional Attributes that are not important here. they are removed
-    fields = provider.fields()
-    provider.deleteAttributes(range(0,len(fields)))
+    conversion_fields = [[u'AnzahlDerO',u'FLRS_ALK'],[u'Gebaeudefu',u'FUNC_ALK'],[u'Bauweise_s',u'KIND_ALK']]
+    fields = filter(lambda f: f.name() not in [i[0] for i in conversion_fields], provider.fields())
+    fieldnames =[field.name() for field in fields]
+    to_remove = []
+    count = 0
+    for field in provider.fields():
+        if field.name() in fieldnames:
+            to_remove.append(count)
+        count += 1
+
+    provider.deleteAttributes(to_remove)
     layer.updateFields()
+
+    # in the Berlin Hausumringe WFS there are additional Attributes that are not important here. they are removed
+    layer.startEditing()
+    for cf in conversion_fields:
+        count = 0
+        for field in provider.fields():
+            #print field.name()
+            if field.name() == cf[0]:
+                layer.renameAttribute(count,cf[1])
+                break
+            count += 1
+    layer.commitChanges()
+
 
     # create building_ids
     add_attributes_if_not_exists(layer, [QgsField(config.building_id_key,QVariant.String)])
@@ -51,9 +74,12 @@ def preflight(self=None):
 
 def evaluation(self=None, parameters={},feature=None):
     from PyQt4.QtCore import QVariant
-    ar = None
-    per = None
-    id = None
+    ar = NULL
+    per = NULL
+    id = NULL
+    flr = NULL
+    usage = NULL
+    kind = NULL
 
     if feature:
             geometry = feature.geometry()
@@ -61,16 +87,26 @@ def evaluation(self=None, parameters={},feature=None):
             ar = geometry.area()
             per = geometry.length()
             id = feature[config.building_id_key] #necessary to safe dependency check
+            flr = feature[u'FLRS_ALK']  # necessary to safe dependency check
+            usage = feature[u'FUNC_ALK']  # necessary to safe dependency check
+            kind = feature[u'KIND_ALK']  # necessary to safe dependency check
+
     #print ar
     #print per
     #print id
 
     return {config.building_id_key: {'type': QVariant.String,
                            'value': id},
-            'AREA': {'type': QVariant.Double,
+            'AREA_ALK': {'type': QVariant.Double,
                            'value': ar},
-            'PERIMETER': {'type': QVariant.Double,
-                           'value': per}
+            'PERI_ALK': {'type': QVariant.Double,
+                           'value': per},
+            'FLRS_ALK': {'type': QVariant.Double,
+                           'value': flr},
+            'FUNC_ALK': {'type': QVariant.Double,
+                       'value': usage},
+            'KIND_ALK': {'type': QVariant.Double,
+                       'value': kind},
             }
 
 def postflight(self=None):

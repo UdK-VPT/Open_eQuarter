@@ -10,9 +10,9 @@ def load(self=None):
 
 def evaluation(self=None, parameters={},feature=None):
     from mole import oeq_global
-    result = {'FLOORS': {'type': QVariant.Int,
+    result = {'FLOORS': {'type': QVariant.Double,
                          'value': 3.5}}
-    if not oeq_global.isnull(parameters['FLRS_ALK']):
+    if bool(parameters['FLRS_ALK']):
         result['FLOORS']['value'] = parameters['FLRS_ALK']
     return result
 

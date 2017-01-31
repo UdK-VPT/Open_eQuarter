@@ -11,18 +11,11 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'WL_QTP': NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['WL_AR'],dataset['WL_UP'],dataset['HHRS']]):
-        dataset['WL_QTP']=float(dataset['WL_AR']) * float(dataset['WL_UP'])*float(dataset['HHRS'])/1000
-
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    wl_qtp = NULL
+    if not oeq_global.isnull([parameters['WL_AR'],parameters['WL_UP'],parameters['HHRS']]):
+        wl_qtp=float(parameters['WL_AR']) * float(parameters['WL_UP'])*float(parameters['HHRS'])/1000
+    return {'WL_QTP': {'type': QVariant.Double, 'value': wl_qtp}}
 
 
 extension = OeQExtension(

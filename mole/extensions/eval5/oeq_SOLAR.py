@@ -14,19 +14,25 @@ def calculation(self=None, parameters={},feature = None):
     ratio_solar_installable=0.6
     solar_earnings_per_sqm=350.0
 
-    dataset = {'SOLIAR': NULL,'SOLHE': NULL,'SOLHEL': NULL,'SOLCRT': NULL}
+    soliar = NULL
+    solhe = NULL
+    solhel = NULL
+    solcrt = NULL
 
     if not oeq_global.isnull([parameters['AHDP'], parameters['FR_AR'],parameters['LIV_AR']]):
-        dataset['SOLIAR']=float(parameters['FR_AR'])*float(ratio_solar_installable)
-        dataset['SOLHE']=solar_earnings_per_sqm * float(dataset['SOLIAR'])
-        dataset['SOLHEL']=dataset['SOLHE']/float(parameters['LIV_AR'])
-        dataset['SOLCRT']=float(dataset['SOLHEL'])/float(parameters['AHDP'])*100
+        soliar=float(parameters['FR_AR'])*float(ratio_solar_installable)
+        solhe=solar_earnings_per_sqm * float(soliar)
+        solhel=solhe/float(parameters['LIV_AR'])
+        solcrt=float(solhel)/float(parameters['AHDP'])*100
 
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    return {'SOLIAR': {'type': QVariant.Double,
+                           'value': soliar},
+                       'SOLHE': {'type': QVariant.Double,
+                            'value': solhe},
+                       'SOLHEL': {'type': QVariant.Double,
+                             'value': solhel},
+                       'SOLCRT': {'type': QVariant.Double,
+                              'value': solcrt}}
 
 extension = OeQExtension(
     extension_id=__name__,

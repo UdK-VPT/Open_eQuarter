@@ -11,32 +11,13 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'HLAP': NULL}
-    dataset.update(parameters)
 
-  #  print '------'
-  #  print dataset['AREA']
-  #  print dataset['FLOORS']
-    #print float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-  #  print dataset['BS_QTP']
-  #  print dataset['RF_QTP']
-  #  print dataset['WL_QTP']
-  #  print dataset['WN_QTP']
-    #print float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
-
-
-    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'] , dataset['BS_QTP'] , dataset['RF_QTP'] , dataset['WL_QTP'] , dataset['WN_QTP']]):
-        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-        qtp_total = float(dataset['BS_QTP']) + float(dataset['RF_QTP']) + float(dataset['WL_QTP']) + float(dataset['WN_QTP'])*1.2
-        dataset['HLAP']=qtp_total/living_area
-    #print qtp_total/living_area
-  #  print '------'
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    hlap = NULL
+    if not oeq_global.isnull([parameters['AREA'] , parameters['FLOORS'] , parameters['BS_QTP'] , parameters['RF_QTP'] , parameters['WL_QTP'] , parameters['WN_QTP']]):
+        living_area = float(parameters['AREA']) * float(parameters['FLOORS']) * 0.8
+        qtp_total = float(parameters['BS_QTP']) + float(parameters['RF_QTP']) + float(parameters['WL_QTP']) + float(parameters['WN_QTP'])*1.2
+        hlap=qtp_total/living_area
+    return {'HLAP': {'type': QVariant.Double,'value': hlap}}
 
 
 extension = OeQExtension(

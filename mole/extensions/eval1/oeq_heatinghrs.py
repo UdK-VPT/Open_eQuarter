@@ -11,18 +11,8 @@ def calculation(self=None, parameters={},feaure=None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'HHRS':NULL}
-    dataset.update(parameters)
-    #print [dataset[i] for i in dataset.keys()]
-    #print oeq_global.OeQ_project_info['heating_degree_days']
-    dataset['HHRS']=float(oeq_global.OeQ_project_info['heating_degree_days']) * 24
-
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    return {'HHRS': {'type': QVariant.Double,
+                           'value': float(oeq_global.OeQ_project_info['heating_degree_days']) * 24}}
 
 
 extension = OeQExtension(

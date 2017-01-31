@@ -13,11 +13,14 @@ def calculation(self=None, parameters={},feature = None):
     from PyQt4.QtCore import QVariant
     # factor for golden rule
 
-
+    fr_rt = NULL
+    fr_ar = NULL
     if not oeq_global.isnull([parameters['YOC'] , parameters['HEIGHT'],parameters['AREA']]):
 
-        if parameters['HEIGHT'] < 8:
-            fr1=0
+        if parameters['HEIGHT'] < 5:
+            fr1= 1
+        elif parameters['HEIGHT'] < 8:
+            fr1 = 0
         elif parameters['HEIGHT'] < 33:
             fr1= 0.04 * (parameters['HEIGHT'] - 8)
         else:
@@ -30,18 +33,13 @@ def calculation(self=None, parameters={},feature = None):
         else:
             fr2 = 1
 
-        flatroofratio = 0.5 * (fr1 + fr2)
-
-
-        return {'FR_RT': {'type': QVariant.Double,
-                               'value': flatroofratio},
-                'FR_AR': {'type': QVariant.Double,
-                               'value': flatroofratio * parameters['AREA']}}
+        fr_rt = 0.5 * (fr1 + fr2)
+        fr_ar = fr_rt * parameters['AREA']
 
     return {'FR_RT': {'type': QVariant.Double,
-                    'value': NULL},
+                    'value': fr_rt},
             'FR_AR': {'type': QVariant.Double,
-                    'value': NULL}}
+                    'value': fr_ar}}
 
 
 extension = OeQExtension(
@@ -60,7 +58,7 @@ extension = OeQExtension(
     targetlayer_name=config.data_layer_name,
     active=True,
     show_results=['FR_RT'],
-    description=u"Calculate the flat area of the roof of the Building",
+    description=u"Raw calculation of the flat area of the roof of the Building",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

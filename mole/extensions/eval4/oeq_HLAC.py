@@ -12,19 +12,15 @@ def calculation(self=None, parameters={},feature = None):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'HLAC': NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['AREA'] , dataset['FLOORS'] , dataset['BS_QTC'] , dataset['RF_QTC'] , dataset['WL_QTC'] , dataset['WN_QTC']]):
-        living_area = float(dataset['AREA']) * float(dataset['FLOORS']) * 0.8
-        qtp_total = float(dataset['BS_QTC']) + float(dataset['RF_QTC']) + float(dataset['WL_QTC']) + float(dataset['WN_QTC']) #*1.2
-        dataset['HLAC']=qtp_total/living_area
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    hlac= NULL
 
+    if not oeq_global.isnull([parameters['AREA'] , parameters['FLOORS'] , parameters['BS_QTC'] , parameters['RF_QTC'] , parameters['WL_QTC'] , parameters['WN_QTC']]):
+        living_area = float(parameters['AREA']) * float(parameters['FLOORS']) * 0.8
+        qtp_total = float(parameters['BS_QTC']) + float(parameters['RF_QTC']) + float(parameters['WL_QTC']) + float(parameters['WN_QTC']) #*1.2
+        hlac=qtp_total/living_area
+
+    return {'HLAC': {'type': QVariant.Double,'value': hlac}}
 
 extension = OeQExtension(
     extension_id=__name__,
@@ -35,7 +31,7 @@ extension = OeQExtension(
     layer_name= 'QT Building per Livig Area Contemporary',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
-    field_id='HLAC',
+    field_id= None,
     source_type='none',
     par_in=['AREA','FLOORS','BS_QTC','RF_QTC','WL_QTC','WN_QTC'],
     sourcelayer_name=config.data_layer_name,

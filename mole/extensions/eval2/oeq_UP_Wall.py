@@ -11,22 +11,12 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'YOC': NULL,'WL_UP':NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull(dataset['YOC']):
-        #print str(dataset['YOC'])
-        #print type(dataset['YOC'])
-        #try:
-        dataset['WL_UP']=present_wall_uvalue_AVG_by_building_age_lookup.get(dataset['YOC'])
-        #except:
-        #    pass
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    wl_up = NULL
+    if not oeq_global.isnull(parameters['YOC']):
+        wl_up = present_wall_uvalue_AVG_by_building_age_lookup.get(parameters['YOC'])
+    return {'WL_UP': {'type': QVariant.Double, 'value': wl_up}}
+
 
 
 extension = OeQExtension(

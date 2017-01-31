@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import os,time,datetime
@@ -62,7 +63,7 @@ class OeQExtension:
                  targetlayer_name=None,
                  #field_rename=None,
                  colortable=None,
-                 show_results=True,
+                 show_results=[],
                  load_method=None,
                  preflight_method = None,
                  sample_mathod = None,
@@ -490,6 +491,7 @@ class OeQExtension:
         To make it work, each evaluation method of the extension always has to return
         the complete set of output parameters even if "feature" is None.
         """
+        #print self.extension_filepath
         result = self.evaluate(parameter=dict(zip(self.par_in, [1 for i in self.par_in])),feature=None)
         if result == None: return {}
         return result.keys()
@@ -1114,22 +1116,34 @@ file_writer.writeRaster(pipe,
         from mole.qgisinteraction import legend
         if not required:
             required = self.required()
+        #print self.extension_filepath
+
         if not all([(self.last_calculation > ext.last_calculation) for ext in required]):
+            #print [str( self.last_calculation) + '  '  +str(ext.last_calculation) + ' : ' + str(self.last_calculation > ext.last_calculation)+ ' -> ' +  str(ext.extension_filepath)  for ext in required]
+            #print "predessors outdated"
             self.reset_calculation_state()
             return True
         if bool(self.show_results) & (not legend.nodeExists(self.layer_name)):
+            #print self.show_results
+            #print self.layer_name
+            #print legend.nodeExists(self.layer_name)
+            #print str(self.extension_filepath)
+            #print "node does not exist"
             self.reset_calculation_state()
             return True
         if bool(self.sourcelayer_name) & (not legend.nodeExists(self.sourcelayer_name)):
+            #print "source node does not exist"
             self.reset_calculation_state()
             return True
         if bool(self.targetlayer_name) & (not legend.nodeExists(self.targetlayer_name)):
+            #print "target node does not exist"
             self.reset_calculation_state()
             return True
         targetlayer=legend.nodeByName(self.targetlayer_name)[0].layer()
         target_fields = [a.name() for a in targetlayer.fields()]
         par_out = self.get_par_out()
         if not all([par in target_fields for par in par_out]):
+            print "some fields do not exist"
             self.reset_calculation_state()
             return True
         return False

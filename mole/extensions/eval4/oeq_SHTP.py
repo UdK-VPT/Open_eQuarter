@@ -11,20 +11,13 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'HTP': NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['BS_UP'] , dataset['BS_AR'] , dataset['RF_UP'] , dataset['RF_AR'] , dataset['WL_UP'] , dataset['WL_AR'] , dataset['WN_UP'] , dataset['WN_AR']]):
-        qtp_total = float(dataset['BS_UP'] * dataset['BS_AR'] * 0.35 ) + float(dataset['RF_UP'] * dataset['RF_AR']) + float(dataset['WL_UP'] * dataset['WL_AR'] ) + float(dataset['WN_UP'] * dataset['WN_AR'])
-        env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
-        dataset['HTP']=qtp_total/env_area
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
-
+    htp = NULL
+    if not oeq_global.isnull([parameters['BS_UP'] , parameters['BS_AR'] , parameters['RF_UP'] , parameters['RF_AR'] , parameters['WL_UP'] , parameters['WL_AR'] , parameters['WN_UP'] , parameters['WN_AR']]):
+        qtp_total = float(parameters['BS_UP'] * parameters['BS_AR'] * 0.35 ) + float(parameters['RF_UP'] * parameters['RF_AR']) + float(parameters['WL_UP'] * parameters['WL_AR'] ) + float(parameters['WN_UP'] * parameters['WN_AR'])
+        env_area =  float(parameters['BS_AR']) + float(parameters['RF_AR']) + float(parameters['WL_AR']) + float(parameters['WN_AR'])
+        htp=qtp_total/env_area
+    return {'HTP': {'type': QVariant.Double, 'value': htp}}
 
 extension = OeQExtension(
     extension_id=__name__,

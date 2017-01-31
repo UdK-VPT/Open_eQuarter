@@ -13,6 +13,24 @@ def load(self=None):
 
 
 def preflight(self=None):
+    from mole.project import config
+    from PyQt4.QtCore import QVariant
+    from qgis.core import QgsField
+    from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists
+    from mole.oeq_global import OeQ_get_bld_id
+    layer = self.layer()
+    provider = layer.dataProvider()
+    #fields = filter(lambda f: f.name() not in [config.building_id_key,u'AREA',u'PERIMETER'], provider.fields())
+    fields = filter(lambda f: f.name() != config.building_id_key, provider.fields())
+    fieldnames =[field.name() for field in fields]
+    to_remove = []
+    count = 0
+    for field in provider.fields():
+        if field.name() in fieldnames:
+            to_remove.append(count)
+        count += 1
+    provider.deleteAttributes(to_remove)
+    layer.updateFields()
     return True
 
 def evaluation(self=None, parameters={},feature=None):
@@ -46,7 +64,7 @@ extension = OeQExtension(
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     load_method= load,
-    preflight_method = None,
+    preflight_method = preflight,
     evaluation_method= None,
     postflight_method = None)
 

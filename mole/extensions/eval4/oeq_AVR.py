@@ -11,19 +11,13 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    dataset = {'AVR': NULL}
-    dataset.update(parameters)
 
-    if not oeq_global.isnull([dataset['AREA'] , dataset['HEIGHT'] , dataset['BS_AR'] , dataset['RF_AR'] , dataset['WL_AR'] , dataset['WN_AR']]):
-        volume = float(dataset['AREA']) * float(dataset['HEIGHT'])
-        env_area =  float(dataset['BS_AR']) + float(dataset['RF_AR']) + float(dataset['WL_AR']) + float(dataset['WN_AR'])
-        dataset['AVR']=env_area/volume
-    result = {}
-    for i in dataset.keys():
-        result.update({i: {'type': QVariant.Double,
-                           'value': dataset[i]}})
-    return result
+    avr = NULL
+    if not oeq_global.isnull([parameters['AREA'] , parameters['HEIGHT'] , parameters['BS_AR'] , parameters['RF_AR'] , parameters['WL_AR'] , parameters['WN_AR']]):
+        volume = float(parameters['AREA']) * float(parameters['HEIGHT'])
+        env_area =  float(parameters['BS_AR']) + float(parameters['RF_AR']) + float(parameters['WL_AR']) + float(parameters['WN_AR'])
+        avr=env_area/volume
+    return {'AVR': {'type': QVariant.Double, 'value': avr}}
 
 
 extension = OeQExtension(

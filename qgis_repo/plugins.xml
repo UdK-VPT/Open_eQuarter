@@ -2,7 +2,7 @@
 <?xml-stylesheet type='text/xsl' href='/plugins.xsl' ?>
 <plugins>
   <pyqgis_plugin name='Open eQuarter' version='0.996'>
-    <description>The plugin automates the setup for investigating an area. QGIS may tell you, the plugin is fualty. Ignore, keep the plugin and simply restart QGIS. That's it. Will be fixed in the next version.</description>
+    <description>Open eQuarter is a QGIS-Plugin to investigate settlements and cit districts based upon a set of data maps. NOTE: You may have to restart QGIS after installation.</description>
     <version>0.996</version>
     <qgis_minimum_version>2.4</qgis_minimum_version>
     <homepage>http://udk-vpt.github.io/Open_eQuarter</homepage>

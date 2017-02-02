@@ -598,7 +598,8 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     newnode=nodeMove(newnode,position,target_node)
     #time.sleep(1)
     #oeq_global.OeQ_unlockQgis()
-    #oeq_global.OeQ_wait(0.1)
+    #oeq_global.OeQ_wait(0.5)
+    #print "+++++++++++++++"
     return newnode
 
 def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = config.building_id_key):
@@ -616,7 +617,7 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = config.
         target_node = target_node[0]
     target_layer = target_node.layer()
     target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
-
+    #print "X1"
     #print attributenames
     if attributenames:
         fieldnames_to_copy = filter( lambda x : x in source_field_names, attributenames)
@@ -629,8 +630,8 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = config.
 
     fields_to_add = filter (lambda x :  x.name() in fieldnames_to_add , source_layer.dataProvider().fields())
     target_layer.dataProvider().addAttributes(fields_to_add)
-
-    target_layer.startEditing()
+    #print "X2"
+    #target_layer.startEditing()
     target_field_names = [field.name() for field in target_layer.dataProvider().fields()]
     target_field_ids = [[i for i,x in enumerate(target_field_names) if x == fieldname][0] for fieldname in fieldnames_to_copy]
     for feature in target_layer.dataProvider().getFeatures():
@@ -638,13 +639,32 @@ def nodeCopyAttributes(node,target_node,attributenames=None,indexfield = config.
         if  not source_feature: continue
         source_feature = source_feature[0]
         attr = dict(zip(target_field_ids,[source_feature[x] for x in fieldnames_to_copy]))
-        target_layer.dataProvider().changeAttributeValues({feature.id():attr})
+        #target_layer.dataProvider().changeAttributeValues({feature.id():attr})
+        target_layer.updateFields()
+       # print "X3"
 
-    target_layer.updateFields()
-    target_layer.commitChanges()
+    #print "X4"
+    #target_layer.commitChanges()
+    #print "X5"
     return target_layer
 
-
+def nodeDeleteAllAttributes(node,indexfield = None):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    layer = node.layer()
+    fields = layer.dataProvider().fields().toList()
+    to_remove = []
+    count = 0
+    if not bool(indexfield):
+        layer.dataProvider().deleteAttributes(range(0,len(fields)-1))
+    for field in fields:
+        if field.name() != indexfield:
+            to_remove.append(count)
+        count += 1
+    layer.dataProvider().deleteAttributes(to_remove)
+    layer.updateFields()
 
 
 def nodeCopyAsMemory(node,newname=None,position=None,target_node=None):

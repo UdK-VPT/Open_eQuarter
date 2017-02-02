@@ -101,11 +101,13 @@ def OeQ_push_progressbar(title='Be patient!', message='Background calculations a
     return {'widget':progressbarwidget,'baritem':baritem}
 
 
-def OeQ_update_progressbar(progressbar, progress_counter):
+def OeQ_update_progressbar(progressbar, progress_counter,message = None):
     progress_counter = progress_counter + 1
+    OeQ_unlockQgis()
     progressbar['widget'].setValue(progress_counter)
     OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+
     return progress_counter
 
 
@@ -119,8 +121,8 @@ def OeQ_pop_progressbar(progressbar=None):
 def OeQ_push_info(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
+    OeQ_unlockQgis()
     return widget
-    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -138,8 +140,8 @@ def OeQ_push_status(title='Status: ', message='Complete'):
     global OeQ_StatusWidget
     OeQ_StatusWidget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(OeQ_StatusWidget, iface.messageBar().INFO)
+    OeQ_unlockQgis()
     return OeQ_StatusWidget
-    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -158,8 +160,8 @@ def OeQ_pop_status():
 def OeQ_push_warning(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
+    OeQ_unlockQgis()
     return widget
-    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -173,8 +175,8 @@ def OeQ_pop_warning(baritem=None):
 def OeQ_push_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
     iface.messageBar().pushWidget(widget, iface.messageBar().CRITICAL)
+    OeQ_unlockQgis()
     return widget
-    #OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
@@ -205,6 +207,10 @@ QeQ_current_work_layer = None
 def OeQ_unlockQgis():
     import sys
     sys.stdout.write('')
+    sys.stdout.write('')
+    sys.stdout.write('')
+    sys.stdout.write('')
+
 
 from PyQt4.QtCore import QSettings
 

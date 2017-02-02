@@ -526,8 +526,11 @@ class OeQExtension:
         :param overwrite:  (Default value = False)
 
         """
+        #print "0"
         from shutil import copyfile
+        #print "1"
         ct_default = self.get_default_colortable()
+        #print "2"
         if (not ct_default):
             self.colortable = None
         elif not oeq_global.OeQ_project_saved():
@@ -1182,8 +1185,7 @@ file_writer.writeRaster(pipe,
         from qgis import utils
         from qgis.core import QgsField
         from PyQt4.QtCore import QVariant
-        from mole.qgisinteraction.layer_interaction import find_layer_by_name, \
-            add_attributes_if_not_exists
+        from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
 
         # remove existing layer if forcedload is True
         if forcedload:
@@ -1193,90 +1195,174 @@ file_writer.writeRaster(pipe,
 
 
         # search for mandatory predecessors
-        baritem = oeq_global.OeQ_push_info(u'Extension "' + self.extension_name + '":',
-                                           'Updating mandatory predecessors')
+        progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
+                                                      'Processing',maxcount=7)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
+
+        #baritem = oeq_global.OeQ_push_info(u'Extension "' + self.extension_name + '":','Updating mandatory predecessors')
         # find required predecessors
         required = self.required()
 
         # process every predecessor
         for ext in required:
             if ext.needs_evaluation(): ext.process()
-        oeq_global.OeQ_pop_info(baritem)
 
-        baritem = oeq_global.OeQ_push_info(u'Extension "' + self.extension_name + '":',
-                                           'Processing')
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
         # check wether one of them was updated
         if not self.needs_evaluation():
-            oeq_global.OeQ_pop_info(baritem)
+            #oeq_global.OeQ_pop_info(baritem)
             return False
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
 
         # check wether a load function is defined and run it
         if self.load_method != None:
             self.load()
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
+
         # check wether a preflight function is defined and run it
         if self.preflight_method != None:
             self.preflight()
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
+
         if self.evaluation_method != None:
                 self.evaluateAll()
+
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
 
         # check wether a postflight function is defined and run it
         if self.postflight_method != None:
             self.postflight()
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
+
         # if any result shall be visualized
         if bool(self.show_results) & (type(self.show_results) == list):
            self.work_out_results()
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print progress_counter
+
         self.last_calculation = datetime.datetime.now()
         # time.sleep(0.5)
-        oeq_global.OeQ_pop_info(baritem)
+        oeq_global.OeQ_pop_progressbar(progressbar)
         return True
         #return False
 
+
+
+    def getValueFromDatabase(self,fieldname,building_id):
+        layer = legend.nodeByName(config.data_layer_name)[0].layer()
+        feature = filter(lambda x: x[config.building_id_key] in building_id ,layer.getFeatures().toList())
+        return feature[0][fieldname]
+
+    def getAttributeFromDatabase(self,fieldname):
+        layer = legend.nodeByName(config.data_layer_name)[0].layer()
+        field = filter(lambda x: x.name() == fieldname ,layer.dataProvider().fields())
+        return field
 
     def work_out_results(self):
         """ """
         from mole.qgisinteraction.layer_interaction import fullRemove
         from mole.qgisinteraction import legend
+        from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
+
+        progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
+                                                      'Working out Results!',maxcount=8)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
+
         fullRemove(self.layer_name)
+
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+
         self.copy_default_colortable_to_project()
+
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
         #create category group in legend
         if not legend.nodeExists(self.category):
             cat=legend.nodeCreateGroup(self.category,2)
         else:
             cat=legend.nodeByName(self.category)[0]
+
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print 'Create Group'
+
         #create subcategory group in legend
         if not legend.nodeExists(self.subcategory):
             subcat=legend.nodeCreateGroup(self.subcategory,'bottom',cat)
         else:
             subcat=legend.nodeByName(self.subcategory)[0]
 
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+
         #use the housing layer as a template for the resultlayer
+
         resultnode=legend.nodeDuplicate(config.building_outline_layer_name, self.layer_name, None, subcat)
-        oeq_global.OeQ_wait(1)
-        self.copy_default_colortable_to_project()
+
+        legend.nodeDeleteAllAttributes(resultnode,config.building_id_key)
+
+         #oeq_global.OeQ_wait(0.5)
+        #print 'Copy Colortable'
+        #self.copy_default_colortable_to_project()
+        #oeq_global.OeQ_unlockQgis()
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
         #copy the required attributes of the datalayer to the resultlayer
-        legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
+        #return
+        database = legend.nodeByName(config.data_layer_name)[0].layer()
+        target_layer=resultnode.layer()
+        target_layer.dataProvider().addAttributes(self.getAttributeFromDatabase(self.show_results[0]))
+        target_layer.updateFields()
+        #add_attributes_if_not_exists(target_layer, self.show_results)
+        target_layer.startEditing()
 
+        # set target to edit mode
+
+        result = dict(zip([x[config.building_id_key] for x in database.getFeatures()],[x[self.show_results[0]] for x in database.getFeatures()]))
+
+        target_layer.startEditing()
+        # do calculation feature by feature
+        for tgtFeat in target_layer.getFeatures():
+            tgtFeat[self.show_results[0]] = result[tgtFeat[config.building_id_key]]
+            target_layer.updateFeature(tgtFeat)
+        target_layer.commitChanges()
+
+        #legend.nodeCopyAttributes(config.data_layer_name,resultnode,self.show_results)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #return
         #add the colortable as style
         resultnode.layer().loadNamedStyle( self.colortable)
 
         #resultnode=legend.nodeConvertCRS(resultnode,config.default_extent_crs)
-
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        #print 'Add Node Entry 1'
         #add node entry to the radiogroup of the category
         legend.nodeRadioAdd(resultnode,self.category)
         legend.nodeShow(resultnode)
-        time.sleep(0.1)
+        ##oeq_global.OeQ_wait(0.1)
+        #print 'Add Node Entry 2'
+
         legend.nodeCollapse(resultnode)
-        time.sleep(0.1)
+        ##oeq_global.OeQ_wait(0.1)
+        #print 'Add Node Entry 3'
+
         legend.nodeCollapse(subcat)
-        time.sleep(0.1)
+        ##oeq_global.OeQ_wait(0.1)
+        #print 'Add Node Entry 4'
+
         legend.nodeCollapse(cat)
+
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        oeq_global.OeQ_pop_progressbar(progressbar)
 
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
 

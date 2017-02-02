@@ -179,3 +179,132 @@ def extract_color_at_point(raster, point, point_crs):
         return None
     else:
         return color
+
+'''
+def shift_rastermap(layer,from_point,to_point):
+    from osgeo import gdal
+
+# Open in read/write mode
+rast_src = gdal.Open(rast_fname, 1)
+
+# Get affine transform coefficients
+gt = rast_src.GetGeoTransform()
+# (2776450.0, 100.0, 0.0, 6352650.0, 0.0, -100.0)
+
+# Convert tuple to list, so we can modify it
+gtl = list(gt)
+gtl[0] -= 1000.0  # Move east 1 km
+gtl[3] += 20000.0  # Move south 20 km
+# [2777450.0, 100.0, 0.0, 6332650.0, 0.0, -100.0]
+
+# Save the geotransform to the raster
+rast_src.SetGeoTransform(tuple(gtl))
+rast_src = None  # equivalent to save/close
+
+class PointTool(QgsMapTool):
+    from qgis.gui import QgsMapTool,QgsMapToolEmitPoint
+    from qgis.core import QgsFeature,QgsMapLayer,QgsPoint
+    from PyQt4.QtGui import QMessageBox
+    from PyQt4.QtCore import SIGNAL,QObject
+    def __init__(self, canvas):
+        QgsMapTool.__init__(self, canvas)
+        self.canvas = canvas
+        self.iface = iface
+        self.points = []
+        self.pointcnt = 0
+    def canvasPressEvent(self, event):
+        pass
+    def canvasMoveEvent(self, event):
+        x = event.pos().x()
+        y = event.pos().y()
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+    def canvasReleaseEvent(self, event):
+        #Get the click
+        x = event.pos().x()
+        y = event.pos().y()
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+    def activate(self):
+        pass
+    def deactivate(self):
+        pass
+    def isZoomTool(self):
+        return False
+    def isTransient(self):
+        return False
+    def isEditTool(self):
+        return True
+    def pickCoordinates(self,number_of_points = 1):
+        self.points = []
+        self.pointcnt = number_of_points
+        self.pointEmitter = QgsMapToolEmitPoint(iface.mapCanvas())
+        QObject.connect( self.pointEmitter, SIGNAL("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
+        iface.mapCanvas().setMapTool( self.pointEmitter )
+    def selectNow(self, point, button):
+      #QMessageBox.information(None, "Clicked coords", " x: " + str(point.x()) + " Y: " + str(point.y()) )
+      #point1 = self.canvas.getCoordinateTransform().toMapCoordinates(point.x(), point.y())
+      self.points.append(point)
+      self.pointcnt -= 1
+      if not self.pointcnt:
+          super(PointTool, self).deactivate()
+          self.emit(SIGNAL("deactivated()"))
+          QObject.disconnect(self.pointEmitter, SIGNAL("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
+tool = PointTool(iface.mapCanvas())
+tool.pickCoordinates(2)
+
+from qgis.gui import QgsMapTool, QgsMapToolEmitPoint, QgsRubberBand
+from qgis.core import QgsFeature, QgsMapLayer, QgsPoint
+from PyQt4.QtGui import QColor
+class RectangleMapTool(QgsMapToolEmitPoint):
+    from qgis.gui import QgsMapTool, QgsMapToolEmitPoint,QgsRubberBand
+    from qgis.core import QgsFeature, QgsMapLayer, QgsPoint
+    from PyQt4.QtGui import QColor
+    def __init__(self, canvas):
+          self.canvas = canvas
+          QgsMapToolEmitPoint.__init__(self, self.canvas)
+          self.rubberBand = QgsRubberBand(self.canvas, QGis.Line)
+          self.rubberBand.setColor(QColor('green'))
+          self.rubberBand.setWidth(3)
+          self.reset()
+    def reset(self):
+          self.startPoint = self.endPoint = None
+          self.isEmittingPoint = False
+          self.rubberBand.reset(QGis.Polygon)
+    def canvasPressEvent(self, e):
+          self.startPoint = self.toMapCoordinates(e.pos())
+          self.endPoint = self.startPoint
+          self.isEmittingPoint = True
+          self.showRect(self.startPoint, self.endPoint)
+    def canvasReleaseEvent(self, e):
+          self.isEmittingPoint = False
+          r = self.rectangle()
+          if r is not None:
+                print "Rectangle:", r.xMinimum(), r.yMinimum(), r.xMaximum(), r.yMaximum()
+    def canvasMoveEvent(self, e):
+          if not self.isEmittingPoint:
+                return
+          self.endPoint = self.toMapCoordinates(e.pos())
+          self.showRect(self.startPoint, self.endPoint)
+    def showRect(self, startPoint, endPoint):
+          self.rubberBand.reset(QGis.Polygon)
+          if startPoint.x() == endPoint.x() or startPoint.y() == endPoint.y():
+                return
+          point1 = QgsPoint(startPoint.x(), startPoint.y())
+          point2 = QgsPoint(startPoint.x(), endPoint.y())
+          point3 = QgsPoint(endPoint.x(), endPoint.y())
+          point4 = QgsPoint(endPoint.x(), startPoint.y())
+          self.rubberBand.addPoint(point1, False)
+          self.rubberBand.addPoint(point2, False)
+          self.rubberBand.addPoint(point3, False)
+          self.rubberBand.addPoint(point4, True)    # true to update canvas
+          self.rubberBand.show()
+    def rectangle(self):
+          if self.startPoint is None or self.endPoint is None:
+                return None
+          elif self.startPoint.x() == self.endPoint.x() or self.startPoint.y() == self.endPoint.y():
+                return None
+          return QgsRectangle(self.startPoint, self.endPoint)
+    def deactivate(self):
+          super(RectangleMapTool, self).deactivate()
+          self.emit(SIGNAL("deactivated()"))
+tool = RectangleMapTool(iface.mapCanvas())
+'''

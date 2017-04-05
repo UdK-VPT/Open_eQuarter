@@ -31,6 +31,12 @@ def evaluation(self=None, parameters={},feature=None):
                        'value': NULL}
                }
 
+def postflight(self=None):
+    import time
+    time.sleep(0.5)
+    return True
+
+
 
 import os
 from mole.extensions import OeQExtension
@@ -57,6 +63,6 @@ extension = OeQExtension(
     load_method= load,
     preflight_method = None,
     evaluation_method= evaluation,
-    postflight_method = None)
+    postflight_method = postflight)
 
 extension.registerExtension(default=True)

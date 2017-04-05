@@ -1004,6 +1004,7 @@ class OpenEQuarterMain:
 
 
     def run(self):
+        import time
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
         if not self.main_process_dock.automode.isChecked():
@@ -1013,6 +1014,7 @@ class OpenEQuarterMain:
         else:
             while not self.standard_workflow.is_done():
                 self.main_process_dock.call_next_workstep(self)
+                time.sleep(0.5)
         return True
 
 

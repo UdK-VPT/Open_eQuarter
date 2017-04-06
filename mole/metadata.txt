@@ -12,6 +12,15 @@
 name=Open eQuarter
 qgisMinimumVersion=2.4
 description=Open eQuarter is a QGIS-Plugin to investigate settlements and city districts based upon a set of data maps. NOTE: You may have to restart QGIS after installation.
+about=The research project “Sustainable and energy-efficient redevelopment of city quarters - Analytical and planning tools for energy assessment and rehabilitation of urban districts (Open eQuarter)” was aiming at the development of a software environment to evaluate the energetic status of a block, a neighborhood, a city district or an entire city. Therefore the here provided investigastion tool named "Open eQuarter" was developed. It calculates a set of geometric and energy-related parameters on building based precision with the lowest possible acquisition expense.
+
+Furthermore Open eQuarter should facilitate predictions about the impact of
+• taken measures in construction, building service und infrastructure, • modification of supply structures
+• social and/or economical changes as well as of
+• political und conceptional objectives
+on the energy efficiency of an investigation area. The Open eQuarter package should make use of a Geographic Information System and is supposed to be platform independent as well as free of charge.
+In line with the programming works a typical urban quarter was analyzed „by hand“. Scope and type of the inquiry were specified first and foremost by the needs of the software development. A complex 30 block quarter in Berlin’s district Neukölln was selected (s. Figure 1.1). With a typical urban structure and a variety of different building types and building ages it was estimated to be very suitable for development and validation purposes in Open eQuarter.
+The „handmade“ quarter analysis and the programming work were closely coordinated to facilitate continuous information interchange between both fields of work.
 version=0.998
 author=Werner Kaul & Kim Gülle / Open eQuarter Team UdK-Berlin
 email=we.kaul@udk-berlin.de

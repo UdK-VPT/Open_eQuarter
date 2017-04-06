@@ -661,6 +661,7 @@ class OpenEQuarterMain:
         done = self.information_source_dlg.exec_()
         if done:
             self.main_process_dock.import_ext_selected.setChecked(True)
+            self.iface.actionSaveProject().trigger()
         else:
             self.main_process_dock.import_ext_selected.setChecked(False)
         return self.main_process_dock.import_ext_selected.isChecked()
@@ -704,6 +705,7 @@ class OpenEQuarterMain:
         result = self.main_process_dock.building_outlines_acquired.isChecked()
         if result:
             oeq_global.OeQ_push_status(message="Building Outlines succesfully aquired!")
+            self.iface.actionSaveProject().trigger()
         else:
             oeq_global.OeQ_push_status(message="Could not aquire Building Outlines!")
         return result
@@ -749,6 +751,7 @@ class OpenEQuarterMain:
         result = self.main_process_dock.building_coordinates_acquired.isChecked()
         if result:
             oeq_global.OeQ_push_status(message="Building Coordinates succesfully aquired!")
+            self.iface.actionSaveProject().trigger()
         else:
             oeq_global.OeQ_push_status(message="Could not aquire Building Coordinates!")
         return result
@@ -792,6 +795,7 @@ class OpenEQuarterMain:
         result = self.main_process_dock.information_layers_loaded.isChecked()
         if result:
             oeq_global.OeQ_push_status(message="All Information Layers succesfully aquired!")
+            self.iface.actionSaveProject().trigger()
         else:
             oeq_global.OeQ_push_status(message="Could not aquire all Information Layers!")
         return result
@@ -804,6 +808,7 @@ class OpenEQuarterMain:
         infolayernames = extensions.by_state(True,'Import')
         if (len(infolayernames) > 0) & all([legend.nodeExists(i.layer_name) for i in infolayernames]):
             self.main_process_dock.information_layers_loaded.setChecked(True)
+            self.iface.actionSaveProject().trigger()
         else:
             self.main_process_dock.information_layers_loaded.setChecked(False)
 
@@ -955,11 +960,14 @@ class OpenEQuarterMain:
         baritem=oeq_global.OeQ_push_info('Extension "Building Evaluation":', 'Checking dependencies... be patient!')
         for i in extensions.by_type('information',active=True,):
             i.process()
+            self.iface.actionSaveProject().trigger()
         for i in extensions.by_state(True,'Import'):
             i.process()
+            self.iface.actionSaveProject().trigger()
         #extensions.run_active_extensions('Import')
         for i in extensions.by_state(True,'Evaluation'):
             i.process()
+            self.iface.actionSaveProject().trigger()
         #extensions.run_active_extensions('Evaluation')
         #import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
         #evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
@@ -1011,6 +1019,7 @@ class OpenEQuarterMain:
             self.standard_workflow.do_workstep('project_created')
             self.standard_workflow.do_workstep('project_saved')
             self.standard_workflow.do_workstep('investigationarea_defined')
+
         else:
             while not self.standard_workflow.is_done():
                 self.main_process_dock.call_next_workstep(self)

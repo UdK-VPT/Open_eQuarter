@@ -12,7 +12,7 @@
 name=Open eQuarter
 qgisMinimumVersion=2.4
 description=Open eQuarter is a QGIS-Plugin to investigate settlements and city districts based upon a set of data maps. NOTE: You may have to restart QGIS after installation.
-version=0.997
+version=0.998
 author=Werner Kaul & Kim Gülle / Open eQuarter Team UdK-Berlin
 email=we.kaul@udk-berlin.de
 
@@ -21,7 +21,7 @@ email=we.kaul@udk-berlin.de
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-changelog = URL for building outlines and ALK-Data fixed!
+changelog = Open eQuarter now saes the project after each workstep automatically
 
 # tags are comma separated with spaces allowed
 tags=

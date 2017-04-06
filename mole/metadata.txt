@@ -28,8 +28,8 @@ changelog = Open eQuarter now saes the project after each workstep automatically
 tags=
 
 homepage= http://modelica-buildingsystems.de/Open_eQuarter
-repository=http://modelica-buildingsystems.de/Open_eQuarter/qgis_repo
-tracker=https://groups.google.com/forum/#!forum/open-equarter
+tracker=https://github.com/UdK-VPT/Open_eQuarter/issues
+repository=https://github.com/UdK-VPT/Open_eQuarter
 icon=icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=False

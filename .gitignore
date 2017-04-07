@@ -4,3 +4,4 @@ stat_archive/**
 stat/pdfout/**
 stat/data_sources/**
 stat/.RData
+.idea/**

@@ -1,2 +1,7 @@
 crow_archive/**
-mole_archive
+mole_archive/**
+stat_archive/**
+stat/pdfout/**
+stat/data_sources/**
+stat/.RData
+sh/**

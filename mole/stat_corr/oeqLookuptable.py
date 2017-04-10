@@ -27,9 +27,11 @@ class lookuptable:
 
   def lookup(self,args):
     fixed_args=[]
+    if isinstance(args, tuple):
+        args = args[0]
     for j in args:
       fixed_args.append([min(k ,j ) for k in self.keys() if k <= j][-1])
-    ret = [ self.values()[i] for i in [self.keys().index(j) for j in fixed_args]]
+    ret = [self.dat[j] for j in fixed_args]
     if len(ret) == 1: return ret[0]#
     else: return ret
  

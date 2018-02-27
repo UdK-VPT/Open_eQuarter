@@ -11,6 +11,7 @@ country = 'Germany'
 
 # Project information
 project_crs = 'EPSG:3857'
+project_ellipsoid = 'WGS84'
 measurement_projection='EPSG:32633'
 ### Information needed to use external plugins
 # OpenStreetMap plugin

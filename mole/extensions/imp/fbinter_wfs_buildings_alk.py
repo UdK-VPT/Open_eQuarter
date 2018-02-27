@@ -74,18 +74,22 @@ def preflight(self=None):
 
 def evaluation(self=None, parameters={},feature=None):
     from PyQt4.QtCore import QVariant
+    from qgis.core import QgsDistanceArea, QgsCoordinateReferenceSystem
     ar = NULL
     per = NULL
     id = NULL
     flr = NULL
     usage = NULL
     kind = NULL
-
+    da_engine=QgsDistanceArea()
+    da_engine.setSourceCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId))
+    da_engine.setEllipsoid(config.project_ellipsoid)
+    da_engine.setEllipsoidalMode(True)
     if feature:
             geometry = feature.geometry()
             #print geometry
-            ar = geometry.area()
-            per = geometry.length()
+            ar = da_engine.measureArea(geometry)
+            per =da_engine.measurePerimeter(geometry)
             id = feature[config.building_id_key] #necessary to safe dependency check
             flr = feature[u'FLRS_ALK']  # necessary to safe dependency check
             usage = feature[u'FUNC_ALK']  # necessary to safe dependency check
@@ -133,7 +137,7 @@ extension = OeQExtension(
     targetlayer_name=config.building_outline_layer_name,#config.data_layer_name,
     active=True,
     description=u'',
-    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_alkis_gebaeude&SRSNAME=EPSG:25833',
+    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=EPSG:25833',
    # source='http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_hausumringe?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_hausumringe&SRSNAME=EPSG:25833',
     source_crs='EPSG:25833',
     extension_filepath=os.path.join(__file__),

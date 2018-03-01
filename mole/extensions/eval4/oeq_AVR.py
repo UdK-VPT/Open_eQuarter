@@ -11,7 +11,7 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-
+    print ("AVR")
     avr = NULL
     if not oeq_global.isnull([parameters['AREA'] , parameters['HEIGHT'] , parameters['BS_AR'] , parameters['RF_AR'] , parameters['WL_AR'] , parameters['WN_AR']]):
         volume = float(parameters['AREA']) * float(parameters['HEIGHT'])

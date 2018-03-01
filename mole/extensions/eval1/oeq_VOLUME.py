@@ -5,17 +5,15 @@ from qgis.core import NULL
 from mole import oeq_global
 from mole.project import config
 from mole.extensions import OeQExtension
-from mole.stat_corr import contemporary_base_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    # factor for golden rule
-    if not oeq_global.isnull([parameters['AREA'] , parameters['HEIGHT']]):
+    try:
         volume  =  float(parameters['AREA']) * float(parameters['HEIGHT'])
-    else:
-        volume=NULL
+    except:
+        volume = NULL
     return{'VOLUME':{'type': QVariant.Double,
                         'value': volume}}
 
@@ -29,7 +27,7 @@ extension = OeQExtension(
     layer_name= 'Building Volume',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
-    field_id='VOLUME',
+    #field_id='VOLUME',
     source_type='layer',
     par_in=['AREA','HEIGHT'],
     sourcelayer_name=config.data_layer_name,
@@ -40,3 +38,6 @@ extension = OeQExtension(
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)
+
+if __name__ == "__main__":
+    calculation(None,{'AREA':400,'HEIGHT':12})

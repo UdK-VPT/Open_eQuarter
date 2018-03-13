@@ -29,7 +29,7 @@ tags=
 
 homepage= http://modelica-buildingsystems.de/Open_eQuarter
 tracker=https://github.com/UdK-VPT/Open_eQuarter/issues
-repository=https://github.com/UdK-VPT/Open_eQuarter
+repository=http://modelica-buildingsystems.de/Open_eQuarter/qgis_repo
 icon=icons/OeQ_plugin_icon.png
 # experimental flag
 experimental=False

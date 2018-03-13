@@ -77,7 +77,7 @@ def qgis_prefix_path():
         return '/Applications/QGIS.app/Contents/MacOS'
 
 
-default_heating_degree_days =  2750
+default_heating_degree_days =  2301 # average Berlin
 default_construction_year =  1950
 default_population_density =  10000
 default_number_of_floors = 3.5

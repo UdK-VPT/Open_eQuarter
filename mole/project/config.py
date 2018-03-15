@@ -88,6 +88,7 @@ pinfo_default = {
     'project_name': u'New Project',
     'description': u'',
     'location_city': u'',
+    'location_street': u'',
     'location_postal': u'',
     'location_lon': u'',
     'location_lat': u'',

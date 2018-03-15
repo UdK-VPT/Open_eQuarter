@@ -277,14 +277,23 @@ class OpenEQuarterMain:
         import shutil
         import os
         if not project_interaction.project_exists():
+
             # prompt the user to save the project
             self.project_does_not_exist_dlg.show()
+
+
+            # check if a custom project name is defined, otherwise use adress informnation as name
+            if oeq_global.OeQ_project_info['project_name'] == config.pinfo_default['project_name']:
+                oeq_global.OeQ_project_info['project_name'] = ' '.join([oeq_global.OeQ_project_info['location_city'],oeq_global.OeQ_project_info['location_postal'],oeq_global.OeQ_project_info['location_street']])
+                oeq_global.OeQ_project_info['project_name'] = oeq_global.fix_german_umlauts('_'.join(oeq_global.OeQ_project_info['project_name'].split(' ')))
+
             yes_to_save = self.project_does_not_exist_dlg.exec_()
 
             if yes_to_save:
                 dialog=QFileDialog()
+                dialog.selectFile(oeq_global.OeQ_project_info['project_name'])
                 #path=dialog.getExistingDirectory(None,'Navigate to the directory you want project \"'+ oeq_global.OeQ_project_info['project_name'] + '\" to be stored in:')
-                path = QFileDialog.getSaveFileName(None,"Save project'"+oeq_global.OeQ_project_info['project_name']+"' as:",os.path.normpath(os.path.join("~/",oeq_global.OeQ_project_info['project_name'])))
+                path = dialog.getSaveFileName(None,"Save project'"+oeq_global.OeQ_project_info['project_name']+"' as:",os.path.normpath(os.path.join("~/",oeq_global.OeQ_project_info['project_name'])),oeq_global.OeQ_project_info['project_name'])
                 if path:
                     oeq_global.OeQ_project_info['project_name'] = os.path.basename(path).replace (" ", "_")
                     #project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'])

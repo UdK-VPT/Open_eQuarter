@@ -27,7 +27,7 @@ def OeQ_get_bld_id():
 
 # global OeQ_project_info
 OeQ_project_info = {
-    'project_name': u'My Project',
+    'project_name': u'New Project',
     'description': u'The aim of this project, is to analyse a quarter.',
     'location_city': u'City or street',
     'location_city_short': u'City',
@@ -82,6 +82,27 @@ def OeQ_project_saved():
     return (len(OeQ_project_path()) > 3)
     #return OeQ_project_name() != ''
 
+
+
+def fix_german_umlauts(thetext):
+    #thetext = str(thetext)
+    codetype = type(thetext)
+    if codetype != unicode:
+        thetext = unicode(thetext, "utf-8")
+
+    print type(thetext)
+
+    trans = {u'ä':u'ae',u'Ä':u'Ae',u'ö':u'oe',u'Ö':u'Oe',u'ü':u'ue', u'Ü':u'Ue',u'ß':u'ss'}
+    for i in trans.keys():
+        k = thetext.split(i)
+        print k
+        l = trans[i]
+        print l
+        thetext = l.join(k)
+    if codetype != unicode:
+        return str(thetext)
+    else:
+        return thetext
 
 def OeQ_push_progressbar(title='Be patient!', message='Background calculations are going on...', timeout=0,
                          maxcount=100):

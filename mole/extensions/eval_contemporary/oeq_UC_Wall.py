@@ -5,8 +5,8 @@ from qgis.core import NULL
 from mole import oeq_global
 from mole.project import config
 from mole.extensions import OeQExtension
-from mole.stat_corr import contemporary_wall_uvalue_by_building_age_lookup
-from mole.stat_corr import nrb_wall_uvalue_by_building_age_lookup
+from mole.stat_corr import rb_contemporary_wall_uvalue_by_building_age_lookup
+from mole.stat_corr import nrb_contemporary_wall_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
@@ -17,15 +17,15 @@ def calculation(self=None, parameters={},feature = None):
 #differentiation between RB and NRB (for now in case of contemporary U-Values RB=NRB. After getting NRB data for contemporary case code must be adaptet)
     if parameters['BLD_USAGE'] == "RB":
         if not oeq_global.isnull(parameters['YOC']):
-            wl_uc = contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])
+            wl_uc = rb_contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])
 
     elif parameters['BLD_USAGE'] == "NRB":
         if not oeq_global.isnull(parameters['YOC']):
-            wl_uc = contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])
+            wl_uc = nrb_contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])
 
     else:
         if not oeq_global.isnull(parameters['YOC']):
-            wl_uc=(((contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC']))+(contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])))/2)
+            wl_uc=(((rb_contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC'])) + (nrb_contemporary_wall_uvalue_by_building_age_lookup.get(parameters['YOC']))) / 2)
 
     return {'WL_UC': {'type': QVariant.Double, 'value': wl_uc}}
 

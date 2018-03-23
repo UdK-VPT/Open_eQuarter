@@ -22,7 +22,7 @@ email=we.kaul@udk-berlin.de
 # Optional items:
 
 # Uncomment the following line and add your changelog entries:
-changelog = new: OeQ now additionally evaluates the building envelopes based on EnEV regulations. new: OeQ now generates the projectname from the adress data given in the…
+changelog = new: OeQ database now includes alk function and alk kind codes. fixed: better progress bar performance.
 
 # tags are comma separated with spaces allowed
 tags=

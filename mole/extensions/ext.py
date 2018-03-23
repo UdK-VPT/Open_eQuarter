@@ -1212,6 +1212,7 @@ file_writer.writeRaster(pipe,
         # check wether one of them was updated
         if not self.needs_evaluation():
             #oeq_global.OeQ_pop_info(baritem)
+            oeq_global.OeQ_pop_progressbar(progressbar)
             return False
 
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)

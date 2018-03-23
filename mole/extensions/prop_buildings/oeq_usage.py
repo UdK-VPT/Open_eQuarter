@@ -12,12 +12,19 @@ def calculation(self=None, parameters={},feature = None):
 
     try:
         falk = str(int(parameters['FUNC_ALK']))
+        kalk = str(int(parameters['KIND_ALK']))
         bu_bt = building_usage_by_alk_usage_id.get(falk)
     except:
         bu_bt = NULL
+        falk = NULL
+        kalk = NULL
 
     return {'BLD_USAGE':{'type': QVariant.String,
-                        'value': bu_bt}}
+                        'value': bu_bt},
+            'BLD_FUNC':{'type': QVariant.String,
+                        'value': falk},
+            'BLD_KIND':{'type': QVariant.String,
+                        'value': kalk}}
 
 extension = OeQExtension(
     extension_id=__name__,
@@ -30,7 +37,7 @@ extension = OeQExtension(
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     #field_id= "BUI_USAGE",
     source_type='none',
-    par_in= ['FUNC_ALK'],
+    par_in= ['FUNC_ALK','KIND_ALK'],
     sourcelayer_name=config.building_outline_layer_name,
     targetlayer_name=config.data_layer_name,
     active=True,

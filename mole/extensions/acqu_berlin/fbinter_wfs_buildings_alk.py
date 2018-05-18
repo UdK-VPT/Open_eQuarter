@@ -27,7 +27,7 @@ def preflight(self=None):
     to_remove =[]
     for i in features:
         try:
-            if not isnull(i['Bauart_sch']):
+            if (not isnull(i['Bauart_sch'])) & (0 != i['Bauart_sch']):
                 to_remove.append(i.id())
         except:
             return False
@@ -137,9 +137,11 @@ extension = OeQExtension(
     targetlayer_name=config.building_outline_layer_name,#config.data_layer_name,
     active=True,
     description=u'',
-    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=EPSG:25833',
-   # source='http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_hausumringe?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_hausumringe&SRSNAME=EPSG:25833',
+    #source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=EPSG:25833',
+    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAMES=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=urn:ogc:def:crs:EPSG::25833',
+    #source='http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_hausumringe?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_hausumringe&SRSNAME=EPSG:25833',
     source_crs='EPSG:25833',
+    bbox_crs='EPSG:4326',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
     load_method= load,

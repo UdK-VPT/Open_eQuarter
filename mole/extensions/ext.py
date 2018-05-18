@@ -57,6 +57,7 @@ class OeQExtension:
                  active=False,
                  source=None,
                  source_crs=None,
+                 bbox_crs='EPSG:4326',
                  par_in=[],
                  sourcelayer_name=None,
                  #par_out=None,
@@ -87,6 +88,7 @@ class OeQExtension:
         :param active:  Flag, defining wether the extension shall be used or not (Default value = None)
         :param source:  Information source, might be a URL or a path (Default value = None)
         :param source_crs:  Coordinatesystem of the information source (Default value = None)
+        :param bbox_crs:  Coordinatesystem of the bounding box of wfs (Default value = 'EPSG:4326')
         :param par_in:  Mandatory parameters for evaluation (Default value = None)
         :param sourcelayer_name: Source Layer for evaluation (Default value = None)
         :param par_out:  Expired!
@@ -128,8 +130,9 @@ class OeQExtension:
         #self.layer_id = layer_id
         self.description = description
         self.type = type
-        self.source = source
+        self.source = source     
         self.source_crs = source_crs
+        self.bbox_crs = bbox_crs
         self.active = active
         self.show_results = show_results
         self.load_method = load_method
@@ -179,6 +182,7 @@ class OeQExtension:
                active=None,
                source=None,
                source_crs=None,
+               bbox_crs=None,
                par_in=None,
                sourcelayer_name=None,
                #par_out=None,
@@ -209,6 +213,7 @@ class OeQExtension:
         :param active:  Flag, defining wether the extension shall be used or not (Default value = None)
         :param source:  Information source, might be a URL or a path (Default value = None)
         :param source_crs:  Coordinatesystem of the information source (Default value = None)
+        :param bbox_crs:  Coordinatesystem of the bounding box of wfs (Default value = 'EPSG:4326')
         :param par_in:  Mandatory parameters for evaluation (Default value = None)
         :param sourcelayer_name: Source Layer for evaluation (Default value = None)
         :param par_out:  Expired!
@@ -239,6 +244,7 @@ class OeQExtension:
         if active != None: self.active = active
         if source != None: self.source = source
         if source_crs != None: self.source_crs = source_crs
+        if bbox_crs != None: self.bbox_crs = bbox_crs
         if par_in != None: self.par_in = par_in
         if sourcelayer_name != None: self.sourcelayer_name = sourcelayer_name
         #if par_out != None: self.par_out = par_out
@@ -738,7 +744,9 @@ class OeQExtension:
 
         return self.sortAndShelve()
 
-    def load_wfs(self, extent=None, forceload=False):
+
+
+    def load_wfs(self,extent=None,forceload = False):
         """
 
         :param extent:  (Default value = None)
@@ -747,47 +755,41 @@ class OeQExtension:
         import os
         from mole.project import config
         from mole import oeq_global
-        from mole.qgisinteraction import legend, layer_interaction
-        from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, \
-            QgsVectorFileWriter
+        from mole.qgisinteraction import legend,layer_interaction
+        from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter
         from qgis.utils import iface
-        # check whether extent is defined, if not use investigationarea extent
+        #check whether extent is defined, if not use investigationarea extent
         if not extent:
-            extent = legend.nodeGetExtent(config.investigation_shape_layer_name)
+            extent= legend.nodeGetExtent(config.investigation_shape_layer_name)
         else:
-            return None  # legend.nodeByName(self.layer_name)[0]
+            return None #legend.nodeByName(self.layer_name)[0]
 
-        # init progressbar
+        #init progressbar
         progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
-                                                      u'Loading WFS-Map "' + self.layer_name + '"!',
-                                                      maxcount=3)
+                                                              u'Be patient! Loading WFS-Map "' + self.layer_name + '" may take long!',
+                                                              maxcount=3)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
-        # get crs objects
-        crsSrc = QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]),
-                                              QgsCoordinateReferenceSystem.EpsgCrsId)
-        crsDest = QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]),
-                                               QgsCoordinateReferenceSystem.EpsgCrsId)
-        crsBox = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-
-        # transform extent
-        # print ("Original Extent",config.default_extent_crs)
-        # print (str(extent.yMinimum())+','+str(extent.xMinimum())+','+str(extent.yMaximum())+','+str(extent.xMaximum()))
+        #get crs objects
+        crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+        crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+        crsBox=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
+        
+        #transform extent
+        #print ("Original Extent",config.default_extent_crs)
+        #print (str(extent.yMinimum())+','+str(extent.xMinimum())+','+str(extent.yMaximum())+','+str(extent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsBox)
         boxextent = coord_transformer.transform(extent)
-        # print ("Box Extent",self.bbox_crs)
-        # print (str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()))
+        #print ("Box Extent",self.bbox_crs)
+        #print (str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
-        # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
+         # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
         # so we the current messagebar item
-        current_msgb = iface.messageBar().currentItem()
-        # load wfs
-        print (self.source + '&BBOX=' + str(extent.xMinimum()) + ',' + str(extent.yMinimum()) + ',' + str(
-            extent.xMaximum()) + ',' + str(extent.yMaximum()))
-        # wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
-        wfsLayer = QgsVectorLayer(
-            self.source + '&BBOX=' + str(boxextent.yMinimum()) + ',' + str(boxextent.xMinimum()) + ',' + str(
-                boxextent.yMaximum()) + ',' + str(boxextent.xMaximum()), self.layer_name, 'ogr')
+        current_msgb= iface.messageBar().currentItem()
+        #load wfs
+        print (self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()))
+        #wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
+        wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()),self.layer_name,'ogr')
         # windows might throw a warning here, as is does not adopt the CRS from the WFS source
         # so the current baritem gets  immediately removed if is not the the one before loading
         if iface.messageBar().currentItem() != current_msgb:
@@ -800,40 +802,40 @@ class OeQExtension:
             return None
         wfsLayer.setCrs(crsDest)
 
-        wfsfilepath = os.path.join(oeq_global.OeQ_project_path(), self.layer_name + '.shp')
-        QgsVectorFileWriter.writeAsVectorFormat(wfsLayer, wfsfilepath, 'System', wfsLayer.crs(), 'ESRI Shapefile')
+
+        wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
+        QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
-        # oeq_global.OeQ_wait_for_file(wfsfilepath)
-        wfsLayer = iface.addVectorLayer(wfsfilepath, self.layer_name, 'ogr')
+        #oeq_global.OeQ_wait_for_file(wfsfilepath)
+        wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
         if not oeq_global.OeQ_wait_for_renderer(60000):
-            oeq_global.OeQ_push_warning(self.extension_id + ':', 'Loading Data timed out!')
+            oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
             return False
         if not wfsLayer.isValid():
-            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
-                                      u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not add WFS-Map "' + self.layer_name + ' to Legend"!')
             return None
-        wfsnode = legend.nodeByLayer(wfsLayer)
+        wfsnode=legend.nodeByLayer(wfsLayer)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         if not wfsnode:
-            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
-                                      u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
             return None
-        wfsnode = wfsnode[0]
-        wfsnode = legend.nodeConvertCRS(wfsnode, config.default_extent_crs)
+        wfsnode=wfsnode[0]
+        wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
         if not wfsnode:
-            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
-                                      u'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
+            oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":', u'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
             return None
 
         oeq_global.OeQ_pop_progressbar(progressbar)
-        baritem = oeq_global.OeQ_push_info("Clipping Building Outlines:", "'" + self.layer_name + "'")
-        wfsnode = legend.nodeClipByShapenode(wfsnode, config.investigation_shape_layer_name)
+        baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+self.layer_name+"'")
+        wfsnode=legend.nodeClipByShapenode(wfsnode,config.investigation_shape_layer_name)
         oeq_global.OeQ_pop_info(baritem)
 
-        # self.process()
+        #self.process()
 
         return self.sortAndShelve()
-        # return wfsnode
+        #return wfsnode
+
+
 
     '''
 

@@ -767,7 +767,7 @@ class OeQExtension:
         #init progressbar
         progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
                                                               u'Be patient! Loading WFS-Map "' + self.layer_name + '" may take long!',
-                                                              maxcount=3)
+                                                              maxcount=7)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #get crs objects
@@ -782,11 +782,15 @@ class OeQExtension:
         #print (str(extent.yMinimum())+','+str(extent.xMinimum())+','+str(extent.yMaximum())+','+str(extent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsBox)
         boxextent = coord_transformer.transform(extent)
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        
         #print ("Box Extent",self.bbox_crs)
         #print (str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
          # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
         # so we the current messagebar item
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        
         current_msgb= iface.messageBar().currentItem()
         #load wfs
         url = self.source
@@ -800,6 +804,8 @@ class OeQExtension:
         
         print (url)
         #wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
+        progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+        
         try:
             wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
         except:

@@ -771,10 +771,12 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #get crs objects
+        print ('Defaulft CRS:',config.default_extent_crs)
         crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
-        crsBox=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        
+        print ('Source CRS:',self.source_crs)
+        crsBox=QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+        print ('Box CRS:',self.bbox_crs)
         #transform extent
         #print ("Original Extent",config.default_extent_crs)
         #print (str(extent.yMinimum())+','+str(extent.xMinimum())+','+str(extent.yMaximum())+','+str(extent.xMaximum()))
@@ -787,9 +789,24 @@ class OeQExtension:
         # so we the current messagebar item
         current_msgb= iface.messageBar().currentItem()
         #load wfs
-        print (self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()))
+        url = self.source
+        if self.bbox_crs.split(':')[-1] == '4326':
+            print ('WGS84:',)
+            url = url+ '&BBOX='+str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum())+ ',urn:ogc:def:crs:EPSG:6.9:' + self.bbox_crs.split(':')[-1]
+        else:
+            print ('Other:',)
+            url = url+ '&BBOX='+str(boxextent.xMinimum())+','+str(boxextent.yMinimum())+','+str(boxextent.xMaximum())+','+str(boxextent.yMaximum())+ ',urn:ogc:def:crs:EPSG:6.9:' + self.bbox_crs.split(':')[-1]
+        
+        
+        print (url)
         #wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
-        wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()),self.layer_name,'ogr')
+        try:
+            wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
+        except:
+            pass
+        
+        #    oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
+        #                              u'WFS load error! "' + self.source + '"!')
         # windows might throw a warning here, as is does not adopt the CRS from the WFS source
         # so the current baritem gets  immediately removed if is not the the one before loading
         if iface.messageBar().currentItem() != current_msgb:

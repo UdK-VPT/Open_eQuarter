@@ -27,7 +27,7 @@ def preflight(self=None):
     to_remove =[]
     for i in features:
         try:
-            if (not isnull(i['Bauart_sch'])) & (0 != i['Bauart_sch']):
+            if (not isnull(i['BAT'])) & (0 != i['BAT']):
                 to_remove.append(i.id())
         except:
             return False
@@ -35,7 +35,7 @@ def preflight(self=None):
     provider.deleteFeatures(to_remove)
 
     # in the Berlin Hausumringe WFS there are additional Attributes that are not important here. they are removed
-    conversion_fields = [[u'AnzahlDerO',u'FLRS_ALK'],[u'Gebaeudefu',u'FUNC_ALK'],[u'Bauweise_s',u'KIND_ALK']]
+    conversion_fields = [[u'AOG',u'FLRS_ALK'],[u'GFK',u'FUNC_ALK'],[u'BAW',u'KIND_ALK']]
     fields = filter(lambda f: f.name() not in [i[0] for i in conversion_fields], provider.fields())
     fieldnames =[field.name() for field in fields]
     to_remove = []

@@ -89,18 +89,20 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     dataset = {}
     dataset['latitude'] = result[u'lat']
     dataset['longitude'] = result[u'lon']
-    dataset['house_number'] = ""
-    dataset['house_number'] = result[u'address'][u'house_number']
     dataset['state'] = result[u'address'][ u'state']
     dataset['suburb'] = result[u'address'][u'suburb']
     dataset['road'] = result[u'address'][u'road']
     dataset['postcode'] = result[u'address'][u'postcode']
     dataset['country'] = result[u'address'][ u'country']
     dataset['state'] = result[u'address'][u'state']
-    if 'town' in dataset.keys():
-        dataset.update({u'town': dataset[u'town']})
+    if 'town' in result[u'address'].keys():
+        dataset.update({u'town': result[u'address'][u'town']})
     else:
         dataset.update({u'town': dataset[u'state']})
+    if 'house_number' in result[u'address'].keys():
+        dataset.update({u'house_number': result[u'address'][u'house_number']})
+    else:
+        dataset.update({u'house_number': u''})
     if  bool(crs):
         transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRS).transform
         location2=transform2(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
@@ -136,18 +138,20 @@ def getCoordinatesByAddress(address,crs=None):
         dataset = {}
         dataset[u'latitude'] = addrrecord[u'lat']
         dataset[u'longitude'] = addrrecord[u'lon']
-        dataset[u'house_number'] = ""
-        dataset[u'house_number'] = addrrecord[u'address'][u'house_number']
         dataset[u'state'] = addrrecord[u'address'][ u'state']
         dataset[u'suburb'] = addrrecord[u'address'][u'suburb']
         dataset[u'road'] = addrrecord[u'address'][u'road']
         dataset[u'postcode'] = addrrecord[u'address'][u'postcode']
         dataset[u'country'] = addrrecord[u'address'][ u'country']
         dataset[u'state'] = addrrecord[u'address'][u'state']
-        if u'town' in dataset.keys():
-            dataset.update({u'town': dataset[u'town']})
+        if 'town' in addrrecord[u'address'].keys():
+            dataset.update({u'town':  addrrecord[u'address'][u'town']})
         else:
             dataset.update({u'town': dataset[u'state']})
+        if 'house_number' in addrrecord[u'address'].keys():
+            dataset.update({u'house_number':  addrrecord[u'address'][u'house_number']})
+        else:
+            dataset.update({u'house_number': u''})
         #print(crs);
         if crs:
            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)

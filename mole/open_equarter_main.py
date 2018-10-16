@@ -91,7 +91,7 @@ class OpenEQuarterMain:
         self.iface.actionShowPythonDialog().trigger()
         #print "Welcome to Open eQuarter. To support the messagebar it is necessary to open the console once..."
         self.iface.actionShowPythonDialog().trigger()  # in fact it's not show but toggle
-        print "Hello this is Open eQuarter"
+        print("Hello this is Open eQuarter")
 
     def new_project(self):
 
@@ -414,7 +414,7 @@ class OpenEQuarterMain:
             geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
             pyramids_built = raster_layer_interaction.gdal_addo_layerfile(geo_export_path, 'gauss', 6)
             if pyramids_built != 0:
-                print 'Error number {} occured, while building pyramids.'.format(pyramids_built)
+                print('Error number {} occured, while building pyramids.'.format(pyramids_built))
         except AttributeError as NoneException:
             print(self.__module__, NoneException)
             return None
@@ -530,6 +530,7 @@ class OpenEQuarterMain:
     def handle_project_saved(self):
         from mole import extensions
         #extensions.load_defaults()
+        print(oeq_global.OeQ_project_info)
         oeq_global.OeQ_pop_status()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
@@ -1083,7 +1084,7 @@ class OpenEQuarterMain:
                 QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'GeoJson')
                 return fileName
         else:
-            print "No Database available!"
+            print("No Database available!")
         return None
 
 
@@ -1105,7 +1106,7 @@ class OpenEQuarterMain:
                 QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'CSV', False, "", "", ["SEPARATOR=SEMICOLON"])
                 return fileName
         else:
-            print "No Database available!"
+            print("No Database available!")
         return None
 
     def export_database_to_sqlite(self,fileName=None):
@@ -1123,7 +1124,7 @@ class OpenEQuarterMain:
                 QgsVectorFileWriter.writeAsVectorFormat(database.layer(),fileName, 'utf-8',database.layer().crs(), 'SQLite')
                 return fileName
         else:
-            print "No Database available!"
+            print("No Database available!")
         return None
 
 

@@ -862,7 +862,7 @@ def nodeConvertCRSold(node,crs=None):
     #it is necessary
     try:
         process = subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        print process.stdout.read()
+        print(process.stdout.read())
     except:
         oeq_global.OeQ_push_error('nodeClipByShapefile :',"ogr2ogr failed to run -clipsrc !")
     #subprocess.call(cmd,shell=True)
@@ -1280,7 +1280,7 @@ def nodeGetBuildingData(building_coordinates_node):
     :rtype: bool
     """
     from mole import oeq_global
-    from mole.webinteraction import googlemaps
+    from mole.webinteraction import googlemaps,nominatim
     from PyQt4.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(building_coordinates_node):
@@ -1323,7 +1323,7 @@ def nodeGetBuildingData(building_coordinates_node):
         #print geometry.asPoint().x()
         #print geometry.asPoint().y()
         #print crs
-        bdata=googlemaps.getBuildingLocationDataByCoordinates(geometry.asPoint().x(),geometry.asPoint().y(),crs)
+        bdata=nominatim.getBuildingLocationDataByCoordinates(geometry.asPoint().x(),geometry.asPoint().y(),crs)
         #print bdata
         if bdata:
             bdata=bdata[0]

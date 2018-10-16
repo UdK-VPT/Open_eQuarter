@@ -29,7 +29,7 @@ from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
 from mole.qgisinteraction import layer_interaction, legend
 from mole import oeq_global
 from mole.project import config
-from mole.webinteraction import googlemaps
+from mole.webinteraction import googlemaps,nominatim
 from oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from ui_color_picker_dialog import Ui_color_picker_dialog
 from ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
@@ -680,14 +680,14 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.lineedit_city_layout()
         if self.found_locations != []:
             location_info = self.found_locations[index]
-            #print location_info
+            #print(location_info)
             self.location_country.setText(location_info['country'])
-            self.location_city.setText(location_info['locality'])
-            self.location_street.setText(location_info['route'])
-            if not oeq_global.isEmpty(location_info['street_number']):
-                self.location_street.setText(self.location_street.text() + u' ' + location_info['street_number'])
-            if not oeq_global.isEmpty(self.location_postal.setText(location_info['postal_code'])):
-                self.location_postal.setText(location_info['postal_code'])
+            self.location_city.setText(location_info['town'])
+            self.location_street.setText(location_info['road'])
+            if not oeq_global.isEmpty(location_info['house_number']):
+                self.location_street.setText(self.location_street.text() + u' ' + location_info['house_number'])
+            if not oeq_global.isEmpty(self.location_postal.setText(location_info['postcode'])):
+                self.location_postal.setText(location_info['postcode'])
             self.location_lon.setText(str(location_info['longitude']))
             self.location_lat.setText(str(location_info['latitude']))
             self.location_crs.setText('EPSG:4326')
@@ -696,7 +696,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
     def set_municipal_data(self):
         self.municipals = filter(lambda x :  str(x['POSTCODE']).startswith(self.location_postal.text().encode('utf8')) , self.municipal_information.municipal_db)
-        self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0].encode('utf8') == self.location_city.text().split()[0].encode('utf8') , self.municipal_information.municipal_db)
+        #self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0].encode('utf8') == self.location_city.text().split()[0].encode('utf8') , self.municipal_information.municipal_db)
 
         if len(self.municipals) > 0:
             pop_dens = int('{}'.format(self.municipals[0]['POP_DENS']))
@@ -719,7 +719,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
          self.average_build_year.setText(avg_yoc)
          citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
          address = ', '.join([config.country, citystring, self.location_street.text()])
-         self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+         self.found_locations = nominatim.getCoordinatesByAddress(address, crs=4326)
          if len(self.found_locations) == 1:
             self.update_form(1)
          elif len(self.found_locations) > 1:
@@ -769,7 +769,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
               #self.lineedit_postal_layout()
              citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
              address = ', '.join([config.country, citystring, self.location_street.text()])
-             self.found_locations = googlemaps.getCoordinatesByAddress(address, crs=4326)
+             self.found_locations = nominatim.getCoordinatesByAddress(address, crs=4326)
              if len(self.found_locations) == 1:
                 self.update_form(1)
              elif len(self.found_locations) > 1:
@@ -789,7 +789,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         crs = self.location_crs.text()
         if crs:
             crs=int(crs[5:])
-        self.found_locations = googlemaps.getBuildingLocationDataByCoordinates(lon, lat, crs)
+        self.found_locations = nominatim.getBuildingLocationDataByCoordinates(lon, lat, crs)
         if len(self.found_locations) == 1:
             self.update_form(1)
         elif len(self.found_locations) > 1:

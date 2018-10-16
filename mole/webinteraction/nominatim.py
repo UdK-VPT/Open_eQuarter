@@ -70,30 +70,43 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     # Out: dict of all informations delivered by googlemaps
     if bool(crs):
         sourceCRS=QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
-        googleMapsCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transform = QgsCoordinateTransform(sourceCRS, googleMapsCRS).transform
+        nominatimCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
+        transform = QgsCoordinateTransform(sourceCRS, nominatimCRS).transform
         location=transform(QgsPoint(longitude, latitude))
         latitude=location.y()
         longitude=location.x()
-    url='http://maps.google.com/maps/api/geocode/json?sensor=false&latlng='+str(latitude)+','+str(longitude)
-    response = urllib2.urlopen(url)
+    urlParams = {'format': 'json',
+                 'lat': str(latitude),
+                 'lon' : str(longitude),
+                 'addressdetails': '1',
+                 'email':config.referrer_email
+                 }
+    url = 'https://nominatim.openstreetmap.org/reverse?' + urllib.urlencode(urlParams)
+    response = urllib2.urlopen(url,timeout=10)
     result = json.load(response)
     # try:
     addrlist = []
-    for addrrecord in result['results']:
-        dataset = {}
-        for i in addrrecord['address_components']:
-            dataset[i['types'][0]] = i['long_name']
-        geom = addrrecord['geometry']
-        dataset['latitude'] = geom['location']['lat']
-        dataset['longitude'] = geom['location']['lng']
-        if  bool(crs):
-            transform2 = QgsCoordinateTransform(googleMapsCRS,sourceCRS).transform
-            location2=transform2(QgsPoint(dataset['longitude'], dataset['latitude']))
-            dataset['latitude']=location2.y()
-            dataset['longitude']=location2.x()
-        addrlist.append(complete_google_dataset(dataset))
-    return addrlist
+    dataset = {}
+    dataset['latitude'] = result[u'lat']
+    dataset['longitude'] = result[u'lon']
+    dataset['house_number'] = ""
+    dataset['house_number'] = result[u'address'][u'house_number']
+    dataset['state'] = result[u'address'][ u'state']
+    dataset['suburb'] = result[u'address'][u'suburb']
+    dataset['road'] = result[u'address'][u'road']
+    dataset['postcode'] = result[u'address'][u'postcode']
+    dataset['country'] = result[u'address'][ u'country']
+    dataset['state'] = result[u'address'][u'state']
+    if 'town' in dataset.keys():
+        dataset.update({u'town': dataset[u'town']})
+    else:
+        dataset.update({u'town': dataset[u'state']})
+    if  bool(crs):
+        transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRS).transform
+        location2=transform2(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
+        dataset['latitude']=location2.y()
+        dataset['longitude']=location2.x()
+    return([complete_nominatim_dataset(dataset)])
     # except:
     #    return []
 
@@ -110,38 +123,51 @@ def getCoordinatesByAddress(address,crs=None):
     urlParams = {'q': address,
                  'format': 'json',
                 'addressdetails': '1',
+                 'email': config.referrer_email
         }
-    url='http://nominatim.openstreetmap.org/search?'+urllib.urlencode(urlParams)
+    url='https://nominatim.openstreetmap.org/search?'+urllib.urlencode(urlParams)
 
     response = urllib2.urlopen(url)
     result = json.load(response)
-    #print result['results']
 
     # try:
     addrlist = []
     for addrrecord in result:
         dataset = {}
-        dataset['latitude'] = addrrecord['lat']
-        dataset['longitude'] = addrrecord['lon']
+        dataset[u'latitude'] = addrrecord[u'lat']
+        dataset[u'longitude'] = addrrecord[u'lon']
+        dataset[u'house_number'] = ""
+        dataset[u'house_number'] = addrrecord[u'address'][u'house_number']
+        dataset[u'state'] = addrrecord[u'address'][ u'state']
+        dataset[u'suburb'] = addrrecord[u'address'][u'suburb']
+        dataset[u'road'] = addrrecord[u'address'][u'road']
+        dataset[u'postcode'] = addrrecord[u'address'][u'postcode']
+        dataset[u'country'] = addrrecord[u'address'][ u'country']
+        dataset[u'state'] = addrrecord[u'address'][u'state']
+        if u'town' in dataset.keys():
+            dataset.update({u'town': dataset[u'town']})
+        else:
+            dataset.update({u'town': dataset[u'state']})
+        #print(crs);
         if crs:
-            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
-            googleMapsCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-            location = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform(QgsPoint(dataset['longitude'], dataset['latitude']))
-            dataset['latitude'] = location.y()
-            dataset['longitude'] = location.x()
-        addrlist.append(complete_google_dataset(dataset))
+           targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
+           nominatimCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
+           location = QgsCoordinateTransform(nominatimCRS, targetCRS).transform(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
+           dataset['latitude'] = location.y()
+           dataset['longitude'] = location.x()
+        addrlist.append(complete_nominatim_dataset(dataset))
     # except:
     #    return []
     return addrlist
 
-def complete_google_dataset(dataset):
-    mandatory_keys = [u'street_number', u'locality', u'sublocality_level_1', u'route', 'longitude', u'postal_code',
-                      u'administrative_area_level_1', u'country', 'latitude'u'sublocality_level_2']
+def complete_nominatim_dataset(dataset):
+    mandatory_keys = [u'house_number', u'town', u'state', u'road', 'lon', u'postcode',
+                      u'', 'lat', u'suburb', u'country']
     for i in mandatory_keys:
         if not i in dataset.keys():
             dataset.update({i: ''})
-    zip_city = ' '.join(filter(bool, [dataset['postal_code'], dataset['locality']]))
-    dataset['formatted_location'] = ', '.join(filter(bool, [dataset['route'], zip_city, dataset['country']]))
+    zip_city = ' '.join([dataset['postcode'], dataset['town']])
+    dataset['formatted_location'] = ', '.join([dataset['road'], zip_city, dataset['country']])
     return dataset
 
 def getCoordinatesByAddressTest(address,crs=None):
@@ -154,18 +180,19 @@ def getCoordinatesByAddressTest(address,crs=None):
     urlParams = {'q': address,
                  'format': 'json',
                 'addressdetails': '1',
+                 'email':config.referrer_email
         }
     url='http://nominatim.openstreetmap.org/search?'+urllib.urlencode(urlParams)
-    print url
+    #print(url)
     response = urllib2.urlopen(url)
     result =  json.load(response)
     addrlist = []
-    print len
+    #print(len)
     for addrrecord in result:
         dataset = {}
         dataset['latitude'] = addrrecord['lat']
         dataset['longitude'] = addrrecord['lon']
-        print dataset
+        #print(dataset)
         #if crs:
         #    location = transform(QgsPoint(dataset['longitude'], dataset['latitude']))
         #    dataset['latitude'] = location.y()
@@ -176,8 +203,8 @@ def getCoordinatesByAddressTest(address,crs=None):
     return addrlist
 
 
-address ='Georg-Leoewenstein-Strasse 14, Berlin, Germany'
-print address
+#address ='Georg-Leoewenstein-Strasse 14, Berlin, Germany'
+#print(address)
 
 
 def translate_to_google_location_dataset(dataset):
@@ -190,7 +217,7 @@ def translate_to_google_location_dataset(dataset):
                           u'country': u'country',
                           u'lat':'latitude',
                           u'suburb':u'sublocality_level_2'}
-    nominatim_keys = [u'house_number',u'state',u'suburb',u'road',u'postcode',]
+    nominatim_keys = [u'house_number',u'state',u'suburb',u'road',u'postcode',u'country',u'state']
     if not 'town' in dataset.keys():
         dataset.update({u'town':dataset[u'state']})
 
@@ -202,7 +229,27 @@ def translate_to_google_location_dataset(dataset):
     dataset['formatted_location'] = ', '.join(filter(bool, [dataset['route'], zip_city, dataset['country']]))
     return dataset
 
+def translate_to_nominatim_location_dataset(dataset):
+    translation_table = {u'street_number' : u'house_number',
+                          u'locality': u'town' ,
+                          u'sublocality_level_1' : u'state' ,
+                          u'route' : u'road',
+                          u'longitude' : u'lon' ,
+                          u'postal_code' : u'postcode'  ,
+                          u'country' : u'country' ,
+                          u'latitude' : u'lat',
+                          u'sublocality_level_2' : u'suburb'}
+    nominatim_keys = [u'house_number',u'state',u'suburb',u'road',u'postcode',]
+    if not u'locality' in dataset.keys():
+        dataset.update({u'locality':dataset[u'state']})
 
+
+    for i in translation_table.keys():
+        if not i in dataset.keys():
+            dataset.update({i: ''})
+    zip_city = ' '.join(filter(bool, [dataset['postal_code'], dataset['locality']]))
+    dataset['formatted_location'] = ', '.join(filter(bool, [dataset['road'], zip_city, dataset['country']]))
+    return dataset
 
 
 

@@ -108,8 +108,8 @@ class OeQ_WorkStep:
         Print name and description of the workstep
         :return:
         '''
-        print "Workstep   : '"+self.name+"'"
-        print "Description: "+self.description
+        print("Workstep   : '"+self.name+"'")
+        print("Description: "+self.description)
 
 
 class OeQ_Workflow:
@@ -262,8 +262,8 @@ class OeQ_Workflow:
         Print Info for Worklow
         :return: None
         '''
-        print "Workflow   : '"+self.name+"'"
-        print "Description: "+self.description
-        print "State      : "+str(self.state)
-        print "Worksteps  : "+str(self.worksteps)
+        print("Workflow   : '"+self.name+"'")
+        print("Description: "+self.description)
+        print("State      : "+str(self.state))
+        print("Worksteps  : "+str(self.worksteps))
 

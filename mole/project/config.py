@@ -24,6 +24,8 @@ open_layers_layer_name='OpenStreetMap'
 # Point Sampling Tool
 pst_plugin_name = 'pointsamplingtool'
 
+referrer_email="oeq@udk-berlin.de"
+
 
 # Realcentroid plugin
 real_centroid_plugin_name = 'realcentroid'

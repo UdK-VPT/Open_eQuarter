@@ -90,14 +90,14 @@ def fix_german_umlauts(thetext):
     if codetype != unicode:
         thetext = unicode(thetext, "utf-8")
 
-    print type(thetext)
+    #print type(thetext)
 
     trans = {u'ä':u'ae',u'Ä':u'Ae',u'ö':u'oe',u'Ö':u'Oe',u'ü':u'ue', u'Ü':u'Ue',u'ß':u'ss'}
     for i in trans.keys():
         k = thetext.split(i)
-        print k
+        #print k
         l = trans[i]
-        print l
+        #print l
         thetext = l.join(k)
     if codetype != unicode:
         return str(thetext)

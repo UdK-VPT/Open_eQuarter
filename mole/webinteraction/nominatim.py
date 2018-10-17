@@ -86,23 +86,12 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     result = json.load(response)
     # try:
     addrlist = []
-    dataset = {}
+    dataset = {'latitude':'','longitude':'','state':'','town':'','suburb':'','road':'','postcode':'','country':'','house_number':'',}
     dataset['latitude'] = result[u'lat']
     dataset['longitude'] = result[u'lon']
-    dataset['state'] = result[u'address'][ u'state']
-    dataset['suburb'] = result[u'address'][u'suburb']
-    dataset['road'] = result[u'address'][u'road']
-    dataset['postcode'] = result[u'address'][u'postcode']
-    dataset['country'] = result[u'address'][ u'country']
-    dataset['state'] = result[u'address'][u'state']
-    if 'town' in result[u'address'].keys():
-        dataset.update({u'town': result[u'address'][u'town']})
-    else:
-        dataset.update({u'town': dataset[u'state']})
-    if 'house_number' in result[u'address'].keys():
-        dataset.update({u'house_number': result[u'address'][u'house_number']})
-    else:
-        dataset.update({u'house_number': u''})
+    for field in result[u'address'].keys():
+        dataset.update({field : result[u'address'][field]})
+    if (dataset['town'] == ''): dataset[u'town'] = result[u'address'][u'state']
     if  bool(crs):
         transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRS).transform
         location2=transform2(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
@@ -128,30 +117,19 @@ def getCoordinatesByAddress(address,crs=None):
                  'email': config.referrer_email
         }
     url='https://nominatim.openstreetmap.org/search?'+urllib.urlencode(urlParams)
-
     response = urllib2.urlopen(url)
     result = json.load(response)
 
     # try:
     addrlist = []
     for addrrecord in result:
-        dataset = {}
-        dataset[u'latitude'] = addrrecord[u'lat']
-        dataset[u'longitude'] = addrrecord[u'lon']
-        dataset[u'state'] = addrrecord[u'address'][ u'state']
-        dataset[u'suburb'] = addrrecord[u'address'][u'suburb']
-        dataset[u'road'] = addrrecord[u'address'][u'road']
-        dataset[u'postcode'] = addrrecord[u'address'][u'postcode']
-        dataset[u'country'] = addrrecord[u'address'][ u'country']
-        dataset[u'state'] = addrrecord[u'address'][u'state']
-        if 'town' in addrrecord[u'address'].keys():
-            dataset.update({u'town':  addrrecord[u'address'][u'town']})
-        else:
-            dataset.update({u'town': dataset[u'state']})
-        if 'house_number' in addrrecord[u'address'].keys():
-            dataset.update({u'house_number':  addrrecord[u'address'][u'house_number']})
-        else:
-            dataset.update({u'house_number': u''})
+        dataset = {'latitude': '', 'longitude': '', 'state': '', 'town': '', 'suburb': '', 'road': '', 'postcode': '',
+                   'country': '', 'house_number': '', }
+        dataset.update({'latitude': addrrecord['lat']})
+        dataset.update({'longitude': addrrecord['lon']})
+        for field in addrrecord[u'address'].keys():
+            dataset.update({field: addrrecord[u'address'][field]})
+        if (dataset['town'] == ''): dataset[u'town'] = addrrecord[u'address'][u'state']
         #print(crs);
         if crs:
            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)

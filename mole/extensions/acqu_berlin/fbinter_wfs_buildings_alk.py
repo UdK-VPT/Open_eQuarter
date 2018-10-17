@@ -35,7 +35,7 @@ def preflight(self=None):
     provider.deleteFeatures(to_remove)
 
     # in the Berlin Hausumringe WFS there are additional Attributes that are not important here. they are removed
-    conversion_fields = [[u'AOG',u'FLRS_ALK'],[u'GFK',u'FUNC_ALK'],[u'BAW',u'KIND_ALK']]
+    conversion_fields = [[u'AOG',u'FLRS_ALK'],[u'GFK',u'FUNC_ALK'],[u'BAW',u'KIND_ALK'],[u'GKN',u'GKN_ALK']]
     fields = filter(lambda f: f.name() not in [i[0] for i in conversion_fields], provider.fields())
     fieldnames =[field.name() for field in fields]
     to_remove = []
@@ -81,6 +81,7 @@ def evaluation(self=None, parameters={},feature=None):
     flr = NULL
     usage = NULL
     kind = NULL
+    gkn = NULL
     da_engine=QgsDistanceArea()
     da_engine.setSourceCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId))
     da_engine.setEllipsoid(config.project_ellipsoid)
@@ -94,6 +95,7 @@ def evaluation(self=None, parameters={},feature=None):
             flr = feature[u'FLRS_ALK']  # necessary to safe dependency check
             usage = feature[u'FUNC_ALK']  # necessary to safe dependency check
             kind = feature[u'KIND_ALK']  # necessary to safe dependency check
+            gkn = feature[u'GKN_ALK']  # necessary to safe dependency check
 
     #print ar
     #print per
@@ -111,6 +113,8 @@ def evaluation(self=None, parameters={},feature=None):
                        'value': usage},
             'KIND_ALK': {'type': QVariant.Double,
                        'value': kind},
+            'GKN_ALK': {'type': QVariant.String,
+                         'value': gkn}
             }
 
 def postflight(self=None):

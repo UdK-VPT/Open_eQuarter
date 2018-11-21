@@ -91,7 +91,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     dataset['longitude'] = result[u'lon']
     for field in result[u'address'].keys():
         dataset.update({field : result[u'address'][field]})
-    if (dataset['town'] == ''): dataset[u'town'] = result[u'address'][u'state']
+    if (dataset['town'] == ''): dataset[u'town'] = result[u'address'][u'city']
     if  bool(crs):
         transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRS).transform
         location2=transform2(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
@@ -129,7 +129,7 @@ def getCoordinatesByAddress(address,crs=None):
         dataset.update({'longitude': addrrecord['lon']})
         for field in addrrecord[u'address'].keys():
             dataset.update({field: addrrecord[u'address'][field]})
-        if (dataset['town'] == ''): dataset[u'town'] = addrrecord[u'address'][u'state']
+        if (dataset['town'] == ''): dataset[u'town'] = addrrecord[u'address'][u'city']
         #print(crs);
         if crs:
            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)

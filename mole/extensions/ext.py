@@ -756,7 +756,7 @@ class OeQExtension:
         from mole.project import config
         from mole import oeq_global
         from mole.qgisinteraction import legend,layer_interaction
-        from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter
+        from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter,QgsRectangle
         from qgis.utils import iface
         #check whether extent is defined, if not use investigationarea extent
         if not extent:
@@ -771,23 +771,17 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #get crs objects
-        print ('Defaulft CRS:',config.default_extent_crs)
         crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
-        print ('Source CRS:',self.source_crs)
         crsBox=QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
-        print ('Box CRS:',self.bbox_crs)
+
         #transform extent
-        #print ("Original Extent",config.default_extent_crs)
-        #print (str(extent.yMinimum())+','+str(extent.xMinimum())+','+str(extent.yMaximum())+','+str(extent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsBox)
         boxextent = coord_transformer.transform(extent)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
-        #print ("Box Extent",self.bbox_crs)
-        #print (str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum()))
         coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
-         # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
+        # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
         # so we the current messagebar item
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
@@ -800,23 +794,21 @@ class OeQExtension:
         else:
             print ('Other:',)
             url = url+ '&BBOX='+str(boxextent.xMinimum())+','+str(boxextent.yMinimum())+','+str(boxextent.xMaximum())+','+str(boxextent.yMaximum())+ ',urn:ogc:def:crs:EPSG:6.9:' + self.bbox_crs.split(':')[-1]
-        
-        
-        print (url)
-        #wfsLayer=QgsVectorLayer(self.source + '&BBOX='+str(extent.xMinimum())+','+str(extent.yMinimum())+','+str(extent.xMaximum())+','+str(extent.yMaximum()),self.layer_name,'ogr')
+
+        # push progressbar
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
         try:
-            wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
+            wfsLayer =QgsVectorLayer(url,self.layer_name,'WFS')
+            #wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
         except:
             pass
-        
-        #    oeq_global.OeQ_push_error(u'Extension "' + self.extension_name + '":',
-        #                              u'WFS load error! "' + self.source + '"!')
+
         # windows might throw a warning here, as is does not adopt the CRS from the WFS source
         # so the current baritem gets  immediately removed if is not the the one before loading
         if iface.messageBar().currentItem() != current_msgb:
             iface.messageBar().popWidget()
+
         # push progressbar
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         if not wfsLayer.isValid():
@@ -825,10 +817,11 @@ class OeQExtension:
             return None
         wfsLayer.setCrs(crsDest)
 
-
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
-        QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile')
+        QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile',filterExtent=QgsRectangle(boxextent.xMinimum(), boxextent.yMinimum(), boxextent.xMaximum(), boxextent.yMaximum()))
+
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+
         #oeq_global.OeQ_wait_for_file(wfsfilepath)
         wfsLayer = iface.addVectorLayer(wfsfilepath,self.layer_name, 'ogr')
         if not oeq_global.OeQ_wait_for_renderer(60000):
@@ -850,13 +843,14 @@ class OeQExtension:
 
         oeq_global.OeQ_pop_progressbar(progressbar)
         baritem=oeq_global.OeQ_push_info("Clipping Building Outlines:", "'"+self.layer_name+"'")
+
         wfsnode=legend.nodeClipByShapenode(wfsnode,config.investigation_shape_layer_name)
+
         oeq_global.OeQ_pop_info(baritem)
 
         #self.process()
 
         return self.sortAndShelve()
-        #return wfsnode
 
 
 

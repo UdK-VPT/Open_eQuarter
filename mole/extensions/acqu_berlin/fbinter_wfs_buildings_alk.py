@@ -3,7 +3,7 @@
 from qgis.core import NULL
 from mole.project import config
 from mole.oeq_global import OeQ_get_bld_id, isnull
-
+from PyQt4 import QtGui, QtCore
 
 def load(self=None):
     self.load_wfs()
@@ -142,7 +142,7 @@ extension = OeQExtension(
     active=True,
     description=u'',
     #source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=EPSG:25833',
-    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAMES=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=urn:ogc:def:crs:EPSG:6.9:25833',
+    source='http://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_wfs_alkis_gebaeudeflaechen?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAME=fis:s_wfs_alkis_gebaeudeflaechen&SRSNAME=urn:ogc:def:crs:EPSG:6.9:25833',
     #source='http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_hausumringe?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_hausumringe&SRSNAME=EPSG:25833',
     source_crs='EPSG:25833',
     bbox_crs='EPSG:25833',

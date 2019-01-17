@@ -1199,7 +1199,7 @@ def nodeCreateSampleLayer(node, sample_layer_name, reference_crs=None, overwrite
 
 def nodeCreateBuildingIDs(building_outline_node):
     """
-    Add a PERIMETER, AREA, and BLD_ID field to the layer's attribute table and populate them with appropiate values.
+    Add a PERIMETER, AREA, BLD_ID and GKN field to the layer's attribute table and populate them with appropiate values.
     Delete duplicate features and finally remove the FID-field
     :param housing_layer: The layer whose attribute-table shall be edited
     :type housing_layer: QgsVectorLayer
@@ -1224,7 +1224,8 @@ def nodeCreateBuildingIDs(building_outline_node):
     # NEW
     attributes = [QgsField(config.building_id_key, QVariant.String),
                   QgsField('AREA', QVariant.Double),
-                  QgsField('PERIMETER', QVariant.Double)]
+                  QgsField('PERIMETER', QVariant.Double),
+                  QgsField('GKN', QVariant.String)]
     layer_interaction.add_attributes_if_not_exists(building_outline_layer, attributes)
     provider= building_outline_layer.dataProvider()
     #set attributes for all features
@@ -1234,7 +1235,8 @@ def nodeCreateBuildingIDs(building_outline_node):
             geometry = feat.geometry()
             attributevalues = {building_outline_layer.fieldNameIndex(config.building_id_key): '{}'.format(building_id),
                                building_outline_layer.fieldNameIndex('AREA'): geometry.area(),
-                               building_outline_layer.fieldNameIndex('PERIMETER'): geometry.length()}
+                               building_outline_layer.fieldNameIndex('PERIMETER'): geometry.length(),
+                               building_outline_layer.fieldNameIndex('GKN'): feat['GKN_ALK']}
             provider.changeAttributeValues({feat.id(): attributevalues})
             building_id += 1
 

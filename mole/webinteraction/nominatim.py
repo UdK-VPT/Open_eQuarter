@@ -117,6 +117,7 @@ def getCoordinatesByAddress(address,crs=None):
                  'email': config.referrer_email
         }
     url='https://nominatim.openstreetmap.org/search?'+urllib.urlencode(urlParams)
+    #print(url);
     response = urllib2.urlopen(url)
     result = json.load(response)
 

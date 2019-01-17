@@ -758,6 +758,14 @@ class OeQExtension:
         from mole.qgisinteraction import legend,layer_interaction
         from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter,QgsRectangle
         from qgis.utils import iface
+
+        if legend.nodeExists(self.layer_name):
+            if forceload:
+                legend.nodeRemove(self.layer_name, physical=True)
+                self.reset_calculation_state()
+            else:
+                return None
+
         #check whether extent is defined, if not use investigationarea extent
         if not extent:
             extent= legend.nodeGetExtent(config.investigation_shape_layer_name)
@@ -1410,6 +1418,7 @@ file_writer.writeRaster(pipe,
 
     def sampleData(self, feature, datalayer_name = '', field_list=[], feature_crs = None):
         if datalayer_name == '': datalayer_name = self.layer_name
+        if feature_crs == None: feature_crs = self.layer().crs()
         from mole.qgisinteraction import layer_interaction
         return layer_interaction.sampleDataFromVectorLayerByFeature(feature, datalayer_name, field_list, feature_crs)
 

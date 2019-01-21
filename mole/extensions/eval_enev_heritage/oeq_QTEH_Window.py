@@ -12,28 +12,29 @@ def calculation(self=None, parameters={},feature = None):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
 
-    bs_sqte= NULL
-    if not oeq_global.isnull([parameters['BS_UE'],parameters['HHRS']]):
-        bs_sqte= float(parameters['BS_UE'])*float(parameters['HHRS'])/1000 *0.35 #correction factor
-    return {'BS_SQTE': {'type': QVariant.Double, 'value': bs_sqte}}
+    wn_qteh = NULL
+    if not oeq_global.isnull([parameters['WN_AR'],parameters['WN_UEH'],parameters['HHRS']]):
+        wn_qteh=float(parameters['WN_AR']) * float(parameters['WN_UEH'])*float(parameters['HHRS'])/1000
+    return {'WN_QTEH': {'type': QVariant.Double, 'value': wn_qteh}}
+
 
 extension = OeQExtension(
     extension_id=__name__,
 
     category='Evaluation',
-    subcategory='EnEV Spec. Transm. Heat Loss',
-    extension_name='Base SpecTransm (SQT, EnEV)',
-    layer_name= 'SQT Base EnEV',
+    subcategory='EnEV Heritage Transm. Heat Loss',
+    extension_name='Window Quality (QT, EnEV Heritage)',
+    layer_name= 'QT Window EnEV Heritage',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),
-    field_id='BS_SQTE',
+    field_id='WN_QTEH',
     source_type='none',
-    par_in=['BS_UE','HHRS'],
+    par_in=['WN_AR','WN_UEH','HHRS'],
     sourcelayer_name=config.data_layer_name,
     targetlayer_name=config.data_layer_name,
     active=True,
-    show_results=['BS_SQTE'],
-    description=u"Calculate the EnEV Transmission Heat Loss of the Building's baseplate per m2",
+    show_results=['WN_QTEH'],
+    description=u"Calculate the EnEV Heritage Transmission Heat Loss of the Building's Windows",
     evaluation_method=calculation)
 
 extension.registerExtension(default=True)

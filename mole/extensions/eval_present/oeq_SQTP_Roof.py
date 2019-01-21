@@ -17,7 +17,6 @@ def calculation(self=None, parameters={},feature = None):
         rf_sqtp= float(parameters['RF_UP'])*float(parameters['HHRS'])/1000 *0.35 #correction factor
     return {'RF_SQTP': {'type': QVariant.Double, 'value': rf_sqtp}}
 
-
 extension = OeQExtension(
     extension_id=__name__,
 

@@ -15,30 +15,17 @@ def calculation(self=None, parameters={},feature = None):
 
 #differentiation between RB and NRB (for now in case of contemporary U-Values RB=NRB. After getting NRB data for contemporary case code must be adaptet)
     if parameters['BLD_USAGE'] == "RB":
-        if parameters['HERIT_STAT'] == "0":
-            if not oeq_global.isnull(parameters['YOC']):
+        if not oeq_global.isnull(parameters['YOC']):
                 wn_uph = rb_present_window_uvalue_AVG_by_building_age_lookup.get(parameters['YOC'])
-        else:
-            if not oeq_global.isnull(parameters['YOC']):
-                wn_uph = rb_contemporary_window_uvalue_by_building_age_lookup.get(parameters['YOC'])
 
     elif parameters['BLD_USAGE'] == "NRB":
-        if parameters['HERIT_STAT'] == "0":
-            if not oeq_global.isnull(parameters['YOC']):
+        if not oeq_global.isnull(parameters['YOC']):
                 wn_uph = nrb_present_window_uvalue_by_building_age_lookup.get(parameters['YOC'])
-        else:
-            if not oeq_global.isnull(parameters['YOC']):
-                wn_uph = nrb_contemporary_window_uvalue_by_building_age_lookup.get(parameters['YOC'])
 
     else:
-        if parameters['HERIT_STAT'] == "0":
-            if not oeq_global.isnull(parameters['YOC']):
+        if not oeq_global.isnull(parameters['YOC']):
                 wn_uph = (((rb_present_window_uvalue_AVG_by_building_age_lookup.get(parameters['YOC'])) + (
                     nrb_present_window_uvalue_by_building_age_lookup.get(parameters['YOC']))) / 2)
-        else:
-            if not oeq_global.isnull(parameters['YOC']):
-                wn_uph = (((rb_contemporary_window_uvalue_by_building_age_lookup.get(parameters['YOC'])) + (
-                    nrb_contemporary_window_uvalue_by_building_age_lookup.get(parameters['YOC']))) / 2)
 
     return {'WN_UPH': {'type': QVariant.Double, 'value': wn_uph}}
 

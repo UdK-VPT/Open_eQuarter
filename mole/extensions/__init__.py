@@ -24,7 +24,9 @@ try:
     from crea_basics import *
     from eval_contemporary import *
     from eval_enev import *
+    from eval_enev_heritage import *
     from eval_present import *
+    from eval_present_heritage import *
 
     OeQ_ExtensionsLoaded=True
 except:

@@ -12,10 +12,10 @@ def calculation(self=None, parameters={},feature = None):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
 
-    rf_qtp = NULL
+    rf_qte = NULL
     if not oeq_global.isnull([parameters['RF_AR'],parameters['RF_UE'],parameters['HHRS']]):
-        rf_qtp=float(parameters['RF_AR']) * float(parameters['RF_UE'])*float(parameters['HHRS'])/1000
-    return {'RF_QTE': {'type': QVariant.Double, 'value': rf_qtp}}
+        rf_qte=float(parameters['RF_AR']) * float(parameters['RF_UE'])*float(parameters['HHRS'])/1000
+    return {'RF_QTE': {'type': QVariant.Double, 'value': rf_qte}}
 
 
 extension = OeQExtension(

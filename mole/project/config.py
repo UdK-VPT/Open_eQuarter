@@ -47,7 +47,7 @@ building_outline_style ='oeq_floor_sw.qml'
 building_coordinate_layer_name = 'BLD Coordinates'
 data_layer_name = 'BLD Data'
 sample_layer_name = 'Sample Results'
-building_id_key = 'BLD_ID'
+building_id_key = 'BLD_SUB_ID'
 # name of the wms-raster which will be loaded and is the basis for the clipping
 clipping_raster_layer_name = 'Investigation Area - raster'
 color_match_tolerance = 30

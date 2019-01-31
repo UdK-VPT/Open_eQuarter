@@ -931,24 +931,19 @@ def sampleDataFromVectorLayerByFeature(feature, data_layer_name, field_list=[] ,
         :rtype: boolean
         """
     result = True
-    enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
-    enquire_provider = enquire_layer.dataProvider()
     data_layer = legend.nodeByName(data_layer_name)[0].layer()
     fieldnames = [j.name() for j in data_layer.pendingFields()]
     fieldnames =filter(lambda nam: nam in field_list, fieldnames)
-    for nam in fieldnames:
-        if not nam in [a.name() for a in enquire_layer.fields()]:
-            enquire_provider.addAttributes([QgsField(nam, QVariant.String)])
-    enquire_layer.updateFields()
-    enquire_layer.startEditing()
     containers = sampleContainers(data_layer, feature.geometry(), feature_crs)
     result = None
     if bool(containers):
         container = containers[0]
         result =[]
-        for nam in fieldnames:
-            #print nam
-            result.append({str(nam):container[str(nam)]})
+        for c in containers:
+            res_dict = {}
+            for nam in fieldnames:
+                res_dict[str(nam)] = c[str(nam)]
+            result.append(res_dict)
     return result
 
 def sampleDataFromVectorLayer(enquire_layer_name, data_layer_name, field_list=[]):

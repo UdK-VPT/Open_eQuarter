@@ -11,12 +11,12 @@ def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
-    htc = NULL
+    hte = NULL
     if not oeq_global.isnull([parameters['BS_UE'] , parameters['BS_AR'] , parameters['RF_UE'] , parameters['RF_AR'] , parameters['WL_UE'] , parameters['WL_AR'] , parameters['WN_UE'] , parameters['WN_AR']]):
-        qtp_total = float(parameters['BS_UE'] * parameters['BS_AR'] *0.35 ) + float(parameters['RF_UE'] * parameters['RF_AR']) + float(parameters['WL_UE'] * parameters['WL_AR'] ) + float(parameters['WN_UE'] * parameters['WN_AR'])
+        qte_total = float(parameters['BS_UE'] * parameters['BS_AR'] *0.35 ) + float(parameters['RF_UE'] * parameters['RF_AR']) + float(parameters['WL_UE'] * parameters['WL_AR'] ) + float(parameters['WN_UE'] * parameters['WN_AR'])
         env_area =  float(parameters['BS_AR']) + float(parameters['RF_AR']) + float(parameters['WL_AR']) + float(parameters['WN_AR'])
-        htc=qtp_total/env_area
-    return {'HTE': {'type': QVariant.Double,'value': htc}}
+        hte=qte_total/env_area
+    return {'HTE': {'type': QVariant.Double,'value': hte}}
 
 
 extension = OeQExtension(

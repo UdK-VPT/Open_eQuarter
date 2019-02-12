@@ -1,0 +1,28 @@
+<RCC>
+  <qresource prefix="Controls">
+    <file>../icons/sources.png</file>
+    <file>../icons/crosshair.png</file>
+    <file>../icons/magnifying_glass.png</file>
+    <file>../icons/semiopenmark.png</file>
+    <file>../icons/info.png</file>
+    <file>../icons/tools.png</file>
+    <file>../icons/checkmark.png</file>
+    <file>../icons/refresh.png</file>
+    <file>../icons/openmark.png</file>
+    <file>../icons/arrow_left.png</file>
+    <file>../icons/arrow_right.png</file>
+    <file>../icons/autorun.png</file>
+    <file>../icons/open.png</file>
+    <file>../icons/config.png</file>
+    <file>../icons/save_active.png</file>
+    <file>../icons/gearwheel.png</file>
+  </qresource>
+  <qresource prefix="Brands">
+    <file>../icons/OeQ_logo_footer.png</file>
+  </qresource>
+  <qresource prefix="Plugin">
+    <file>../icons/lightbulb.png</file>
+    <file>../icons/OeQ_plugin_icon.png</file>
+    <file>../icons/scissor.png</file>
+  </qresource>
+</RCC>

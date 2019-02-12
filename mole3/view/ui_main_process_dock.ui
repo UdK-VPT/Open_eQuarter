@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainProcess_dock</class>
+ <widget class="QDockWidget" name="MainProcess_dock">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>374</width>
+    <height>516</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>374</width>
+    <height>500</height>
+   </size>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QStackedWidget QWidget {
+	text-align: left;
+}
+
+QStackedWidget QAbstractButton {
+	border: none;
+	margin-left: 2px;
+	min-width: 261px;
+	max-width: 320px;
+	min-height: 32px;
+	max-height: 40px;
+	qproperty-icon: url(&quot;:/Controls/icons/openmark.png&quot;) off,
+							url(&quot;:/Controls/icons/checkmark.png&quot;) on ;
+	qproperty-iconSize: 17px;
+	qproperty-flat: true;
+	qproperty-checkable: true;
+}
+
+QStackedWidget QAbstractButton:active {
+	border: none;
+}
+
+QListView {
+	text-align: left;
+    background-color: #f0f0f0;
+}
+#menu_bar {
+	padding: -10px;
+}
+
+
+
+</string>
+  </property>
+  <property name="windowTitle">
+   <string>Open eQuarter Mole</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item alignment="Qt::AlignLeft">
+       <widget class="QWidget" name="menu_bar" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QToolButton" name="settings_dropdown_btn">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/Controls/icons/gearwheel.png</normaloff>:/Controls/icons/gearwheel.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>17</width>
+             <height>17</height>
+            </size>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="tools_dropdown_btn">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/Controls/icons/tools.png</normaloff>:/Controls/icons/tools.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>17</width>
+             <height>17</height>
+            </size>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Currently viewing:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="active_page_dropdown">
+        <property name="accessibleName">
+         <string>Information Sources</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Requirements</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Project Basics</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Information Sources</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Evaluation</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Reports</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Export</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="process_page">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>350</width>
+        <height>280</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>280</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="accessibleName">
+       <string>jkiiuuu</string>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="midLineWidth">
+       <number>1</number>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="oeq_requirements">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="accessibleName">
+        <string>Requirements</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <layout class="QVBoxLayout" name="Requirements">
+        <item>
+         <widget class="QProcessButton" name="ol_plugin_installed">
+          <property name="text">
+           <string>Check if 'OpenLayers' Plugin is available</string>
+          </property>
+          <property name="shortcut">
+           <string notr="true"/>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <property name="autoRepeat">
+           <bool>false</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="pst_plugin_installed">
+          <property name="text">
+           <string>Check if 'Point Sampling Tool' Plugin is available</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="real_centroid_plugin_installed">
+          <property name="text">
+           <string>Check if 'realcentriod'  Plugin is available</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_project_basics">
+       <property name="accessibleName">
+        <string>Project Basics</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="Project">
+        <item>
+         <widget class="QProcessButton" name="project_created">
+          <property name="text">
+           <string>Define Project Location and Parameters</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="project_saved">
+          <property name="text">
+           <string>Save Project</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="investigationarea_defined">
+          <property name="text">
+           <string>Define Investigation Area</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_informationsources">
+       <property name="accessibleName">
+        <string>Information Sources</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QProcessButton" name="import_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Select Import Extensions</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="building_outlines_acquired">
+          <property name="text">
+           <string>Acquire Building Outlines</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="building_coordinates_acquired">
+          <property name="text">
+           <string>Acquire Building Coordinates</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="information_layers_loaded">
+          <property name="text">
+           <string>Load Information Layers</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="needle_request_done">
+          <property name="text">
+           <string>Perform Needle Request</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_building_evaluation">
+       <property name="accessibleName">
+        <string>Evaluation</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QProcessButton" name="database_created">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Create Database</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="eval_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Select Evaluation Extensions</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="disp_ext_selected">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Select Display Extensions</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="buildings_evaluated">
+          <property name="text">
+           <string>Evaluate Buildings</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="quarter_evaluated">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Evaluate Quarter</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_reports">
+       <property name="accessibleName">
+        <string>Reports</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QProcessButton" name="statistics_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Create reports of selected buildings</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="building_reports_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Create reports of the investigation area</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="investigationarea_report_created">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Create statistics</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="oeq_export">
+       <property name="accessibleName">
+        <string>Export</string>
+       </property>
+       <property name="accessibleDescription">
+        <string/>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QProcessButton" name="json_export_done">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Export database as GeoJSON file</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="sqlite_export_done">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Export database as SQLite file</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProcessButton" name="csv_export_done">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Export database as CSV file</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="button_layout">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="automode">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Automode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="run_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Run</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/icons/arrow_right.png</normaloff>:/Controls/icons/arrow_right.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="process_button_next">
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Step</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/Controls/icons/arrow_right.png</normaloff>:/Controls/icons/arrow_right.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="vertical_logo_spacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>32</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="logo_layout">
+      <item>
+       <widget class="QClickableLabel" name="oeq_clickable_logo">
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>57</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="resources.qrc">:/Brands/icons/OeQ_logo_footer.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QProcessButton</class>
+   <extends>QPushButton</extends>
+   <header>oeq_ui_classes</header>
+  </customwidget>
+  <customwidget>
+   <class>QClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>oeq_ui_classes</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>ol_plugin_installed</tabstop>
+  <tabstop>pst_plugin_installed</tabstop>
+  <tabstop>real_centroid_plugin_installed</tabstop>
+  <tabstop>process_button_next</tabstop>
+  <tabstop>settings_dropdown_btn</tabstop>
+  <tabstop>tools_dropdown_btn</tabstop>
+  <tabstop>active_page_dropdown</tabstop>
+  <tabstop>building_outlines_acquired</tabstop>
+  <tabstop>building_coordinates_acquired</tabstop>
+  <tabstop>eval_ext_selected</tabstop>
+  <tabstop>disp_ext_selected</tabstop>
+  <tabstop>csv_export_done</tabstop>
+  <tabstop>project_created</tabstop>
+  <tabstop>investigationarea_defined</tabstop>
+  <tabstop>project_saved</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>active_page_dropdown</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>process_page</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>287</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>270</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>automode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>run_button</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>183</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

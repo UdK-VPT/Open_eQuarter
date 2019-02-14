@@ -4,7 +4,7 @@ import unittest
 from qgis.core import QgsVectorLayer, QgsProject, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsField, QgsFeature
 from qgis.utils import iface
 from qgis.PyQt.QtCore import QVariant
-from mole.qgisinteraction import layer_interaction
+from mole3.qgisinteraction import layer_interaction
 from .qgis_models import set_up_interface
 
 class LayerInteraction_test(unittest.TestCase):

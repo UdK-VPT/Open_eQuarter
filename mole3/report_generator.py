@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 def write_project_definition_report(self,template):
-    from mole.qgisinteraction import legend
-    from mole.project import config
-    from mole import oeq_global
+    from mole3.qgisinteraction import legend
+    from mole3.project import config
+    from mole3 import oeq_global
     database=legend.nodeByName(config.data_layer_name)
     if not database:
         return None
@@ -24,9 +24,9 @@ def write_project_definition_report(self,template):
     return output
 
 def write_building_reports(bld_ids=[],reporttemplate=None):
-    from mole.qgisinteraction import legend
-    from mole.project import config
-    from mole import oeq_global
+    from mole3.qgisinteraction import legend
+    from mole3.project import config
+    from mole3 import oeq_global
     import os
     database=legend.nodeByName(config.data_layer_name)
     if not database:
@@ -56,9 +56,9 @@ def write_building_reports(bld_ids=[],reporttemplate=None):
 
 def write_project_definitions_report():
     from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform
-    from mole.qgisinteraction import legend
-    from mole.project import config
-    from mole import oeq_global
+    from mole3.qgisinteraction import legend
+    from mole3.project import config
+    from mole3 import oeq_global
     import os
     import webbrowser
     from cgi import escape

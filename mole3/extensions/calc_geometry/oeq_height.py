@@ -2,9 +2,9 @@
 
 import os,math
 from qgis.core import NULL
-from mole import oeq_global
-from mole.project import config
-from mole.extensions import OeQExtension
+from mole3 import oeq_global
+from mole3.project import config
+from mole3.extensions import OeQExtension
 
 def calculation(self=None, parameters={},feature = None):
     return {}

@@ -3,7 +3,7 @@ import os
 from platform import system
 from qgis.core import QgsRectangle
 
-import mole
+import mole3
 
 
 # County
@@ -67,7 +67,7 @@ building_report_tpl = "building_report.html"
 project_report_tpl = "project_report.html"
 
 ### Default paths
-plugin_dir = os.path.dirname(mole.__file__)
+plugin_dir = os.path.dirname(mole3.__file__)
 progress_model = os.path.join(plugin_dir, 'project', 'default_progress.oeq')
 investigation_area_style = os.path.join(plugin_dir, 'styles', 'oeq_ia_style.qml')
 valid_centroids_style = os.path.join(plugin_dir, 'styles', 'oeq_valid_centroid_style.qml')

@@ -39,8 +39,8 @@ def postflight(self=None):
 
 
 import os
-from mole.extensions import OeQExtension
-from mole.project import config
+from mole3.extensions import OeQExtension
+from mole3.project import config
 extension = OeQExtension(
     extension_id=__name__,
     category= None,

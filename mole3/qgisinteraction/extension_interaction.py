@@ -27,6 +27,6 @@ from qgis.PyQt.QtCore import QSettings, QSize, QVariant
 from qgis.PyQt.QtGui import QPainter, QColor, QImage, QProgressDialog, QLabel
 import os
 import time
-from string import find
-from mole.project import config
-from mole import oeq_global
+#from string import find
+from mole3.project import config
+from mole3 import oeq_global

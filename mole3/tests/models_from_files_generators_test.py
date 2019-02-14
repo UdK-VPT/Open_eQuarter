@@ -5,7 +5,7 @@ import io
 import json
 import os
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationParser, MunicipalInformationTree
+from mole3.model.file_manager import ColorEntryManager, MunicipalInformationParser, MunicipalInformationTree
 
 
 class ColorEntryManagerTestCase(unittest.TestCase):

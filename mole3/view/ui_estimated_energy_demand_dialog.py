@@ -126,8 +126,8 @@ class Ui_EstimatedEnergyDemand_dialog(object):
         self.verticalLayout.addWidget(self.dialogButtonBox)
 
         self.retranslateUi(EstimatedEnergyDemand_dialog)
-        QtCore.QObject.connect(self.dialogButtonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), EstimatedEnergyDemand_dialog.accept)
-        QtCore.QObject.connect(self.dialogButtonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), EstimatedEnergyDemand_dialog.reject)
+        QtCore.QObject.connect(self.dialogButtonBox, QtCore.pyqtSignal(_fromUtf8("accepted()")), EstimatedEnergyDemand_dialog.accept)
+        QtCore.QObject.connect(self.dialogButtonBox, QtCore.pyqtSignal(_fromUtf8("rejected()")), EstimatedEnergyDemand_dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(EstimatedEnergyDemand_dialog)
 
     def retranslateUi(self, EstimatedEnergyDemand_dialog):

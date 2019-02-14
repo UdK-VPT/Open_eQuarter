@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -16,12 +16,12 @@ except AttributeError:
         return s
 
 try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtWidgets.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtWidgets.QApplication.translate(context, text, disambig)
 
 class Ui_ModularInfo_dialog(object):
     def setupUi(self, ModularInfo_dialog):
@@ -29,25 +29,25 @@ class Ui_ModularInfo_dialog(object):
         ModularInfo_dialog.resize(502, 190)
         ModularInfo_dialog.setFocusPolicy(QtCore.Qt.ClickFocus)
         ModularInfo_dialog.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
-        self.buttonBox = QtGui.QDialogButtonBox(ModularInfo_dialog)
+        self.buttonBox = QtWidgets.QDialogButtonBox(ModularInfo_dialog)
         self.buttonBox.setGeometry(QtCore.QRect(191, 140, 120, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Close)
         self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.textBrowser = QtGui.QTextBrowser(ModularInfo_dialog)
+        self.textBrowser = QtWidgets.QTextBrowser(ModularInfo_dialog)
         self.textBrowser.setGeometry(QtCore.QRect(25, 10, 450, 111))
         self.textBrowser.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.textBrowser.setAutoFillBackground(False)
         self.textBrowser.setStyleSheet(_fromUtf8("background-color: rgb(237,237,237);"))
-        self.textBrowser.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textBrowser.setFrameShadow(QtGui.QFrame.Plain)
+        self.textBrowser.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textBrowser.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textBrowser.setLineWidth(0)
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
 
         self.retranslateUi(ModularInfo_dialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ModularInfo_dialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ModularInfo_dialog.reject)
+        self.buttonBox.accepted.connect(ModularInfo_dialog.accept)
+        self.buttonBox.rejected.connect(ModularInfo_dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(ModularInfo_dialog)
 
     def retranslateUi(self, ModularInfo_dialog):

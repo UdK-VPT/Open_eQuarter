@@ -5,7 +5,7 @@ Project:        OpenEQuarter
 Subproject:     Mole
 Type:           A QGIS plugin
 Module:         legend
-Package:        mole.qgisinteraction
+Package:        mole3.qgisinteraction
 Description:    Functions to deal with the QGIS Legend
 Authors:        Werner 'Max' Kaul, UdK-Berlin (max)
 Creation Date:  2015-09-16
@@ -17,8 +17,8 @@ Latest Changes: 2015-09-16 (max)
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsProject,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature,QgsCoordinateReferenceSystem,QgsCoordinateTransform
 from qgis.utils import iface
-from mole import oeq_global
-from mole.project import config
+from mole3 import oeq_global
+from mole3.project import config
 import os
 
 
@@ -479,8 +479,8 @@ def nodeRadioSwitch(node,state=None):
 
 def nodeRemove(node,physical=False):
     import os
-    from mole.qgisinteraction import layer_interaction
-    from mole import oeq_global
+    from mole3.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
     os.environ['PATH'] += ":"+"/usr/local/bin"
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
@@ -832,8 +832,8 @@ def nodeSetActive(node):
 def nodeConvertCRSold(node,crs=None):
     import os, subprocess
     os.environ['PATH'] += ":"+"/usr/local/bin"
-    from mole import oeq_global
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.qgisinteraction import layer_interaction
     if crs == None:
         crs='epsg:4326' #default is WGS84
     if oeq_global.isStringOrUnicode(node):
@@ -894,8 +894,8 @@ def nodeConvertCRSold(node,crs=None):
 def nodeConvertCRS(node,crs=None):
     import os, subprocess
     os.environ['PATH'] += ":"+"/usr/local/bin"
-    from mole import oeq_global
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.qgisinteraction import layer_interaction
     if crs == None:
         crs='epsg:4326' #default is WGS84
     if oeq_global.isStringOrUnicode(node):
@@ -938,8 +938,8 @@ def nodeConvertCRS(node,crs=None):
 def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
     import os, subprocess
     from qgis.core import QgsMessageLog
-    from mole import oeq_global
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.qgisinteraction import layer_interaction
     #add path in case ogr2ogr can not be found
 
     #check if a clippath is given
@@ -1017,7 +1017,7 @@ def nodeClipByShapefile(node,clip_filepath=None,target_filepath=None):
 
 def nodeClipByShapenode(node,clip_node=None,target_path=None):
     import os, subprocess
-    from mole import oeq_global
+    from mole3 import oeq_global
     #os.environ['PATH'] += ":"+"/usr/local/bin"
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
@@ -1083,7 +1083,7 @@ def nodeGetExtent(node):
 def nodeVectorSave(node,filepath=None,crs=None,load=False):
     from qgis.core import QgsCoordinateReferenceSystem,QgsVectorFileWriter
     from qgis.utils import iface
-    from mole import oeq_global
+    from mole3 import oeq_global
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
         if not node: return None
@@ -1100,9 +1100,9 @@ def nodeVectorSave(node,filepath=None,crs=None,load=False):
         #oeq_global.OeQ_wait_for_renderer(60000)
 
 def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=True, category = None,subcategory=None,position='bottom'):
-    from mole import oeq_global
-    from mole.project import config
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.project import config
+    from mole3.qgisinteraction import layer_interaction
     from qgis.PyQt.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(node):
@@ -1148,9 +1148,9 @@ def nodeCreateDatabase(node,database_layer_name,reference_crs=None,overwrite=Tru
 
 def nodeCreateSampleLayer(node, sample_layer_name, reference_crs=None, overwrite=True, category=None,
                        subcategory=None, position='bottom'):
-    from mole import oeq_global
-    from mole.project import config
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.project import config
+    from mole3.qgisinteraction import layer_interaction
     from qgis.PyQt.QtCore import QVariant
     # get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(node):
@@ -1206,9 +1206,9 @@ def nodeCreateBuildingIDs(building_outline_node):
     :return: If the changes were commited
     :rtype: bool
     """
-    from mole import oeq_global
-    from mole.project import config
-    from mole.qgisinteraction import layer_interaction
+    from mole3 import oeq_global
+    from mole3.project import config
+    from mole3.qgisinteraction import layer_interaction
     from qgis.PyQt.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(building_outline_node):
@@ -1281,8 +1281,8 @@ def nodeGetBuildingData(building_coordinates_node):
     :return: If the changes were commited
     :rtype: bool
     """
-    from mole import oeq_global
-    from mole.webinteraction import googlemaps,nominatim
+    from mole3 import oeq_global
+    from mole3.webinteraction import googlemaps,nominatim
     from qgis.PyQt.QtCore import QVariant
     #get node for building_outline if only layer name is given
     if oeq_global.isStringOrUnicode(building_coordinates_node):

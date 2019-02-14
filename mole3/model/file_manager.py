@@ -1,7 +1,7 @@
 # coding = utf-8
 import os
 import json
-import mole
+import mole3
 import qgis.utils
 import xml.etree.ElementTree as etree
 from io import open
@@ -19,7 +19,7 @@ class ColorEntryManager:
         self.layer_abbreviation_map = {}
 
     def add_layer(self, layer_name):
-        from mole import extensions
+        from mole3 import extensions
         if layer_name not in self.layer_values_map:
             self.layer_values_map[layer_name] = OrderedDict()
         ext = extensions.by_layername(layer_name)
@@ -257,9 +257,9 @@ class MunicipalInformationParser:
     def __init__(self):
         self.municipal = []
 
-        mole_path = mole.__file__
-        mole_path = os.path.dirname(mole_path)
-        municipal_json_path = os.path.join(mole_path, 'project', 'municipal_db.json')
+        mole3_path = mole3.__file__
+        mole3_path = os.path.dirname(mole3_path)
+        municipal_json_path = os.path.join(mole3_path, 'project', 'municipal_db.json')
         self.municipal_json_file = municipal_json_path
 
     def parse_municipal(self, postcode):
@@ -291,9 +291,9 @@ class MunicipalInformationTree:
 
     def __init__(self):
         self.tree = {}
-        mole_path = mole.__file__
-        mole_path = os.path.dirname(mole_path)
-        municipal_json_path = os.path.join(mole_path, 'project', 'municipal_db.json')
+        mole3_path = mole3.__file__
+        mole3_path = os.path.dirname(mole3_path)
+        municipal_json_path = os.path.join(mole3_path, 'project', 'municipal_db.json')
         self.municipal_json_file = municipal_json_path
 
     def find_keys_on_level(self, level):

@@ -5,9 +5,9 @@ from qgis import utils
 from os import path
 import sys
 
-from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists, delete_layer_files
-from mole.qgisinteraction import legend
-from mole.project import config
+from mole3.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists, delete_layer_files
+from mole3.qgisinteraction import legend
+from mole3.project import config
 
 def get_plugin_ifexists(plugin_name):
     """
@@ -19,7 +19,7 @@ def get_plugin_ifexists(plugin_name):
     :return plugin: Return the plugin if it was found or None otherwise
     :rtype: plugin instance
     """
-    from mole import oeq_global
+    from mole3 import oeq_global
     try:
         plugin = utils.plugins[plugin_name]
         return plugin
@@ -70,7 +70,7 @@ class PstInteraction(object):
         :return plugin: Return the plugin if it was found or None otherwise
         :rtype: plugin instance
         """
-        import mole.extensions as extensions
+        import mole3.extensions as extensions
 
         sample_list = self.pst_dialog.inData
         table = self.pst_dialog.fieldsTable
@@ -225,7 +225,7 @@ class RealCentroidInteraction(object):
             print((KError, 'The realcentroid plugin has not been found by the given name "{}"'.format(plugin_name)))
 
     def create_centroids(self, polygon_name, path_to_output_shape):
-        from mole import oeq_global
+        from mole3 import oeq_global
         self.plugin.dlg.showEvent(QtCore.QEvent.Show)
         polygon_combobox = self.plugin.dlg.ui.layerBox
 

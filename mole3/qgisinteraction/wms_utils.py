@@ -1,4 +1,4 @@
-from qgis.PyQt.QtGui import QMessageBox
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import QgsProject
 
 import qgis
@@ -7,9 +7,9 @@ import time
 from webbrowser import open as open_url
 
 
-from mole.oeq_global import *
-from mole.qgisinteraction import raster_layer_interaction
-from mole.qgisinteraction import layer_interaction , legend
+from mole3.oeq_global import *
+from mole3.qgisinteraction import raster_layer_interaction
+from mole3.qgisinteraction import layer_interaction , legend
 
 
 def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_output = True):

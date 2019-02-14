@@ -5,9 +5,9 @@ from qgis.core import QgsVectorLayer, QgsField, QgsProject, QGis
 from qgis.PyQt.QtCore import QVariant
 
 from .qgis_models import set_up_interface
-from mole.qgisinteraction import layer_interaction as li
-from mole.qgisinteraction import plugin_interaction as pi
-from mole.tests.qgis_models import HybridLayer
+from mole3.qgisinteraction import layer_interaction as li
+from mole3.qgisinteraction import plugin_interaction as pi
+from mole3.tests.qgis_models import HybridLayer
 
 
 class PstPluginInteractionTest(unittest.TestCase):

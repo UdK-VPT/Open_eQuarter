@@ -20,7 +20,7 @@ from qgis.PyQt.QtCore import QObject, pyqtSlot, pyqtSignal, QCoreApplication
 from qgis.core import QgsProject, QgsApplication, QgsVectorLayer
 from qgis.gui import QgsMapCanvasLayer
 
-from mole.project import config
+from mole3.project import config
 
 
 LOGGER = logging.getLogger('QGIS')

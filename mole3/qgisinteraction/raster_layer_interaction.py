@@ -204,8 +204,8 @@ rast_src = None  # equivalent to save/close
 class PointTool(QgsMapTool):
     from qgis.gui import QgsMapTool,QgsMapToolEmitPoint
     from qgis.core import QgsFeature,QgsMapLayer,QgsPoint
-    from qgis.PyQt.QtGui import QMessageBox
-    from qgis.PyQt.QtCore import SIGNAL,QObject
+    from qgis.PyQt.QtWidgets import QMessageBox
+    from qgis.PyQt.QtCore import pyqtSignal,QObject
     def __init__(self, canvas):
         QgsMapTool.__init__(self, canvas)
         self.canvas = canvas
@@ -237,7 +237,7 @@ class PointTool(QgsMapTool):
         self.points = []
         self.pointcnt = number_of_points
         self.pointEmitter = QgsMapToolEmitPoint(iface.mapCanvas())
-        QObject.connect( self.pointEmitter, SIGNAL("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
+        QObject.connect( self.pointEmitter, pyqtSignal("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
         iface.mapCanvas().setMapTool( self.pointEmitter )
     def selectNow(self, point, button):
       #QMessageBox.information(None, "Clicked coords", " x: " + str(point.x()) + " Y: " + str(point.y()) )
@@ -246,8 +246,8 @@ class PointTool(QgsMapTool):
       self.pointcnt -= 1
       if not self.pointcnt:
           super(PointTool, self).deactivate()
-          self.emit(SIGNAL("deactivated()"))
-          QObject.disconnect(self.pointEmitter, SIGNAL("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
+          self.emit(pyqtSignal("deactivated()"))
+          QObject.disconnect(self.pointEmitter, pyqtSignal("canvasClicked(const QgsPoint, Qt::MouseButton)"), self.selectNow)
 tool = PointTool(iface.mapCanvas())
 tool.pickCoordinates(2)
 
@@ -305,6 +305,6 @@ class RectangleMapTool(QgsMapToolEmitPoint):
           return QgsRectangle(self.startPoint, self.endPoint)
     def deactivate(self):
           super(RectangleMapTool, self).deactivate()
-          self.emit(SIGNAL("deactivated()"))
+          self.emit(pyqtSignal("deactivated()"))
 tool = RectangleMapTool(iface.mapCanvas())
 '''

@@ -2,14 +2,14 @@
 
 import os,math
 from qgis.core import NULL
-from mole import oeq_global
-from mole.project import config
-from mole.extensions import OeQExtension
-from mole.stat_corr import rb_contemporary_base_uvalue_by_building_age_lookup
+from mole3 import oeq_global
+from mole3.project import config
+from mole3.extensions import OeQExtension
+from mole3.stat_corr import rb_contemporary_base_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
     from qgis.core import NULL
-    from mole.webinteraction import googlemaps,nominatim
+    from mole3.webinteraction import googlemaps,nominatim
     from qgis.PyQt.QtCore import QVariant
     if bool(feature):
         crs = int(self.layer('source').crs().authid().split(':')[1])

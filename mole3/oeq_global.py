@@ -4,10 +4,11 @@
 import os
 import time,datetime
 
-from qgis.PyQt.QtGui import QProgressBar
+from qgis.PyQt.QtWidgets import QProgressBar
+from qgis.gui import QgsMessageBar
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
-from qgis.core import QgsProject, NULL
+from qgis.core import QgsProject, NULL, Qgis
 
 from .project import config
 
@@ -30,7 +31,7 @@ OeQ_project_info = {
     'project_name': 'New Project',
     'description': 'The aim of this project, is to analyse a quarter.',
     'location_city': 'City or street',
-    'location_city_short': 'City',
+    #'location_city_short': 'City',
     'location_street': 'Street',
     'location_postal': 'Postal',
     'location_lon': 'Lon',
@@ -116,7 +117,7 @@ def OeQ_push_progressbar(title='Be patient!', message='Background calculations a
     widget.layout().addWidget(progressbarwidget)
 
     # pass the progress bar to the message Bar
-    baritem=iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
+    baritem=iface.messageBar().pushWidget(widget, Qgis.Info)
     OeQ_unlockQgis()
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
     return {'widget':progressbarwidget,'baritem':baritem}
@@ -141,7 +142,7 @@ def OeQ_pop_progressbar(progressbar=None):
 
 def OeQ_push_info(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
-    iface.messageBar().pushWidget(widget, iface.messageBar().INFO)
+    iface.messageBar().pushWidget(widget, Qgis.Info)
     OeQ_unlockQgis()
     return widget
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
@@ -160,7 +161,7 @@ OeQ_StatusWidget = None
 def OeQ_push_status(title='Status: ', message='Complete'):
     global OeQ_StatusWidget
     OeQ_StatusWidget = iface.messageBar().createMessage(title, message)
-    iface.messageBar().pushWidget(OeQ_StatusWidget, iface.messageBar().INFO)
+    iface.messageBar().pushWidget(OeQ_StatusWidget, Qgis.Info)
     OeQ_unlockQgis()
     return OeQ_StatusWidget
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
@@ -170,7 +171,7 @@ def OeQ_pop_status():
     global OeQ_StatusWidget
     if bool(OeQ_StatusWidget):
         try:
-            iface.messageBar().popWidget(OeQ_StatusWidget)
+            QgsMessageBar.popWidget(OeQ_StatusWidget)
         except:
             pass
 
@@ -180,7 +181,7 @@ def OeQ_pop_status():
 
 def OeQ_push_warning(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
-    iface.messageBar().pushWidget(widget, iface.messageBar().WARNING)
+    iface.messageBar().pushWidget(widget, Qgis.Warning)
     OeQ_unlockQgis()
     return widget
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
@@ -195,7 +196,7 @@ def OeQ_pop_warning(baritem=None):
 
 def OeQ_push_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
-    iface.messageBar().pushWidget(widget, iface.messageBar().CRITICAL)
+    QgsMessageBar.pushWidget(widget, Qgis.Critical)
     OeQ_unlockQgis()
     return widget
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
@@ -341,7 +342,7 @@ def OeQ_wait(sec):
 
 def test(testo):
     from qgis.core import QgsRasterLayer,QgsProject
-    from mole import oeq_global
+    from mole3 import oeq_global
     urlWithParams = 'url=http://kaart.maaamet.ee/wms/alus&format=image/png&layers=MA-ALUS&styles=&crs=EPSG:3301'
     rlayer = QgsRasterLayer(urlWithParams, 'MA-ALUS', 'wms')
     QgsProject.instance().addMapLayer(rlayer)

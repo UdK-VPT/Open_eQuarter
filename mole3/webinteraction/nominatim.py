@@ -51,13 +51,13 @@
  *****************************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from mole.qgisinteraction import layer_interaction
-from mole.project import config
+from mole3.qgisinteraction import layer_interaction
+from mole3.project import config
 #from qgis.core import *
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import json
-from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint
+from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint,Qgis,QgsProject
 
 
 # Get the postal adress for the specified coordinates
@@ -71,8 +71,8 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     if bool(crs):
         sourceCRS=QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
         nominatimCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transform = QgsCoordinateTransform(sourceCRS, nominatimCRS).transform
-        location=transform(QgsPoint(longitude, latitude))
+        transform = QgsCoordinateTransform(sourceCRS, nominatimCRS,QgsProject).transform
+        location=transform(longitude, latitude)
         latitude=location.y()
         longitude=location.x()
     urlParams = {'format': 'json',
@@ -93,8 +93,8 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
         dataset.update({field : result['address'][field]})
     if (dataset['town'] == ''): dataset['town'] = result['address']['city']
     if  bool(crs):
-        transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRS).transform
-        location2=transform2(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
+        transform2 = QgsCoordinateTransform(nominatimCRS,sourceCRSQgsProject).transform
+        location2=transform2(float(dataset['longitude']), float(dataset['latitude']))
         dataset['latitude']=location2.y()
         dataset['longitude']=location2.x()
     return([complete_nominatim_dataset(dataset)])
@@ -117,7 +117,10 @@ def getCoordinatesByAddress(address,crs=None):
                  'email': config.referrer_email
         }
     url='https://nominatim.openstreetmap.org/search?'+urllib.parse.urlencode(urlParams)
-    #print(url);
+    print(url);
+    import ssl
+
+    ssl._create_default_https_context = ssl._create_unverified_context
     response = urllib.request.urlopen(url)
     result = json.load(response)
 
@@ -131,11 +134,12 @@ def getCoordinatesByAddress(address,crs=None):
         for field in list(addrrecord['address'].keys()):
             dataset.update({field: addrrecord['address'][field]})
         if (dataset['town'] == ''): dataset['town'] = addrrecord['address']['city']
-        #print(crs);
+        print(dataset);
         if crs:
            targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
            nominatimCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-           location = QgsCoordinateTransform(nominatimCRS, targetCRS).transform(QgsPoint(float(dataset['longitude']), float(dataset['latitude'])))
+           transform0 = QgsCoordinateTransform(nominatimCRS, targetCRS, QgsProject.instance()).transform
+           location = transform0(float(dataset['longitude']), float(dataset['latitude']))
            dataset['latitude'] = location.y()
            dataset['longitude'] = location.x()
         addrlist.append(complete_nominatim_dataset(dataset))
@@ -243,8 +247,8 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     # In: BLD_ID
     #     Target Coordinate Reference System as EPSG Code
     # Out: dict of all informations delivered by googlemaps
-    from mole.qgisinteraction import legend
-    from mole.project import config
+    from mole3.qgisinteraction import legend
+    from mole3.project import config
     layer = legend.nodeByName(config.building_coordinate_layer_name)
     if not layer: return None
     layer = layer[0].layer()
@@ -259,8 +263,8 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     return result
 
 def getBuildingCoordinateByBLD_ID(building_id, crs=None):
-    from mole.qgisinteraction import legend
-    from mole.project import config
+    from mole3.qgisinteraction import legend
+    from mole3.project import config
     adress=getBuildingLocationDataByBLD_ID(building_id)
     if adress:
         adress = adress[0]

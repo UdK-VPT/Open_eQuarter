@@ -4,7 +4,7 @@ from qgis.PyQt.QtCore import QFileInfo, QFile
 import unittest
 import os
 
-from mole.qgisinteraction import project_interaction
+from mole3.qgisinteraction import project_interaction
 from .qgis_models import set_up_interface
 
 class QgisProjectTest(unittest.TestCase):

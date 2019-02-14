@@ -6,10 +6,10 @@ from qgis.PyQt.QtGui import QPainter, QColor, QImage
 from qgis.PyQt.QtWidgets import QProgressDialog, QLabel
 import os
 import time
-from string import find
-from mole.project import config
-from mole.qgisinteraction import legend
-from mole import oeq_global
+#from string import find
+from mole3.project import config
+from mole3.qgisinteraction import legend
+from mole3 import oeq_global
 import numpy as np
 import math
 
@@ -56,7 +56,7 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
 def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=True):
     import os
     from qgis.utils import iface
-    from mole import oeq_global
+    from mole3 import oeq_global
     if oeq_global.OeQ_project_name() == '':
         iface.actionSaveProjectAs().trigger()
     layer_name = vlayer.name()
@@ -748,7 +748,7 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     :rtype:
     """
 
-    import mole.extensions as extensions
+    import mole3.extensions as extensions
     extension = extensions.by_layername(layer.name(), 'Import')
     if extension != []:
         extension = extension[0]
@@ -840,7 +840,7 @@ def zoomToActiveLayer():
 # Sample Tools
 
 
-from mole.qgisinteraction import legend
+from mole3.qgisinteraction import legend
 from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint, QgsRectangle, QgsFeatureRequest, QgsGeometry, QgsCoordinateTransform, QgsRaster, NULL
 from qgis.PyQt.QtCore import QVariant
 
@@ -1103,9 +1103,9 @@ def createCentroidLayer(polygon_layer_name, centroid_layer_name, forced=False):
 
     '''
     import os
-    from mole import oeq_global
-    from mole.project import config
-    from mole.qgisinteraction import plugin_interaction,legend,layer_interaction
+    from mole3 import oeq_global
+    from mole3.project import config
+    from mole3.qgisinteraction import plugin_interaction,legend,layer_interaction
     # check if centroid layer exists
     if legend.nodeExists(centroid_layer_name):
         #force rebuild?

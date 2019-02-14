@@ -6,7 +6,7 @@ from . import bld_geometry
 from stat_corr import * 
 
 from qgis.core import *
-from mole.oeq_global import *
+from mole3.oeq_global import *
 
 
 def evaluate_building(population_density, 

@@ -1,7 +1,8 @@
 import operator
 
-from qgis.PyQt.QtGui import QLabel, QPushButton, QLineEdit, QItemDelegate, QIcon, QFont, QColor, QStyle
-from qgis.PyQt.QtCore import SIGNAL, QSize, QPoint, QRect, Qt, QAbstractTableModel
+from qgis.PyQt.QtGui import QIcon, QFont, QColor
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QLineEdit, QItemDelegate, QStyle
+from qgis.PyQt.QtCore import pyqtSignal, QSize, QPoint, QRect, Qt, QAbstractTableModel
 from qgis.PyQt import QtCore
 
 try:
@@ -189,7 +190,7 @@ class QColorTableModel(QAbstractTableModel):
         :return:
         :rtype:
         """
-        self.emit(SIGNAL("layoutAboutToBeChanged()"))
+        #self.emit(pyqtSignal("layoutAboutToBeChanged()"))
         try:
             items = []
             for key, triple in self.in_data.items():
@@ -214,7 +215,7 @@ class QColorTableModel(QAbstractTableModel):
         except IndexError as OutOfRangeError:
             print((self.__module__, OutOfRangeError))
 
-        self.emit(SIGNAL("layoutChanged()"))
+        #self.emit(pyqtSignal("layoutChanged()"))
 
 
 class QProcessViewDelegate(QItemDelegate):
@@ -286,7 +287,8 @@ class QClickableLabel(QLabel):
         QLabel.__init__(self, parent)
 
     def mouseReleaseEvent(self, ev):
-        self.emit(SIGNAL('clicked()'))
+        #self.emit(pyqtSignal('clicked()'))
+        pass
 
 
 class QProcessButton(QPushButton):
@@ -295,4 +297,5 @@ class QProcessButton(QPushButton):
         QPushButton.__init(self, parent)
 
     def mouseReleaseEvent(self, event):
-        self.emit(SIGNAL('process_button_click'), self.objectName(), self)
+        #self.emit(pyqtSignal('process_button_click'), self.objectName(), self)
+        pass

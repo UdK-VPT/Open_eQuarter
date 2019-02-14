@@ -5,7 +5,7 @@ Project:        OpenEQuarter
 Subproject:     Mole
 Type:           A QGIS plugin
 Module:         workflow
-Package:        mole.qgisinteraction
+Package:        mole3.qgisinteraction
 Description:    Functions to handle workflows
 Authors:        Werner 'Max' Kaul, UdK-Berlin (max)
 Creation Date:  2015-11-26
@@ -53,7 +53,7 @@ class OeQ_WorkStep:
         Default errorfunction
         :return: None
         '''
-        from mole import oeq_global
+        from mole3 import oeq_global
         oeq_global.OeQ_push_error("Workstep '"+self.name+ "': ", 'Execution failed!')
 
     def wait_default(self):

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from qgis.core import NULL
-from mole.project import config
-from mole.oeq_global import OeQ_get_bld_id, isnull
-from mole.qgisinteraction import legend
+from mole3.project import config
+from mole3.oeq_global import OeQ_get_bld_id, isnull
+from mole3.qgisinteraction import legend
 from qgis.PyQt import QtGui, QtCore
 
 def load(self=None):
@@ -12,11 +12,11 @@ def load(self=None):
 
 
 def preflight(self=None):
-    from mole.project import config
+    from mole3.project import config
     from qgis.PyQt.QtCore import QVariant
     from qgis.core import QgsField
-    from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists
-    from mole.oeq_global import OeQ_get_bld_id
+    from mole3.qgisinteraction.layer_interaction import add_attributes_if_not_exists
+    from mole3.oeq_global import OeQ_get_bld_id
     print("Heritage Preflight")
     layer = self.layer()
     #print layer.name()
@@ -106,8 +106,8 @@ def postflight(self=None):
 
 
 import os
-from mole.extensions import OeQExtension
-from mole.project import config
+from mole3.extensions import OeQExtension
+from mole3.project import config
 extension = OeQExtension(
     extension_id=__name__,
     category='Import',

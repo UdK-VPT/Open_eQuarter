@@ -21,15 +21,15 @@
 import os
 from functools import partial
 
-from qgis.PyQt import QtGui, QtCore
+from qgis.PyQt import QtWidgets, QtCore, QtGui
 from qgis.core import QgsProject, QgsMapLayer
 from qgis.utils import iface,plugins
 
-from mole.model.file_manager import ColorEntryManager, MunicipalInformationTree
-from mole.qgisinteraction import layer_interaction, legend
-from mole import oeq_global
-from mole.project import config
-from mole.webinteraction import googlemaps,nominatim
+from mole3.model.file_manager import ColorEntryManager, MunicipalInformationTree
+from mole3.qgisinteraction import layer_interaction, legend
+from mole3 import oeq_global
+from mole3.project import config
+from mole3.webinteraction import googlemaps,nominatim
 from .oeq_ui_classes import QColorTableDelegate, QColorTableModel
 from .ui_color_picker_dialog import Ui_color_picker_dialog
 from .ui_main_process_dock import Ui_MainProcess_dock, _fromUtf8
@@ -42,24 +42,24 @@ from .ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from .ui_information_source_dialog import Ui_InformationSource_dialog
 
 
-# from mole.extensionActive.ui_extensions_active import Ui_Dialog
+# from mole3.extensionActive.ui_extensions_active import Ui_Dialog
 
 
 
-# import mole.extensions as extensions
+# import mole3.extensions as extensions
 
 
 
-class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
+class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
         #self.refresh_dropdown()
         self.extension_dropdown.currentIndexChanged.connect(self.complete_information)
-        role = QtGui.QDialogButtonBox.AcceptRole
+        role = QtWidgets.QDialogButtonBox.AcceptRole
         self.buttonBox.addButton('Done', role)
-        role = QtGui.QDialogButtonBox.ActionRole
+        role = QtWidgets.QDialogButtonBox.ActionRole
         next_button = self.buttonBox.addButton('Save source...', role)
         next_button.clicked.connect(self.register_information)
         self.open_geotiff_btn.clicked.connect(lambda: self.load_source_from_disk(self.geotiff))
@@ -70,7 +70,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         self.complete_information()
 
     def refresh_dropdown(self):
-        import mole.extensions as extensions
+        import mole3.extensions as extensions
         self.extension_dropdown.clear()
         self.placeholder = '<Select information type>'
         self.extension_dropdown.addItem(self.placeholder)
@@ -86,8 +86,8 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         :rtype:
         """
         # clear all line-edits first
-        import mole.extensions as extensions
-        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        import mole3.extensions as extensions
+        line_edits = self.gridWidget.findChildren(QtWidgets.QLineEdit)
         for line_edit in line_edits:
             line_edit.clear()
 
@@ -101,7 +101,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
                 self.stateBox.setChecked(importextension.active)
 
     def toggle_state(self):
-        import mole.extensions as extensions
+        import mole3.extensions as extensions
         extension_name = self.extension_dropdown.currentText()
         if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
             extension = extensions.by_name(self.extension_dropdown.currentText())[0]
@@ -109,13 +109,13 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
             self.stateBox.setChecked(extension.active)
 
     def register_information(self):
-        import mole.extensions as extensions
+        import mole3.extensions as extensions
         extension_name = self.extension_dropdown.currentText()
         layer_name = self.layer_name.text()
         field_id = self.field_id.text()
         source_path = ''
         type = ''
-        line_edits = self.gridWidget.findChildren(QtGui.QLineEdit)
+        line_edits = self.gridWidget.findChildren(QtWidgets.QLineEdit)
         for line_edit in line_edits:
             if line_edit is not self.layer_name and line_edit.text():
                 type = line_edit.objectName()
@@ -181,7 +181,7 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
 
             caption = 'Chose a {} file for the "{}" source...'.format(file_extension, source)
             ext_filter = '*' + file_extension
-            filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter=ext_filter)
+            filename = QtWidgets.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter=ext_filter)
             field.setText(filename)
 
     def exec_(self):
@@ -191,17 +191,17 @@ class InformationSource_dialog(QtGui.QDialog, Ui_InformationSource_dialog):
         :rtype:
         """
         self.refresh_dropdown()
-        QtGui.QDialog.exec_(self)
+        QtWidgets.QDialog.exec_(self)
         self.refresh_dropdown()
 
 
 
 
 
-class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
+class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QtWidgets.QDialog.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
         self.color_entry_manager = ColorEntryManager()
         self.recent_layer = ''
@@ -220,7 +220,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.refresh_layers_dropdown.clicked.connect(self.refresh_layer_list)
         self.layers_dropdown.currentIndexChanged.connect(self.setup_legend)
 
-        role = QtGui.QDialogButtonBox.ActionRole
+        role = QtWidgets.QDialogButtonBox.ActionRole
         load_button = self.buttonBox.addButton('Load legend...', role)
         load_button.clicked.connect(self.load_color_map)
         save_button = self.buttonBox.addButton('Save legend', role)
@@ -242,7 +242,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         self.color_table_view.setColumnWidth(4, 35)
         self.color_table_view.setShowGrid(False)
         self.color_table_view.setSortingEnabled(True)
-        self.color_table_view.sortByColumn(2)
+        #self.color_table_view.sortByColumn(2)
 
         # set horizontal header properties
         hor_header = self.color_table_view.horizontalHeader()
@@ -301,7 +301,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        from mole import extensions
+        from mole3 import extensions
 
         layer = self.layers_dropdown.currentText()
         self.recent_layer = layer
@@ -371,11 +371,11 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        from mole import extensions
+        from mole3 import extensions
 
         layer = self.layers_dropdown.currentText()
         caption = 'Chose a .qml-legend file for the "{}"-layer...'.format(layer)
-        filename = QtGui.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
+        filename = QtWidgets.QFileDialog.getOpenFileName(iface.mainWindow(), caption=caption, filter='*.qml')
         self.color_entry_manager.read_color_map_from_qml(filename)
         self.update_color_values()
         activeextensions = extensions.by_name(layer)
@@ -390,7 +390,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
-        from mole import extensions
+        from mole3 import extensions
 
         layer = iface.activeLayer()
         selected_layer = self.layers_dropdown.currentText()
@@ -414,7 +414,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
             pass
 
     def refresh_layer_list(self):
-        from mole import extensions
+        from mole3 import extensions
         """
         Update the color-pickers layer-dropdown with a list of the currently visible .tif-files
         :return:
@@ -464,7 +464,7 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         self.refresh_layer_list()
-        QtGui.QDialog.show(self)
+        QtWidgets.QDialog.show(self)
         self.update_color_values()
 
     def exec_(self):
@@ -475,42 +475,42 @@ class ColorPicker_dialog(QtGui.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         self.show()
-        QtGui.QDialog.exec_(self)
+        QtWidgets.QDialog.exec_(self)
         for i in range(self.layers_dropdown.count()):
             layer_name = self.layers_dropdown.itemText(i)
             layer_interaction.unhide_or_remove_layer(layer_name, 'unhide', iface)
 
 
-class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
+class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 
-    def __init__(self,mole): #, progress_model):
+    def __init__(self,mole3): #, progress_model):
         #from qgis import utils
-        #standard_workflow = utils.plugins['mole'].standard_workflow
-        QtGui.QDockWidget.__init__(self)
+        #standard_workflow = utils.plugins['mole3'].standard_workflow
+        QtWidgets.QDockWidget.__init__(self)
         self.setupUi(self)
         self._check_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/checkmark.png"))
         self._open_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/openmark.png"))
         self._semiopen_mark = QtGui.QPixmap(_fromUtf8(":/Controls/icons/semiopenmark.png"))
         #self.progress_model = progress_model
-        self.ol_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('ol_plugin_installed'))
-        self.pst_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('pst_plugin_installed'))
-        self.real_centroid_plugin_installed.pressed.connect(lambda: mole.standard_workflow.do_workstep('real_centroid_plugin_installed'))
-        self.project_created.pressed.connect(lambda: mole.standard_workflow.do_workstep('project_created'))
-        self.project_saved.pressed.connect(lambda: mole.standard_workflow.do_workstep('project_saved'))
-        self.investigationarea_defined.pressed.connect(lambda: mole.standard_workflow.do_workstep('investigationarea_defined'))
-        self.building_outlines_acquired.pressed.connect(lambda: mole.standard_workflow.do_workstep('building_outlines_acquired'))
-        self.building_coordinates_acquired.pressed.connect(lambda: mole.standard_workflow.do_workstep('building_coordinates_acquired'))
-        self.import_ext_selected.pressed.connect(lambda: mole.standard_workflow.do_workstep('import_ext_selected'))
-        self.information_layers_loaded.pressed.connect(lambda: mole.standard_workflow.do_workstep('information_layers_loaded'))
-        self.needle_request_done.pressed.connect(lambda: mole.standard_workflow.do_workstep('needle_request_done'))
-        self.database_created.pressed.connect(lambda: mole.standard_workflow.do_workstep('database_created'))
-        self.buildings_evaluated.pressed.connect(lambda: mole.standard_workflow.do_workstep('buildings_evaluated'))
-        self.json_export_done.pressed.connect(mole.export_database_to_json)
-        self.sqlite_export_done.pressed.connect(mole.export_database_to_sqlite)
-        self.csv_export_done.pressed.connect(mole.export_database_to_csv)
+        self.ol_plugin_installed.pressed.connect(lambda: mole3.standard_workflow.do_workstep('ol_plugin_installed'))
+        self.pst_plugin_installed.pressed.connect(lambda: mole3.standard_workflow.do_workstep('pst_plugin_installed'))
+        self.real_centroid_plugin_installed.pressed.connect(lambda: mole3.standard_workflow.do_workstep('real_centroid_plugin_installed'))
+        self.project_created.pressed.connect(lambda: mole3.standard_workflow.do_workstep('project_created'))
+        self.project_saved.pressed.connect(lambda: mole3.standard_workflow.do_workstep('project_saved'))
+        self.investigationarea_defined.pressed.connect(lambda: mole3.standard_workflow.do_workstep('investigationarea_defined'))
+        self.building_outlines_acquired.pressed.connect(lambda: mole3.standard_workflow.do_workstep('building_outlines_acquired'))
+        self.building_coordinates_acquired.pressed.connect(lambda: mole3.standard_workflow.do_workstep('building_coordinates_acquired'))
+        self.import_ext_selected.pressed.connect(lambda: mole3.standard_workflow.do_workstep('import_ext_selected'))
+        self.information_layers_loaded.pressed.connect(lambda: mole3.standard_workflow.do_workstep('information_layers_loaded'))
+        self.needle_request_done.pressed.connect(lambda: mole3.standard_workflow.do_workstep('needle_request_done'))
+        self.database_created.pressed.connect(lambda: mole3.standard_workflow.do_workstep('database_created'))
+        self.buildings_evaluated.pressed.connect(lambda: mole3.standard_workflow.do_workstep('buildings_evaluated'))
+        self.json_export_done.pressed.connect(mole3.export_database_to_json)
+        self.sqlite_export_done.pressed.connect(mole3.export_database_to_sqlite)
+        self.csv_export_done.pressed.connect(mole3.export_database_to_csv)
 
-        self.process_button_next.clicked.connect(lambda: self.call_next_workstep(mole))
-        self.run_button.clicked.connect(lambda: self.run_automode(mole))
+        self.process_button_next.clicked.connect(lambda: self.call_next_workstep(mole3))
+        self.run_button.clicked.connect(lambda: self.run_automode(mole3))
        # for dropdown_index, list_view in enumerate(self.progress_model.section_views):
        #     self.process_page.addWidget(list_view)
        #     self.active_page_dropdown.addItem(list_view.accessibleName())
@@ -546,7 +546,7 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
     '''
     def go_to_page(self, selection_name):
         for child in self.process_page.children():
-            if isinstance(child, QtGui.QListView) and child.accessibleName() == selection_name:
+            if isinstance(child, QtWidgets.QListView) and child.accessibleName() == selection_name:
                 self.process_page.setCurrentWidget(child)
                 break
 
@@ -561,15 +561,15 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
 
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
         if isinstance(check_yes_no, bool):
-            page = self.findChild(QtGui.QWidget, page_name)
-            checkbox = page.findChild(QtGui.QPushButton, checkbox_name)
+            page = self.findChild(QtWidgets.QWidget, page_name)
+            checkbox = page.findChild(QtWidgets.QPushButton, checkbox_name)
 
             if checkbox:
                 checkbox.setChecked(check_yes_no)
 
     def is_checkbox_on_page_checked(self, checkbox_name, page_name):
-        page = self.process_page.findChild(QtGui.QWidget, page_name)
-        return page.findChild(QtGui.QPushButton, checkbox_name).isChecked()
+        page = self.process_page.findChild(QtWidgets.QWidget, page_name)
+        return page.findChild(QtWidgets.QPushButton, checkbox_name).isChecked()
 
     def set_current_page_done(self, value):
         if isinstance(value, bool):
@@ -584,32 +584,32 @@ class MainProcess_dock(QtGui.QDockWidget, Ui_MainProcess_dock):
     def switch_to_objects_parent_page(self,object):
         self.select_page(self.project_created.parent().objectName())
 
-    def switch_to_next_worksteps_page(self,mole):
-        from qgis.PyQt import QtGui
-        nextname = mole.standard_workflow.next_workstep_name()
+    def switch_to_next_worksteps_page(self,mole3):
+        from qgis.PyQt import QtWidgets
+        nextname = mole3.standard_workflow.next_workstep_name()
         if bool(nextname):
-            pagename = self.process_page.findChild(QtGui.QWidget, nextname).parent().objectName()
+            pagename = self.process_page.findChild(QtWidgets.QWidget, nextname).parent().objectName()
             self.select_page(pagename)
 
-    def call_next_workstep(self,mole):
-        from qgis.PyQt import QtGui
-        if mole.standard_workflow.is_done():
+    def call_next_workstep(self,mole3):
+        from qgis.PyQt import QtWidgets
+        if mole3.standard_workflow.is_done():
             return False
-        self.switch_to_next_worksteps_page(mole)
-        return mole.standard_workflow.do_next_workstep()
+        self.switch_to_next_worksteps_page(mole3)
+        return mole3.standard_workflow.do_next_workstep()
 
 
 
-    def run_automode(self,mole):
+    def run_automode(self,mole3):
         from qgis import utils
-        while (not mole.standard_workflow.is_done()) & self.automode.isChecked():
-            self.call_next_workstep(mole)
+        while (not mole3.standard_workflow.is_done()) & self.automode.isChecked():
+            self.call_next_workstep(mole3)
         self.automode.setChecked(False)
 
-class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
+class ProjectDoesNotExist_dialog(QtWidgets.QDialog, Ui_ProjectDoesNotExist_dialog):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -619,10 +619,10 @@ class ProjectDoesNotExist_dialog(QtGui.QDialog, Ui_ProjectDoesNotExist_dialog):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
 
-class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
+class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
@@ -634,17 +634,17 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.found_locations = [{}]
         self.municipal_information = MunicipalInformationTree()
         self.municipal_information.read_municipals()
-        for field in self.form.findChildren(QtGui.QLineEdit)[:]:
+        for field in self.form.findChildren(QtWidgets.QLineEdit)[:]:
             self.defaults[field.objectName()] = field.text()
             field.textChanged.connect(partial(self.text_changed, field))
         self.location_country.setText(config.country)
         self.lookup_by_address.clicked.connect(self.location_by_address)
         self.lookup_by_coords.clicked.connect(self.location_by_coordinates)
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.apply)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.apply)
 
 
     def apply(self):
-        if not issubclass(type(self.location_city), QtGui.QLineEdit):
+        if not issubclass(type(self.location_city), QtWidgets.QLineEdit):
              self.update_form(1)
         for key in oeq_global.OeQ_project_info:
             field = getattr(self, key)
@@ -657,15 +657,17 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
     def show(self):
         #print oeq_global.OeQ_project_info
         for key in oeq_global.OeQ_project_info:
+            print(key)
             field = getattr(self, key)
             if key == 'description':
                 field.setPlainText(str(oeq_global.OeQ_project_info[key]))
             else:
                 field.setText(str(oeq_global.OeQ_project_info[key]))
-        QtGui.QDialog.show(self)
+        QtWidgets.QDialog.show(self)
 
     def reset(self):
         for key in oeq_global.OeQ_project_info:
+            print(key,getattr(self, key))
             field = getattr(self, key)
             field.setText(str(''))
         #print 'resetted'
@@ -695,7 +697,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
 
     def set_municipal_data(self):
-        self.municipals = [x for x in self.municipal_information.municipal_db if str(x['POSTCODE']).startswith(self.location_postal.text().encode('utf8'))]
+        self.municipals = [x for x in self.municipal_information.municipal_db if str(x['POSTCODE']).startswith(str(self.location_postal.text()))] #startswith(self.location_postal.text().encode('utf8'))]
         #self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0].encode('utf8') == self.location_city.text().split()[0].encode('utf8') , self.municipal_information.municipal_db)
 
         if len(self.municipals) > 0:
@@ -731,12 +733,13 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
             self.location_city.currentIndexChanged.connect(self.update_form)
 
     def location_by_address(self):
-         #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
-         #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
-
+         #if not issubclass(type(self.location_city), QtWidgets.QLineEdit): return None
+         #if not issubclass(type(self.location_postal), QtWidgets.QLineEdit): return None
+         print(self.location_city.text(),self.location_street.text())
          if oeq_global.isEmpty(self.location_city.text()) & oeq_global.isEmpty(self.location_street.text()) & (not oeq_global.isEmpty(self.location_postal.text())):
             postal = self.location_postal.text()
             self.municipals = [x for x in self.municipal_information.municipal_db if str(x['POSTCODE']).startswith(postal)]
+            print("Municipals", self.municipals)
             if len(self.municipals) > 0:
                 if len(self.municipals) ==  1:
                     self.lineedit_city_layout()
@@ -782,8 +785,8 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
 
     def location_by_coordinates(self):
-        #if not issubclass(type(self.location_city), QtGui.QLineEdit): return None
-        #if not issubclass(type(self.location_postal), QtGui.QLineEdit): return None
+        #if not issubclass(type(self.location_city), QtWidgets.QLineEdit): return None
+        #if not issubclass(type(self.location_postal), QtWidgets.QLineEdit): return None
         lat = float(self.location_lat.text())
         lon = float(self.location_lon.text())
         crs = self.location_crs.text()
@@ -841,27 +844,27 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
 
     def combobox_city_layout(self, entries=[]):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
+        location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if isinstance(city_edit, QtGui.QLineEdit):
+        if isinstance(city_edit, QtWidgets.QLineEdit):
             location_box.removeWidget(city_edit)
             width = city_edit.minimumWidth()
             city_edit.deleteLater()
-            self.location_city = QtGui.QComboBox(self.form)
+            self.location_city = QtWidgets.QComboBox(self.form)
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setMinimumWidth(width)
             location_box.insertWidget(0, self.location_city)
 
 
     def lineedit_city_layout(self, text=''):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_city_layout')
+        location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
-        if isinstance(city_edit, QtGui.QComboBox):
+        if isinstance(city_edit, QtWidgets.QComboBox):
             location_box.removeWidget(city_edit)
             city_edit.deleteLater()
-            self.location_city = QtGui.QLineEdit(self.form)
+            self.location_city = QtWidgets.QLineEdit(self.form)
             self.location_city.setMinimumWidth(228)
             self.location_city.setObjectName(_fromUtf8("location_city"))
             self.location_city.setStyleSheet('color: rgb(0,0,0)')
@@ -879,26 +882,26 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
         self.average_build_year.setText(avg_yoc)
 
     def combobox_postal_layout(self, entries=[]):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_postal_layout')
         location_edit = location_box.itemAt(0).widget()
 
-        if isinstance(location_edit, QtGui.QLineEdit):
+        if isinstance(location_edit, QtWidgets.QLineEdit):
             location_box.removeWidget(location_edit)
             width = location_edit.minimumWidth()
             location_edit.deleteLater()
-            self.location_postal = QtGui.QComboBox()
+            self.location_postal = QtWidgets.QComboBox()
             self.location_postal.setObjectName('location_postal')
             self.location_postal.setMinimumWidth(width)
             location_box.insertWidget(0, self.location_postal)
 
     def lineedit_postal_layout(self, text=''):
-        location_box = self.gridLayout.findChild(QtGui.QHBoxLayout, 'location_postal_layout')
+        location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_postal_layout')
         location_edit = location_box.itemAt(0).widget()
 
-        if isinstance(location_edit, QtGui.QComboBox):
+        if isinstance(location_edit, QtWidgets.QComboBox):
             location_box.removeWidget(location_edit)
             location_edit.deleteLater()
-            self.location_postal = QtGui.QLineEdit(self.form)
+            self.location_postal = QtWidgets.QLineEdit(self.form)
             self.location_postal.setMinimumWidth(228)
             self.location_postal.setObjectName(_fromUtf8("location_postal"))
             self.location_postal.setStyleSheet('color: rgb(0,0,0)')
@@ -906,9 +909,9 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
 
 
 
-class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):
+class ModularInfo_dialog(QtWidgets.QDialog, Ui_ModularInfo_dialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -919,9 +922,9 @@ class ModularInfo_dialog(QtGui.QDialog, Ui_ModularInfo_dialog):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
 
-class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
+class Modular_dialog(QtWidgets.QDialog, Ui_Modular_dialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -932,7 +935,7 @@ class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
         self.setContentsMargins(500, 500, 0, 0)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.help_dialog = ModularInfo_dialog()
-        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
 
     def set_dialog_text(self, text, title=""):
 
@@ -946,18 +949,18 @@ class Modular_dialog(QtGui.QDialog, Ui_Modular_dialog):
 
             html_postfix = "</p>"
             browser_text = html_prefix + text + html_postfix
-            self.textBrowser.setHtml(QtGui.QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))
+            self.textBrowser.setHtml(QtWidgets.QApplication.translate('InvestigationAreaSelected_dialog', browser_text, None))
 
 
-class RequestWmsUrl_dialog(QtGui.QDialog, Ui_RequestWmsUrl_dialog):
+class RequestWmsUrl_dialog(QtWidgets.QDialog, Ui_RequestWmsUrl_dialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
 
 
-class EstimatedEnergyDemand_dialog(QtGui.QDialog, Ui_EstimatedEnergyDemand_dialog):
+class EstimatedEnergyDemand_dialog(QtWidgets.QDialog, Ui_EstimatedEnergyDemand_dialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
 
         layer_dict = QgsProject.instance().mapLayers()

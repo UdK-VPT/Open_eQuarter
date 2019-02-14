@@ -4,7 +4,7 @@ import unittest
 import sys
 import shutil
 
-from mole.model.progress_model import *
+from mole3.model.progress_model import *
 
 
 class ProgressItemsModel_test(unittest.TestCase):

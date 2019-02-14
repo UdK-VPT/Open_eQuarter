@@ -6,7 +6,7 @@ __all__ = [os.path.basename(f).split('.')[0] for f in modules if not f.endswith(
 
 from .ext import *
 
-from mole import oeq_global
+from mole3 import oeq_global
 
 #oeq_global.OeQ_ExtensionsLoaded = True
 

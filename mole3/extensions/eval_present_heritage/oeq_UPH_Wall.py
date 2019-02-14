@@ -2,10 +2,10 @@
 
 import os,math
 from qgis.core import NULL
-from mole import oeq_global
-from mole.project import config
-from mole.extensions import OeQExtension
-from mole.stat_corr import rb_present_wall_uvalue_AVG_by_building_age_lookup, nrb_present_wall_uvalue_by_building_age_lookup, rb_contemporary_wall_uvalue_by_building_age_lookup, nrb_contemporary_wall_uvalue_by_building_age_lookup
+from mole3 import oeq_global
+from mole3.project import config
+from mole3.extensions import OeQExtension
+from mole3.stat_corr import rb_present_wall_uvalue_AVG_by_building_age_lookup, nrb_present_wall_uvalue_by_building_age_lookup, rb_contemporary_wall_uvalue_by_building_age_lookup, nrb_contemporary_wall_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
     from scipy.constants import golden

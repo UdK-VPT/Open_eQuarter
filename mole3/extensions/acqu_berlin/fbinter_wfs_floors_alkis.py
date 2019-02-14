@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from qgis.core import NULL
-from mole.project import config
+from mole3.project import config
 from qgis.PyQt.QtCore import QVariant
 
 def load(self=None):
@@ -9,7 +9,7 @@ def load(self=None):
     return True
 
 def evaluation(self=None, parameters={},feature=None):
-    from mole import oeq_global
+    from mole3 import oeq_global
     result = {'FLOORS': {'type': QVariant.Double,
                          'value': 3.5}}
     if bool(parameters['FLRS_ALK']):
@@ -18,8 +18,8 @@ def evaluation(self=None, parameters={},feature=None):
 
 
 import os
-from mole.extensions import OeQExtension
-from mole.project import config
+from mole3.extensions import OeQExtension
+from mole3.project import config
 extension = OeQExtension(
     extension_id=__name__,
     category='Import',

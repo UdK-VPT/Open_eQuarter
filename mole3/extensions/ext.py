@@ -3,10 +3,10 @@
 
 import os,time,datetime
 import pickle
-from mole import oeq_global
-from mole.project import config
-from mole.qgisinteraction import legend
-from qgis.core import QgsVectorJoinInfo
+from mole3 import oeq_global
+from mole3.project import config
+from mole3.qgisinteraction import legend
+from qgis.core import QgsVectorLayerJoinInfo
 
 
 
@@ -260,7 +260,7 @@ class OeQExtension:
         if last_calculation != None: self.last_calculation = last_calculation
 
     def load(self, force=False):
-        from mole.qgisinteraction import legend
+        from mole3.qgisinteraction import legend
         """
         Method call for the load method
         """
@@ -308,8 +308,8 @@ class OeQExtension:
         return result
 
     def evaluateAll(self, parameter={},feature = None):
-        from mole.qgisinteraction import legend
-        from mole.qgisinteraction import layer_interaction
+        from mole3.qgisinteraction import legend
+        from mole3.qgisinteraction import layer_interaction
         from qgis.core import QgsMessageLog
         baritem = oeq_global.OeQ_push_info('Extension "' + self.extension_name + '":',
                                        'Running Evaluation Script')
@@ -478,7 +478,7 @@ class OeQExtension:
                          if True it is inscribed into the global ExtensionRegistry (Default value = False)
 
         """
-        from mole.oeq_global import OeQ_ExtensionRegistry, OeQ_ExtensionDefaultRegistry
+        from mole3.oeq_global import OeQ_ExtensionRegistry, OeQ_ExtensionDefaultRegistry
 
         if default:
             OeQ_ExtensionDefaultRegistry.append(self)
@@ -629,7 +629,7 @@ class OeQExtension:
         :return: the legend node of the moved extension layer
         '''
         # if extension layer exists
-        from mole.qgisinteraction import legend
+        from mole3.qgisinteraction import legend
         mynode = None
         if legend.nodeExists(self.layer_name):
             # if it is the building outline layer
@@ -672,9 +672,9 @@ class OeQExtension:
 
         """
         from qgis.core import QgsRasterLayer,QgsProject
-        from mole.oeq_global import OeQ_wait_for_renderer
-        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image,getWmsLegendUrl
-        from mole.qgisinteraction import layer_interaction
+        from mole3.oeq_global import OeQ_wait_for_renderer
+        from mole3.qgisinteraction.wms_utils import save_wms_extent_as_image,getWmsLegendUrl
+        from mole3.qgisinteraction import layer_interaction
 
         #zoom to a canvas covering the whole investigation area
         legend.nodeZoomTo(config.investigation_shape_layer_name)
@@ -753,9 +753,9 @@ class OeQExtension:
 
         """
         import os
-        from mole.project import config
-        from mole import oeq_global
-        from mole.qgisinteraction import legend,layer_interaction
+        from mole3.project import config
+        from mole3 import oeq_global
+        from mole3.qgisinteraction import legend,layer_interaction
         from qgis.core import QgsVectorLayer,QgsProject,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter,QgsRectangle
         from qgis.utils import iface
 
@@ -874,7 +874,7 @@ processing.load(output)
 
 
 
-import mole.extensions as ext
+import mole3.extensions as ext
 ext.by_type('wms')[0].load_wms()
 
 
@@ -925,7 +925,7 @@ file_writer.writeRaster(pipe,
 
         #read colormap
         try:
-            oeqMain = utils.plugins['mole']
+            oeqMain = utils.plugins['mole3']
         except:
             print self.extension_id + ".decode_color(): Could not connect to Colormanager"
             return result
@@ -987,7 +987,7 @@ file_writer.writeRaster(pipe,
 
         #read colormap
         try:
-            oeqMain = utils.plugins['mole']
+            oeqMain = utils.plugins['mole3']
         except:
             print(self.extension_id + ".decode_color(): Could not connect to Colormanager")
             return result
@@ -1026,9 +1026,9 @@ file_writer.writeRaster(pipe,
         from qgis import utils
         from qgis.core import QgsField
         from qgis.PyQt.QtCore import QVariant
-        from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists, \
+        from mole3.qgisinteraction.layer_interaction import add_attributes_if_not_exists, \
             colors_match_feature
-        oeqMain = utils.plugins['mole']
+        oeqMain = utils.plugins['mole3']
         source_layer = legend.nodeByName(self.sourcelayer_name)
         if not source_layer:
             print("layer not found in decode color table")
@@ -1082,8 +1082,8 @@ file_writer.writeRaster(pipe,
 
 
     def databaseInsane(self):
-        from mole.qgisinteraction import legend
-        import mole.extensions as ext
+        from mole3.qgisinteraction import legend
+        import mole3.extensions as ext
         if not legend.nodeExists(config.data_layer_name):
             ext.by_layername(config.building_outline_layer_name)[0].reset_calculation_state()
             return True
@@ -1095,7 +1095,7 @@ file_writer.writeRaster(pipe,
     def required(self):
         """ """
         from qgis.core import QgsMessageLog
-        from mole import extensions as ext
+        from mole3 import extensions as ext
         req=[]
         all_suppliers=[ext for ext in by_state(True) if ext != self]
 
@@ -1156,7 +1156,7 @@ file_writer.writeRaster(pipe,
         :param required:  (Default value = None)
 
         """
-        from mole.qgisinteraction import legend
+        from mole3.qgisinteraction import legend
         if not required:
             required = self.required()
         #print self.extension_filepath
@@ -1210,7 +1210,7 @@ file_writer.writeRaster(pipe,
     '''
     def reset_calculation_state(self):
         """ """
-        from mole.oeq_global import first_of_all_calculation_times
+        from mole3.oeq_global import first_of_all_calculation_times
         self.last_calculation=first_of_all_calculation_times
 
 
@@ -1225,7 +1225,7 @@ file_writer.writeRaster(pipe,
         from qgis import utils
         from qgis.core import QgsField
         from qgis.PyQt.QtCore import QVariant
-        from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
+        from mole3.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
 
         # remove existing layer if forcedload is True
         if forcedload:
@@ -1312,9 +1312,9 @@ file_writer.writeRaster(pipe,
 
     def work_out_results(self):
         """ """
-        from mole.qgisinteraction.layer_interaction import fullRemove
-        from mole.qgisinteraction import legend
-        from mole.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
+        from mole3.qgisinteraction.layer_interaction import fullRemove
+        from mole3.qgisinteraction import legend
+        from mole3.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
 
         progressbar = oeq_global.OeQ_push_progressbar('Extension "' + self.extension_name + '":',
                                                       'Working out Results!',maxcount=8)
@@ -1408,7 +1408,7 @@ file_writer.writeRaster(pipe,
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
 
     def sampleColor(self,feature, rasterlayer_name = '', fieldname='',feature_crs = None, blur=3):
-        from mole.qgisinteraction import layer_interaction
+        from mole3.qgisinteraction import layer_interaction
         if rasterlayer_name == '':
             rasterlayer_name = self.layer_name
         fieldnames = ['R','G','B','a']
@@ -1419,7 +1419,7 @@ file_writer.writeRaster(pipe,
     def sampleData(self, feature, datalayer_name = '', field_list=[], feature_crs = None):
         if datalayer_name == '': datalayer_name = self.layer_name
         if feature_crs == None: feature_crs = self.layer().crs()
-        from mole.qgisinteraction import layer_interaction
+        from mole3.qgisinteraction import layer_interaction
         return layer_interaction.sampleDataFromVectorLayerByFeature(feature, datalayer_name, field_list, feature_crs)
 
     def sampleold(self,source_layer=None,target_layers=None,result_layer=None):
@@ -1430,7 +1430,7 @@ file_writer.writeRaster(pipe,
         :param result_layer:  (Default value = None)
 
         """
-        from mole.qgisinteraction import layer_interaction, plugin_interaction, legend
+        from mole3.qgisinteraction import layer_interaction, plugin_interaction, legend
         from qgis.utils import iface
         if source_layer == None:
             source_layer = self.sourcelayer_name().name()
@@ -1455,9 +1455,9 @@ file_writer.writeRaster(pipe,
 
     def needle_request(self):
         """ """
-        from mole.qgisinteraction import layer_interaction,plugin_interaction,legend
-        from mole.project import config
-        from mole import extensions
+        from mole3.qgisinteraction import layer_interaction,plugin_interaction,legend
+        from mole3.project import config
+        from mole3 import extensions
         from qgis.core import QgsVectorLayer
         from qgis.utils import iface
         # create data node
@@ -1528,16 +1528,16 @@ file_writer.writeRaster(pipe,
 
     #wrappers
     def createDatabase(self):
-        from mole import extensions
+        from mole3 import extensions
         return extensions.createDatabase(self.extension_name)
 
     def createSampleLayer(self):
-        from mole import extensions
+        from mole3 import extensions
         return extensions.createSampleLayer(self.extension_name)
 
 
     def createCoordinateLayer(self):
-        from mole import extensions
+        from mole3 import extensions
         return extensions.createCoordinateLayer(self.extension_name)
 
 
@@ -1762,8 +1762,8 @@ def XXsave():
 
 def createDatabase(caller = 'Unknown'):
     """ """
-    from mole import extensions
-    from mole.qgisinteraction import legend
+    from mole3 import extensions
+    from mole3.qgisinteraction import legend
     result = False
     baritem = oeq_global.OeQ_push_info('Extension "' + caller + '":', 'Creating Database!')
     if not legend.nodeExists(config.data_layer_name):
@@ -1775,8 +1775,8 @@ def createDatabase(caller = 'Unknown'):
 
 def createSampleLayer(caller = 'Unknown'):
     """ """
-    from mole import extensions
-    from mole.qgisinteraction import legend
+    from mole3 import extensions
+    from mole3.qgisinteraction import legend
     result = False
     baritem = oeq_global.OeQ_push_info('Extension "' + caller + '":', 'Creating Database!')
     if not legend.nodeExists(config.sample_layer_name):
@@ -1787,7 +1787,7 @@ def createSampleLayer(caller = 'Unknown'):
 
 def createCoordinateLayer(caller='Unknown',forced = True):
     """ """
-    from mole.qgisinteraction import legend,layer_interaction
+    from mole3.qgisinteraction import legend,layer_interaction
     baritem = oeq_global.OeQ_push_info('Extension "' + caller + '":', 'Creating Centroids!')
     result = bool(layer_interaction.createCentroidLayer(config.building_outline_layer_name,config.building_coordinate_layer_name,forced))
     oeq_global.OeQ_pop_info(baritem)

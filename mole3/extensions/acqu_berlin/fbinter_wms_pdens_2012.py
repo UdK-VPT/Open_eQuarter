@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mole.project import config
+from mole3.project import config
 from qgis.PyQt.QtCore import QVariant
 
 def load(self=None):
@@ -8,12 +8,12 @@ def load(self=None):
     return True
 
 def preflight(self=None):
-    from mole.project.config import sample_layer_name
+    from mole3.project.config import sample_layer_name
     #self.createSampleLayer()
 
 def evaluation(self=None, parameters={},feature=None):
     # import functions
-    from mole import oeq_global
+    from mole3 import oeq_global
     from qgis.core import NULL
     #prepare rgba_keys
     rgba_keys = ['R', 'G', 'B', 'a']
@@ -35,7 +35,7 @@ def evaluation(self=None, parameters={},feature=None):
 
 
 import os
-from mole.extensions import OeQExtension
+from mole3.extensions import OeQExtension
 
 extension = OeQExtension(
     extension_id=__name__,

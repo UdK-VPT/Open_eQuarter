@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from qgis.core import NULL
-from mole.project import config
-from mole.oeq_global import OeQ_get_bld_id, isnull
+from mole3.project import config
+from mole3.oeq_global import OeQ_get_bld_id, isnull
 
 
 def load(self=None):
@@ -26,8 +26,8 @@ def postflight(self=None):
 
 
 import os
-from mole.extensions import OeQExtension
-from mole.project import config
+from mole3.extensions import OeQExtension
+from mole3.project import config
 extension = OeQExtension(
     extension_id=__name__,
     category='Evaluation',

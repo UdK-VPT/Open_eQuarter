@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -16,32 +16,32 @@ except AttributeError:
         return s
 
 try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtWidgets.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtWidgets.QApplication.translate(context, text, disambig)
 
 class Ui_RequestWmsUrl_dialog(object):
     def setupUi(self, RequestWmsUrl_dialog):
         RequestWmsUrl_dialog.setObjectName(_fromUtf8("RequestWmsUrl_dialog"))
         RequestWmsUrl_dialog.resize(540, 159)
-        self.buttonBox = QtGui.QDialogButtonBox(RequestWmsUrl_dialog)
+        self.buttonBox = QtWidgets.QDialogButtonBox(RequestWmsUrl_dialog)
         self.buttonBox.setGeometry(QtCore.QRect(175, 100, 190, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Abort|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Abort|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.textBrowser = QtGui.QTextBrowser(RequestWmsUrl_dialog)
+        self.textBrowser = QtWidgets.QTextBrowser(RequestWmsUrl_dialog)
         self.textBrowser.setGeometry(QtCore.QRect(35, 30, 490, 31))
         self.textBrowser.setAutoFillBackground(False)
         self.textBrowser.setStyleSheet(_fromUtf8("background-color: rgb(237,237,237);"))
-        self.textBrowser.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textBrowser.setFrameShadow(QtGui.QFrame.Plain)
+        self.textBrowser.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textBrowser.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textBrowser.setLineWidth(0)
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
-        self.wms_url = QtGui.QLineEdit(RequestWmsUrl_dialog)
+        self.wms_url = QtWidgets.QLineEdit(RequestWmsUrl_dialog)
         self.wms_url.setGeometry(QtCore.QRect(40, 60, 460, 22))
         self.wms_url.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.wms_url.setInputMethodHints(QtCore.Qt.ImhUrlCharactersOnly)
@@ -49,8 +49,8 @@ class Ui_RequestWmsUrl_dialog(object):
         self.wms_url.setObjectName(_fromUtf8("wms_url"))
 
         self.retranslateUi(RequestWmsUrl_dialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), RequestWmsUrl_dialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), RequestWmsUrl_dialog.reject)
+        self.buttonBox.accepted.connect(RequestWmsUrl_dialog.accept)
+        self.buttonBox.rejected.connect(RequestWmsUrl_dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(RequestWmsUrl_dialog)
 
     def retranslateUi(self, RequestWmsUrl_dialog):

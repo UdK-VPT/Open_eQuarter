@@ -13,7 +13,7 @@ def calculation(self=None, parameters={},feature = None):
     from PyQt4.QtCore import QVariant
     # factor for golden rule
     dataset = {'AREA': NULL, 'PERIMETER': NULL, 'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL, 'FLOORS': NULL,
-               'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
+               'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'TWL_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
     dataset.update(parameters)
     #print parameters
     if (not oeq_global.isnull(dataset['AREA'])):
@@ -75,16 +75,16 @@ def calculation(self=None, parameters={},feature = None):
     #print type(dataset['YOC'])
     #print dataset['YOC']
     if oeq_global.isnull(dataset['WN_RAT']) & (not oeq_global.isnull(parameters['YOC'])):
-       # try:
        dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(parameters['YOC'])
-        #except:
-        #    pass
 
     if oeq_global.isnull(dataset['WL_COM']) & (not oeq_global.isnull(parameters['PDENS'])):
         dataset['WL_COM']=common_walls_by_population_density_corr.get(parameters['PDENS'])
 
     if oeq_global.isnull(dataset['BS_AR']) & (not oeq_global.isnull(dataset['AREA'])):
         dataset['BS_AR']=dataset['AREA']
+
+    if oeq_global.isnull(dataset['TWL_AR']) & (not oeq_global.isnull(dataset['PERIMETER'])) & (not oeq_global.isnull(dataset['HEIGHT'])):
+        dataset['TWL_AR']=(dataset['PERIMETER']*dataset['HEIGHT'])
 
     if oeq_global.isnull(dataset['WL_AR'])& (not oeq_global.isnull(dataset['PERIMETER'])) & (not oeq_global.isnull(dataset['WL_COM']))& (not oeq_global.isnull(dataset['WIDTH'])) & (not oeq_global.isnull(dataset['WN_RAT'])):
         dataset['WL_AR']=(dataset['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])* dataset['HEIGHT']*(1-dataset['WN_RAT'])

@@ -12,7 +12,7 @@ def calculation(self=None, parameters={},feature = None):
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule
-    dataset = {'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
+    dataset = {'LENGTH': NULL, 'WIDTH': NULL, 'HEIGHT': NULL,'WN_RAT':NULL,'WL_COM':NULL,'BS_AR':NULL,'WL_AR':NULL,'TWL_AR':NULL,'WN_AR':NULL,'RF_AR':NULL,'LIV_AR':NULL}
     #dataset.update(parameters)
     #calculate dimesion a and b of a representing rectangle from the proportion of AREA and PERIMETER
     if bool(parameters['PERIMETER']) & bool(parameters['AREA']):
@@ -36,12 +36,14 @@ def calculation(self=None, parameters={},feature = None):
     if bool(parameters['YOC']):
        dataset['WN_RAT']=window_wall_ratio_AVG_by_building_age_lookup.get(parameters['YOC'])
 
-
     if bool(parameters['PDENS']):
         dataset['WL_COM']=common_walls_by_population_density_corr.get(parameters['PDENS'])
 
     if bool(parameters['AREA']):
         dataset['BS_AR']=parameters['AREA']
+
+    if bool(parameters['PERIMETER']) & bool(dataset['HEIGHT']):
+        dataset['TWL_AR']=(parameters['PERIMETER']*dataset['HEIGHT'])
 
     if bool(parameters['PERIMETER']) & bool(dataset['WL_COM'])  & bool(dataset['WIDTH'])  & bool(dataset['HEIGHT'])  & bool(dataset['WN_RAT']):
         dataset['WL_AR']=(parameters['PERIMETER']-dataset['WL_COM']* dataset['WIDTH'])* dataset['HEIGHT']*(1-dataset['WN_RAT'])

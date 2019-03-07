@@ -19,12 +19,14 @@ def evaluation(self=None, parameters={},feature=None):
     rgba_keys = ['R', 'G', 'B', 'a']
     if bool(self.field_id):
         rgba_keys = [self.field_id + '_' + c for c in rgba_keys]
+        print("RGBA Keys",rgba_keys)
     if feature != None:
         #sample color
         rgba = self.sampleColor(feature, blur = 3)
+        #print("RGBA", rgba)
         # decode_color
         color = self.decode_color(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id], mode='average')
-        #print color
+        print("Color ", color)
         if all([c['value'] != NULL for c in list(color.values())]):
             return color
     return {self.field_id: {'type': QVariant.Int,
@@ -45,7 +47,8 @@ extension = OeQExtension(
     layer_name='Year of Construction (WMS Capture)',
     description='Gebäudealter 199293 Scan der Karte Gebäudealter 1992 93 '
                 + 'aus der Veroeffentlichung: Staedtebauliche Entwicklung Berlins seit 1650 in Karten',
-    source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
+    source='https://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
+    #source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
     source_crs='EPSG:3068',
     par_in= [],
     sourcelayer_name=config.building_coordinate_layer_name,

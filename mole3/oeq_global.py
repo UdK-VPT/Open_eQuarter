@@ -5,7 +5,6 @@ import os
 import time,datetime
 
 from qgis.PyQt.QtWidgets import QProgressBar
-from qgis.gui import QgsMessageBar
 from qgis.PyQt.QtCore import Qt
 from qgis.utils import iface
 from qgis.core import QgsProject, NULL, Qgis
@@ -54,7 +53,9 @@ def OeQ_project_name():
 
 #global OeQ_project_path
 def OeQ_project_path():
-    qgis_path = QgsProject.instance().readPath('')
+    qgis_path = os.path.dirname(QgsProject.instance().fileName())
+    if not qgis_path:
+        qgis_path = '~/Documents'
     normed_path = os.path.normpath(qgis_path)
     return normed_path
 
@@ -164,14 +165,14 @@ def OeQ_push_status(title='Status: ', message='Complete'):
     iface.messageBar().pushWidget(OeQ_StatusWidget, Qgis.Info)
     OeQ_unlockQgis()
     return OeQ_StatusWidget
-    #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
+    #print "THISgLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"
 
 
 def OeQ_pop_status():
     global OeQ_StatusWidget
     if bool(OeQ_StatusWidget):
         try:
-            QgsMessageBar.popWidget(OeQ_StatusWidget)
+            iface.messageBar().popWidget(OeQ_StatusWidget)
         except:
             pass
 
@@ -196,7 +197,7 @@ def OeQ_pop_warning(baritem=None):
 
 def OeQ_push_error(title='Be patient!', message='Background calculations are going on...'):
     widget = iface.messageBar().createMessage(title, message)
-    QgsMessageBar.pushWidget(widget, Qgis.Critical)
+    iface.messageBar().pushWidget(widget, Qgis.Critical)
     OeQ_unlockQgis()
     return widget
     #print "THIS PRINTLN IS NECESSARY TO TRIGGER THE MESSAGEBAR"

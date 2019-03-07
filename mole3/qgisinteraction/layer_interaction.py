@@ -1,5 +1,5 @@
-from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter
-from qgis.core import QgsProject, QgsMapLayer, QgsMapRendererJob, QgsProject, QgsField
+from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsCoordinateReferenceSystem, QgsVectorFileWriter, QgsMapRendererSequentialJob
+from qgis.core import QgsProject, QgsMapLayer, QgsMapSettings, QgsMapRendererJob, QgsProject, QgsField, QgsMapRendererCustomPainterJob
 #from qgis.core.processing import QgsOverlayUtils
 from qgis.PyQt.QtCore import QSettings, QSize, QVariant
 from qgis.PyQt.QtGui import QPainter, QColor, QImage
@@ -12,6 +12,8 @@ from mole3.qgisinteraction import legend
 from mole3 import oeq_global
 import numpy as np
 import math
+import inspect
+DEBUG_MODE = True
 
 def create_temporary_layer(layer_name, layer_type, crs_name=''):
     """
@@ -25,6 +27,7 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
     :return The created layer:
     :rtype QgsVectorLayer:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if layer_name and not layer_name.isspace() and layer_type and not layer_type.isspace():
 
         crs = ''
@@ -40,7 +43,7 @@ def create_temporary_layer(layer_name, layer_type, crs_name=''):
 
         # create a new shape-file called layer_name, of the type layer_type, with system encoding and crs according to crs_name
         shape_layer=legend.nodeCreateVectorLayer(layer_name,'top',source=layer_type,crs=crs_name ,providertype="ESRI Shapefile")
-
+        #print("Neuer Layer",shape_layer)
         #shape_layer = QgsVectorLayer(layer_type + crs, layer_name, 'memory')
         #shape_layer.setProviderEncoding('System')
 
@@ -57,6 +60,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
     import os
     from qgis.utils import iface
     from mole3 import oeq_global
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if oeq_global.OeQ_project_name() == '':
         iface.actionSaveProjectAs().trigger()
     layer_name = vlayer.name()
@@ -84,6 +88,7 @@ def write_temporary_vector_layer_to_disk(vlayer, style=None, replace_in_legend=T
 #remove a layer including all files
 def fullRemove(layer_name=None, layer_id=None):
     import os
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if layer_id is None:
         thelayer = find_layer_by_name(layer_name)
     else:
@@ -97,6 +102,7 @@ def fullRemove(layer_name=None, layer_id=None):
     oeq_global.OeQ_unlockQgis()
 
 def delete_layer_files(layer):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if (type(layer) == type('')) | (type(layer) == type('')):
         layer = find_layer_by_name(layer)
     if layer == None:
@@ -114,6 +120,7 @@ def delete_layer_files(layer):
                         os.remove(os.path.join(path, file))
 
 def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     from qgis.core import QgsMessageLog
     import os
     os.environ['PATH'] += ":"+"/usr/local/bin"
@@ -133,6 +140,7 @@ def remove_filegroup(path,filenamebase,ext=[],ignore=[]):
     return tgt_files
 
 def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     from qgis.core import QgsMessageLog
     import os
     os.environ['PATH'] += ":"+"/usr/local/bin"
@@ -153,6 +161,7 @@ def rename_filegroup(path,filenamebase,newfilenamebase,ext=[],ignore=[]):
     return tgt_files
 
 def remove_layer(layer,physical=False):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     from qgis.core import QgsProject
     tgt_dir=os.path.dirname(layer.source())
     basename=layer.name()
@@ -162,6 +171,7 @@ def remove_layer(layer,physical=False):
     return True
 
 def load_layer_from_disk(path_to_layer, name):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     """
     Load a layer from disk
     :param path_to_layer: Location of the .shp-file
@@ -180,6 +190,7 @@ def load_layer_from_disk(path_to_layer, name):
 
 
 def add_style_to_layer(path_to_style, layer):
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     """
     Set the style of the layer to the given style
     :param path_to_style:
@@ -201,6 +212,7 @@ def add_layer_to_registry(layer):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if layer:
         # add the layer to the layer-legend
         QgsProject.instance().addMapLayer(layer)
@@ -215,6 +227,7 @@ def find_layer_by_name(layer_name):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if layer_name and not layer_name.isspace():
 
         found_layers = QgsProject.instance().mapLayersByName(layer_name)
@@ -232,6 +245,7 @@ def find_layer_by_id(layer_id):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         found_layer = QgsProject.instance().mapLayers()[layer_id]
     except:
@@ -249,6 +263,7 @@ def unhide_or_remove_layer(layer_name, mode='hide', iface = None):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     layer = find_layer_by_name(layer_name)
     if layer and mode == 'remove':
         QgsProject.instance().removeMapLayer(layer.id())
@@ -271,6 +286,7 @@ def write_vector_layer_to_disk(vlayer, full_path):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     out_path, out_name = os.path.split(full_path)
 
     if out_name.upper().endswith('.SHP'):
@@ -332,6 +348,7 @@ def trigger_edit_mode(iface, layer_name, trigger='on'):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if layer_name and not layer_name.isspace():
 
         edit_layer = find_layer_by_name(layer_name)
@@ -355,6 +372,7 @@ def get_raster_layer_list(iface, visibility='all'):
     :return: A list containing raster layers with the given visibility-value
     :rtype: list
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     active_raster_layers = []
     layer_list = QgsProject.instance().mapLayers()
     interface = iface.legendInterface()
@@ -393,6 +411,7 @@ def open_wms_as_raster(iface, wms_url_with_parameters, layer_name):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if iface is not None and wms_url_with_parameters and layer_name and not wms_url_with_parameters.isspace() and not layer_name.isspace():
 
         rlayer = QgsRasterLayer(wms_url_with_parameters, layer_name, 'wms')
@@ -467,6 +486,7 @@ def move_layer_to_position(iface, layer_name, position):
             break
 '''
 
+
 def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type = 'tif'):
     """
     Select and save the currently visible extent to a .tif file
@@ -479,6 +499,72 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+    from qgis.utils import iface
+    # calculate the extents width and height
+    width = extent.width()
+    height = extent.height()
+    # calculate the missing value (width or height) of the output file, based on the extent
+    if width >= height:
+        height_as_dec = max_resolution / width * height
+        width = max_resolution
+        height = int(height_as_dec)
+    else:
+        width_as_dec = max_resolution / height * width
+        width = int(width_as_dec)
+        height = max_resolution
+
+    # append the resolution to the filename and call the save method
+
+    filename=layer.name()
+    if filename.startswith("WMS_"):
+       filename=filename.replace("WMS_","")
+    else:
+       resolution_prefix = '{}_{}-'.format(width, height)
+       filename = resolution_prefix + layer.name()
+    #img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
+    img = QImage()
+    color = QColor(187, 187, 187, 0)
+    img.fill(color.rgba())
+
+    leonardo = QPainter()
+    leonardo.begin(img)
+    leonardo.setRenderHint(QPainter.Antialiasing)
+    settings = iface.mapCanvas().mapSettings()
+    settings.setLayers([layer])
+    #settings.setExtent(extent)
+    settings.setOutputSize(img.size())
+    settings.setDestinationCrs(layer.crs())
+    renderer = QgsMapRendererCustomPainterJob(settings,leonardo)
+    renderer.start()
+    renderer.waitForFinished()
+    leonardo.end()
+
+    filename += '.{}'.format(image_type)
+    out_path = os.path.join(path_to_file, filename)
+    print("OUT_PATH",out_path)
+    print("filename", filename)
+    print("image_type", image_type)
+
+    error = img.save(out_path, image_type)
+    print("Save Error =",error)
+    return out_path
+
+
+def x_save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', image_type = 'tif'):
+    """
+    Select and save the currently visible extent to a .tif file
+    :param width: image width
+    :type width: int
+    :param height: image height
+    :type height: int
+    :param name: name of the created file
+    :type name: str
+    :return:
+    :rtype:
+    """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+    from qgis.utils import iface
     # calculate the extents width and height
     width = extent.width()
     height = extent.height()
@@ -501,23 +587,32 @@ def save_layer_as_image(layer, extent, path_to_file, max_resolution='1024', imag
        resolution_prefix = '{}_{}-'.format(width, height)
        filename = resolution_prefix + layer.name()
     img = QImage(QSize(width, height), QImage.Format_ARGB32_Premultiplied)
-    color = QColor(187, 187, 187, 0)
-    img.fill(color.rgba())
+    #color = QColor(187, 187, 187, 0)
+    #img.fill(color.rgba())
 
-    leonardo = QPainter()
-    leonardo.begin(img)
-    leonardo.setRenderHint(QPainter.Antialiasing)
-
-    renderer = QgsMapRendererJob()
-    lst = [layer.id()]
-
-    renderer.setLayerSet(lst)
-    renderer.setExtent(extent)
-    renderer.setOutputSize(img.size(), img.logicalDpiX())
-    renderer.render(leonardo)
-    leonardo.end()
+    painter = QPainter()
+    painter.begin(img)
+    painter.setRenderHint(QPainter.Antialiasing)
+    canvas = iface.mapCanvas()
+    #settings = canvas.mapSettings()
+    settings = QgsMapSettings()
+    #print(layer.name())
+    settings.setLayers([layer])
+    #rect = QgsRectangle(settings.visibleExtent())
+    #rect.scale(1.1)
+    #settings.setExtent(rect)
+    #print('Width',extent.width(),extent.height())
+    #settings.setExtent(extent)
+    #settings.setOutputSize(img.size())
+    renderer = QgsMapRendererCustomPainterJob(settings,painter)
+    #renderer.render(painter)
+    renderer.start()
+    renderer.waitForFinished()
+    painter.end()
 
     filename += '.{}'.format(image_type)
+    filename= filename.replace("","_")
+    print('path to imge',path_to_file, filename)
     out_path = os.path.join(path_to_file, filename)
     if img.save(out_path, image_type):
         return out_path
@@ -560,6 +655,7 @@ def edit_housing_layer_attributes(housing_layer):
     :return: If the changes were commited
     :rtype: bool
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
@@ -606,6 +702,7 @@ def init_building_geometries(housing_layer):
     :return: If the changes were commited
     :rtype: bool
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
@@ -641,6 +738,7 @@ def init_building_ids(housing_layer):
     :return: If the changes were commited
     :rtype: bool
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
@@ -680,6 +778,7 @@ def init_building_adress(housing_layer):
     :return: If the changes were commited
     :rtype: bool
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         provider = housing_layer.dataProvider()
         housing_layer.startEditing()
@@ -747,7 +846,7 @@ def add_parameter_info_to_layer(color_dict, field_name, layer):
     :return:
     :rtype:
     """
-
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     import mole3.extensions as extensions
     extension = extensions.by_layername(layer.name(), 'Import')
     if extension != []:
@@ -799,6 +898,7 @@ def colors_match_feature(color_quadriple, feature, field_name):
     #print color_quadriple
     #print feature
     #print field_name
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     match = (((color_quadriple[0]-config.color_match_tolerance) < feature.attribute(field_name + '_R') < (color_quadriple[0]+config.color_match_tolerance)) \
             and ((color_quadriple[1]-config.color_match_tolerance) < feature.attribute(field_name + '_G') < (color_quadriple[1]+config.color_match_tolerance))
             and ((color_quadriple[2]-config.color_match_tolerance) < feature.attribute(field_name + '_B') < (color_quadriple[2]+config.color_match_tolerance))
@@ -819,6 +919,7 @@ def add_attributes_if_not_exists(layer, attribute):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     layer.startEditing()
     provider = layer.dataProvider()
     name_map = provider.fieldNameMap()
@@ -829,11 +930,13 @@ def add_attributes_if_not_exists(layer, attribute):
     layer.commitChanges()
 
 def zoomToActiveLayer():
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     from qgis.utils import iface
     vLayer = iface.activeLayer()
     canvas = iface.mapCanvas()
     extent = vLayer.extent()
     canvas.setExtent(extent)
+    canvas.refresh()
 
 
 
@@ -841,7 +944,7 @@ def zoomToActiveLayer():
 
 
 from mole3.qgisinteraction import legend
-from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint, QgsRectangle, QgsFeatureRequest, QgsGeometry, QgsCoordinateTransform, QgsRaster, NULL
+from qgis.core import QgsField, QgsFeature, QgsDistanceArea, QgsPoint, QgsRectangle, QgsFeatureRequest, QgsGeometry, QgsCoordinateTransform, QgsRaster, NULL, QgsProject
 from qgis.PyQt.QtCore import QVariant
 
 def transform_geometry_to_pointlist(geometry=None):
@@ -852,6 +955,7 @@ def transform_geometry_to_pointlist(geometry=None):
           :return: Vertices
           :rtype: list of QgsPoints
           """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     def isPoint(x):
         """
             Submethod, checks if geometry x is a Point
@@ -910,9 +1014,10 @@ def sampleContainers(layer=None, geometry=None, crs = None):
         :return: Found Containers
         :rtype: list
         """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     containers =[]
     pointlist = transform_geometry_to_pointlist(geometry)
-    transformation = QgsCoordinateTransform(crs, layer.crs())
+    transformation = QgsCoordinateTransform(crs, layer.crs(), QgsProject.instance())
     for feature in layer.getFeatures():
         if all([feature.geometry().contains(transformation.transform(point)) for point in pointlist]):
             containers.append(feature)
@@ -932,9 +1037,10 @@ def sampleDataFromVectorLayerByFeature(feature, data_layer_name, field_list=[] ,
         :return: True/False depending on found data
         :rtype: boolean
         """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     result = True
     data_layer = legend.nodeByName(data_layer_name)[0].layer()
-    fieldnames = [j.name() for j in data_layer.pendingFields()]
+    fieldnames = [j.name() for j in data_layer.fields()]
     fieldnames =[nam for nam in fieldnames if nam in field_list]
     containers = sampleContainers(data_layer, feature.geometry(), feature_crs)
     result = None
@@ -960,11 +1066,12 @@ def sampleDataFromVectorLayer(enquire_layer_name, data_layer_name, field_list=[]
         :return: True/False depending on found data
         :rtype: boolean
         """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     result = True
     enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
     enquire_provider = enquire_layer.dataProvider()
     data_layer = legend.nodeByName(data_layer_name)[0].layer()
-    fieldnames = [j.name() for j in data_layer.pendingFields()]
+    fieldnames = [j.name() for j in data_layer.fields()]
     fieldnames =[nam for nam in fieldnames if nam in field_list]
     for nam in fieldnames:
         if not nam in [a.name() for a in enquire_layer.fields()]:
@@ -985,7 +1092,7 @@ def sampleDataFromVectorLayer(enquire_layer_name, data_layer_name, field_list=[]
     return result
 
 
-def sampleColor(raster_layer=None, geometry=None, crs = None, fieldnames = [], blur = 0):
+def sampleColor(raster_layer=None, geometry=None, crs = None, fieldnames = ['R','G','B','A'], blur = 0):
     """
     Gets the color at a point or the average of the colors of the vertices of a geometry from layer 'raster_layer' with corresponding CRS.
     :param raster_layer: The layer from where the color value shall be picked from
@@ -1003,10 +1110,18 @@ def sampleColor(raster_layer=None, geometry=None, crs = None, fieldnames = [], b
     :return: Found Colors
     :rtype: dict of found color values
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+    print(raster_layer.name())
+    print(geometry)
+    print(crs)
+    print(fieldnames)
+
     colorlist = []
     color = {}
     if crs == None: crs = raster_layer.crs()
+    print(crs)
     pointlist = transform_geometry_to_pointlist(geometry)
+    print(pointlist)
     blury_point_list = []
     if blur > 0:
         for point in pointlist:
@@ -1016,27 +1131,36 @@ def sampleColor(raster_layer=None, geometry=None, crs = None, fieldnames = [], b
             blury_point_list.append(QgsPoint(point.x() - blur, point.y() - blur))
             blury_point_list.append(QgsPoint(point.x() - blur, point.y() + blur))
         pointlist = blury_point_list
-    transformation = QgsCoordinateTransform(crs, raster_layer.crs())
+    transformation = QgsCoordinateTransform(crs, raster_layer.crs(), QgsProject.instance())
     col_keys =[]
     for point in pointlist:
+        print(point)
         ident = raster_layer.dataProvider().identify(transformation.transform(point), QgsRaster.IdentifyFormatValue)
         if ident.isValid():
-            colres = ident.results()
-            col_keys = [str(k) for k in list(colres.keys())]
-            if bool(fieldnames):
-                col_keys = fieldnames[0:len(col_keys)]
-            if color == {}:
-                color = dict(list(zip([str(k) for k in col_keys], [NULL] * len(col_keys))))  # color indizieren
-            if all(co != NULL for co in list(colres.values())):
-                colorlist.append(dict(list(zip([str(k) for k in col_keys], list(colres.values())))))
-    if bool(colorlist):
-        for i in col_keys:
-            color[i]= int(np.mean([c[i] for c in colorlist]))
-    return color
+            colres = list(ident.results().values())
+            print("Farbe",colres)
+            #qCol = QColor.fromRgb(colres[0])
+            colorlist.append(colres)
+            #print(colres)
+            #get keys
+            #col_keys = [str(k) for k in list(colres.keys())]
+            #if bool(fieldnames):
+            #    col_keys = fieldnames[0:len(col_keys)]
+            #color = dict(list(zip([str(k) for k in col_keys], [NULL] * len(col_keys))))  # color indizieren
+            #if all(co != NULL for co in list(colres.values())):
+            #colorlist.append(dict(list(zip([str(k) for k in col_keys], list(colres.values())))))
+    print(colorlist)
+    qCol = QColor.fromRgb(int(round(np.mean([c[0] for c in colorlist]), 0)),
+                  int(round(np.mean([c[1] for c in colorlist]), 0)),
+                  int(round(np.mean([c[2] for c in colorlist]), 0)),
+                  int(round(np.mean([c[3] for c in colorlist]), 0)))
+    return(qCol)
+
 
 def sampleColorsFromRasterLayer(enquire_layer_name,raster_layer_name, fieldnames = [], blur = 0):
     """
-    Gets the colors at the geometry vertices from layer 'raster_layer' with corresponding CRS.:param layer: The layer on which the polygons reside
+    Gets the colors at the geometry vertices from layer 'raster_layer' with corresponding CRS.
+    :param layer: The layer on which the polygons reside
     :type layer: QgsVectorLayer
     :param geometry: Geometry to find the containers of
     :type geometry: QgsGeometry
@@ -1045,24 +1169,25 @@ def sampleColorsFromRasterLayer(enquire_layer_name,raster_layer_name, fieldnames
     :return: Found Containers
     :rtype: list
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     result = True
     enquire_layer = legend.nodeByName(enquire_layer_name)[0].layer()
     enquire_provider = enquire_layer.dataProvider()
     raster_layer = legend.nodeByName(raster_layer_name)[0].layer()
     testenquire = next(enquire_layer.getFeatures())
-    field_keys = list(sampleColor(raster_layer, testenquire.geometry()).keys())
-    if bool(fieldnames):
-        field_keys = fieldnames[0:len(field_keys)]
-    for nam in field_keys:
+    #field_keys = list(sampleColor(raster_layer, testenquire.geometry()).keys())
+    #if bool(fieldnames):
+        #    field_keys = fieldnames[0:len(field_keys)]
+    for nam in fieldnames:
         if not str(nam) in [a.name() for a in enquire_layer.fields()]:
             enquire_provider.addAttributes([QgsField(str(nam), QVariant.String)])
     enquire_layer.updateFields()
     enquire_layer.startEditing()
     for enquirer in enquire_layer.getFeatures():
-        color = sampleColor(raster_layer, enquirer.geometry(), enquire_layer.crs(), fieldnames = field_keys, blur = blur)
-        result = result & all(co != NULL for co in list(color.values()))
-        for i in list(color.keys()):
-            enquirer[str(i)] = color[str(i)]
+        color = sampleColor(raster_layer, enquirer.geometry(), enquire_layer.crs(), fieldnames = ['R','G','B','A'], blur = blur).getRgb()
+        #result = result & all(co != NULL for co in list(color.values()))
+        for i in range(0,len(fieldnames)):
+            enquirer[fieldnames[i]] = color[i]
             enquire_layer.updateFeature(enquirer)
     enquire_layer.commitChanges()
 
@@ -1077,15 +1202,16 @@ def sampleColorFromRasterLayerByFeature(feature,raster_layer_name, fieldnames = 
     :return: Found Containers
     :rtype: list
     """
-    result = None
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+    #result = None
     raster_layer = legend.nodeByName(raster_layer_name)[0].layer()
-    color = sampleColor(raster_layer, feature.geometry(), feature_crs)
-    field_keys = [str(k) for k in range(1,len(color)+1)]
+    #color = sampleColor(raster_layer, feature.geometry(), feature_crs)
+    #field_keys = [str(k) for k in range(1,len(color)+1)]
     #print field_keys
-    if bool(fieldnames):
-        field_keys = fieldnames[0:len(field_keys)]
-        print()
-    color = sampleColor(raster_layer, feature.geometry(), feature_crs, fieldnames = field_keys, blur = blur)
+    #if bool(fieldnames):
+    #    field_keys = fieldnames[0:len(field_keys)]
+    #   print()
+    color = sampleColor(raster_layer, feature.geometry(), feature_crs, fieldnames, blur = blur)
     #print color
     return color
 
@@ -1102,10 +1228,11 @@ def createCentroidLayer(polygon_layer_name, centroid_layer_name, forced=False):
     :rtype: QgsVectorLayer
 
     '''
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     import os
     from mole3 import oeq_global
     from mole3.project import config
-    from mole3.qgisinteraction import plugin_interaction,legend,layer_interaction
+    from mole3.qgisinteraction import plugin_interaction,legend
     # check if centroid layer exists
     if legend.nodeExists(centroid_layer_name):
         #force rebuild?
@@ -1119,13 +1246,13 @@ def createCentroidLayer(polygon_layer_name, centroid_layer_name, forced=False):
     output = os.path.join(oeq_global.OeQ_project_path(), centroid_layer_name + '.shp')
     centroid_layer = rci.create_centroids(polygon_layer_name, output)
     if centroid_layer.isValid():
-        layer_interaction.add_layer_to_registry(centroid_layer)
+        add_layer_to_registry(centroid_layer)
         polygon_layer = legend.nodeByName(polygon_layer_name)
         #if not failed
         if bool(polygon_layer):
             polygon_layer = polygon_layer[0].layer()
             rci.calculate_accuracy(polygon_layer, centroid_layer)
-            layer_interaction.add_style_to_layer(config.valid_centroids_style, centroid_layer)
+            add_style_to_layer(config.valid_centroids_style, centroid_layer)
             legend.nodeByName(centroid_layer.name())[0].setExpanded(False)
             #source_section = self.progress_items_model.section_views[1]
             #section_model = source_section.model()

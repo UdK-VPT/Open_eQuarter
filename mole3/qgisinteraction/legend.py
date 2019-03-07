@@ -15,7 +15,9 @@ Latest Changes: 2015-09-16 (max)
 """
 
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsProject,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature,QgsCoordinateReferenceSystem,QgsCoordinateTransform
+from qgis.PyQt.QtGui import QPainter, QImage,QColor
+from qgis.core import QgsProject,QgsLayerTreeGroup,QgsLayerTreeLayer,QgsProject,QgsVectorFileWriter,QgsVectorLayer,QgsField,QgsFeature,QgsCoordinateReferenceSystem,\
+    QgsCoordinateTransform,QgsMapSettings,QgsMapRendererCustomPainterJob
 from qgis.utils import iface
 from mole3 import oeq_global
 from mole3.project import config
@@ -33,8 +35,7 @@ def nodeIsLayer(node):
     """
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
-            return None
+        if not node: return None
         node = node[0]
     if isinstance(node, QgsLayerTreeLayer):
         return True
@@ -47,8 +48,7 @@ def nodeIsGroup(node):
     """
     if oeq_global.isStringOrUnicode(node):
         node = nodeByName(node)
-        if len(node) == 0:
-            return None
+        if not node: return None
         node = node[0]
     if isinstance(node, QgsLayerTreeGroup):
         return True
@@ -56,8 +56,7 @@ def nodeIsGroup(node):
 
 def nodeExists(nodename):
         node = nodeByName(nodename)
-        if not node:
-            return False
+        if not node: return False
         return True
 
 
@@ -127,8 +126,45 @@ def nodeNames(which='all',searchgroup=None):
         if nodeIsGroup(i):
             namelist.append(i.name())
         if nodeIsLayer(i):
-            namelist.append(i.layerName())
+            namelist.append(i.name())
     return namelist
+
+
+def nodeSaveAsImage(node,filename="", extent=None, crs=None):
+
+#https://fromgistors.blogspot.com/2013/09/how-to-clip-multiple-rasters-at-once.html
+
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    img = QImage(iface.mapCanvas().size(),QImage.Format_ARGB32_Premultiplied)
+    color = QColor(255,255,255,255)
+    img.fill(color.rgba())
+
+    p = QPainter()
+    p.begin(img)
+    p.setRenderHint(QPainter.Antialiasing)
+    ms = iface.mapCanvas().mapSettings()
+    ms.setBackgroundColor(color)
+
+    ms.setLayers([node.layer()])
+    extent = iface.mapCanvas().extent()
+    destcrs = node.layer().crs()
+    #if (crs!=None):
+    #    #destcrs = QgsCoordinateReferenceSystem(crs)
+    transform = QgsCoordinateTransform(QgsProject.instance().crs(), node.layer().crs(), QgsProject.instance()).transform
+    extent = transform(extent)
+    ms.setDestinationCrs(destcrs)
+    ms.setExtent(extent)
+    ms.setOutputSize(img.size())
+
+    render = QgsMapRendererCustomPainterJob(ms, p)
+    render.start()
+    render.waitForFinished()
+    p.end()
+    img.save(os.path.join(oeq_global.OeQ_project_path(),filename),format='TIFF')
+
 
 
 def nodeByName(nodename,which='all',searchgroup=None):
@@ -148,7 +184,7 @@ def nodeByName(nodename,which='all',searchgroup=None):
             if i.name() == nodename:
                 nodelist.append(i)
         if nodeIsLayer(i):
-            if i.layerName() == nodename:
+            if i.name() == nodename:
                 nodelist.append(i)
     return nodelist
 
@@ -295,7 +331,7 @@ def nodeShow(node):
         if not node:
             return None
         node = node[0]
-    node.setVisible(Qt.Checked)
+    node.setItemVisibilityChecked(True)
     #oeq_global.OeQ_unlockQgis()
     #oeq_global.OeQ_wait(0.1)
     return node.isVisible()
@@ -320,7 +356,7 @@ def nodeHide(node):
         if len(node) == 0:
             return None
         node = node[0]
-    node.setVisible(Qt.Unchecked)
+    node.setItemVisibilityChecked(True)
     #oeq_global.OeQ_unlockQgis()
     #oeq_global.OeQ_wait(0.1)
     return node.isVisible()
@@ -368,10 +404,10 @@ def nodeRestoreVisibility(node,restorevariablename="was_visible_before_Solo"):
         node = node[0]
 
     if node.customProperty(restorevariablename) != None:
-        if node.customProperty(restorevariablename) > 0:
-            node.setVisible(Qt.Checked)
+        if node.customProperty(restorevariablename) != "0":
+            node.setItemVisibilityChecked(True)
         else:
-            node.setVisible(Qt.Unchecked)
+            node.setItemVisibilityChecked(False)
         node.removeCustomProperty(restorevariablename)
     return node
 
@@ -565,7 +601,8 @@ def nodeDuplicate(node,newname=None,position='bottom',target_node=None):
     # creation of the shapefiles:
     pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.shp')
     ct_pathfile = os.path.join(oeq_global.OeQ_project_path(),newname+'.qml')
-    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.geometryType(), layer.crs(), "ESRI Shapefile")
+    writer = QgsVectorFileWriter(pathfile, "CP1250", provider.fields(), provider.wkbType(), layer.crs(), "ESRI Shapefile")
+
     #print writer
     outelem = QgsFeature()
     # iterating over the input layer
@@ -717,14 +754,16 @@ def nodeCreateVectorLayer(nodename, position='bottom',target_node=None,path=None
         crs = config.project_crs
     new_layer = QgsVectorLayer(source + '?crs=' + crs, nodename, "memory")
     new_layer.setProviderEncoding('System')
+   # print(new_layer)
     #test
     dataprovider = new_layer.dataProvider()
     dataprovider.addAttributes([QgsField(indexfieldname, QVariant.Int)])
     new_layer.updateFields()
     writer = QgsVectorFileWriter.writeAsVectorFormat(new_layer, os.path.join(path , nodename+'.shp'), "System", new_layer.crs(), providertype)
-    if writer != QgsVectorFileWriter.NoError:
-        oeq_global.OeQ_push_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
-        return None
+   # print (writer)
+    #if writer != QgsVectorFileWriter.NoError:
+    #    oeq_global.OeQ_push_error(title='Write Error:', message=os.path.join(path , nodename+'.shp'))
+    #    return None
     del writer
     oeq_global.OeQ_wait_for_file(os.path.join(path , nodename+'.shp'))
     iface.addVectorLayer(os.path.join(path , nodename+'.shp'),nodename, 'ogr')
@@ -1078,6 +1117,20 @@ def nodeGetExtent(node):
     canvas.setExtent(backup_extent)
     canvas.refresh()
     return node_extent
+
+def nodeEdit(node):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    return(node.layer().startEditing())
+
+def nodeCommit(node):
+    if oeq_global.isStringOrUnicode(node):
+        node = nodeByName(node)
+        if not node: return None
+        node = node[0]
+    return(node.layer().commitChanges())
 
 
 def nodeVectorSave(node,filepath=None,crs=None,load=False):

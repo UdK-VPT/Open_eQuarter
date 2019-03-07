@@ -1,14 +1,16 @@
-from qgis.core import QgsRasterLayer, QgsApplication, QgsRaster, QgsCoordinateTransform, QgsCoordinateReferenceSystem
+from qgis.core import QgsRasterLayer, QgsApplication, QgsRaster, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject
 from qgis.PyQt.QtGui import QColor
 from platform import system
 from os import path
 import subprocess
 import time
 from . import GdalUtils
-
+import inspect
+DEBUG_MODE = True
 
 def get_environment():
     # setup the MacOSX path to both GDAL executables and python modules
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if system() == 'Darwin':
         GdalUtils.setMacOSXDefaultEnvironment()
 
@@ -31,7 +33,7 @@ def get_environment():
     return environment
 
 def gdal_warp_layer(layer, target_crs):
-
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     try:
         source_crs = layer.crs().toProj4()
         input_path = layer.publicSource()
@@ -56,7 +58,7 @@ def gdal_warp_layer(layer, target_crs):
 
 
 def gdal_addo_layerfile(file, sampling_algorithm, number_of_pyramids):
-
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     environment = get_environment()
     pyramids = []
     for i in range(1,number_of_pyramids+1):
@@ -83,6 +85,7 @@ def gdal_translate_layerfile(src_filename, dst_filename, crs, extent):
     :return:
     :rtype:
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     ulx = extent.xMinimum()
     uly = extent.yMaximum()
     lrx = extent.xMaximum()
@@ -108,6 +111,7 @@ def get_wms_url(wms_layer):
     :return url: The url to the wms-server
     :rtype url: str
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     src = wms_layer.source()
     start = src.find('url=')
     url = ''
@@ -129,6 +133,7 @@ def get_wms_crs(wms_layer):
     :return wms_crs: The crs provided by the server
     :rtype wms_crs: str
     """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     src = wms_layer.source()
     wms_crs = ''
     start = src.find('crs=')
@@ -155,20 +160,21 @@ def transform_wms_geo_data(wms_layer, extent, extent_crs):
     :return extent: The extent (transformed to the WMS-server's crs)
     :rtype wms_crs: QgsRectangle
      """
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     wms_crs = get_wms_crs(wms_layer)
     target_crs = QgsCoordinateReferenceSystem(wms_crs)
 
     if not extent_crs == target_crs:
-        coord_transformer = QgsCoordinateTransform(extent_crs, target_crs)
+        coord_transformer = QgsCoordinateTransform(extent_crs, target_crs, QgsProject.instance())
         return coord_transformer.transform(extent)
     else:
         return extent
 
 
 def extract_color_at_point(raster, point, point_crs):
-
+    if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
     if not raster.crs() == point_crs:
-        xform = QgsCoordinateTransform(point_crs, raster.crs())
+        xform = QgsCoordinateTransform(point_crs, raster.crs(), QgsProject.instance())
         point = xform.transform(point)
 
     color_rgba = raster.dataProvider().identify(point,QgsRaster.IdentifyFormatValue).results()

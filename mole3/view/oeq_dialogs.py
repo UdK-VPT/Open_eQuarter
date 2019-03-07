@@ -40,7 +40,8 @@ from .ui_modular_dialog import Ui_Modular_dialog
 from .ui_request_wms_url_dialog import Ui_RequestWmsUrl_dialog
 from .ui_estimated_energy_demand_dialog import Ui_EstimatedEnergyDemand_dialog
 from .ui_information_source_dialog import Ui_InformationSource_dialog
-
+import inspect
+DEBUG_MODE = False
 
 # from mole3.extensionActive.ui_extensions_active import Ui_Dialog
 
@@ -53,6 +54,7 @@ from .ui_information_source_dialog import Ui_InformationSource_dialog
 class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
 
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
         #self.refresh_dropdown()
@@ -70,6 +72,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
         self.complete_information()
 
     def refresh_dropdown(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import mole3.extensions as extensions
         self.extension_dropdown.clear()
         self.placeholder = '<Select information type>'
@@ -86,6 +89,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
         :rtype:
         """
         # clear all line-edits first
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import mole3.extensions as extensions
         line_edits = self.gridWidget.findChildren(QtWidgets.QLineEdit)
         for line_edit in line_edits:
@@ -101,6 +105,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
                 self.stateBox.setChecked(importextension.active)
 
     def toggle_state(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import mole3.extensions as extensions
         extension_name = self.extension_dropdown.currentText()
         if extension_name in [i.extension_name for i in extensions.by_category('Import')]:
@@ -109,6 +114,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
             self.stateBox.setChecked(extension.active)
 
     def register_information(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import mole3.extensions as extensions
         extension_name = self.extension_dropdown.currentText()
         layer_name = self.layer_name.text()
@@ -167,6 +173,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         source = self.extension_dropdown.currentText()
         if source != self.placeholder:
             file_extension = ''
@@ -190,6 +197,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.refresh_dropdown()
         QtWidgets.QDialog.exec_(self)
         self.refresh_dropdown()
@@ -201,6 +209,7 @@ class InformationSource_dialog(QtWidgets.QDialog, Ui_InformationSource_dialog):
 class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
 
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
         self.setupUi(self)
         self.color_entry_manager = ColorEntryManager()
@@ -232,6 +241,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         for i in range(len(self.header)):
             self.color_table_view.setItemDelegateForColumn(i, QColorTableDelegate(self))
 
@@ -280,6 +290,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         column = model_index.column()
         if column == 4:
             row = model_index.row()
@@ -301,6 +312,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
 
         layer = self.layers_dropdown.currentText()
@@ -333,6 +345,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         layer = self.layers_dropdown.currentText()
         color_map = {}
         if layer in self.color_entry_manager.layer_values_map:
@@ -359,6 +372,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if len(parameter_name) == 10 and parameter_name != 'Parameter ':
             self.message_label.setStyleSheet(_fromUtf8("color: red;"))
             self.message_label.setText('Warning: A maximum of 10 characters is allowed as a parameter name!')
@@ -371,6 +385,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
 
         layer = self.layers_dropdown.currentText()
@@ -391,7 +406,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :rtype:
         """
         from mole3 import extensions
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         layer = iface.activeLayer()
         selected_layer = self.layers_dropdown.currentText()
         if layer.name() != selected_layer:
@@ -420,6 +435,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         legend.nodeExitSolo()
         dropdown = self.layers_dropdown
         dropdown.clear()
@@ -449,6 +465,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         #layer_interaction.move_layer_to_position(iface, layer, 0)
 
     def setup_legend(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         legend.nodeExitSolo()
         oeq_global.QeQ_current_work_layer = layer_interaction.find_layer_by_name(self.layers_dropdown.currentText())
         if oeq_global.QeQ_current_work_layer != None:
@@ -463,6 +480,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.refresh_layer_list()
         QtWidgets.QDialog.show(self)
         self.update_color_values()
@@ -474,6 +492,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.show()
         QtWidgets.QDialog.exec_(self)
         for i in range(self.layers_dropdown.count()):
@@ -484,6 +503,7 @@ class ColorPicker_dialog(QtWidgets.QDialog, Ui_color_picker_dialog):
 class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 
     def __init__(self,mole3): #, progress_model):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #from qgis import utils
         #standard_workflow = utils.plugins['mole3'].standard_workflow
         QtWidgets.QDockWidget.__init__(self)
@@ -545,12 +565,14 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 
     '''
     def go_to_page(self, selection_name):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         for child in self.process_page.children():
             if isinstance(child, QtWidgets.QListView) and child.accessibleName() == selection_name:
                 self.process_page.setCurrentWidget(child)
                 break
 
     def select_page(self,section_name):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         pages = self.process_page.children()
         itemindex = [i.objectName() for i in pages].index(section_name)
         dropdownentry = pages[itemindex].accessibleName()
@@ -560,6 +582,7 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 
 
     def set_checkbox_on_page(self, checkbox_name, page_name, check_yes_no):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if isinstance(check_yes_no, bool):
             page = self.findChild(QtWidgets.QWidget, page_name)
             checkbox = page.findChild(QtWidgets.QPushButton, checkbox_name)
@@ -568,10 +591,12 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
                 checkbox.setChecked(check_yes_no)
 
     def is_checkbox_on_page_checked(self, checkbox_name, page_name):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         page = self.process_page.findChild(QtWidgets.QWidget, page_name)
         return page.findChild(QtWidgets.QPushButton, checkbox_name).isChecked()
 
     def set_current_page_done(self, value):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if isinstance(value, bool):
             page_name = self.active_page_dropdown.currentText()
             page = self.selection_to_page[page_name]
@@ -582,9 +607,11 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
                 self.active_page_dropdown.setCurrentIndex((index+1) % len(self.selection_to_page))
 
     def switch_to_objects_parent_page(self,object):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.select_page(self.project_created.parent().objectName())
 
     def switch_to_next_worksteps_page(self,mole3):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.PyQt import QtWidgets
         nextname = mole3.standard_workflow.next_workstep_name()
         if bool(nextname):
@@ -592,6 +619,7 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
             self.select_page(pagename)
 
     def call_next_workstep(self,mole3):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.PyQt import QtWidgets
         if mole3.standard_workflow.is_done():
             return False
@@ -601,6 +629,7 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 
 
     def run_automode(self,mole3):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis import utils
         while (not mole3.standard_workflow.is_done()) & self.automode.isChecked():
             self.call_next_workstep(mole3)
@@ -609,6 +638,7 @@ class MainProcess_dock(QtWidgets.QDockWidget, Ui_MainProcess_dock):
 class ProjectDoesNotExist_dialog(QtWidgets.QDialog, Ui_ProjectDoesNotExist_dialog):
 
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -622,6 +652,7 @@ class ProjectDoesNotExist_dialog(QtWidgets.QDialog, Ui_ProjectDoesNotExist_dialo
 class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -644,6 +675,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def apply(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if not issubclass(type(self.location_city), QtWidgets.QLineEdit):
              self.update_form(1)
         for key in oeq_global.OeQ_project_info:
@@ -655,6 +687,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
                 oeq_global.OeQ_project_info[key] = field.text()
 
     def show(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #print oeq_global.OeQ_project_info
         for key in oeq_global.OeQ_project_info:
             print(key)
@@ -666,6 +699,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
         QtWidgets.QDialog.show(self)
 
     def reset(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         for key in oeq_global.OeQ_project_info:
             print(key,getattr(self, key))
             field = getattr(self, key)
@@ -673,11 +707,13 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
         #print 'resetted'
 
     def text_changed(self, input_field):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if input_field.text() != self.defaults[input_field.objectName()]:
             input_field.setStyleSheet('color: rgb(0,0,0)')
             # print self.location_by_address()
 
     def update_form(self, index):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         index = index - 1
         self.lineedit_city_layout()
         if self.found_locations != []:
@@ -692,11 +728,12 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
                 self.location_postal.setText(location_info['postcode'])
             self.location_lon.setText(str(location_info['longitude']))
             self.location_lat.setText(str(location_info['latitude']))
-            self.location_crs.setText('EPSG:4326')
+            self.location_crs.setText(str(location_info['crs']))
             self.set_municipal_data()
 
 
     def set_municipal_data(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.municipals = [x for x in self.municipal_information.municipal_db if str(x['POSTCODE']).startswith(str(self.location_postal.text()))] #startswith(self.location_postal.text().encode('utf8'))]
         #self.municipals = filter(lambda x :  x['NAME'].split()[0].split(',')[0].encode('utf8') == self.location_city.text().split()[0].encode('utf8') , self.municipal_information.municipal_db)
 
@@ -711,6 +748,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def get_location_from_web(self,index):
+         if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
          index -= 1
          self.lineedit_city_layout()
          self.location_city.setText(self.municipals[index]['NAME'])
@@ -720,8 +758,9 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
          avg_yoc = '{}'.format(self.municipals[index]['AVG_YOC'])
          self.average_build_year.setText(avg_yoc)
          citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
-         address = ', '.join([config.country, citystring, self.location_street.text()])
-         self.found_locations = nominatim.getCoordinatesByAddress(address, crs=4326)
+         #address = ','.join(["country="+config.country,"city="+citystring, "street="+self.location_street.text(),"addressdetails=1"])
+         #self.found_locations = nominatim.getCoordinatesByAddress(address)
+         self.found_locations = nominatim.getCoordinatesByAddress(config.country, citystring,self.location_street.text())
          if len(self.found_locations) == 1:
             self.update_form(1)
          elif len(self.found_locations) > 1:
@@ -733,6 +772,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
             self.location_city.currentIndexChanged.connect(self.update_form)
 
     def location_by_address(self):
+         if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
          #if not issubclass(type(self.location_city), QtWidgets.QLineEdit): return None
          #if not issubclass(type(self.location_postal), QtWidgets.QLineEdit): return None
          print(self.location_city.text(),self.location_street.text())
@@ -771,8 +811,10 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
               #self.lineedit_city_layout()
               #self.lineedit_postal_layout()
              citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
-             address = ', '.join([config.country, citystring, self.location_street.text()])
-             self.found_locations = nominatim.getCoordinatesByAddress(address, crs=4326)
+             #address = ', '.join([config.country, citystring, self.location_street.text()])
+             #address = ','.join(["country=" + config.country, "city=" + citystring, "street=" + self.location_street.text())
+             self.found_locations = nominatim.getCoordinatesByAddress(config.country,citystring,self.location_street.text())
+             print(self.found_locations)
              if len(self.found_locations) == 1:
                 self.update_form(1)
              elif len(self.found_locations) > 1:
@@ -785,6 +827,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def location_by_coordinates(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #if not issubclass(type(self.location_city), QtWidgets.QLineEdit): return None
         #if not issubclass(type(self.location_postal), QtWidgets.QLineEdit): return None
         lat = float(self.location_lat.text())
@@ -792,7 +835,8 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
         crs = self.location_crs.text()
         if crs:
             crs=int(crs[5:])
-        self.found_locations = nominatim.getBuildingLocationDataByCoordinates(lon, lat, crs)
+        self.found_locations = nominatim.getBuildingLocationDataByCoordinates(lon, lat)
+        #print(self.found_locations)
         if len(self.found_locations) == 1:
             self.update_form(1)
         elif len(self.found_locations) > 1:
@@ -805,6 +849,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def find_municipal_information(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         city = self.location_city.text()
         postal = self.location_postal.text()
         if ((city == '') | (city == '')):
@@ -844,6 +889,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def combobox_city_layout(self, entries=[]):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
@@ -858,6 +904,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def lineedit_city_layout(self, text=''):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_city_layout')
         city_edit = location_box.itemAt(0).widget()
 
@@ -873,6 +920,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 
     def set_postal(self, index):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         municipal = self.municipals[index]
         self.lineedit_postal_layout()
         self.location_postal.setText(str(municipal['POSTCODE']))
@@ -882,6 +930,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
         self.average_build_year.setText(avg_yoc)
 
     def combobox_postal_layout(self, entries=[]):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_postal_layout')
         location_edit = location_box.itemAt(0).widget()
 
@@ -895,6 +944,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
             location_box.insertWidget(0, self.location_postal)
 
     def lineedit_postal_layout(self, text=''):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         location_box = self.gridLayout.findChild(QtWidgets.QHBoxLayout, 'location_postal_layout')
         location_edit = location_box.itemAt(0).widget()
 
@@ -911,6 +961,7 @@ class ProjectSettings_form(QtWidgets.QDialog, Ui_project_settings_form):
 
 class ModularInfo_dialog(QtWidgets.QDialog, Ui_ModularInfo_dialog):
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
@@ -924,6 +975,7 @@ class ModularInfo_dialog(QtWidgets.QDialog, Ui_ModularInfo_dialog):
 
 class Modular_dialog(QtWidgets.QDialog, Ui_Modular_dialog):
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
 
         # Set up the user interface from Designer.
@@ -938,6 +990,7 @@ class Modular_dialog(QtWidgets.QDialog, Ui_Modular_dialog):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.help_dialog.show)
 
     def set_dialog_text(self, text, title=""):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
 
         if not title.isspace():
             self.setWindowTitle(title)
@@ -954,12 +1007,14 @@ class Modular_dialog(QtWidgets.QDialog, Ui_Modular_dialog):
 
 class RequestWmsUrl_dialog(QtWidgets.QDialog, Ui_RequestWmsUrl_dialog):
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
 
 
 class EstimatedEnergyDemand_dialog(QtWidgets.QDialog, Ui_EstimatedEnergyDemand_dialog):
     def __init__(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         QtWidgets.QDialog.__init__(self)
         self.setupUi(self)
 
@@ -972,6 +1027,7 @@ class EstimatedEnergyDemand_dialog(QtWidgets.QDialog, Ui_EstimatedEnergyDemand_d
         self.input_layer.currentIndexChanged.connect(self.update_field_dropdowns)
 
     def update_field_dropdowns(self, index):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         layer = layer_interaction.find_layer_by_name(self.input_layer.currentText())
         provider = layer.dataProvider()
         fields = list(provider.fieldNameMap().keys())

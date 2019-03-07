@@ -83,9 +83,11 @@ def evaluation(self=None, parameters={},feature=None):
     kind = NULL
     gkn = NULL
     da_engine=QgsDistanceArea()
-    da_engine.setSourceCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId))
-    da_engine.setEllipsoid(config.project_ellipsoid)
-    da_engine.setEllipsoidalMode(True)
+    #print (QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[-1])))
+    #print(QgsCoordinateReferenceSystem.EpsgCrsId)
+    #da_engine.setSourceCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId))
+    #da_engine.setEllipsoid(config.project_ellipsoid)
+   # da_engine.setEllipsoidalMode(True)
     if feature:
             geometry = feature.geometry()
             #print geometry

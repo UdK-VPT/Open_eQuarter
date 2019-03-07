@@ -227,7 +227,7 @@ class RealCentroidInteraction(object):
     def create_centroids(self, polygon_name, path_to_output_shape):
         from mole3 import oeq_global
         self.plugin.dlg.showEvent(QtCore.QEvent.Show)
-        polygon_combobox = self.plugin.dlg.ui.layerBox
+        polygon_combobox = self.plugin.dlg.layerBox
 
         for i in range(polygon_combobox.count()):
             if polygon_combobox.itemText(i) == polygon_name:
@@ -239,7 +239,8 @@ class RealCentroidInteraction(object):
 
         self.plugin.dlg.shapefileName = path_to_output_shape
         self.plugin.dlg.encoding = sys.getfilesystemencoding()
-        self.plugin.centroids()
+        self.plugin.dlg.addBox.setCheckState(QtCore.Qt.Checked)
+        self.plugin.generate()
 
         file_info = QtCore.QFileInfo(path_to_output_shape)
         if file_info.exists():

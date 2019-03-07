@@ -2,7 +2,7 @@
 
 
 def load(self=None):
-    self.createCoordinateLayer()
+    #self.createCoordinateLayer()
     return True
 
 

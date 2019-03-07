@@ -23,9 +23,9 @@ import time
 import os
 
 from qgis.PyQt.QtGui import *
-from qgis.PyQt.QtWidgets import QMenu, QAction
+from qgis.PyQt.QtWidgets import QMenu, QAction, QPushButton, QMessageBox
 
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QSettings, QVariant
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QSettings, QVariant, QTimer
 
 from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
 from qgis.core import *
@@ -41,11 +41,14 @@ from mole3.qgisinteraction import (
     wms_utils,
     legend)
 from mole3.project import config
-from mole3.stat_util.building_evaluation import evaluate_building
 from mole3 import workflow as oeq_workflows
 from mole3 import oeq_global
                 #OeQ_Workflow,OeQ_WorkStep
-print(oeq_workflows)
+#print(oeq_workflows)
+
+import inspect
+DEBUG_MODE = True
+
 
 
 def do_print():
@@ -57,6 +60,7 @@ def isnull(value):
 
 class OpenEQuarterMain:
     def __init__(self, iface):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #from mole3.oeq_workflows import OeQ_Workflow
         # Save reference to the QGIS interface
         self.iface = iface
@@ -67,7 +71,7 @@ class OpenEQuarterMain:
         #enable on the fly projection
         ##self.iface.mapCanvas().setCrsTransformEnabled(True)
         #self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
-        crsSrc = self.iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId))
+        #crsSrc = self.iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem(config.project_crs))
         #self.iface.mapCanvas().mapRenderer().setDestinationCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[1]), QgsCoordinateReferenceSystem.EpsgCrsId))
 
         ### UI specific settings
@@ -82,7 +86,7 @@ class OpenEQuarterMain:
         self.coordinate_tracker = QgsMapToolEmitPoint(self.iface.mapCanvas())
         #self.wms_url = 'crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k5'
         self.confirm_selection_of_investigation_area_dlg = Modular_dialog()
-
+        #set default coordinate system
         ### Project specific settings
         self.oeq_project = ''
 
@@ -96,7 +100,7 @@ class OpenEQuarterMain:
         print("Hello this is Open eQuarter")
 
     def new_project(self):
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #self.progress_items_model.load_section_models(config.progress_model)
         #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
         #sections = self.progress_items_model.section_views
@@ -105,11 +109,13 @@ class OpenEQuarterMain:
         #    list_view.clicked.connect(self.process_button_clicked)
 
         import copy
+
         oeq_global.OeQ_project_info = copy.deepcopy(config.pinfo_default)
         self.update_workstep_states_in_Gui()
 
 
     def initGui(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsProject
         project =QgsProject.instance()
         plugin_icon = QIcon(os.path.join(':', oeq_global.OeQ_plugin_path(), 'icons', 'OeQ_plugin_icon.png'))
@@ -130,6 +136,7 @@ class OpenEQuarterMain:
         #self.initGui_process_dock()
 
     def initMainProcessDock(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.main_process_dock = MainProcess_dock(self) #self.progress_items_model)
         #self.main_process_dock.process_button_next.clicked.connect(self.continue_process)
         #sections = self.progress_items_model.section_views
@@ -148,27 +155,34 @@ class OpenEQuarterMain:
         tools_dropdown_menu.addAction('Color Picker', self.prepare_color_picker)
         tools_dropdown_menu.addAction('Load layer from WMS', self.load_wms)
         tools_dropdown_menu.addAction('Save extent as image',
-                                      lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
+                                      #lambda: wms_utils.save_wms_extent_as_image(self.iface.activeLayer().name()))
+                                      lambda: wms_utils.wms_saveCanvasExtent(self.iface.activeLayer().name()))
         #tools_dropdown_menu.addAction('Calculate Energy Demand', self.handle_building_calculations)
 
         self.main_process_dock.tools_dropdown_btn.setMenu(tools_dropdown_menu)
         self.main_process_dock.settings_dropdown_btn.setMenu(settings_dropdown_menu)
 
     def initWorkflow(self):
-        from mole3 import workflow as oeq_workflows
-        self.standard_workflow=oeq_workflows.OeQ_Workflow('OeQ_standard','Standard Workflow of Open eQuarter')
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('ol_plugin_installed', 'Check if the Openlayers Plugin exists', self.handle_ol_plugin_installed, self.check_if_ol_plugin_installed))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('pst_plugin_installed', 'Check if the Pointsampling Tool Plugin exists', self.handle_pst_plugin_installed, self.check_if_pst_plugin_installed))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('real_centroid_plugin_installed', 'Check if the Reacentroid Plugin exists', self.handle_real_centroid_plugin_installed, self.check_if_real_centroid_plugin_installed))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('project_created', 'Create a Project', self.handle_project_created, self.check_if_project_created))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('project_saved', 'Save the Project', self.handle_project_saved, self.check_if_project_saved))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('investigationarea_defined', 'Define Investigation Area', self.handle_investigationarea_defined, self.check_if_investigationarea_defined))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('building_outlines_acquired', 'Get building outlines', self.handle_building_outlines_acquired, self.check_if_building_outlines_acquired))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('building_coordinates_acquired', 'Get building coordinates', self.handle_building_coordinates_acquired, self.check_if_building_coordinates_acquired))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('information_layers_loaded', 'Load information layers', self.handle_information_layers_loaded, self.check_if_information_layers_loaded))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('needle_request_done', 'Perform Needle Request', self.handle_needle_request_done, self.check_if_needle_request_done))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('database_created', 'Create Building Database', self.handle_database_created, self.check_if_database_created))
-        self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('buildings_evaluated', 'Do all Building Evaluations', self.handle_buildings_evaluated, self.check_if_buildings_evaluated))
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        from mole3 import workflow as wf
+
+        self.standard_workflow=wf.OeQ_Workflow('OeQ_standard','Standard Workflow of Open eQuarter')
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('ol_plugin_installed', 'Check if the Openlayers Plugin exists', self.handle_ol_plugin_installed, self.check_if_ol_plugin_installed))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('pst_plugin_installed', 'Check if the Pointsampling Tool Plugin exists', self.handle_pst_plugin_installed, self.check_if_pst_plugin_installed))
+
+        #self.standard_workflow.register_workstep(oeq_workflows.OeQ_WorkStep('real_centroid_plugin_installed', 'Check if the Reacentroid Plugin exists', self.handle_real_centroid_plugin_installed, self.check_if_real_centroid_plugin_installed))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('project_created', 'Create a Project', self.handle_project_created, self.check_if_project_created))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('project_saved', 'Save the Project', self.handle_project_saved, self.check_if_project_saved))
+        self.standard_workflow.register_workstep(
+            wf.OeQ_WorkStep('osm_opened', 'Open the OSM-Layer', self.handle_open_osm_layer_loaded,
+                                       self.check_if_osm_layer_is_loaded))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('investigationarea_defined', 'Define Investigation Area', self.define_investigationarea, self.investigationarea_defined))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('building_outlines_acquired', 'Get building outlines', self.acquire_building_outlines, self.building_outlines_acquired))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('building_coordinates_acquired', 'Get building coordinates', self.acquire_building_coordinates, self.building_coordinates_acquired))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('information_layers_loaded', 'Load information layers', self.acquire_information_layers, self.information_layers_acquired))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('needle_request_done', 'Perform Needle Request', self.perform_needle_request, self.needle_request_performed))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('database_created', 'Create Building Database', self.create_database, self.database_created))
+        self.standard_workflow.register_workstep(wf.OeQ_WorkStep('buildings_evaluated', 'Do all Building Evaluations', self.evaluate_buildings, self.buildings_evaluated))
         self.standard_workflow.append_workstep('ol_plugin_installed')
         self.standard_workflow.append_workstep('pst_plugin_installed')
         self.standard_workflow.append_workstep('real_centroid_plugin_installed')
@@ -194,6 +208,7 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         root_node = QgsProject.instance().layerTreeRoot()
         legend.nodeMove(config.investigation_shape_layer_name,'top',root_node)
         legend.nodeMove(config.building_coordinate_layer_name, 1, root_node)
@@ -203,6 +218,7 @@ class OpenEQuarterMain:
 
 
     def open_settings(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.oeq_project_settings_form.show()
         save = self.oeq_project_settings_form.exec_()
         if save:
@@ -211,12 +227,12 @@ class OpenEQuarterMain:
         #self.oeq_project_settings_form.show()
 
     def launch_oeq(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         progress = os.path.join(oeq_global.OeQ_project_path(), oeq_global.OeQ_project_name() + '.oeq')
         #if os.path.isfile(progress):
         #    self.progress_items_model.load_section_models(progress)
         #else:
         #    self.progress_items_model.load_section_models(config.progress_model)
-
         if self.main_process_dock.isVisible():
             self.main_process_dock.setVisible(False)
         self.initMainProcessDock()
@@ -226,6 +242,7 @@ class OpenEQuarterMain:
 
 
     def load_wms(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #print('Load wms')
         pass
 
@@ -239,6 +256,7 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         canvas = self.iface.mapCanvas()
         crs = canvas.mapRenderer().destinationCrs()
         raster = oeq_global.QeQ_current_work_layer
@@ -255,6 +273,7 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsProject
         project =QgsProject.instance()
         self.iface.removePluginMenu("&OpenEQuarter", self.main_action)
@@ -271,10 +290,14 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+
         from mole3 import oeq_global
         from qgis.PyQt.QtWidgets import QFileDialog,QMessageBox
         import shutil
         import os
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        #QgsProject.instance().setCrs(QgsCoordinateReferenceSystem(config.project_crs))
+        print("###Marke -2")
         if not project_interaction.project_exists():
 
             # prompt the user to save the project
@@ -285,21 +308,21 @@ class OpenEQuarterMain:
             if oeq_global.OeQ_project_info['project_name'] == config.pinfo_default['project_name']:
                 oeq_global.OeQ_project_info['project_name'] = ' '.join([oeq_global.OeQ_project_info['location_city'],oeq_global.OeQ_project_info['location_postal'],oeq_global.OeQ_project_info['location_street']])
                 oeq_global.OeQ_project_info['project_name'] = oeq_global.fix_german_umlauts('_'.join(oeq_global.OeQ_project_info['project_name'].split(' ')))
-
+            print("###Marke -1")
             yes_to_save = self.project_does_not_exist_dlg.exec_()
-
             if yes_to_save:
-                dialog=QFileDialog()
-                dialog.selectFile(oeq_global.OeQ_project_info['project_name'])
-                #path=dialog.getExistingDirectory(None,'Navigate to the directory you want project \"'+ oeq_global.OeQ_project_info['project_name'] + '\" to be stored in:')
-                result = dialog.getSaveFileName(None,"Save project'"+oeq_global.OeQ_project_info['project_name']+"' as:",os.path.normpath(os.path.join("~/",oeq_global.OeQ_project_info['project_name'])),oeq_global.OeQ_project_info['project_name'])
-                pathname = result[0]
-                if pathname:
-                    print(pathname)
-                    oeq_global.OeQ_project_info['project_name'] = os.path.basename(path).replace (" ", "_")
-                    #project_dir = os.path.join(path,oeq_global.OeQ_project_info['project_name'])
-                    project_dir = pathname
+                print("###Marke 0")
+                project_dir = QFileDialog.getSaveFileName(None, "Save project'" + oeq_global.OeQ_project_info['project_name'] + "' as:",
+                                                          os.path.join(os.path.expanduser(oeq_global.OeQ_project_path()), oeq_global.OeQ_project_info['project_name'].replace(" ", "_")),
+                                                          oeq_global.OeQ_project_info['project_name'])[0]
+
+                print("###Marke 1",project_dir)
+                if project_dir:
+                    print("###Marke 2")
+                    #print(project_dir)
+                    oeq_global.OeQ_project_info['project_name'] = os.path.basename(project_dir).replace (" ", "_")
                     project_file = oeq_global.OeQ_project_info['project_name']+'.qgs'
+                    print("###Marke 3")
                     if os.path.exists(project_dir):
                         if [i.endswith('.qgs') for i in os.listdir(project_dir)]:
                             ask=QMessageBox()
@@ -313,22 +336,37 @@ class OpenEQuarterMain:
                                                  ask.No)
                             if reply == ask.No: return False
                         shutil.rmtree(project_dir, ignore_errors=True)
+                    print("###Marke 4")
                     os.makedirs(project_dir)
+                    print("###Marke 5")
+                    print(os.path.join(project_dir,project_file))
+
                     QgsProject.instance().setFileName(os.path.join(project_dir,project_file))
+                    print("###Marke 6")
+                    #print (QgsProject.instance().fileName())
                     self.iface.actionSaveProject().trigger()
+                    print("###Marke 7")
                     return True
         return False
 
+    def handle_open_osm_layer_loaded(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        if not self.check_if_osm_layer_is_loaded():
+            ol_plugin = plugin_interaction.OlInteraction(config.ol_plugin_name)
 
+            ol_plugin.open_osm_layer(config.open_layer_type_id)
+        self.iface.mapCanvas().renderComplete.connect(self.zoom_to_default_extent)
+        return True
 
-    def osm_layer_is_loaded(self):
+    def check_if_osm_layer_is_loaded(self):
         """
         Iterate over all layers and check if an osm plugin-layer exists.
         :return True if the layer is available:
         :rtype bool:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction.legend import nodeExists
-        if nodeExists('OpenLayers_plugin_layer'):
+        if nodeExists(config.open_layers_layer_name):
             return True
         return False
 
@@ -338,27 +376,27 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
-        # try:
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         canvas = self.iface.mapCanvas()
-        #print oeq_global.OeQ_project_info['location_lon']
-        #print oeq_global.OeQ_project_info['location_lat']
         if (not oeq_global.OeQ_project_info['location_lon']) | (not  oeq_global.OeQ_project_info['location_lat']):
-            x = config.x
-            y=config.y
-            scale = config.scale
+            x = config.default_latitude
+            y=config.default_longitude
+            scale = config.default_offset
+            source_crs = QgsCoordinateReferenceSystem(config.default_crs)
         else:
             x = float(oeq_global.OeQ_project_info['location_lon'])
             y = float(oeq_global.OeQ_project_info['location_lat'])
-            scale = 0.01
+            scale = config.default_offset
+            source_crs = QgsCoordinateReferenceSystem(oeq_global.OeQ_project_info['location_crs'])
         extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-        map_crs = canvas.destinationCrs()
-        source_crs = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transformer = QgsCoordinateTransform(source_crs, map_crs)
-        extent = transformer.transform(extent)
-
+        map_crs = QgsProject.instance().crs()
+        transformer = QgsCoordinateTransform(source_crs, map_crs, QgsProject.instance()).transform
+        extent = transformer(extent)
+        if (canvas.extent().xMinimum() == extent.xMinimum()) & (canvas.extent().width() == extent.width()) | (canvas.extent().yMinimum() == extent.yMinimum()) & (canvas.extent().height() == extent.height()):
+            canvas.renderComplete.disconnect(self.zoom_to_default_extent)
         canvas.setExtent(extent)
         canvas.refresh()
-
+        return(True)
     '''
     def set_project_crsx(self, crs):
         """
@@ -385,7 +423,7 @@ class OpenEQuarterMain:
 
             if not current_crs == new_crs:
                 # set extent, by transforming the formerly saved extent to new Projection
-                coord_transformer = QgsCoordinateTransform(current_crs, new_crs)
+                coord_transformer = QgsCoordinateTransform(current_crs, new_crs, QgsProject.instance())
                 extent = coord_transformer.transform(extent)
 
             canvas.setExtent(extent)
@@ -398,7 +436,7 @@ class OpenEQuarterMain:
         :return: The project crs
         :rtype: QgsCoordinateReferenceSystem
         """
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         canvas = self.iface.mapCanvas()
         crs = canvas.destinationCrs()
 
@@ -412,15 +450,17 @@ class OpenEQuarterMain:
         :return:
         :rtype:
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         try:
             # set the rasterlayer as active, since only the active layer will be clipped and start the exp
             self.iface.setActiveLayer(raster_layer)
-            geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
+            #geo_export_path = wms_utils.save_wms_extent_as_image(raster_layer.name())
+            geo_export_path = wms_utils.wms_saveCanvasExtent(raster_layer.name())
             pyramids_built = raster_layer_interaction.gdal_addo_layerfile(geo_export_path, 'gauss', 6)
             if pyramids_built != 0:
                 print(('Error number {} occured, while building pyramids.'.format(pyramids_built)))
         except AttributeError as NoneException:
-            print((self.__module__, NoneException))
+            print((inspect.currentframe().f_code.co_name, NoneException))
             return None
 
         filename = geo_export_path.split(os.path.sep)[-1]
@@ -448,6 +488,7 @@ class OpenEQuarterMain:
 
     # step 0.0
     def handle_ol_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
         if plugin_exists:
             self.main_process_dock.ol_plugin_installed.setChecked(True)
@@ -457,6 +498,7 @@ class OpenEQuarterMain:
             return False
 
     def check_if_ol_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.ol_plugin_name)
         if plugin_exists:
             self.main_process_dock.ol_plugin_installed.setChecked(True)
@@ -467,6 +509,7 @@ class OpenEQuarterMain:
 
     # step 0.1
     def handle_pst_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
         if plugin_exists:
             self.main_process_dock.pst_plugin_installed.setChecked(True)
@@ -476,6 +519,7 @@ class OpenEQuarterMain:
             return False
 
     def check_if_pst_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.pst_plugin_name)
         if plugin_exists:
             self.main_process_dock.pst_plugin_installed.setChecked(True)
@@ -486,6 +530,7 @@ class OpenEQuarterMain:
 
     # step 0.2
     def handle_real_centroid_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
         if plugin_exists:
             self.main_process_dock.real_centroid_plugin_installed.setChecked(True)
@@ -495,6 +540,7 @@ class OpenEQuarterMain:
             return False
 
     def check_if_real_centroid_plugin_installed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         plugin_exists = plugin_interaction.get_plugin_ifexists(config.real_centroid_plugin_name)
         if plugin_exists:
             self.main_process_dock.real_centroid_plugin_installed.setChecked(True)
@@ -505,6 +551,10 @@ class OpenEQuarterMain:
 
     # step 0.3
     def handle_project_created(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        #set project crs to default
+        QgsProject.instance().setCrs(QgsCoordinateReferenceSystem(config.project_crs))
+        self.iface.mapCanvas().refresh()
         oeq_global.OeQ_pop_status()
         self.oeq_project_settings_form.show()
         save = self.oeq_project_settings_form.exec_()
@@ -519,10 +569,10 @@ class OpenEQuarterMain:
         else:
             oeq_global.OeQ_push_status(message="Could not create Project!")
         return result
-            #self.handle_project_saved()
-            #return self.create_project_ifNotExists()
+
 
     def check_if_project_created(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if bool(oeq_global.OeQ_project_info['location_city']) & bool(oeq_global.OeQ_project_info['location_lon']):
             self.main_process_dock.project_created.setChecked(True)
         else:
@@ -532,9 +582,10 @@ class OpenEQuarterMain:
 
 
     def handle_project_saved(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         #extensions.load_defaults()
-        print((oeq_global.OeQ_project_info))
+        #print((oeq_global.OeQ_project_info))
         oeq_global.OeQ_pop_status()
         self.create_project_ifNotExists()
         if oeq_global.OeQ_project_saved():
@@ -551,6 +602,7 @@ class OpenEQuarterMain:
 
 
     def check_if_project_saved(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if oeq_global.OeQ_project_saved():
             self.main_process_dock.project_saved.setChecked(True)
         else:
@@ -561,11 +613,13 @@ class OpenEQuarterMain:
 
 
     # step 1.0
-    def handle_investigationarea_defined(self):
+    def define_investigationarea(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.PyQt.QtCore import QEventLoop
         from qgis.gui import QgsMessageBar
         oeq_global.OeQ_pop_status()
         result = False
+        self.handle_open_osm_layer_loaded()
         if not self.standard_workflow.all_mandatory_worksteps_done('investigationarea_defined'):
             self.main_process_dock.investigationarea_defined.setChecked(False)
             return False
@@ -576,38 +630,17 @@ class OpenEQuarterMain:
         except ImportError:
             # we are using Python3 so QString is not defined
             QString = type("")
-
-        if not self.osm_layer_is_loaded():
-            ol_plugin = plugin_interaction.OlInteraction(config.ol_plugin_name)
-
-            if ol_plugin.open_osm_layer(config.open_layer_type_id):
-                layer_dict = QgsProject.instance().mapLayers()
-                for layer_name, layer in layer_dict.items():
-                    if 'OpenLayers_plugin_layer' in layer_name:
-                        self.open_layer = layer
-                        break
-
-
-        #enable on the fly projection
-        #self.iface.mapCanvas().mapRenderer().setProjectionsEnabled(True)
-        #self.iface.mapCanvas().mapRenderer().setDestinationCrs(QgsCoordinateReferenceSystem(int(config.project_crs.split(':')[1])))
-
-
         # remove if necessary
-        layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
-        layer_interaction.fullRemove(config.investigation_shape_layer_name)
-       # p_path = os.path.join(oeq_global.OeQ_project_path(), config.investigation_shape_layer_name + '.shp').decode('utf-8')
+        legend.nodeCommit(config.investigation_shape_layer_name)
+        #layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
+        legend.nodeRemove(config.investigation_shape_layer_name,True)
+        #layer_interaction.fullRemove(config.investigation_shape_layer_name)
         oeq_global.QeQ_disableDialogAfterAddingFeature()
-
-        investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon',
-                                                                      config.project_crs)
-        self.zoom_to_default_extent()
+        investigation_area = layer_interaction.create_temporary_layer(config.investigation_shape_layer_name, 'Polygon', config.project_crs)
         if investigation_area is not None:
             investigation_area.loadNamedStyle(os.path.join(oeq_global.OeQ_plugin_path(), 'styles', config.investigation_shape_layer_style))
-            #oeq_global.OeQ_wait(5)
             layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name)
             legend.nodeSetActive(config.investigation_shape_layer_name)
-
             widget = self.iface.messageBar().createMessage('Cover Investigation Area',
                                                            'Click "Done" once the investigation area is completely covered.')
             button = QPushButton(widget)
@@ -615,11 +648,13 @@ class OpenEQuarterMain:
             button.released.connect(lambda: self.confirm_selection_of_investigation_area(loop.quit,confirmed))
             button.destroyed.connect(loop.quit)
             widget.layout().addWidget(button)
-
-            baritem=self.iface.messageBar().pushWidget(widget, QgsMessageBar.WARNING,duration = 3600)
-
+            baritem=self.iface.messageBar().pushWidget(widget, Qgis.Warning,duration = 3600)
+            legend.nodeByName(config.investigation_shape_layer_name)[0].layer().triggerRepaint()
+            self.zoom_to_default_extent()
+            legend.nodeByName(config.investigation_shape_layer_name)[0].layer().triggerRepaint()
             loop.exec_()
-            layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
+            legend.nodeCommit(config.investigation_shape_layer_name)
+            #layer_interaction.trigger_edit_mode(self.iface, config.investigation_shape_layer_name, 'off')
             oeq_global.QeQ_enableDialogAfterAddingFeature()
             oeq_global.OeQ_pop_warning(baritem)
             if confirmed[0]:
@@ -633,7 +668,8 @@ class OpenEQuarterMain:
                             self.main_process_dock.investigationarea_defined.setChecked(True)
                             result = self.main_process_dock.investigationarea_defined.isChecked()
             else:
-                layer_interaction.fullRemove(config.investigation_shape_layer_name)
+                legend.nodeRemove(config.investigation_shape_layer_name, True)
+                #layer_interaction.fullRemove(config.investigation_shape_layer_name)
                 self.main_process_dock.investigationarea_defined.setChecked(False)
 
             result = self.main_process_dock.investigationarea_defined.isChecked()
@@ -647,6 +683,7 @@ class OpenEQuarterMain:
 
 
     def confirm_selection_of_investigation_area(self,loop_quit,confirmed):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #from mole3 import oeq_global
         #from mole3.qgisinteraction import legend
         confirmed[0]=True
@@ -658,7 +695,8 @@ class OpenEQuarterMain:
 
 
 
-    def check_if_investigationarea_defined(self):
+    def investigationarea_defined(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.project import config
         if legend.nodeExists(config.investigation_shape_layer_name):
             self.main_process_dock.investigationarea_defined.setChecked(True)
@@ -669,6 +707,7 @@ class OpenEQuarterMain:
 
     # step 2.0
     def handle_import_ext_selected(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if not self.standard_workflow.all_mandatory_worksteps_done('import_ext_selected'):
             self.main_process_dock.import_ext_selected.setChecked(False)
             return False
@@ -687,7 +726,8 @@ class OpenEQuarterMain:
 
 
     # step 2.1
-    def handle_building_outlines_acquired(self):
+    def acquire_building_outlines(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         from mole3 import oeq_global
         from mole3.qgisinteraction import legend
@@ -715,7 +755,7 @@ class OpenEQuarterMain:
 
         self.reorder_layers()
         self.main_process_dock.building_outlines_acquired.setChecked(True)
-        #self.standard_workflow.do_workstep('building_coordinates_acquired')
+        self.standard_workflow.do_workstep('building_coordinates_acquired')
         result = self.main_process_dock.building_outlines_acquired.isChecked()
         if result:
             oeq_global.OeQ_push_status(message="Building Outlines succesfully aquired!")
@@ -724,7 +764,8 @@ class OpenEQuarterMain:
             oeq_global.OeQ_push_status(message="Could not aquire Building Outlines!")
         return result
 
-    def check_if_building_outlines_acquired(self):
+    def building_outlines_acquired(self):
+            if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
             from mole3.project import config
             if legend.nodeExists(config.building_outline_layer_name):
                 self.main_process_dock.building_outlines_acquired.setChecked(True)
@@ -735,6 +776,7 @@ class OpenEQuarterMain:
 
     # step 2.2
     def handle_building_coordinates_acquired(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         from mole3 import oeq_global
         from mole3.qgisinteraction import legend
@@ -772,7 +814,8 @@ class OpenEQuarterMain:
 
 
 
-    def check_if_building_coordinates_acquired(self):
+    def building_coordinates_acquired(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.project import config
         if legend.nodeExists(config.building_coordinate_layer_name):
             self.main_process_dock.building_coordinates_acquired.setChecked(True)
@@ -780,7 +823,8 @@ class OpenEQuarterMain:
             self.main_process_dock.building_coordinates_acquired.setChecked(False)
         return self.main_process_dock.building_coordinates_acquired.isChecked()
 
-    def handle_information_layers_loaded(self):
+    def acquire_information_layers(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         from mole3.project import config
         from mole3.qgisinteraction import legend
@@ -815,7 +859,8 @@ class OpenEQuarterMain:
         return result
 
 
-    def check_if_information_layers_loaded(self):
+    def information_layers_acquired(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         from mole3.qgisinteraction import legend
 
@@ -831,10 +876,12 @@ class OpenEQuarterMain:
 
 
     def pick_color(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.coordinate_tracker.canvasClicked.connect(self.handle_canvas_click)
         self.iface.mapCanvas().setMapTool(self.coordinate_tracker)
 
     def prepare_color_picker(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.pick_color()
         self.color_picker_dlg.start_colorpicking.clicked.connect(self.pick_color)
         save_or_abort = self.color_picker_dlg.exec_()
@@ -853,98 +900,66 @@ class OpenEQuarterMain:
             self.reorder_layers()
             return 1
 
+    # step
+    def acquire_building_coordinates(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        """ generate points on surface """
+        vlayer = legend.nodeByName(config.building_outline_layer_name)[0].layer()
+        #print('Layer',vlayer.name())
+        vprovider = vlayer.dataProvider()
+        writer = QgsVectorFileWriter(os.path.join(oeq_global.OeQ_project_path(),config.building_coordinate_layer_name), "CP1250", vprovider.fields(), QgsWkbTypes.Point, vlayer.crs(),"ESRI Shapefile")
+        outFeat = QgsFeature()
+        features = vlayer.getFeatures()
+        nElement = 0
+        nError = 0
+        for inFeat in features:
+            nElement += 1
+            inGeom = inFeat.geometry()
+            if inGeom is None or not inFeat.hasGeometry() or \
+               not inGeom.isGeosValid():
+                QgsMessageLog.logMessage("Feature %d skipped (empty or invalid geometry)" % nElement, 'realcentroid')
+                nError += 1
+                continue
+            if inGeom.isMultipart():
+                # find largest part in case of multipart
+                maxarea = 0
+                #tmpGeom = QgsGeometry()
+                for part in inGeom.asGeometryCollection():
+                    area = part.area()
+                    if area > maxarea:
+                        tmpGeom = part
+                        maxarea = area
+                inGeom = tmpGeom
+            atMap = inFeat.attributes()
+            outGeom = inGeom.pointOnSurface()
+            outFeat.setAttributes(atMap)
+            outFeat.setGeometry(outGeom)
+            writer.addFeature(outFeat)
+        del writer
+        if nError > 0:
+            QMessageBox.warning(None, "RealCentroid", "Invalid or empty geometries found, see log messages")
+        # add centroid shape to canvas
 
+        w = QgsVectorLayer(os.path.join(oeq_global.OeQ_project_path(),config.building_coordinate_layer_name+'.shp'), config.building_coordinate_layer_name, 'ogr')
+        if w.isValid():
+            QgsProject.instance().addMapLayer(w)
+        else:
+            QMessageBox.warning(None, "RealCentroid", "Error loading shapefile\n" + config.building_coordinate_layer_name)
+        return(True)
 
     # step 4.1
-    def handle_needle_request_done(self):                #DOES NOT CAPTURE WFS!
+    def perform_needle_request(self):                #DOES NOT CAPTURE WFS!
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.main_process_dock.needle_request_done.setChecked(True)
         return self.main_process_dock.needle_request_done.isChecked()
-        '''
-        from mole3 import extensions
-        from mole3.project import config
-        # create data node
-        if not legend.nodeExists('Data'):
-            cat=legend.nodeCreateGroup('Data')
-        else:
-            cat=legend.nodeByName('Data')[0]
-        #create_database
-        #self.create_database(True,'Data')
-        baritem=oeq_global.OeQ_push_info('Needle Request:', 'Collecting data... be patient!')
 
-        # show import layers
-        layerstoshow = [config.investigation_shape_layer_name, config.building_coordinate_layer_name]
-        layerstoshow += ([i.layer_name for i in extensions.by_category('Basic',extensions.by_state(True))])
-        layerstoshow += ([i.layer_name for i in extensions.by_category('Import', extensions.by_state(True))])
-        legend.nodesShow(layerstoshow)
-
-        input_node=legend.nodeByName(config.building_coordinate_layer_name)
-
-        #reset import extensions
-        for i in extensions.by_state(True,category='Import'):
-            i.reset_calculation_state()
-
-        if input_node:
-            sample_fields=[]
-            for i in extensions.by_type('wms',category='Import',active=True):
-                legend.nodeShow(i.layer_name)
-                sample_fields.append({'layername':i.layer_name,'fieldnames':i.par_in})
-            #get original crs (necessary because qgis does not deal with epsg:3857 very well, but sets it to epsg:54004)
-            source_crs=input_node[0].layer().crs()
-
-            #remove point sampling layer
-            layer_interaction.fullRemove(layer_name=config.sample_layer_name)
-
-
-            #run point sampling tool
-            psti = plugin_interaction.PstInteraction(self.iface, config.pst_plugin_name)
-            psti.set_input_layer(config.building_coordinate_layer_name)
-            abbreviations = psti.select_and_rename_files_for_sampling(sample_fields)
-            pst_output_layer = psti.start_sampling(oeq_global.OeQ_project_path(), config.sample_layer_name)
-            vlayer = QgsVectorLayer(pst_output_layer, config.sample_layer_name, "ogr")
-            layer_interaction.add_layer_to_registry(vlayer)
-            #set original crs (necessary because qgis does not deal with epsg:3857 very well, but sets it to epsg:54004)
-            vlayer.setCrs(source_crs)
-            #resultnode=legend.nodeConvertCRS(config.pst_output_layer_name,config.default_extent_crs)
-            resultnode=legend.nodeByName(vlayer.name())
-
-            if resultnode:
-                resultnode = resultnode[0]
-                #move to data
-                legend.nodeMove(resultnode,'bottom','Data')
-
-                #run import extensions
-
-                # collapse and hide
-                legend.nodeCollapse('Import')
-                legend.nodeHide('Import')
-
-            for i in extensions.by_type('wms',category='Import',active=True):
-                legend.nodeHide(i.layer_name)
-
-        if legend.nodeExists(config.sample_layer_name):
-            legend.nodeGetBuildingData(legend.nodeByName(config.sample_layer_name)[0])
-            self.reorder_layers()
-            self.main_process_dock.needle_request_done.setChecked(True)
-        else:
-            self.main_process_dock.needle_request_done.setChecked(False)
-        oeq_global.OeQ_pop_info(baritem)
-        return self.main_process_dock.needle_request_done.isChecked()
-        '''
-
-
-    def check_if_needle_request_done(self):
+    def needle_request_performed(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.main_process_dock.needle_request_done.setChecked(True)
         return self.main_process_dock.needle_request_done.isChecked()
-        '''
-        from mole3.project import config
-        if legend.nodeExists(config.sample_layer_name):
-            self.main_process_dock.needle_request_done.setChecked(True)
-        else:
-            self.main_process_dock.needle_request_done.setChecked(False)
-        return self.main_process_dock.needle_request_done.isChecked()
-        '''
 
-    def handle_database_created(self):
+    def create_database(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         from mole3.qgisinteraction import legend
         baritem=oeq_global.OeQ_push_info('Create Database:', 'Generating building records... be patient!')
@@ -957,7 +972,8 @@ class OpenEQuarterMain:
         oeq_global.OeQ_pop_info(baritem)
         return True
 
-    def check_if_database_created(self):
+    def database_created(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.project import config
         if legend.nodeExists(config.data_layer_name):
             self.main_process_dock.database_created.setChecked(True)
@@ -967,10 +983,11 @@ class OpenEQuarterMain:
 
     # step 4.2
         # step 4.1
-    def handle_buildings_evaluated(self):
+    def evaluate_buildings(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         oeq_global.OeQ_pop_status()
-        oeq_global.OeQ_wait_for_renderer()
+        #oeq_global.OeQ_wait_for_renderer()
         baritem=oeq_global.OeQ_push_info('Extension "Building Evaluation":', 'Checking dependencies... be patient!')
         for i in extensions.by_type('information',active=True,):
             i.process()
@@ -1002,7 +1019,8 @@ class OpenEQuarterMain:
         return result
 
 
-    def check_if_buildings_evaluated(self):
+    def buildings_evaluated(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         #import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
         #evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
@@ -1011,14 +1029,17 @@ class OpenEQuarterMain:
             self.main_process_dock.buildings_evaluated.setChecked(True)
         else:
             self.main_process_dock.buildings_evaluated.setChecked(False)
+        self.main_process_dock.buildings_evaluated.setChecked(False)
         return self.main_process_dock.buildings_evaluated.isChecked()
 
 
 
     def check_plugin_availability(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         return self.handle_pst_plugin_installed() & self.handle_ol_plugin_installed() & self.handle_real_centroid_plugin_installed()
 
     def update_workstep_states_in_Gui(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.PyQt import QtWidgets
         for i in self.standard_workflow.worksteps:
             object=self.main_process_dock.findChild(QtWidgets.QWidget, i)
@@ -1026,6 +1047,7 @@ class OpenEQuarterMain:
 
 
     def run(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import time
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main_process_dock)
         self.check_plugin_availability()
@@ -1042,6 +1064,8 @@ class OpenEQuarterMain:
 
 
     def save_oeq_project(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        print("#kkklll")
         import os,pickle
         from mole3.oeq_global import OeQ_project_info,OeQ_ExtensionRegistry
         project = {'project_info':OeQ_project_info,
@@ -1049,14 +1073,16 @@ class OpenEQuarterMain:
         project_path = oeq_global.OeQ_project_path()
         project_name = oeq_global.OeQ_project_name()
         project_file = os.path.join(project_path, project_name + '.oeq')
-        print("PATH",project_path)
-        print("NAME",project_name)
-        print("FILE",project_file)
+        #print("PATH",project_path)
+        #print("NAME",project_name)
+        #print("FILE",project_file)
         if os.path.exists(project_file):
              os.remove(project_file)
-        pickle.dump(project, open(project_file, 'wb'),protocol=2)
+        with open(project_file, 'wb') as f:
+            pickle.dump(project, f,protocol=2)
 
     def load_oeq_project(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         import os,pickle
         from mole3 import oeq_global
         from mole3 import extensions
@@ -1064,12 +1090,14 @@ class OpenEQuarterMain:
         project_name = oeq_global.OeQ_project_name()
         project_file = os.path.join(project_path, project_name + '.oeq')
         if os.path.exists(project_file):
-            project=pickle.load(open(project_file, 'rb'))
+            with open(project_file, 'rb') as f:
+                project=pickle.load(f)
             #print project
             oeq_global.OeQ_project_info = project['project_info']
-            oeq_global.OeQ_ExtensionRegistry = project['extension_registry']
-            for ext in oeq_global.OeQ_ExtensionRegistry:
-                ext.copy_default_colortable_to_project(True)
+            #oeq_global.OeQ_ExtensionRegistry = project['extension_registry']
+            #for ext in oeq_global.OeQ_ExtensionRegistry:
+            #    ext.copy_default_colortable_to_project(True)
+            extensions.copy_extensions_to_project()
             oeq_global.OeQ_ExtensionsLoaded = True
             self.reorder_layers()
             legend.nodeZoomTo(config.investigation_shape_layer_name)
@@ -1077,6 +1105,7 @@ class OpenEQuarterMain:
             #extensions.load()
 
     def export_database_to_json(self,fileName=None):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import legend
         from mole3.project import config
         from mole3 import oeq_global
@@ -1099,6 +1128,7 @@ class OpenEQuarterMain:
 
 
     def export_database_to_csv(self,fileName=None):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import legend
         from mole3.project import config
         from mole3 import oeq_global
@@ -1117,6 +1147,7 @@ class OpenEQuarterMain:
         return None
 
     def export_database_to_sqlite(self,fileName=None):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import legend
         from mole3.project import config
         from mole3 import oeq_global
@@ -1134,17 +1165,3 @@ class OpenEQuarterMain:
             print("No Database available!")
         return None
 
-
-    '''
-from mole3 import extensions
-from mole3.qgisinteraction import legend
-import_layer_names= filter(lambda x: bool(x.layer_name), extensions.by_state(True,'Import'))
-success = all([legend.nodeExists(i.layer_name) for i in import_layer_names])
-import_layer_names = filter(lambda x: bool(x.layer_name), extensions.by_state(True, 'Import'))
-evaluation_layer_names = filter(lambda x: bool(x.layer_name) & bool(x.show_results), extensions.by_state(True, 'Evaluation'))
-if all([legend.nodeExists(i.layer_name) for i in import_layer_names]) & all([legend.nodeExists(i.layer_name) for i in evaluation_layer_names]):
-    self.main_process_dock.buildings_evaluated.setChecked(True)
-else:
-    self.main_process_dock.buildings_evaluated.setChecked(False)
-
-'''

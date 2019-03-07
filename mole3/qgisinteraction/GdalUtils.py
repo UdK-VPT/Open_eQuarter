@@ -1,5 +1,6 @@
 import platform
 import os.path
+import sys
 from qgis.PyQt.QtCore import *
 from qgis.core import *
 from osgeo import gdal

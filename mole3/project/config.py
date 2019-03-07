@@ -32,11 +32,11 @@ real_centroid_plugin_name = 'realcentroid'
 
 ### Default values
 # default extent is set, after the OSM-layer was loaded (currently: extent of Germany)
-x = 10.447683
-y = 51.163375
-scale = 0.5
-default_extent = QgsRectangle(x - scale, y - scale, x + scale, y + scale)
-default_extent_crs = 'EPSG:3857'
+default_latitude = 1492729.76
+default_longitude = 6894850.47
+default_offset = 1000
+default_extent = QgsRectangle(default_latitude - default_offset, default_latitude + default_offset, default_longitude - default_offset, default_longitude + default_offset)
+default_crs = project_crs
 
 # name of the shapefile which will be created to define the investigation area
 investigation_shape_layer_name = 'Investigation Area'

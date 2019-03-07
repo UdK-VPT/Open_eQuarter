@@ -53,7 +53,7 @@
 # Import the PyQt and QGIS libraries
 from mole3.qgisinteraction import layer_interaction
 from mole3.project import config
-from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint
+from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform, QgsPoint, QgsProject
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import json
@@ -71,7 +71,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     if crs:
         sourceCRS=QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
         googleMapsCRS=QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transform = QgsCoordinateTransform(sourceCRS, googleMapsCRS).transform
+        transform = QgsCoordinateTransform(sourceCRS, googleMapsCRS, QgsProject.instance()).transform
         location=transform(QgsPoint(longitude, latitude))
         latitude=location.y()
         longitude=location.x()
@@ -88,7 +88,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
         dataset['latitude'] = geom['location']['lat']
         dataset['longitude'] = geom['location']['lng']
         if crs:
-            transform2 = QgsCoordinateTransform(googleMapsCRS,sourceCRS).transform
+            transform2 = QgsCoordinateTransform(googleMapsCRS,sourceCRS, QgsProject.instance()).transform
             location2=transform2(QgsPoint(dataset['longitude'], dataset['latitude']))
             dataset['latitude']=location2.y()
             dataset['longitude']=location2.x()
@@ -118,7 +118,7 @@ def getCoordinatesByAddress(address,crs=None):
     if crs:
         targetCRS = QgsCoordinateReferenceSystem(crs, QgsCoordinateReferenceSystem.EpsgCrsId)
         googleMapsCRS = QgsCoordinateReferenceSystem(4326, QgsCoordinateReferenceSystem.EpsgCrsId)
-        transform = QgsCoordinateTransform(googleMapsCRS, targetCRS).transform
+        transform = QgsCoordinateTransform(googleMapsCRS, targetCRS, QgsProject.instance()).transform
     # try:
     addrlist = []
     for addrrecord in result['results']:

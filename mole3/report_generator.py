@@ -75,7 +75,7 @@ def write_project_definitions_report():
     #crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         #crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         ##transform extent
-        #coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
+        #coord_transformer = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
         #extent = coord_transformer.transform(extent)
     p_info = oeq_global.OeQ_project_info
     project_info = {'PRJ_NAME':p_info['project_name'],

@@ -6,8 +6,10 @@ import pickle
 from mole3 import oeq_global
 from mole3.project import config
 from mole3.qgisinteraction import legend
-from qgis.core import QgsVectorLayerJoinInfo
-
+from qgis.utils import iface
+from qgis.core import QgsVectorLayerJoinInfo, QgsCoordinateTransform, QgsProject, QgsCoordinateReferenceSystem
+import inspect
+DEBUG_MODE = False
 
 
 
@@ -104,7 +106,7 @@ class OeQExtension:
         :param last_calculation: Timestamp, set after each evalution(Default value = None)
 
         """
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.field_id = field_id
         self.source_type = source_type
         if extension_id == None:
@@ -229,7 +231,7 @@ class OeQExtension:
         :param last_calculation: Timestamp, set after each evalution(Default value = None)
 
         """
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if category != None: self.category = category
         if subcategory != None: self.subcategory = subcategory
         if field_id != None: self.field_id = field_id
@@ -264,6 +266,7 @@ class OeQExtension:
         """
         Method call for the load method
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if force:
             self.reset_calculation_state()
             if legend.nodeExists(self.layer_name):
@@ -285,6 +288,7 @@ class OeQExtension:
         """
         Method call for the preflight method
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         baritem = oeq_global.OeQ_push_info('Extension "' + self.extension_name + '":',
                                            'Running Preflight Script')
         result = None
@@ -302,6 +306,7 @@ class OeQExtension:
         :param feature:  Pointer to the current feature (Default value = None)
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         result = None
         if self.evaluation_method != None:
             result = self.evaluation_method(self, parameter , feature )
@@ -311,6 +316,7 @@ class OeQExtension:
         from mole3.qgisinteraction import legend
         from mole3.qgisinteraction import layer_interaction
         from qgis.core import QgsMessageLog
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         baritem = oeq_global.OeQ_push_info('Extension "' + self.extension_name + '":',
                                        'Running Evaluation Script')
 
@@ -439,6 +445,7 @@ class OeQExtension:
         :param feature:  Pointer to the current feature (Default value = None)
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         result = None
         if self.sample_method != None:
             result = self.sample_method(self, parameter , feature )
@@ -449,7 +456,7 @@ class OeQExtension:
         """
         Method call for the postflight method
         """
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         baritem = oeq_global.OeQ_push_info('Extension "' + self.extension_name + '":',
                                            'Running Postflight Script')
         result = None
@@ -463,12 +470,14 @@ class OeQExtension:
         """
         Activate an OeQExtension
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.active = True
 
     def deactivate(self):
         """
         Deactivate an OeQExtension
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         self.active = False
 
     def registerExtension(self, default=False):
@@ -479,7 +488,7 @@ class OeQExtension:
 
         """
         from mole3.oeq_global import OeQ_ExtensionRegistry, OeQ_ExtensionDefaultRegistry
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if default:
             OeQ_ExtensionDefaultRegistry.append(self)
         else:
@@ -489,6 +498,7 @@ class OeQExtension:
 
     def dummy_par(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         return dict(list(zip(self.par_in, [1 for i in self.par_in])))
 
     def get_par_out(self):
@@ -497,6 +507,7 @@ class OeQExtension:
         To make it work, each evaluation method of the extension always has to return
         the complete set of output parameters even if "feature" is None.
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #print self.extension_filepath
         result = self.evaluate(parameter=dict(list(zip(self.par_in, [1 for i in self.par_in]))),feature=None)
         if result == None: return {}
@@ -507,12 +518,14 @@ class OeQExtension:
         """
         The same as get_par_out() except that only output parameters will be given back that are not input parameters as well
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         return [par for par in self.get_par_out() if not (par in self.par_in)]
 
     def par_out_as_attributes(self):
         """
         The same as get_par_out() except that the output parameters are given back as QGIS field attributes
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsField
         eval_out = self.evaluate(parameter=dict(list(zip(self.par_in, [1 for i in self.par_in]))),feature=None)
         return [QgsField(i, eval_out[i]['type']) for i in list(eval_out.keys())]
@@ -521,6 +534,7 @@ class OeQExtension:
         """
         get the colortable information from the OeQDefaultExtensionRegistry
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         defcolortable = by_extension_id(self.extension_id, registry=oeq_global.OeQ_ExtensionDefaultRegistry)
         if defcolortable:
             return defcolortable[0].colortable
@@ -532,6 +546,7 @@ class OeQExtension:
         :param overwrite:  (Default value = False)
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         #print "0"
         from shutil import copyfile
         #print "1"
@@ -573,6 +588,7 @@ class OeQExtension:
         :param which:  'own','source','target'
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         thename = self.layer_name
         if which == 'source':
             thename = self.sourcelayer_name
@@ -590,6 +606,7 @@ class OeQExtension:
         :param which:  'own','source','target' (Default value = 'own')
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         treelayer = self.treelayer(which)
         if treelayer != None:
             return treelayer.layer()
@@ -602,6 +619,7 @@ class OeQExtension:
         :param which:  'own','source','target' (Default value = 'own')
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         treelayer = self.treelayer(which)
         if treelayer != None:
             return treelayer.layer().dataProvider()
@@ -614,6 +632,7 @@ class OeQExtension:
         :param which:  'own','source','target' (Default value = 'own')
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         treelayer = self.treelayer(which)
         if treelayer != None:
             return treelayer.layer().getFeatures()
@@ -628,6 +647,7 @@ class OeQExtension:
         :type: boolean
         :return: the legend node of the moved extension layer
         '''
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         # if extension layer exists
         from mole3.qgisinteraction import legend
         mynode = None
@@ -671,9 +691,11 @@ class OeQExtension:
         :param capture:  (Default value = True)
 
         """
+        import urllib.request, urllib.parse, urllib.error
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsRasterLayer,QgsProject
         from mole3.oeq_global import OeQ_wait_for_renderer
-        from mole3.qgisinteraction.wms_utils import save_wms_extent_as_image,getWmsLegendUrl
+        from mole3.qgisinteraction.wms_utils import wms_saveCanvasExtent,getWmsLegendUrl
         from mole3.qgisinteraction import layer_interaction
 
         #zoom to a canvas covering the whole investigation area
@@ -695,19 +717,50 @@ class OeQExtension:
                                                                   maxcount=3)
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
+
+
+            uri_param = 'crs='+self.source_crs+'&dpiMode=7&format=image/png&layers=0&styles&url='+self.source
+            '''
+            transform = QgsCoordinateTransform(QgsProject.instance().crs(),QgsCoordinateReferenceSystem(self.source_crs),QgsProject.instance()).transform
+            boundingbox = transform(iface.mapCanvas().extent())
+            url_param = {'SERVICE' : 'WMS',
+                        'VERSION':'1.1.1',
+                        'REQUEST':'GetMap',
+                        'WIDTH' : iface.mapCanvas().size().width(),
+                        'HEIGHT' : iface.mapCanvas().size().height(),
+                        'LAYERS' : '0',
+                        'STYLES':'0',
+                        'FORMAT':'image/png',
+                        'DPI' : '72',
+                        'MAP_RESOLUTION':'72',
+                        'FORMAT_OPTIONS': 'dpi:72',
+                        'TRANSPARENT': 'TRUE'}
+
+
+            bbox = str(boundingbox.xMinimum()) + ',' + str(boundingbox.yMinimum()) + ',' + str( boundingbox.xMaximum()) + ',' + str(boundingbox.yMaximum())
+            print(bbox)
+
+
+            url_string = "url="+self.source + '&' + urllib.parse.urlencode(url_param)+'&SRS='+self.source_crs+"&CRS="+self.source_crs+"&BBOX="+bbox
+            print("URL",self.source)
+            print("WMS-URL",url_string)
             #setting the layer and filename for the temp raw load
-            wmslayer='WMS_'+self.layer_name+'_RAW'
+            
 
             oeq_global.OeQ_wait(1)
 
+            #print (self.source)
             #create and register the temp raw layer
-            rlayer = QgsRasterLayer(self.source, wmslayer, self.source_type)
-            QgsProject.instance().addMapLayer(rlayer)
+            #rlayer = QgsRasterLayer(url_string, wmslayer, self.source_type)
+            '''
+            wmslayer = 'WMS_' + self.layer_name + '_RAW'
+            rlayer = iface.addRasterLayer( uri_param, wmslayer,self.source_type)
+            #QgsProject.instance().addMapLayer(rlayer)
 
             #load wms map
-            if not OeQ_wait_for_renderer(60000):
-                oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
-                return None
+            #if not OeQ_wait_for_renderer(60000):
+             #   oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
+            #    return None
 
             #oeq_global.OeQ_wait(3)
 
@@ -717,9 +770,10 @@ class OeQExtension:
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
             # save wms visible in canvas as image
-            path = save_wms_extent_as_image(wmslayer)
+            #path = save_wms_extent_as_image(wmslayer)
+            path = wms_saveCanvasExtent(wmslayer)
             try:
-                legend.nodeRemove(wmslayer, physical=True)
+               pass#legend.nodeRemove(wmslayer, physical=True)
             except:
                 pass
 
@@ -758,7 +812,7 @@ class OeQExtension:
         from mole3.qgisinteraction import legend,layer_interaction
         from qgis.core import QgsVectorLayer,QgsProject,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter,QgsRectangle
         from qgis.utils import iface
-
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if legend.nodeExists(self.layer_name):
             if forceload:
                 legend.nodeRemove(self.layer_name, physical=True)
@@ -779,16 +833,16 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
         #get crs objects
-        crsSrc=QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
+        crsSrc=QgsCoordinateReferenceSystem(int(config.default_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         crsDest=QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
         crsBox=QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]), QgsCoordinateReferenceSystem.EpsgCrsId)
 
         #transform extent
-        coord_transformer = QgsCoordinateTransform(crsSrc, crsBox)
+        coord_transformer = QgsCoordinateTransform(crsSrc, crsBox, QgsProject.instance())
         boxextent = coord_transformer.transform(extent)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
-        coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
+        coord_transformer = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
         # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
         # so we the current messagebar item
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
@@ -844,7 +898,7 @@ class OeQExtension:
             oeq_global.OeQ_push_error('Extension "' + self.extension_name + '":', 'Could not find WFS-Map "' + self.layer_name + ' in Legend"!')
             return None
         wfsnode=wfsnode[0]
-        wfsnode=legend.nodeConvertCRS(wfsnode,config.default_extent_crs)
+        wfsnode=legend.nodeConvertCRS(wfsnode, config.default_crs)
         if not wfsnode:
             oeq_global.OeQ_push_error('Extension "' + self.extension_name + '":', 'Could not convert CRS of WFS-Map "' + self.layer_name + '"!')
             return None
@@ -969,6 +1023,7 @@ file_writer.writeRaster(pipe,
         :param mode:  (Default value = 'range')
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis import utils
         from qgis.core import NULL
         from qgis.core import QgsField
@@ -1023,6 +1078,7 @@ file_writer.writeRaster(pipe,
     # extensions.by_category('Import')[1].decode_color_table()
     def decode_color_table(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis import utils
         from qgis.core import QgsField
         from qgis.PyQt.QtCore import QVariant
@@ -1082,6 +1138,7 @@ file_writer.writeRaster(pipe,
 
 
     def databaseInsane(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import legend
         import mole3.extensions as ext
         if not legend.nodeExists(config.data_layer_name):
@@ -1094,6 +1151,7 @@ file_writer.writeRaster(pipe,
 
     def required(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsMessageLog
         from mole3 import extensions as ext
         req=[]
@@ -1156,6 +1214,7 @@ file_writer.writeRaster(pipe,
         :param required:  (Default value = None)
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import legend
         if not required:
             required = self.required()
@@ -1210,6 +1269,7 @@ file_writer.writeRaster(pipe,
     '''
     def reset_calculation_state(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.oeq_global import first_of_all_calculation_times
         self.last_calculation=first_of_all_calculation_times
 
@@ -1222,6 +1282,7 @@ file_writer.writeRaster(pipe,
         :param forcedeval:  (Default value = False)
 
         """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis import utils
         from qgis.core import QgsField
         from qgis.PyQt.QtCore import QVariant
@@ -1301,17 +1362,20 @@ file_writer.writeRaster(pipe,
 
 
     def getValueFromDatabase(self,fieldname,building_id):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         layer = legend.nodeByName(config.data_layer_name)[0].layer()
         feature = [x for x in layer.getFeatures().toList() if x[config.building_id_key] in building_id]
         return feature[0][fieldname]
 
     def getAttributeFromDatabase(self,fieldname):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         layer = legend.nodeByName(config.data_layer_name)[0].layer()
         field = [x for x in layer.dataProvider().fields() if x.name() == fieldname]
         return field
 
     def work_out_results(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction.layer_interaction import fullRemove
         from mole3.qgisinteraction import legend
         from mole3.qgisinteraction.layer_interaction import find_layer_by_name, add_attributes_if_not_exists
@@ -1408,6 +1472,7 @@ file_writer.writeRaster(pipe,
         #legend.nodeZoomTo(config.investigation_shape_layer_name)
 
     def sampleColor(self,feature, rasterlayer_name = '', fieldname='',feature_crs = None, blur=3):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import layer_interaction
         if rasterlayer_name == '':
             rasterlayer_name = self.layer_name
@@ -1417,12 +1482,14 @@ file_writer.writeRaster(pipe,
         return layer_interaction.sampleColorFromRasterLayerByFeature(feature, rasterlayer_name, fieldnames, feature_crs, blur)
 
     def sampleData(self, feature, datalayer_name = '', field_list=[], feature_crs = None):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         if datalayer_name == '': datalayer_name = self.layer_name
         if feature_crs == None: feature_crs = self.layer().crs()
         from mole3.qgisinteraction import layer_interaction
         return layer_interaction.sampleDataFromVectorLayerByFeature(feature, datalayer_name, field_list, feature_crs)
 
     def sampleold(self,source_layer=None,target_layers=None,result_layer=None):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         """
 
         :param source_layer:  (Default value = None)
@@ -1455,6 +1522,7 @@ file_writer.writeRaster(pipe,
 
     def needle_request(self):
         """ """
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3.qgisinteraction import layer_interaction,plugin_interaction,legend
         from mole3.project import config
         from mole3 import extensions
@@ -1528,15 +1596,18 @@ file_writer.writeRaster(pipe,
 
     #wrappers
     def createDatabase(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         return extensions.createDatabase(self.extension_name)
 
     def createSampleLayer(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         return extensions.createSampleLayer(self.extension_name)
 
 
     def createCoordinateLayer(self):
+        if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from mole3 import extensions
         return extensions.createCoordinateLayer(self.extension_name)
 

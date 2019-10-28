@@ -51,8 +51,8 @@
  *****************************************************************************************/
 """
 # Import the PyQt and QGIS libraries
-from mole3.qgisinteraction import layer_interaction
-from mole3.project import config
+from mole.qgisinteraction import layer_interaction
+from mole.project import config
 #from qgis.core import *
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
@@ -290,8 +290,8 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
     # Out: dict of all informations delivered by googlemaps
     if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
 
-    from mole3.qgisinteraction import legend
-    from mole3.project import config
+    from mole.qgisinteraction import legend
+    from mole.project import config
     layer = legend.nodeByName(config.building_coordinate_layer_name)
     if not layer: return None
     layer = layer[0].layer()
@@ -308,8 +308,8 @@ def getBuildingLocationDataByBLD_ID(building_id, crs=None):
 def getBuildingCoordinateByBLD_ID(building_id, crs=None):
     if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
 
-    from mole3.qgisinteraction import legend
-    from mole3.project import config
+    from mole.qgisinteraction import legend
+    from mole.project import config
     adress=getBuildingLocationDataByBLD_ID(building_id)
     if adress:
         adress = adress[0]

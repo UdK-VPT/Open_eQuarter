@@ -57,7 +57,7 @@ from mole.project import config
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import json
-from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint,Qgis,QgsProject
+from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint,QgsProject
 
 import inspect
 DEBUG_MODE = False

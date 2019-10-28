@@ -9,8 +9,7 @@ from mole.stat_corr import rb_contemporary_roof_uvalue_by_building_age_lookup
 from mole.stat_corr import nrb_contemporary_roof_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
-    from math import floor, ceil
+from math import floor, ceil
     from PyQt4.QtCore import QVariant
     rf_ueh = NULL
 

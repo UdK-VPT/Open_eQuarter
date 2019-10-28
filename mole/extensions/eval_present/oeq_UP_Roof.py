@@ -8,7 +8,6 @@ from mole.extensions import OeQExtension
 from mole.stat_corr import rb_present_roof_uvalue_AVG_by_building_age_lookup, nrb_present_roof_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     rf_up = NULL

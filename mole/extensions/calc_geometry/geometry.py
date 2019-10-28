@@ -8,7 +8,6 @@ from mole.extensions import OeQExtension
 from mole.stat_corr import common_walls_by_population_density_corr,window_wall_ratio_AVG_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     # factor for golden rule

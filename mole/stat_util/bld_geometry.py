@@ -1,6 +1,5 @@
 from math import sqrt
-from scipy.constants import golden
-
+golden = 1.618033988749895
 from qgis.core import *
 
 def isnull(value):

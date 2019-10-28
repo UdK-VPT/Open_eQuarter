@@ -7,7 +7,6 @@ from mole.project import config
 from mole.extensions import OeQExtension
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     try:

@@ -8,8 +8,7 @@ from mole.extensions import OeQExtension
 from mole.stat_corr import rb_contemporary_base_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
-    from math import floor, ceil
+from math import floor, ceil
     from PyQt4.QtCore import QVariant
     hteh = NULL
     if not oeq_global.isnull([parameters['BS_UEH'] , parameters['BS_AR'] , parameters['RF_UEH'] , parameters['RF_AR'] , parameters['WL_UEH'] , parameters['WL_AR'] , parameters['WN_UEH'] , parameters['WN_AR']]):

@@ -9,7 +9,6 @@ from mole.stat_corr import rb_contemporary_base_uvalue_by_building_age_lookup
 from mole.stat_corr import nrb_contemporary_base_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-    from scipy.constants import golden
     from math import floor, ceil
     from PyQt4.QtCore import QVariant
     return {'BS_UE': {'type': QVariant.Double, 'value': 0.3}}

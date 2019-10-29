@@ -8,7 +8,7 @@ from mole.extensions import OeQExtension
 from mole.stat_corr import rb_contemporary_base_uvalue_by_building_age_lookup
 
 def calculation(self=None, parameters={},feature = None):
-from math import floor, ceil
+    from math import floor, ceil
     from PyQt4.QtCore import QVariant
 
     rf_qtph = NULL

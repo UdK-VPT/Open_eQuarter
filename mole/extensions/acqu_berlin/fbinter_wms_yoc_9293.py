@@ -45,7 +45,9 @@ extension = OeQExtension(
     layer_name='Year of Construction (WMS Capture)',
     description=u'Gebäudealter 199293 Scan der Karte Gebäudealter 1992 93 '
                 + u'aus der Veroeffentlichung: Staedtebauliche Entwicklung Berlins seit 1650 in Karten',
-    source='crs=EPSG:25833&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
+    #source='crs=EPSG:25833&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
+    source='http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
+
     #source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
     source_crs='EPSG:25833',
     #source_crs='EPSG:3068',

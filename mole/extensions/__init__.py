@@ -15,20 +15,20 @@ from mole import oeq_global
 #from ext import *
 
 #OeQExtension.generic_id_cnt = 0
-try:
-    from acqu_berlin import *
-    from acqu_hamburg import *
-    from prop_buildings import *
-    from crea_basics import *
-    from calc_geometry import *
-    from crea_basics import *
-    from eval_contemporary import *
-    from eval_enev import *
-    from eval_enev_heritage import *
-    from eval_present import *
-    from eval_present_heritage import *
+#try:
+from acqu_berlin import *
+from acqu_hamburg import *
+from prop_buildings import *
+from crea_basics import *
+from calc_geometry import *
+from crea_basics import *
+from eval_contemporary import *
+from eval_enev import *
+from eval_enev_heritage import *
+from eval_present import *
+from eval_present_heritage import *
 
-    OeQ_ExtensionsLoaded=True
-except:
-    pass
+OeQ_ExtensionsLoaded=True
+#except:
+#    pass
 

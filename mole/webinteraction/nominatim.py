@@ -115,7 +115,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     #    return []
 
 # Get the coordinates for the specified adress
-def getCoordinatesByAddress(country=config.country,city="",street="",crs=None):
+def getCoordinatesByAddress(address="",crs=None):
 
     # In: Country, City, Postal Address or Parts of it
     #     Target Coordinate Reference System as EPSG Code
@@ -126,13 +126,19 @@ def getCoordinatesByAddress(country=config.country,city="",street="",crs=None):
     #if isinstance(address, str):
     #    address = address.encode('utf-8')
     #paramstring = "street="+street+"&country="+country+"&city="+city+"&format=json&addressdetails=1&email="+config.referrer_email
-    urlParams = {'street': street,
-                 'country':country,
-                 'city':city,
-                 'format': 'json',
+    #old 3
+    # urlParams = {'street': street,
+    #             'country':country,
+     #            'city':city,
+     #            'format': 'json',
+     #           'addressdetails': '1',
+     #           'email': config.referrer_email
+     #   }
+    urlParams = {'q': address,
+                'format': 'json',
                 'addressdetails': '1',
                 'email': config.referrer_email
-        }
+                }
     url='https://nominatim.openstreetmap.org/search?'+urllib.parse.urlencode(urlParams)
     print(url);
     import ssl
@@ -150,29 +156,34 @@ def getCoordinatesByAddress(country=config.country,city="",street="",crs=None):
         targetCRS = QgsProject.instance().crs()
         print ('NOMINATIM',nominatim_crs.authid())
         print('TARGET', targetCRS.authid())
-    transform = QgsCoordinateTransform(nominatim_crs, targetCRS, QgsProject.instance()).transform
+    # for QGIS 3
+    #transform = QgsCoordinateTransform(nominatim_crs, targetCRS, QgsProject.instance()).transform
+    # for QGIS 2
+    transform = QgsCoordinateTransform(nominatim_crs, targetCRS).transform
+
     for addrrecord in result:
-        print('LatBef',addrrecord['lat'])
-        print('LonBef', addrrecord['lon'])
-        dataset = {'latitude': '', 'longitude': '', 'state': '', 'town': '', 'city': '', 'suburb': '', 'road': '', 'postcode': '',
-                   'country': '', 'house_number': '', 'crs':''}
-        location = transform(float(addrrecord['lon']),float(addrrecord['lat']))
-        dataset.update({'longitude': location.x()})
-        dataset.update({'latitude': location.y()})
-        dataset.update({'crs': targetCRS.authid()})
+        if addrrecord['type']=='house':
+            print('LatBef',addrrecord['lat'])
+            print('LonBef', addrrecord['lon'])
+            dataset = {'latitude': '', 'longitude': '', 'state': '', 'town': '', 'city': '', 'suburb': '', 'road': '', 'postcode': '',
+                       'country': '', 'house_number': '', 'crs':''}
+            location = transform(float(addrrecord['lon']),float(addrrecord['lat']))
+            dataset.update({'longitude': location.x()})
+            dataset.update({'latitude': location.y()})
+            dataset.update({'crs': targetCRS.authid()})
 
-        for field in list(addrrecord['address'].keys()):
-            dataset.update({field: addrrecord['address'][field]})
-        if (dataset['town'] == ''): dataset['town'] = dataset['city']
-        if (dataset['town'] == ''): dataset['town'] = dataset['state']
-        #Sprint(dataset);
+            for field in list(addrrecord['address'].keys()):
+                dataset.update({field: addrrecord['address'][field]})
+            if (dataset['town'] == ''): dataset['town'] = dataset['city']
+            if (dataset['town'] == ''): dataset['town'] = dataset['state']
+            #Sprint(dataset);
 
-        #print("Location", location)
-        addrlist+= [complete_nominatim_dataset(dataset)]
-    #print(addrlist)
-    # except:
-    #    return []
-    print('ADRESSES',addrlist)
+            #print("Location", location)
+            addrlist+= [complete_nominatim_dataset(dataset)]
+        #print(addrlist)
+        # except:
+        #    return []
+        print('ADRESSES',addrlist)
     return addrlist
 
 def complete_nominatim_dataset(dataset):

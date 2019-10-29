@@ -8,7 +8,7 @@ from mole.project import config
 from mole.qgisinteraction import legend
 from qgis.core import QgsVectorJoinInfo
 
-
+DEBUG_MODE = True
 
 
 def average(self=None, parameters={}):
@@ -56,6 +56,7 @@ class OeQExtension:
                  source_type=None,
                  active=False,
                  source=None,
+                 source_layer=None,
                  source_crs=None,
                  bbox_crs='EPSG:4326',
                  par_in=[],
@@ -130,7 +131,8 @@ class OeQExtension:
         #self.layer_id = layer_id
         self.description = description
         self.type = type
-        self.source = source     
+        self.source = source
+        self.source_layer= source_layer
         self.source_crs = source_crs
         self.bbox_crs = bbox_crs
         self.active = active
@@ -665,7 +667,136 @@ class OeQExtension:
                     if hide: legend.nodeHide(cat)
             return mynode
 
-    def load_wms(self,capture=True,forceload=False):
+
+    def load_wms(self, capture=True, forceload=False):
+        """
+
+        :param capture:  (Default value = True)
+
+        """
+        import urllib.request, urllib.parse, urllib.error
+        #if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
+        from qgis.core import QgsRasterLayer, QgsProject,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform
+        from mole.oeq_global import OeQ_wait_for_renderer
+        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image, getWmsLegendUrl
+        #from mole.qgisinteraction.wms_utils import wms_saveCanvasExtent, getWmsLegendUrl
+        from mole.qgisinteraction import layer_interaction
+        from qgis.utils import iface
+
+        # zoom to a canvas covering the whole investigation area
+        legend.nodeZoomTo(config.investigation_shape_layer_name)
+
+        # remove old files if requested
+
+        if legend.nodeExists(self.layer_name):
+            if forceload:
+                legend.nodeRemove(self.layer_name, physical=True)
+                self.reset_calculation_state()
+            else:
+                return None
+
+        if not legend.nodeExists(self.layer_name):
+            # init progressbar
+            progressbar = oeq_global.OeQ_push_progressbar('Extension "' + self.extension_name + '":',
+                                                          'Loading WMS-Map "' + self.layer_name + '"!',
+                                                          maxcount=3)
+            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
+
+            #if not extent:
+            #    extent = legend.nodeGetExtent(config.investigation_shape_layer_name)
+
+            #uri_param = 'crs=' + self.source_crs + '&dpiMode=7&format=image/png&layers=0&styles&url=' + self.source
+            crsSrc = QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]),
+                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
+            crsDest = QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]),
+                                                   QgsCoordinateReferenceSystem.EpsgCrsId)
+            crsBox = QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]),
+                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
+
+            transform = QgsCoordinateTransform(crsSrc,crsBox).transform
+            boundingbox = transform(iface.mapCanvas().extent())
+            url_param = {'SERVICE' : 'WMS',
+                        'VERSION':'1.1.1',
+                        'REQUEST':'GetMap',
+                        'WIDTH' : iface.mapCanvas().size().width(),
+                        'HEIGHT' : iface.mapCanvas().size().height(),
+                        'LAYERS' : '0',
+                        'STYLES':'0',
+                        'FORMAT':'image/png',
+                        'DPI' : '72',
+                        'MAP_RESOLUTION':'72',
+                        'FORMAT_OPTIONS': 'dpi:72',
+                        'TRANSPARENT': 'TRUE'}
+
+
+            bbox = str(boundingbox.xMinimum()) + ',' + str(boundingbox.yMinimum()) + ',' + str( boundingbox.xMaximum()) + ',' + str(boundingbox.yMaximum())
+            print(bbox)
+
+
+            url_string = "url="+self.source + '&' + urllib.parse.urlencode(url_param)+'&SRS='+self.source_crs+"&CRS="+self.source_crs+"&BBOX="+bbox
+            print("URL",self.source)
+            print("WMS-URL",url_string)
+            #setting the layer and filename for the temp raw load
+
+
+            oeq_global.OeQ_wait(1)
+
+            #print (self.source)
+            #create and register the temp raw layer
+            #rlayer = QgsRasterLayer(url_string, wmslayer, self.source_type)
+
+            print(url_param)
+
+
+            wmslayer = 'WMS_' + self.layer_name + '_RAW'
+            rlayer = iface.addRasterLayer(url_param, wmslayer, self.source_type)
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+
+            # QgsProject.instance().addMapLayer(rlayer)
+
+            # load wms map
+            # if not OeQ_wait_for_renderer(60000):
+            #   oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
+            #    return None
+
+            # oeq_global.OeQ_wait(3)
+
+            legendURL = getWmsLegendUrl(rlayer)
+
+            # push progressbar
+            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+
+            # save wms visible in canvas as image
+            path = save_wms_extent_as_image(wmslayer)
+            #path = wms_saveCanvasExtent(wmslayer)
+            try:
+                pass  # legend.nodeRemove(wmslayer, physical=True)
+            except:
+                pass
+
+            # push progressbar
+            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
+
+            oeq_global.OeQ_wait(1)
+
+            # load clipped wms map
+            rlayer = QgsRasterLayer(path, self.layer_name)
+            #QgsProject.instance().addMapLayer(rlayer)
+            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
+            # print legendURL
+            oeq_global.OeQ_wait(0.1)
+            rlayer.setLegendUrl(legendURL)
+
+            if not OeQ_wait_for_renderer(60000):
+                oeq_global.OeQ_push_warning(self.extension_id + ':', 'Reloading WMS-Capture timed out!')
+                return None
+
+            # close progressbar
+            oeq_global.OeQ_pop_progressbar(progressbar)
+
+        return self.sortAndShelve()
+
+    def load_wms_old(self,capture=True,forceload=False):
         """
 
         :param capture:  (Default value = True)
@@ -794,6 +925,7 @@ class OeQExtension:
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
         current_msgb= iface.messageBar().currentItem()
+
         #load wfs
         url = self.source
         if self.bbox_crs.split(':')[-1] == '4326':
@@ -805,13 +937,41 @@ class OeQExtension:
 
         # push progressbar
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
-        
-        try:
-            wfsLayer =QgsVectorLayer(url,self.layer_name,'WFS')
-            #wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
-        except:
-            pass
 
+        #old loader
+        #try:
+        #    wfsLayer =QgsVectorLayer(url,self.layer_name,'WFS')
+        #    #wfsLayer=QgsVectorLayer(url,self.layer_name,'ogr')
+        #except:
+        #    pass
+
+        wfsfilepath = os.path.join(oeq_global.OeQ_project_path(), self.layer_name + '.shp')
+
+        # load wfs with ogr
+        def wfs_loader(url, sourcelayername='fis:s_wfs_alkis_gebaeudeflaechen', layername='wfs',
+                       filename='WFS_File.shp'):
+            from osgeo import ogr
+            import time
+            print(url)
+            shapedrv = ogr.GetDriverByName("Esri Shapefile")
+            if os.path.exists(filename):
+                # Delete the detination file first
+                shapedrv.DeleteDataSource(filename)
+            shape = shapedrv.CreateDataSource(filename)
+            wfsdrv = ogr.GetDriverByName('WFS')
+            wfs = wfsdrv.Open('WFS:' + url)
+            wfslayer = wfs.GetLayerByName(sourcelayername)
+            print(wfslayer)
+            shapelayer = shape.CopyLayer(wfslayer, sourcelayername)
+            time.sleep(0.2)
+            print(shapelayer)
+            for feature in wfslayer:
+                shapelayer.CreateFeature(feature)
+            #shapelayer.SyncToDisk()
+            shapedrv = wfsdrv = shape = wfs = wfslayer = shapelayer = None
+            return (filename)
+
+        wfsLayer=QgsVectorLayer(wfs_loader(url,sourcelayername=self.source_layer,layername=self.layer_name,filename=wfsfilepath),self.layer_name, "ogr")
         # windows might throw a warning here, as is does not adopt the CRS from the WFS source
         # so the current baritem gets  immediately removed if is not the the one before loading
         if iface.messageBar().currentItem() != current_msgb:
@@ -825,7 +985,7 @@ class OeQExtension:
             return None
         wfsLayer.setCrs(crsDest)
 
-        wfsfilepath = os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.shp')
+
         QgsVectorFileWriter.writeAsVectorFormat( wfsLayer,wfsfilepath,'System',wfsLayer.crs(),'ESRI Shapefile',filterExtent=QgsRectangle(boxextent.xMinimum(), boxextent.yMinimum(), boxextent.xMaximum(), boxextent.yMaximum()))
 
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)

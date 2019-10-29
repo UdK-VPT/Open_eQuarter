@@ -720,6 +720,7 @@ class ProjectSettings_form(QtGui.QDialog, Ui_project_settings_form):
          citystring = ' '.join([self.location_postal.text(),self.location_city.text()])
          address = ', '.join([config.country, citystring, self.location_street.text()])
          self.found_locations = nominatim.getCoordinatesByAddress(address, crs=4326)
+         print(len(self.found_locations))
          if len(self.found_locations) == 1:
             self.update_form(1)
          elif len(self.found_locations) > 1:

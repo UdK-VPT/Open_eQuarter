@@ -36,6 +36,7 @@ extension = OeQExtension(
     active=False,
     description=u'',
     #source='http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_alkis_gebaeude?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=fis:re_alkis_gebaeude&SRSNAME=EPSG:25833',
+
     source_crs='EPSG:25833',
     extension_filepath=os.path.join(__file__),
     colortable = os.path.join(os.path.splitext(__file__)[0] + '.qml'),

@@ -1,9 +1,9 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <?xml-stylesheet type='text/xsl' href='/plugins.xsl' ?>
 <plugins>
-  <pyqgis_plugin name='Open eQuarter' version='0.998p'>
+  <pyqgis_plugin name='Open eQuarter' version='0.999a'>
     <description>Open eQuarter is a QGIS-Plugin to investigate settlements and city districts based upon a set of data maps. NOTE: You may have to restart QGIS after installation.</description>
-    <version>0.998p</version>
+    <version>0.999a</version>
     <qgis_minimum_version>2.4</qgis_minimum_version>
     <homepage>http://udk-vpt.github.io/Open_eQuarter</homepage>
     <file_name>mole.zip</file_name>
@@ -11,6 +11,6 @@
     <download_url>http://modelica-buildingsystems.de/Open_eQuarter/qgis_repo/mole.zip</download_url>
     <uploaded_by>OeQ Team</uploaded_by>
     <create_date>2015-03-10</create_date>
-    <update_date>2019-10-28</update_date>
+    <update_date>2019-11-07</update_date>
   </pyqgis_plugin>
 </plugins

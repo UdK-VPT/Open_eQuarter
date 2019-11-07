@@ -233,10 +233,12 @@ class ColorEntryManager:
                 #print i
                 #print qml_rng[i]
             for i in qml_col.keys():
-                #print i
-                #print qml_col[i]
-                #print qml_rng[i][0]
-                #print qml_rng[i][1]
+                #print(i)
+                #print(qml_col[i])
+                #print(qml_rng[i][0])
+                #print(qml_rng[i][1])
+                #print(qml_par)
+                #print(qml_par[i])
 
                 result_dict[qml_col[i]] = [qml_par[i], qml_rng[i][0], qml_rng[i][1]]
 

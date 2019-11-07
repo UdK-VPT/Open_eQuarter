@@ -1,56 +1,102 @@
-from PyQt4.QtGui import QMessageBox
-from qgis.core import QgsProject
 
-import qgis
+import os, time
+from osgeo import gdal,osr
+from urllib.request import urlopen
+from urllib.parse import urlencode
+
 import os
-import time
-from webbrowser import open as open_url
+
+class wmsHandler(object):
+    def __init__(self,url,styles="0",layers="0",map_resolution=72,dpi=72,
+                 img_format="image/png",format_options="dpi:72",transparent="TRUE",srs="EPSG:25833",
+                 crs="EPSG:25833",bbox=[385267.905618,5819602.01872,386734.721215,5819963.28486]
+                 ,request="GetMap",height=454,width=1665,version="1.3.0"):
+
+    
+        self.url = url
+        self.styles = styles
+        self.layers = layers
+        self.map_resolution = map_resolution
+        self.dpi = dpi
+        self.img_format = img_format
+        self.format_options = format_options
+        self.transparent = transparent
+        self.srs = srs
+        self.crs = crs
+        self.bbox = bbox
+        self.request = request
+        self.height = height
+        self.width = width
+        self.version = version
 
 
-from mole.oeq_global import *
-from mole.qgisinteraction import raster_layer_interaction
-from mole.qgisinteraction import layer_interaction , legend
+    def url_string(self):
+    
+        url_param = {'SERVICE' : 'WMS',
+                     'REQUEST':'GetMap',
+                     'VERSION': self.version,
+                     'STYLES':self.styles,
+                     'LAYERS' : self.layers,
+                     'MAP_RESOLUTION':self.map_resolution,
+                     'DPI' : self.dpi,
+                     'FORMAT':self.img_format,
+                     'FORMAT_OPTIONS': self.format_options,
+                     'TRANSPARENT': self.transparent,
+                     'WIDTH' : self.width,
+                     'HEIGHT' : self.height,
+                     }
 
 
-def save_wms_extent_as_image(wms_layer_name, max_res = 2064, geo_reference_output = True):
+        return(self.url + '?' + urlencode(url_param)+'&SRS=' + 
+                self.srs + "&CRS="+self.crs + "&BBOX=" + ','.join([str(i) for i in self.bbox]))
+                
+                
+    def asPNG(self,filename,timeout=300,debug=False):
 
-    export_wms_layer = legend.nodeByName(wms_layer_name)
-    if not export_wms_layer: return None
-    export_wms_layer = export_wms_layer[0].layer()
-    iface = qgis.utils.iface
-    canvas = iface.mapCanvas()
+        with urlopen(self.url_string(), timeout=timeout) as wmscon:
+            if debug:
+                print(wmscon.geturl())
+                print(wmscon.info())
+                print(wmscon.getcode())
+            with open(filename, 'wb') as outf:
+                 outf.write(wmscon.read())
 
-    current_crs = canvas.mapSettings().destinationCrs()
-    current_extent = canvas.extent()
-    export_extent = raster_layer_interaction.transform_wms_geo_data(export_wms_layer, current_extent, current_crs)
+        return(filename)        
+                
+    def asGeoTif(self,filename):
+        print(self.url_string())
+        tmpfilename = os.path.join(os.path.dirname(filename),"tmp.png")
+        src_ds = gdal.Open( self.asPNG(tmpfilename))
+        #print(self.bbox)
+        xmin, ymin, xmax, ymax = self.bbox
+        xres = (xmax - xmin) / float(self.width)
+        yres = (ymax - ymin) / float(self.height)
+        geotransform = (xmin, xres, 0, ymax, 0, -yres)
+        #print(xmin, xres, 0, ymax, 0, -yres)
+        driver = gdal.GetDriverByName( "GTiff" )
 
-    #info_text = 'The current extent will now be clipped. This may take some time.'
-    #QMessageBox.information(iface.mainWindow(), 'Info', info_text)
-    if not geo_reference_output:
-      export_wms_layer.setLayerName(export_wms_layer.name().replace("_RAW",""))
+        #Output to new format
+        dst_ds = driver.CreateCopy( filename, src_ds, 0 )
 
-    filename = layer_interaction.save_layer_as_image(export_wms_layer, export_extent, OeQ_project_path(), max_res)
 
-    if geo_reference_output:
-         # wait until the file exists to add geo-references
-        no_timeout = 30
-        while not os.path.exists(filename) and no_timeout:
-            time.sleep(0.1)
-            no_timeout -= 1
-        #dest_filename=os.path.splitext(filename)[0]
-        dest_filename=filename.replace("_RAW","")
-        #print filename
-        #print dest_filename
-        #dest_filename = os.path.splitext(filename)[0] + '_geo.tif'
-        referencing = raster_layer_interaction.gdal_translate_layerfile(filename, dest_filename, current_crs.authid(), current_extent)
+        dst_ds.SetGeoTransform(geotransform)  
 
-        if referencing != 0:
-            print 'Error number {} occured, while referencing the output .tif'.format(referencing)
-        else:
-            #os.remove(filename)
-            filename = dest_filename
+        srs = osr.SpatialReference()            # establish encoding
+        srs.ImportFromEPSG(int(self.srs.split(':')[-1]))                # WGS84 lat/long
+        dst_ds.SetProjection(srs.ExportToWkt())
 
-    return filename
+        dst_ds.FlushCache()          
+
+
+        #Properly close the datasets to flush to disk
+        dst_ds = None
+        try:
+            os.remove(tmpfilename)
+        except:
+            pass
+        return(filename)
+
+
 
 def getWmsLegendUrl(layer): #Very quick and very dirty
     url = None

@@ -73,13 +73,17 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
 
     # Out: dict of all informations delivered by googlemaps
     if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
-
     if bool(crs):
-        sourceCRS=QgsCoordinateReferenceSystem(crs)
+        crsSrc = QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]),
+                                              QgsCoordinateReferenceSystem.EpsgCrsId)
     else:
-        sourceCRS = QgsProject().instance().crs()
-    transform = QgsCoordinateTransform(sourceCRS, nominatim_crs, QgsProject.instance()).transform
-    location=transform(longitude, latitude)
+        crsSrc = QgsProject().instance().crs()
+
+
+    # transform extent
+    coord_transformer = QgsCoordinateTransform(crsSrc, nominatim_crs)
+    location = coord_transformer.transform(longitude, latitude)
+
     latitude=location.y()
     longitude=location.x()
     urlParams = {'format': 'json',
@@ -89,7 +93,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
                  'email':config.referrer_email
                  }
     url = 'https://nominatim.openstreetmap.org/reverse?' + urllib.parse.urlencode(urlParams)
-    print(url)
+    #print(url)
     import ssl
 
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -105,11 +109,11 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
         dataset.update({field : result['address'][field]})
     if (dataset['town'] == ''): dataset['town'] = dataset['city']
     if (dataset['town'] == ''): dataset['town'] = dataset['state']
-    transform2 = QgsCoordinateTransform(nominatim_crs,sourceCRS, QgsProject.instance()).transform
-    location2=transform2(float(dataset['latitude']), float(dataset['longitude']))
+    coord_transformer2 = QgsCoordinateTransform(nominatim_crs,crsSrc)
+    location2 = coord_transformer2.transform(float(dataset['latitude']), float(dataset['longitude']))
     dataset['latitude']=location2.y()
     dataset['longitude']=location2.x()
-    dataset['crs'] = sourceCRS.authid()
+    dataset['crs'] = crsSrc.authid()
     return([complete_nominatim_dataset(dataset)])
     # except:
     #    return []
@@ -140,13 +144,24 @@ def getCoordinatesByAddress(address="",crs=None):
                 'email': config.referrer_email
                 }
     url='https://nominatim.openstreetmap.org/search?'+urllib.parse.urlencode(urlParams)
-    print(url);
+   # print(url);
     import ssl
 
     ssl._create_default_https_context = ssl._create_unverified_context
-    response = urllib.request.urlopen(url)
+    connected = 0
+    maxtries = 10
+    response = None
+    while connected < maxtries:
+        try:
+            response = urllib.request.urlopen(url)
+            connected = maxtries+1
+            time.sleep(0.3)
+        except:
+            connected+= 1
+    if connected == maxtries:
+        print("Could not connect to '{}'".format(url))
     result = json.load(response)
-    print("RESULT",result)
+    # print("RESULT",result)
     #result = filter(lambda i: (i['class']=="highway") & (i['type']!="pedestrian"),result)
     # try:
     addrlist = []
@@ -154,17 +169,19 @@ def getCoordinatesByAddress(address="",crs=None):
         targetCRS = QgsCoordinateReferenceSystem(crs)
     else:
         targetCRS = QgsProject.instance().crs()
-        print ('NOMINATIM',nominatim_crs.authid())
-        print('TARGET', targetCRS.authid())
+       # print ('NOMINATIM',nominatim_crs.authid())
+       # print('TARGET', targetCRS.authid())
     # for QGIS 3
     #transform = QgsCoordinateTransform(nominatim_crs, targetCRS, QgsProject.instance()).transform
     # for QGIS 2
     transform = QgsCoordinateTransform(nominatim_crs, targetCRS).transform
 
     for addrrecord in result:
-        if addrrecord['type']=='house':
-            print('LatBef',addrrecord['lat'])
-            print('LonBef', addrrecord['lon'])
+#        if addrrecord['type'] == 'house':
+        if (addrrecord['class'] == 'building') or (addrrecord['type'] in ['house','residential']):
+
+           # print('LatBef',addrrecord['lat'])
+           # print('LonBef', addrrecord['lon'])
             dataset = {'latitude': '', 'longitude': '', 'state': '', 'town': '', 'city': '', 'suburb': '', 'road': '', 'postcode': '',
                        'country': '', 'house_number': '', 'crs':''}
             location = transform(float(addrrecord['lon']),float(addrrecord['lat']))
@@ -183,7 +200,7 @@ def getCoordinatesByAddress(address="",crs=None):
         #print(addrlist)
         # except:
         #    return []
-        print('ADRESSES',addrlist)
+       # print('ADRESSES',addrlist)
     return addrlist
 
 def complete_nominatim_dataset(dataset):
@@ -222,8 +239,8 @@ def getCoordinatesByAddressTest(address,crs=None):
         targetCRS = QgsCoordinateReferenceSystem(crs)
     else:
         targetCRS = QgsProject.instance().crs()
-        print ('NOMINATIM',nominatim_crs.authid())
-        print('TARGET', targetCRS.authid())
+       # print ('NOMINATIM',nominatim_crs.authid())
+       # print('TARGET', targetCRS.authid())
     transform = QgsCoordinateTransform(nominatim_crs, targetCRS, QgsProject.instance()).transform
 
     for addrrecord in result:

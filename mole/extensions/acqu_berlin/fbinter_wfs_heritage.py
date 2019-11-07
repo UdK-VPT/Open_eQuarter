@@ -17,7 +17,7 @@ def preflight(self=None):
     from qgis.core import QgsField
     from mole.qgisinteraction.layer_interaction import add_attributes_if_not_exists
     from mole.oeq_global import OeQ_get_bld_id
-    print("Heritage Preflight")
+    # print("Heritage Preflight")
     layer = self.layer()
     #print layer.name()
     if layer == None:
@@ -88,7 +88,7 @@ def evaluation(self=None, parameters={},feature=None):
         herid = ''
         herits = self.sampleData(feature, field_list=['ID', 'STATE'], feature_crs = self.layer().crs())
         if herits != None:
-            print(herits);
+           # print(herits);
             for i in herits:
                 if i[u'STATE'] > herstate:
                     herstate = i[u'STATE']  # necessary to safe dependency check

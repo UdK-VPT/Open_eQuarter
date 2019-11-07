@@ -17,13 +17,16 @@ def evaluation(self=None, parameters={},feature=None):
     from qgis.core import NULL
     #prepare rgba_keys
     rgba_keys = ['R', 'G', 'B', 'a']
+
     if bool(self.field_id):
         rgba_keys = [self.field_id + '_' + c for c in rgba_keys]
     if feature != None:
         #sample color
-        rgba = self.sampleColor(feature, blur = 3)
+        rgba = self.sampleColor(feature, blur = 1,feature_crs ='EPSG:3857')
+       # print(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id])
         # decode_color
         color = self.decode_color(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id], mode='average')
+       # print(color)
         #print color
         if all([c['value'] != NULL for c in color.values()]):
             return color
@@ -50,6 +53,7 @@ extension = OeQExtension(
 
     #source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/gebaeudealter',
     source_crs='EPSG:25833',
+    bbox_crs='EPSG:25833',
     #source_crs='EPSG:3068',
     par_in= [],
     sourcelayer_name=config.building_coordinate_layer_name,

@@ -6,7 +6,8 @@ import pickle
 from mole import oeq_global
 from mole.project import config
 from mole.qgisinteraction import legend
-from qgis.core import QgsVectorJoinInfo
+from mole.qgisinteraction.wms_utils import wmsHandler
+from qgis.core import QgsVectorJoinInfo,QgsVectorLayer
 
 DEBUG_MODE = True
 
@@ -678,7 +679,7 @@ class OeQExtension:
         #if DEBUG_MODE: print("debug", inspect.currentframe().f_code.co_name)
         from qgis.core import QgsRasterLayer, QgsProject,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform
         from mole.oeq_global import OeQ_wait_for_renderer
-        from mole.qgisinteraction.wms_utils import save_wms_extent_as_image, getWmsLegendUrl
+        from mole.qgisinteraction.wms_utils import getWmsLegendUrl
         #from mole.qgisinteraction.wms_utils import wms_saveCanvasExtent, getWmsLegendUrl
         from mole.qgisinteraction import layer_interaction
         from qgis.utils import iface
@@ -696,102 +697,64 @@ class OeQExtension:
                 return None
 
         if not legend.nodeExists(self.layer_name):
+
+            # use investigationarea extent
+            extent = iface.mapCanvas().extent()
+
+            #extent = legend.nodeGetExtent(config.investigation_shape_layer_name)
+
+            # init progressbar
+            progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
+                                                          u'Be patient! Loading WFS-Map "' + self.layer_name + '" may take long!',
+                                                          maxcount=7)
+            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
+
+            # get crs objects
+            crsSrc = QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]),
+                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
+            crsBox = QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]),
+                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
+           # print(crsSrc.authid())
+           # print(crsSrc.authid())
+           # print(str(extent.xMinimum()) + ',' + str(extent.yMinimum()) + ',' + str(
+            #    extent.xMaximum()) + ',' + str(extent.yMaximum()))
+            # transform extent
+            coord_transformer = QgsCoordinateTransform(crsSrc, crsBox)
+            boundingbox = coord_transformer.transform(extent)
+           # print(str(boundingbox.xMinimum()) + ',' + str(boundingbox.yMinimum()) + ',' + str(
+             #   boundingbox.xMaximum()) + ',' + str(boundingbox.yMaximum()))
+
             # init progressbar
             progressbar = oeq_global.OeQ_push_progressbar('Extension "' + self.extension_name + '":',
                                                           'Loading WMS-Map "' + self.layer_name + '"!',
                                                           maxcount=3)
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
-            #if not extent:
-            #    extent = legend.nodeGetExtent(config.investigation_shape_layer_name)
-
-            #uri_param = 'crs=' + self.source_crs + '&dpiMode=7&format=image/png&layers=0&styles&url=' + self.source
-            crsSrc = QgsCoordinateReferenceSystem(int(config.default_extent_crs.split(':')[-1]),
-                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
-            crsDest = QgsCoordinateReferenceSystem(int(self.source_crs.split(':')[-1]),
-                                                   QgsCoordinateReferenceSystem.EpsgCrsId)
-            crsBox = QgsCoordinateReferenceSystem(int(self.bbox_crs.split(':')[-1]),
-                                                  QgsCoordinateReferenceSystem.EpsgCrsId)
-
-            transform = QgsCoordinateTransform(crsSrc,crsBox).transform
-            boundingbox = transform(iface.mapCanvas().extent())
-            url_param = {'SERVICE' : 'WMS',
-                        'VERSION':'1.1.1',
-                        'REQUEST':'GetMap',
-                        'WIDTH' : iface.mapCanvas().size().width(),
-                        'HEIGHT' : iface.mapCanvas().size().height(),
-                        'LAYERS' : '0',
-                        'STYLES':'0',
-                        'FORMAT':'image/png',
-                        'DPI' : '72',
-                        'MAP_RESOLUTION':'72',
-                        'FORMAT_OPTIONS': 'dpi:72',
-                        'TRANSPARENT': 'TRUE'}
+            wms = wmsHandler(url= self.source, width= iface.mapCanvas().size().width(),
+                             height = iface.mapCanvas().size().height(),crs=self.bbox_crs,srs=self.source_crs,
+                             bbox=[boundingbox.xMinimum(),boundingbox.yMinimum(),boundingbox.xMaximum(),boundingbox.yMaximum()])
 
 
-            bbox = str(boundingbox.xMinimum()) + ',' + str(boundingbox.yMinimum()) + ',' + str( boundingbox.xMaximum()) + ',' + str(boundingbox.yMaximum())
-            print(bbox)
 
+            geotiff_file= os.path.join(oeq_global.OeQ_project_path(),self.layer_name+'.tif')
 
-            url_string = "url="+self.source + '&' + urllib.parse.urlencode(url_param)+'&SRS='+self.source_crs+"&CRS="+self.source_crs+"&BBOX="+bbox
-            print("URL",self.source)
-            print("WMS-URL",url_string)
-            #setting the layer and filename for the temp raw load
-
-
-            oeq_global.OeQ_wait(1)
-
-            #print (self.source)
-            #create and register the temp raw layer
-            #rlayer = QgsRasterLayer(url_string, wmslayer, self.source_type)
-
-            print(url_param)
-
-
-            wmslayer = 'WMS_' + self.layer_name + '_RAW'
-            rlayer = iface.addRasterLayer(url_param, wmslayer, self.source_type)
-            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-
-            # QgsProject.instance().addMapLayer(rlayer)
-
-            # load wms map
-            # if not OeQ_wait_for_renderer(60000):
-            #   oeq_global.OeQ_push_warning(self.extension_id + ':','Loading Data timed out!')
-            #    return None
-
-            # oeq_global.OeQ_wait(3)
+            wms.asGeoTif(geotiff_file)
+            rlayer = iface.addRasterLayer(geotiff_file, self.layer_name)#, self.source_type)
 
             legendURL = getWmsLegendUrl(rlayer)
-
+           # print("LEGEND:",legendURL)
             # push progressbar
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
 
             # save wms visible in canvas as image
-            path = save_wms_extent_as_image(wmslayer)
+            #path = save_wms_extent_as_image(wmslayer)
+            #print("PATH:", path)
             #path = wms_saveCanvasExtent(wmslayer)
-            try:
-                pass  # legend.nodeRemove(wmslayer, physical=True)
-            except:
-                pass
+            #try:
+            #    pass  # legend.nodeRemove(wmslayer, physical=True)
+            #except:
+            #    pass
 
-            # push progressbar
-            progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
-
-            oeq_global.OeQ_wait(1)
-
-            # load clipped wms map
-            rlayer = QgsRasterLayer(path, self.layer_name)
-            #QgsProject.instance().addMapLayer(rlayer)
-            QgsMapLayerRegistry.instance().addMapLayer(rlayer)
-            # print legendURL
-            oeq_global.OeQ_wait(0.1)
-            rlayer.setLegendUrl(legendURL)
-
-            if not OeQ_wait_for_renderer(60000):
-                oeq_global.OeQ_push_warning(self.extension_id + ':', 'Reloading WMS-Capture timed out!')
-                return None
-
-            # close progressbar
             oeq_global.OeQ_pop_progressbar(progressbar)
 
         return self.sortAndShelve()
@@ -889,7 +852,7 @@ class OeQExtension:
         from mole.qgisinteraction import legend,layer_interaction
         from qgis.core import QgsVectorLayer,QgsMapLayerRegistry,QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsVectorFileWriter,QgsRectangle
         from qgis.utils import iface
-
+        from urllib.request import urlopen
         if legend.nodeExists(self.layer_name):
             if forceload:
                 legend.nodeRemove(self.layer_name, physical=True)
@@ -919,7 +882,7 @@ class OeQExtension:
         boxextent = coord_transformer.transform(extent)
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
         
-        coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
+        #coord_transformer = QgsCoordinateTransform(crsSrc, crsDest)
         # windows might throw a warning while loading , as is does not adopt the CRS from the WFS source
         # so we the current messagebar item
         progress_counter = oeq_global.OeQ_update_progressbar(progressbar, progress_counter)
@@ -929,10 +892,10 @@ class OeQExtension:
         #load wfs
         url = self.source
         if self.bbox_crs.split(':')[-1] == '4326':
-            print ('WGS84:',)
+           # print ('WGS84:',)
             url = url+ '&BBOX='+str(boxextent.yMinimum())+','+str(boxextent.xMinimum())+','+str(boxextent.yMaximum())+','+str(boxextent.xMaximum())+ ',urn:ogc:def:crs:EPSG:6.9:' + self.bbox_crs.split(':')[-1]
         else:
-            print ('Other:',)
+           # print ('Other:',)
             url = url+ '&BBOX='+str(boxextent.xMinimum())+','+str(boxextent.yMinimum())+','+str(boxextent.xMaximum())+','+str(boxextent.yMaximum())+ ',urn:ogc:def:crs:EPSG:6.9:' + self.bbox_crs.split(':')[-1]
 
         # push progressbar
@@ -948,9 +911,11 @@ class OeQExtension:
         wfsfilepath = os.path.join(oeq_global.OeQ_project_path(), self.layer_name + '.shp')
 
         # load wfs with ogr
-        def wfs_loader(url, sourcelayername='fis:s_wfs_alkis_gebaeudeflaechen', layername='wfs',
+        '''def wfs_loader(url, sourcelayername='fis:s_wfs_alkis_gebaeudeflaechen', layername='wfs',
                        filename='WFS_File.shp'):
-            from osgeo import ogr
+            from osgeo import ogr,gdal
+            gdal.SetConfigOption('GDAL_HTTP_TIMEOUT', '60')
+
             import time
             print(url)
             shapedrv = ogr.GetDriverByName("Esri Shapefile")
@@ -961,17 +926,23 @@ class OeQExtension:
             wfsdrv = ogr.GetDriverByName('WFS')
             wfs = wfsdrv.Open('WFS:' + url)
             wfslayer = wfs.GetLayerByName(sourcelayername)
-            print(wfslayer)
+            print(wfslayer,sourcelayername)
             shapelayer = shape.CopyLayer(wfslayer, sourcelayername)
             time.sleep(0.2)
-            print(shapelayer)
+            print(shapelayer,sourcelayername)
             for feature in wfslayer:
                 shapelayer.CreateFeature(feature)
             #shapelayer.SyncToDisk()
             shapedrv = wfsdrv = shape = wfs = wfslayer = shapelayer = None
-            return (filename)
+            return (filename)'''
 
-        wfsLayer=QgsVectorLayer(wfs_loader(url,sourcelayername=self.source_layer,layername=self.layer_name,filename=wfsfilepath),self.layer_name, "ogr")
+        wfsRAWfilepath = os.path.join(oeq_global.OeQ_project_path(), self.layer_name + '.wfs')
+        result = urlopen(url, timeout=300)
+        with open(wfsRAWfilepath, 'wb') as outf:
+            outf.write(result.read())
+        result = None
+        wfsLayer=QgsVectorLayer(wfsRAWfilepath, self.layer_name, "ogr")
+        #wfsLayer=QgsVectorLayer(wfs_loader(url,sourcelayername=self.source_layer,layername=self.layer_name,filename=wfsfilepath),self.layer_name, "ogr")
         # windows might throw a warning here, as is does not adopt the CRS from the WFS source
         # so the current baritem gets  immediately removed if is not the the one before loading
         if iface.messageBar().currentItem() != current_msgb:
@@ -1569,11 +1540,14 @@ file_writer.writeRaster(pipe,
 
     def sampleColor(self,feature, rasterlayer_name = '', fieldname='',feature_crs = None, blur=3):
         from mole.qgisinteraction import layer_interaction
+        from qgis.core import QgsCoordinateReferenceSystem
         if rasterlayer_name == '':
             rasterlayer_name = self.layer_name
         fieldnames = ['R','G','B','a']
         if fieldname != '':
             fieldnames = [fieldname + '_' + c for c in fieldnames]
+        feature_crs=   QgsCoordinateReferenceSystem(int(feature_crs.split(':')[-1]),
+                                         QgsCoordinateReferenceSystem.EpsgCrsId)
         return layer_interaction.sampleColorFromRasterLayerByFeature(feature, rasterlayer_name, fieldnames, feature_crs, blur)
 
     def sampleData(self, feature, datalayer_name = '', field_list=[], feature_crs = None):

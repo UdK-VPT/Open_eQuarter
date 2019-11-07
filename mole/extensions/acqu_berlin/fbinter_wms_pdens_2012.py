@@ -24,7 +24,7 @@ def evaluation(self=None, parameters={},feature=None):
                          'value': oeq_global.OeQ_project_info['population_density']}}
     if feature != None:
         #sample color
-        rgba = self.sampleColor(feature, blur = 3)
+        rgba = self.sampleColor(feature, blur = 3,feature_crs ='EPSG:3857')
         # decode_color
         color = self.decode_color(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id], mode='average')
         #print color
@@ -51,7 +51,8 @@ extension = OeQExtension(
     targetlayer_name=config.data_layer_name,
     #source='crs=EPSG:3068&dpiMode=7&format=image/png&layers=0&styles=&url=http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',
     source='http://fbinter.stadt-berlin.de/fb/wms/senstadt/k06_06ewdichte2012',
-    source_crs='EPSG:3068',
+    source_crs='EPSG:25833',
+    bbox_crs='EPSG:25833',
     active=True,
     description=u'',
     extension_filepath=os.path.join(__file__),

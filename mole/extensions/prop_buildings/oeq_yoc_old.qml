@@ -163,15 +163,6 @@
   </renderer-v2>
   <labeling type="simple"/>
   <customproperties>
-    <property key="ParName0" value="YOC"/>
-    <property key="ParName1" value="YOC"/>
-    <property key="ParName2" value="YOC"/>
-    <property key="ParName3" value="YOC"/>
-    <property key="ParName4" value="YOC"/>
-    <property key="ParName5" value="YOC"/>
-    <property key="ParName6" value="YOC"/>
-    <property key="ParName7" value="YOC"/>
-    <property key="ParName8" value="YOC"/>
     <property key="embeddedWidgets/count" value="0"/>
     <property key="labeling" value="pal"/>
     <property key="labeling/addDirectionSymbol" value="false"/>

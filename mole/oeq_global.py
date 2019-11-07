@@ -280,7 +280,7 @@ def OeQ_wait_for_renderer(timeout=10000):
     if iface.mapCanvas().isDrawing():
         #connect mapCanvasRefreshed and renderComplete events to quit loop
         iface.mapCanvas().renderComplete.connect(loop.quit)
-        iface.mapCanvas().mapCanvasRefreshed.connect(loop.quit)
+        #iface.mapCanvas().mapCanvasRefreshed.connect(loop.quit)
         # if a timeout is defined and other than 0
         if bool(timeout):
             # start timer
@@ -288,7 +288,7 @@ def OeQ_wait_for_renderer(timeout=10000):
         #and jump into the loop
         loop.exec_()
         #disconnect after loop has quit
-        iface.mapCanvas().mapCanvasRefreshed.disconnect(loop.quit)
+        #iface.mapCanvas().mapCanvasRefreshed.disconnect(loop.quit)
         iface.mapCanvas().renderComplete.disconnect(loop.quit)
     #print 'Done'
     return render_result[0]

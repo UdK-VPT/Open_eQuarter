@@ -705,8 +705,8 @@ class OeQExtension:
 
             # init progressbar
             progressbar = oeq_global.OeQ_push_progressbar(u'Extension "' + self.extension_name + '":',
-                                                          u'Be patient! Loading WFS-Map "' + self.layer_name + '" may take long!',
-                                                          maxcount=7)
+                                                          u'Be patient! Loading WMS-Map "' + self.layer_name + '" may take long!',
+                                                          maxcount=3)
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
             # get crs objects
@@ -725,9 +725,7 @@ class OeQExtension:
              #   boundingbox.xMaximum()) + ',' + str(boundingbox.yMaximum()))
 
             # init progressbar
-            progressbar = oeq_global.OeQ_push_progressbar('Extension "' + self.extension_name + '":',
-                                                          'Loading WMS-Map "' + self.layer_name + '"!',
-                                                          maxcount=3)
+
             progress_counter = oeq_global.OeQ_update_progressbar(progressbar, 0)
 
             wms = wmsHandler(url= self.source, width= iface.mapCanvas().size().width(),

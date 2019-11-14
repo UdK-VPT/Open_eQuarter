@@ -31,6 +31,9 @@ def preflight(self=None):
                 to_remove.append(i.id())
         except:
             return False
+        #try:
+        if (not isnull(i['GFK'])) & (i['GFK'] in [2465]): #ignore underground car parks
+            to_remove.append(i.id())
 
     provider.deleteFeatures(to_remove)
 

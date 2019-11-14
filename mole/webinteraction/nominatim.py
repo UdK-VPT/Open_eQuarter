@@ -57,12 +57,30 @@ from mole.project import config
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import json
+import time, datetime
 from qgis.core import QgsCoordinateReferenceSystem,QgsCoordinateTransform,QgsPoint,QgsProject
 
 import inspect
 DEBUG_MODE = False
 
 nominatim_crs = QgsCoordinateReferenceSystem('EPSG:4326')
+
+class nominatim_timer(object):
+    '''Nominatim urges users not to overcharge their services and send 1 request per second max'''
+    def __init__(self,waittime = 800): #hundredth of a second
+        self.start=datetime.datetime.now()
+        self.waittime = 800
+    def elapsed(self):
+        return(int((datetime.datetime.now() - self.start).total_seconds()*1000))
+    def wait(self,waittime = None):
+        if bool(waittime):
+            self.waittime = waittime
+            self.start = datetime.datetime.now()
+        while self.elapsed() < self.waittime:
+            time.sleep(0.02)
+
+
+
 
 # Get the postal adress for the specified coordinates
 def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
@@ -94,10 +112,25 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
                  }
     url = 'https://nominatim.openstreetmap.org/reverse?' + urllib.parse.urlencode(urlParams)
     #print(url)
-    import ssl
+    #import ssl
 
-    ssl._create_default_https_context = ssl._create_unverified_context
-    response = urllib.request.urlopen(url,timeout=10)
+    #ssl._create_default_https_context = ssl._create_unverified_context
+    waiter= nominatim_timer(1100)
+    connected = 0
+    maxtries = 10
+    response = None
+    while (connected < maxtries) &  (response== None):
+        try:
+            response = urllib.request.urlopen(url,timeout=20)
+            connected = maxtries + 1
+            time.sleep(0.3)
+        except:
+            connected += 1
+    print (response)
+    if (connected == maxtries) or (response== None):
+        print("Could not connect to '{}'".format(url))
+        raise (ValueError("Could not connect to '{}'".format(url)))
+    waiter.wait()
     result = json.load(response)
     # try:
     addrlist = []
@@ -114,6 +147,7 @@ def getBuildingLocationDataByCoordinates(longitude,latitude, crs=None):
     dataset['latitude']=location2.y()
     dataset['longitude']=location2.x()
     dataset['crs'] = crsSrc.authid()
+    waiter.wait()
     return([complete_nominatim_dataset(dataset)])
     # except:
     #    return []
@@ -145,21 +179,25 @@ def getCoordinatesByAddress(address="",crs=None):
                 }
     url='https://nominatim.openstreetmap.org/search?'+urllib.parse.urlencode(urlParams)
    # print(url);
-    import ssl
+    #import ssl
 
-    ssl._create_default_https_context = ssl._create_unverified_context
+    #ssl._create_default_https_context = ssl._create_unverified_context
+    waiter = nominatim_timer(1100)
     connected = 0
     maxtries = 10
     response = None
-    while connected < maxtries:
+    while (connected < maxtries) &  (response== None):
         try:
-            response = urllib.request.urlopen(url)
+            response = urllib.request.urlopen(url, timeout=20)
             connected = maxtries+1
             time.sleep(0.3)
         except:
             connected+= 1
-    if connected == maxtries:
+    print(response)
+    if (connected == maxtries) or (response== None):
         print("Could not connect to '{}'".format(url))
+        raise(ValueError("Could not connect to '{}'".format(url)))
+    waiter.wait()
     result = json.load(response)
     # print("RESULT",result)
     #result = filter(lambda i: (i['class']=="highway") & (i['type']!="pedestrian"),result)
@@ -231,7 +269,24 @@ def getCoordinatesByAddressTest(address,crs=None):
         }
     url='http://nominatim.openstreetmap.org/search?'+urllib.parse.urlencode(urlParams)
     #print(url)
-    response = urllib.request.urlopen(url)
+    waiter = nominatim_timer(1100)
+    connected = 0
+    maxtries = 10
+    response = None
+    while (connected < maxtries) &  (response== None):
+        try:
+            response = urllib.request.urlopen(url, timeout=20)
+            connected = maxtries + 1
+            time.sleep(0.3)
+        except:
+            connected += 1
+    print(response)
+    if (connected == maxtries) or (response == None):
+        print("Could not connect to '{}'".format(url))
+        raise ValueError("Could not connect to '{}'".format(url))
+    waiter.wait()
+
+
     result =  json.load(response)
     addrlist = []
     #print(len)

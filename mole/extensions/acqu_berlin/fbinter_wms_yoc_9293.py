@@ -22,7 +22,7 @@ def evaluation(self=None, parameters={},feature=None):
         rgba_keys = [self.field_id + '_' + c for c in rgba_keys]
     if feature != None:
         #sample color
-        rgba = self.sampleColor(feature, blur = 1,feature_crs ='EPSG:3857')
+        rgba = self.sampleColor(feature, blur = 3,feature_crs ='EPSG:3857')
        # print(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id])
         # decode_color
         color = self.decode_color(rgba['R'], rgba['G'], rgba['B'], rgba['a'], [self.field_id], mode='average')

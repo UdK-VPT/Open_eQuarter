@@ -4,4 +4,7 @@ stat_archive/**
 stat/pdfout/**
 stat/data_sources/**
 stat/.RData
-.idea/**
+*/.idea
+*/.idea/**
+*/.ipynb_checkpoints
+*/.ipynb_checkpoints/**

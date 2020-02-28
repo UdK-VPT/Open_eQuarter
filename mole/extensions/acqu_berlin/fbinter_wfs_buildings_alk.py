@@ -48,8 +48,8 @@ def preflight(self=None):
             to_remove.append(count)
         count += 1
 
-    provider.deleteAttributes(to_remove)
-    layer.updateFields()
+    #provider.deleteAttributes(to_remove)
+    #layer.updateFields()
 
     # in the Berlin Hausumringe WFS there are additional Attributes that are not important here. they are removed
     layer.startEditing()
@@ -57,7 +57,7 @@ def preflight(self=None):
         count = 0
         for field in provider.fields():
             #print field.name()
-            if field.name() == cf[0]:
+            if field.name().upper() == cf[0]:
                 layer.renameAttribute(count,cf[1])
                 break
             count += 1

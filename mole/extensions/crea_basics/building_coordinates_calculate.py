@@ -21,13 +21,17 @@ def evaluation(self=None, parameters={},feature=None):
                 'LAT': {'type': QVariant.Double,
                        'value': y},
                 config.building_id_key : {'type': QVariant.String,
-                       'value': parameters[config.building_id_key]}
+                       'value': parameters[config.building_id_key]},
+                'GML_ID': {'type': QVariant.String,
+                       'value': parameters['GML_ID_ALK']}
                 }
     return {'LON': {'type': QVariant.Double,
                        'value': NULL},
                 'LAT': {'type': QVariant.Double,
                        'value': NULL},
                 config.building_id_key: {'type': QVariant.String,
+                       'value': NULL},
+                'GML_ID': {'type': QVariant.String,
                        'value': NULL}
                }
 
@@ -48,7 +52,7 @@ extension = OeQExtension(
     extension_name='Building Coordinates (Calculated)',
     extension_type='information',
     field_id='',   #used for point sampling tool
-    par_in= [config.building_id_key],
+    par_in= [config.building_id_key,'GML_ID_ALK'],
     #par_out=[config.building_id_key,'AREA','PERIMETER'],
     source_type='calc',
     layer_name=config.building_coordinate_layer_name,
